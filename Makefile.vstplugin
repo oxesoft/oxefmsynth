@@ -1,0 +1,78 @@
+# Oxe FM Synth: a software synthesizer
+# Copyright (C) 2015  Daniel Moura <oxe@oxesoft.com>
+# 
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+ifeq ($(VST_PATH),)
+    $(error Please set the VST_PATH environment variable to the vstsdk2.4 path)
+endif
+
+INCLUDES:=-Isrc/vstplugin
+INCLUDES+=-Isrc/synth
+INCLUDES+=-Isrc/gui
+INCLUDES+=-I$(VST_PATH)
+
+SOURCES:=src/vstplugin/oxevst.cpp
+SOURCES+=src/vstplugin/oxevsteditor.cpp
+SOURCES+=src/vstplugin/oxevstmain.cpp
+SOURCES+=src/gui/button.cpp
+SOURCES+=src/gui/channels.cpp
+SOURCES+=src/gui/editor.cpp
+SOURCES+=src/gui/key.cpp
+SOURCES+=src/gui/knob.cpp
+SOURCES+=src/gui/lcd.cpp
+SOURCES+=src/gui/mapper.cpp
+SOURCES+=src/synth/buffers.cpp
+SOURCES+=src/synth/delay.cpp
+SOURCES+=src/synth/envelop.cpp
+SOURCES+=src/synth/filter.cpp
+SOURCES+=src/synth/noise.cpp
+SOURCES+=src/synth/note.cpp
+SOURCES+=src/synth/oscillator.cpp
+SOURCES+=src/synth/persist.cpp
+SOURCES+=src/synth/programs.cpp
+SOURCES+=src/synth/reverb.cpp
+SOURCES+=src/synth/synthesizer.cpp
+SOURCES+=$(VST_PATH)/public.sdk/source/vst2.x/audioeffect.cpp
+SOURCES+=$(VST_PATH)/public.sdk/source/vst2.x/audioeffectx.cpp
+SOURCES+=$(VST_PATH)/public.sdk/source/vst2.x/vstplugmain.cpp
+
+LIBS:=-lgdi32
+
+ifeq ($(OS),Windows_NT)
+	CC:=i686-w64-mingw32-g++.exe
+	RC:=windres.exe
+	CC64:=x86_64-w64-mingw32-g++.exe
+	RC64:=windres.exe
+else
+	CC:=i686-w64-mingw32-g++
+	RC:=i686-w64-mingw32-windres
+	CC64:=x86_64-w64-mingw32-g++
+	RC64:=x86_64-w64-mingw32-windres
+endif
+
+all: oxevst32 oxevst64
+
+oxevst32:
+	@$(RC)   -Isrc/synth -Iskins/default src/vstplugin/vstplugin.rc resources32.o
+	@$(CC)   -static -s -O3 -shared -o oxevst.dll   $(VST_PATH)/public.sdk/samples/vst2.x/win/vstplug.def $(CFLAGS) $(SOURCES) $(INCLUDES) $(LIBS) resources32.o
+	@rm resources32.o
+
+oxevst64:
+	@$(RC64) -Isrc/synth -Iskins/default src/vstplugin/vstplugin.rc resources64.o
+	@$(CC64) -static -s -O3 -shared -o oxevst64.dll $(VST_PATH)/public.sdk/samples/vst2.x/win/vstplug.def $(CFLAGS) $(SOURCES) $(INCLUDES) $(LIBS) resources64.o
+	@rm resources64.o
+
+clean:
+	@rm -f oxevst*.dll

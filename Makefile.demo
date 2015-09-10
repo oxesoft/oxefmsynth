@@ -1,0 +1,69 @@
+# Oxe FM Synth: a software synthesizer
+# Copyright (C) 2015  Daniel Moura <oxe@oxesoft.com>
+# 
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+EXECUTABLE_NAME:=oxefmsynthdemo
+
+INCLUDES:=-Isrc/demo
+INCLUDES+=-Isrc/synth
+
+SOURCES:=src/demo/controller.cpp
+SOURCES+=src/demo/main.cpp
+SOURCES+=src/demo/tunereader.cpp
+SOURCES+=src/synth/buffers.cpp
+SOURCES+=src/synth/delay.cpp
+SOURCES+=src/synth/envelop.cpp
+SOURCES+=src/synth/filter.cpp
+SOURCES+=src/synth/note.cpp
+SOURCES+=src/synth/oscillator.cpp
+SOURCES+=src/synth/programs.cpp
+SOURCES+=src/synth/reverb.cpp
+SOURCES+=src/synth/noise.cpp
+SOURCES+=src/synth/synthesizer.cpp
+
+ifeq ($(DEBUG),YES)
+	CFLAGS+=-g -O0
+else
+	CFLAGS+=-s -O3
+endif
+
+ifeq ($(PROFILING),YES)
+	CFLAGS+=-D__RENDER_TO_MEMORY__ONLY__
+	#CFLAGS+=-nostdlib
+endif
+
+ifeq ($(WITH_DSOUND),YES)
+	CFLAGS+=-D__WITH_DSOUND__
+	LDFLAGS+=-ldsound
+endif
+
+ifeq ($(OS),Windows_NT)
+	EXECUTABLE_NAME:=$(EXECUTABLE_NAME).exe
+	CC:=g++.exe
+else
+	ifeq ($(TARGET),WIN32)
+		EXECUTABLE_NAME:=$(EXECUTABLE_NAME).exe
+		CC:=i686-w64-mingw32-g++
+		LDFLAGS+=-static
+	else
+		CC:=g++
+	endif
+endif
+
+all:
+	@$(CC) -o $(EXECUTABLE_NAME) -DEXECUTABLE_NAME=\"$(EXECUTABLE_NAME)\" -D__OXEDMO__ $(CFLAGS) $(SOURCES) $(INCLUDES) $(LDFLAGS)
+
+clean:
+	@rm -f $(EXECUTABLE_NAME) *.wav
