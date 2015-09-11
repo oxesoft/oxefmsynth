@@ -1,6 +1,6 @@
 Oxe FM Synth
 ============
-Welcome to the [Oxe FM Synth](http://www.oxesoft.com/) official respository.
+Welcome to the [Oxe FM Synth](http://www.oxesoft.com/) official repository.
 
 ![screenshot](http://www.oxesoft.com/images/screenshot_medium.png)
 
