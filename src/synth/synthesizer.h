@@ -52,7 +52,7 @@ private:
 	float           pan[MIDICHANNELS]; // pan
 	float           aft[MIDICHANNELS]; // aftertouch
 	float           ptc[MIDICHANNELS]; // pitch wheel
-	int                     qtdativas; // active notes count
+	int                     activeNotesCount; // active notes count
 	char                      revrbON; // reverb on
 	char                      delayON; // delay on
 	// sum signals

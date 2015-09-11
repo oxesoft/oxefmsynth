@@ -23,12 +23,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 CSynthesizer::CSynthesizer()
 {
 	int i;
-	// Inicializa as chaves que indicam se os efeitos estão ligados
 	revrbON = INACTIVE;
 	delayON = INACTIVE;
-	// Inicializa o contador de novas ativas
-	qtdativas = 0;
-	// Inicializa os parâmetros de todas as notas
+	activeNotesCount = 0;
 	for (i=0; i<POLIPHONY; i++)
 	{
 		state[i]    = INACTIVE;
@@ -37,7 +34,6 @@ CSynthesizer::CSynthesizer()
 		veloc[i]    = 0;
 		heldkeys[i] = 0;
 	}
-	// Inicializa os parâmetros dos 16 canais
 	for (i=0; i<MIDICHANNELS; i++)
 	{
 		tca[i] = 255;
@@ -60,7 +56,7 @@ void CSynthesizer::SendEvent(unsigned char bS,unsigned char bD1,unsigned char bD
 {
 	int   i         = 0;
 	float f         = 0.0f;
-	float menorvol  = 1.1f; // qualquer valor maior que o máximo (1.0f)
+	float menorvol  = 1.1f; // any value bigger then the maximum (1.0f)
 	int   imenorvl  = POLIPHONY;
 	int   channel   = bS & 0x0F;
 	switch (bS & 0xF0)
@@ -95,7 +91,7 @@ void CSynthesizer::SendEvent(unsigned char bS,unsigned char bD1,unsigned char bD
 			}
 			else
 			{
-				// Verifica se a nota ainda não foi solta (improvável)
+				// verifies if the node was released (improbable)
 				for (i=0; i<POLIPHONY; i++)
 				{
 					if (state[i] == ACTIVE)
@@ -112,17 +108,13 @@ void CSynthesizer::SendEvent(unsigned char bS,unsigned char bD1,unsigned char bD
 					}
 				}
 				// ------------------------------------------------------------------
-				// A) Se todas as notas estão ocupadas:
-				//     1) Identificar a mesma nota no mesmo canal que já foi solta e a realocar;
-				// B) Se não achou:
-				//     2) Identificar todas as notas que foram soltas e realocar a que tiver menor volume;
-				// C) Se não achou:
-				//     3) Identificar a mesma nota no mesmo canal e a realocar;
-				// D) Se não achou:
-				//     4) Realocar a nota com menor volume;
+				// a) if all notes are being used, identifies the same note in the same channel that was released and reallocate it;
+				// b) otherwise, identifies all notes that were released and reallocate the one of lower volume;
+				// c) otherwise, identifies the same note in the same channel and reallocate it;
+				// d) otherwise, reallocate the lower volume note.
 				// ------------------------------------------------------------------
-				// Se todas as notas estão ocupadas:
-				if (qtdativas==POLIPHONY)
+				// case a
+				if (activeNotesCount==POLIPHONY)
 				{
 					// kill the same released note on the same channel;
 					for (i=0; i<POLIPHONY; i++)
@@ -136,17 +128,16 @@ void CSynthesizer::SendEvent(unsigned char bS,unsigned char bD1,unsigned char bD
 									//---------------------
 									state[i] = INACTIVE;
 									heldkeys[i] = 0;
-									qtdativas--;
+									activeNotesCount--;
 									//---------------------
 									break;
 								}
 							}
 						}
 					}
-					// Se não achou:
+					// case b
 					if (i==POLIPHONY)
 					{
-						// Identificar todas as notas que foram soltas e realocar a que tiver menor volume;
 						for (i=0; i<POLIPHONY; i++)
 						{
 							if (state[i] == ENDED)
@@ -164,13 +155,12 @@ void CSynthesizer::SendEvent(unsigned char bS,unsigned char bD1,unsigned char bD
 							//---------------------
 							state[i] = INACTIVE;
 							heldkeys[i] = 0;
-							qtdativas--;
+							activeNotesCount--;
 							//---------------------
 						}
 						else
-						// Se não achou:
+						// case c
 						{
-							// kill the same note on the same channel
 							for (i=0; i<POLIPHONY; i++)
 							{
 								if (tecla[i] == bD1)
@@ -180,16 +170,15 @@ void CSynthesizer::SendEvent(unsigned char bS,unsigned char bD1,unsigned char bD
 										//---------------------
 										state[i] = INACTIVE;
 										heldkeys[i] = 0;
-										qtdativas--;
+										activeNotesCount--;
 										//---------------------
 										break;
 									}
 								}
 							}
-							// Se não achou:
+							// case d
 							if (i==POLIPHONY)
 							{
-								// Realocar a nota com menor volume;
 								for (i=0; i<POLIPHONY; i++)
 								{
 									if (veloc[i]<menorvol)
@@ -202,7 +191,7 @@ void CSynthesizer::SendEvent(unsigned char bS,unsigned char bD1,unsigned char bD
 								//---------------------
 								state[i] = INACTIVE;
 								heldkeys[i] = 0;
-								qtdativas--;
+								activeNotesCount--;
 								//---------------------
 							}
 						}
@@ -210,7 +199,7 @@ void CSynthesizer::SendEvent(unsigned char bS,unsigned char bD1,unsigned char bD
 				}
 				else
 				{
-					// Acha uma ocorrência livre
+					// find a free note index
 					for (i=0; i<POLIPHONY; i++)
 					{
 						if (state[i] == INACTIVE)
@@ -219,7 +208,7 @@ void CSynthesizer::SendEvent(unsigned char bS,unsigned char bD1,unsigned char bD
 						}
 					}
 				}
-				// Aloca a nova nota ---------------------------------------------------------------------
+				// allocates a new note ------------------------------------------------------------------
 				channels[i]   = channel;
 				veloc[i]      = float(bD2) / 127.0f;
 				notes[i].Init(programs.GetProgram(channels[i]), &buffers, bD1, tca[channels[i]], veloc[i], samplerate);
@@ -232,7 +221,7 @@ void CSynthesizer::SendEvent(unsigned char bS,unsigned char bD1,unsigned char bD
 				tecla[i]      = bD1;
 				state[i]     = ACTIVE;
 				tca[channels[i]] = bD1;
-				qtdativas++;
+				activeNotesCount++;
 				// ---------------------------------------------------------------------------------------
 				UpdateGlobalEffects();
 			}
@@ -413,30 +402,23 @@ void CSynthesizer::Process(int *b, int size, int position)
 {
 	int i;
 	int tam = size<<1;
-	// Zera o buffer principal
 	memset(b,0,tam*sizeof(int));
-	// Zera o buffer da reverberação
 	if (revrbON)
 		memset(buffers.bREV,0,sizeof(buffers.bREV));
-	// Zera o buffer do dalay
 	if (delayON)
 		memset(buffers.bDLY,0,sizeof(buffers.bDLY));
-	// Varre todas as notas
 	for (i=0;i<POLIPHONY;i++)
 	{
 		if (state[i] != INACTIVE)
 		{
-			// Zera o buffer da nota
 			memset(buffers.bNoteOut,0,sizeof(buffers.bNoteOut));
-			// Processa a nota
 			notes[i].Process(buffers.bNoteOut,size,position);
-			// Libera se a nota está inativa
 			if (INACTIVE == notes[i].GetState())
 			{
 				//---------------------
 				state[i] = INACTIVE;
 				heldkeys[i] = 0;
-				qtdativas--;
+				activeNotesCount--;
 				//---------------------
 			}
 			if (revrbON)
@@ -449,20 +431,16 @@ void CSynthesizer::Process(int *b, int size, int position)
 	
 	if (revrbON)
 	{
-		// Processa reverberação
 		reverb.Process(buffers.bREV,size);
 		if (reverb.GetState() == ACTIVE)
-			// Somar o buffer com reverberação ao buffer de saída
 			SumMonoStereo(buffers.bREV,b,size);
 	}
 	if (delayON)
 	{
-		// Processa delay
 		delay.Process(buffers.bDLY,size);
-		// Somar o buffer com delay ao buffer de saída
 		SumMonoStereo(buffers.bDLY,b,size);
 	}
-	// Limitador de pico
+	// peak limiting
 	for (i=0;i<tam;i++)
 	{
 		if (b[i] >  32767)
@@ -500,7 +478,7 @@ void CSynthesizer::KillNotes()
 			//---------------------
 			state[i] = INACTIVE;
 			heldkeys[i] = 0;
-			qtdativas--;
+			activeNotesCount--;
 			//---------------------
 		}
 	}
