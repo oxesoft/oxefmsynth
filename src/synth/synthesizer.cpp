@@ -30,13 +30,13 @@ CSynthesizer::CSynthesizer()
     {
         state[i]    = INACTIVE;
         channels[i] = 0;
-        tecla[i]    = 0;
+        key[i]      = 0;
         veloc[i]    = 0;
         heldkeys[i] = 0;
     }
     for (i=0; i<MIDICHANNELS; i++)
     {
-        tca[i] = 255;
+        lkp[i] = 255;
         rev[i] = 0.0f;
         dly[i] = 0.0f;
         mod[i] = 0.0f;
@@ -72,7 +72,7 @@ void CSynthesizer::SendEvent(unsigned char bS,unsigned char bD1,unsigned char bD
                     {
                         if (channels[i] == channel)
                         {
-                            if (tecla[i] == bD1)
+                            if (key[i] == bD1)
                             {
                                 if (hld[channel])
                                 {
@@ -98,7 +98,7 @@ void CSynthesizer::SendEvent(unsigned char bS,unsigned char bD1,unsigned char bD
                     {
                         if (channels[i] == channel)
                         {
-                            if (tecla[i] == bD1)
+                            if (key[i] == bD1)
                             {
                                 notes[i].SendEvent(NOTEOFF,0,position);
                                 state[i] = ENDED;
@@ -119,7 +119,7 @@ void CSynthesizer::SendEvent(unsigned char bS,unsigned char bD1,unsigned char bD
                     // kill the same released note on the same channel;
                     for (i=0; i<POLIPHONY; i++)
                     {
-                        if (tecla[i] == bD1)
+                        if (key[i] == bD1)
                         {
                             if (channels[i] == channel)
                             {
@@ -163,7 +163,7 @@ void CSynthesizer::SendEvent(unsigned char bS,unsigned char bD1,unsigned char bD
                         {
                             for (i=0; i<POLIPHONY; i++)
                             {
-                                if (tecla[i] == bD1)
+                                if (key[i] == bD1)
                                 {
                                     if (channels[i] == channel)
                                     {
@@ -209,18 +209,18 @@ void CSynthesizer::SendEvent(unsigned char bS,unsigned char bD1,unsigned char bD
                     }
                 }
                 // allocates a new note ------------------------------------------------------------------
-                channels[i]   = channel;
-                veloc[i]      = float(bD2) / 127.0f;
-                notes[i].Init(programs.GetProgram(channels[i]), &buffers, bD1, tca[channels[i]], veloc[i], samplerate);
+                channels[i] = channel;
+                veloc[i]    = float(bD2) / 127.0f;
+                notes[i].Init(programs.GetProgram(channels[i]), &buffers, bD1, lkp[channels[i]], veloc[i], samplerate);
                 notes[i].SendEvent(NOTEON    , 0               , position);
                 notes[i].SendEvent(MODULATION, mod[channels[i]], position);
                 notes[i].SendEvent(VOLUME    , vol[channels[i]], position);
                 notes[i].SendEvent(PAN       , pan[channels[i]], position);
                 notes[i].SendEvent(AFTERTOUCH, aft[channels[i]], position);
                 notes[i].SendEvent(PITCH     , ptc[channels[i]], position);
-                tecla[i]      = bD1;
-                state[i]     = ACTIVE;
-                tca[channels[i]] = bD1;
+                key[i] = bD1;
+                state[i] = ACTIVE;
+                lkp[channels[i]] = bD1;
                 activeNotesCount++;
                 // ---------------------------------------------------------------------------------------
                 UpdateGlobalEffects();
@@ -232,7 +232,7 @@ void CSynthesizer::SendEvent(unsigned char bS,unsigned char bD1,unsigned char bD
             {
                 if (state[i] == ACTIVE)
                 {
-                    if ((channels[i] == channel) && (tecla[i] == bD1))
+                    if ((channels[i] == channel) && (key[i] == bD1))
                     {
                         notes[i].SendEvent(AFTERTOUCH,f,position);
                         break;

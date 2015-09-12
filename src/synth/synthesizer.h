@@ -41,10 +41,10 @@ private:
     float            veloc[POLIPHONY]; // notes velocity
     unsigned char    state[POLIPHONY]; // notes state
     unsigned char channels[POLIPHONY]; // notes channel
-    unsigned char    tecla[POLIPHONY]; // notes key
+    unsigned char      key[POLIPHONY]; // notes key
     unsigned char heldkeys[POLIPHONY]; // notes held by hold pedal
     char            hld[MIDICHANNELS]; // hold pedal state
-    unsigned char   tca[MIDICHANNELS]; // last key pressed
+    unsigned char   lkp[MIDICHANNELS]; // last key pressed
     float           rev[MIDICHANNELS]; // reverb value
     float           dly[MIDICHANNELS]; // delay value
     float           mod[MIDICHANNELS]; // modulation wheel value
