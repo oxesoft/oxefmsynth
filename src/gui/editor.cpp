@@ -70,57 +70,72 @@ CEditor::CEditor(HINSTANCE hInstance, CSynthesizer *synthesizer)
     this->hwnd        = 0;
     channel           = 0;
     
-    // Configuração de posicionamento dos controles da interface
-    int aX   = 0;    // auxiliar
-    int aY   = 0;    // auxiliar
+    // auxiliar vars
+    int aX   = 0;
+    int aY   = 0;
     
-    int sX   = 32;   // separação horizontal entre os controles dos operadores
-    int sX2  = sX/2; // metade de sX
-    int sY   = 35;   // separação vertical entre os controles dos operadores
+    // separation between the operators controls
+    int sX   = 32;
+    int sX2  = sX/2;
+    int sY   = 35;
 
-    int oX   = 202;  // separação horizontal entre os operadores
-    int oY   = 94;   // separação vertical entre os operadores
+    // separation between the operators
+    int oX   = 202;
+    int oY   = 94;
     
-    int fX   = 20;   // separação horizontal entre os controles da matriz
-    int fY   = 20;   // separação vertical entre os controles da matriz
+    // separation between the half matrix controls
+    int fX   = 20;
+    int fY   = 20;
 
-    int tX   = 44;   // separação horizontal entre os botões
-    int tY   = 16;   // separação vertical entre os botões
+    // separation between the buttons
+    int tX   = 44;
+    int tY   = 16;
 
-    int cX   = 17;   // coordenada horizontal de OPA
-    int cY   = 80;   // coordenada vertical de OPA
+    // OPA coordinates
+    int cX   = 17;
+    int cY   = 80;
     
-    int mX   = 419;  // coordenada horizontal da matriz
-    int mY   = 77;   // coordenada vertical da matriz
+    // half-matrix coordinates
+    int mX   = 419;
+    int mY   = 77;
 
-    int lX   = 421;  // coordenada horizontal da seção LFO
-    int lY   = 338;  // coordenada vertical da seção LFO
+    // LFO section coordinates
+    int lX   = 421;
+    int lY   = 338;
 
-    int pX   = 421;  // coordenada horizontal da seção Pitch
-    int pY   = 397;  // coordenada vertical da seção Pitch
+    // pitch section coordinates
+    int pX   = 421;
+    int pY   = 397;
 
-    int zX   = 527;  // coordenada horizontal da seção Effects
-    int zY   = 397;  // coordenada vertical da seção Effects
+    // effects section coordinates
+    int zX   = 527;
+    int zY   = 397;
 
-    int dX   = 591;  // coordenada horizontal da seção Modulation
-    int dY   = 338;  // coordenada vertical da seção Modulation
+    // modulation control coordinates
+    int dX   = 591;
+    int dY   = 338;
 
-    int gX   = 327;  // coordenada horizontal da seção Canais
-    int gY   = 25;   // coordenada vertical da seção Canais
+    // channels control coordinates
+    int gX   = 327;
+    int gY   = 25;
 
-    int rX   = 559;  // coordenada horizontal da seção Reverb
-    int rY   = 23;   // coordenada vertical da seção Reverb
+    // reverb section corrdinates
+    int rX   = 559;
+    int rY   = 23;
 
-    int eX   = 421;  // coordenada horizontal da seção Delay
-    int eY   = 23;   // coordenada vertical da seção Delay
+    // delay section coordinates
+    int eX   = 421;
+    int eY   = 23;
 
-    int bX   = 147;  // coordenada horizontal da seção Botões
-    int bY   = 15;   // coordenada vertical da seção Botões
+    // buttons section coordinates
+    int bX   = 147;
+    int bY   = 15;
 
-    int hX   = 603;  // coordenada horizontal da seção HQ
-    int hY   = 401;  // coordenada vertical da seção HQ
+    // hq control coordinates
+    int hX   = 603;
+    int hY   = 401;
 
-    // Display
+    // display
     lcd             = new CLcd     (bmpchars, 25, 23);
     
     // OPA
@@ -349,7 +364,7 @@ CEditor::CEditor(HINSTANCE hInstance, CSynthesizer *synthesizer)
     aY = dY;
     ctl[ctlcount++] = new CKnob    (bmpknob,   25,   "Mod Destination", synthesizer, channel, VL_MOD_DEST,      MDLDS, aX         , aY      );
     
-    // Canais
+    // Channels
     aX = gX;
     aY = gY;
     ctl[ctlcount++] = new CChannels(bmpkey,                             synthesizer, channel,                          aX         , aY      );
@@ -368,13 +383,13 @@ CEditor::CEditor(HINSTANCE hInstance, CSynthesizer *synthesizer)
     ctl[ctlcount++] = new CKnob    (bmpknob,   25,   "Delay LFO Rate",  synthesizer, channel, VL_LFO_RATE,      DLYLF, aX+sX*2    , aY      );
     ctl[ctlcount++] = new CKnob    (bmpknob,   25,   "Delay LFO Amt",   synthesizer, channel, VL_ZERO_TO_ONE,   DLYLA, aX+sX*3    , aY      );
 
-    // Efeitos
+    // Effects
     aX = zX;
     aY = zY;
     ctl[ctlcount++] = new CKnob    (bmpknob,   25,   "Delay Level",     synthesizer, channel, VL_ZERO_TO_ONE,   DLYLV, aX         , aY      );
     ctl[ctlcount++] = new CKnob    (bmpknob,   25,   "Reverb Level",    synthesizer, channel, VL_ZERO_TO_ONE,   RVBLV, aX+sX      , aY      );
 
-    // Botões
+    // Buttons
     aX = bX;
     aY = bY;
     ctl[ctlcount++] = new CButton  (bmpbuttons, 0,                      synthesizer, channel, BT_BANK,                 aX         , aY      );
@@ -435,7 +450,7 @@ void CEditor::SetHandle(HWND hwnd)
     }
     if (hwnd)
     {
-        // new offscreen buffer
+        // create offscreen buffer
         hdc = GetDC(hwnd); 
         hdcMem = CreateCompatibleDC(hdc);
         hdcAux = CreateCompatibleDC(hdc);
