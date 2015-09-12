@@ -16,14 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#define LCD_EECH    1  // horizontal space between the LCD characters
-#define LCD_EECV    1  // vertical space between the LCD characters
 #define LCD_COLS    16 // columns
-#define LCD_LINS    2  // lines
-#define LCD_ALTDIG  7  // char height in pixels
-#define LCD_LARDIG  5  // char width in pixels
-#define LCD_X       0  // bg left
-#define LCD_Y       0  // bg top
 
 class CLcd
 {

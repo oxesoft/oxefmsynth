@@ -23,6 +23,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "synthesizer.h"
 #include "button.h"
 
+#define BUTTON_WIDTH   42
+#define BUTTON_HEIGHT  16
+
 CButton::CButton(HBITMAP bmp, int index, CSynthesizer *synthesizer, char &channel, int type, int x, int y)
 {
     this->hwnd        = NULL;
@@ -33,8 +36,8 @@ CButton::CButton(HBITMAP bmp, int index, CSynthesizer *synthesizer, char &channe
     this->type        = type;
     rect.left         = x;
     rect.top          = y;
-    rect.right        = x + BOTAO_H;
-    rect.bottom       = y + BOTAO_V;
+    rect.right        = x + BUTTON_WIDTH;
+    rect.bottom       = y + BUTTON_HEIGHT;
 }
 
 void CButton::SetHandlers(HWND hwnd, HDC dc, HDC memdc)
@@ -161,7 +164,7 @@ void CButton::Repaint()
 {
     int dcant = SaveDC(memdc);
     SelectObject(memdc,bmp);
-    BitBlt(dc, rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top, memdc, 0, index * BOTAO_V, SRCCOPY );
+    BitBlt(dc, rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top, memdc, 0, index * BUTTON_HEIGHT, SRCCOPY );
     RestoreDC(memdc,dcant);
 }
 

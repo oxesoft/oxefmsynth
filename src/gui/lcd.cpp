@@ -20,6 +20,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <windows.h>
 #include "lcd.h"
 
+#define LCD_LINES   2  // lines
+#define LCD_SEP_H   1  // horizontal space between the LCD characters
+#define LCD_SEP_V   1  // vertical space between the LCD characters
+#define LCD_CHAR_H  7  // char height in pixels
+#define LCD_CHAR_W  5  // char width in pixels
+#define LCD_X       0  // bg left
+#define LCD_Y       0  // bg top
+
 CLcd::CLcd(HBITMAP bmpchars, int x, int y)
 {
     this->hwnd        = NULL;
@@ -33,8 +41,8 @@ CLcd::CLcd(HBITMAP bmpchars, int x, int y)
         text1[i] = ' ';
     this->rect.left   = x + LCD_X;
     this->rect.top    = y + LCD_Y;
-    this->rect.right  = rect.left + (LCD_LARDIG * LCD_COLS) + (LCD_EECH * LCD_COLS);
-    this->rect.bottom = rect.top  + (LCD_ALTDIG * LCD_LINS) + (LCD_EECV * LCD_LINS);
+    this->rect.right  = rect.left + (LCD_CHAR_W * LCD_COLS ) + (LCD_SEP_H * LCD_COLS );
+    this->rect.bottom = rect.top  + (LCD_CHAR_H * LCD_LINES) + (LCD_SEP_V * LCD_LINES);
 }
 
 void CLcd::SetHandlers(HWND hwnd, HDC dc, HDC memdc)
@@ -54,9 +62,9 @@ void CLcd::Repaint()
     int dcant = SaveDC(memdc);
     SelectObject(memdc,bmpchars);
     for (i=0;i<LCD_COLS;i++)
-        BitBlt(dc, lcdx + LCD_X + LCD_EECH + ((LCD_EECH + LCD_LARDIG) * i), lcdy + LCD_Y + LCD_EECV,                         LCD_LARDIG, LCD_ALTDIG, memdc, (0xF & (text0[i] - ' ')) * LCD_LARDIG, ((0xF0 & (text0[i] - ' ')) / 0x10) * LCD_ALTDIG, SRCCOPY);
+        BitBlt(dc, lcdx + LCD_X + LCD_SEP_H + ((LCD_SEP_H + LCD_CHAR_W) * i), lcdy + LCD_Y + LCD_SEP_V,                         LCD_CHAR_W, LCD_CHAR_H, memdc, (0xF & (text0[i] - ' ')) * LCD_CHAR_W, ((0xF0 & (text0[i] - ' ')) / 0x10) * LCD_CHAR_H, SRCCOPY);
     for (i=0;i<LCD_COLS;i++)
-        BitBlt(dc, lcdx + LCD_X + LCD_EECH + ((LCD_EECH + LCD_LARDIG) * i), lcdy + LCD_Y + LCD_EECV + LCD_ALTDIG + LCD_EECV, LCD_LARDIG, LCD_ALTDIG, memdc, (0xF & (text1[i] - ' ')) * LCD_LARDIG, ((0xF0 & (text1[i] - ' ')) / 0x10) * LCD_ALTDIG, SRCCOPY);
+        BitBlt(dc, lcdx + LCD_X + LCD_SEP_H + ((LCD_SEP_H + LCD_CHAR_W) * i), lcdy + LCD_Y + LCD_SEP_V + LCD_CHAR_H + LCD_SEP_V, LCD_CHAR_W, LCD_CHAR_H, memdc, (0xF & (text1[i] - ' ')) * LCD_CHAR_W, ((0xF0 & (text1[i] - ' ')) / 0x10) * LCD_CHAR_H, SRCCOPY);
     RestoreDC(memdc,dcant);
 }
 

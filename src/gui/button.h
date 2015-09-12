@@ -16,9 +16,6 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#define BOTAO_H   42 // Tamanho horizontal do bitmap em pixels
-#define BOTAO_V   16 // Tamanho vertical   do bitmap em pixels
-
 class CButton : public CControl
 {
 private:

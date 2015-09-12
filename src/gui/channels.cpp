@@ -23,6 +23,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "synthesizer.h"
 #include "channels.h"
 
+#define KEY_WIDTH   10
+#define KEY_HEIGHT  10
+
 CChannels::CChannels(HBITMAP bmp, CSynthesizer *synthesizer, char &channel, int x, int y)
 {
     this->hwnd        = NULL;
@@ -31,8 +34,8 @@ CChannels::CChannels(HBITMAP bmp, CSynthesizer *synthesizer, char &channel, int 
     this->synthesizer = synthesizer;
     rect.left         = x;
     rect.top          = y;
-    rect.right        = x + CHAVE_H * 8;
-    rect.bottom       = y + CHAVE_V * 2;
+    rect.right        = x + KEY_WIDTH  * 8;
+    rect.bottom       = y + KEY_HEIGHT * 2;
 }
 
 void CChannels::SetHandlers(HWND hwnd, HDC dc, HDC memdc)
@@ -48,8 +51,8 @@ void CChannels::SetHandlers(HWND hwnd, HDC dc, HDC memdc)
 
 void CChannels::OnClick(POINT point)
 {
-    *channel = (char)((point.x - rect.left) / CHAVE_H);
-    if (point.y > rect.top + CHAVE_V)
+    *channel = (char)((point.x - rect.left) / KEY_WIDTH);
+    if (point.y > rect.top + KEY_HEIGHT)
     {
         *channel += 8;
     }
@@ -71,9 +74,9 @@ void CChannels::Repaint()
     int  dcant = SaveDC(memdc);
     SelectObject(memdc,bmp);
     for (i=0;i< 8;i++)
-        BitBlt(dc, rect.left +  i    * CHAVE_H, rect.top          , CHAVE_H, CHAVE_V, memdc, (*channel==i)?CHAVE_H:0, 0, SRCCOPY);
+        BitBlt(dc, rect.left +  i    * KEY_WIDTH, rect.top             , KEY_WIDTH, KEY_HEIGHT, memdc, (*channel==i)?KEY_WIDTH:0, 0, SRCCOPY);
     for (i=8;i<16;i++)
-        BitBlt(dc, rect.left + (i-8) * CHAVE_H, rect.top + CHAVE_V, CHAVE_H, CHAVE_V, memdc, (*channel==i)?CHAVE_H:0, 0, SRCCOPY);
+        BitBlt(dc, rect.left + (i-8) * KEY_WIDTH, rect.top + KEY_HEIGHT, KEY_WIDTH, KEY_HEIGHT, memdc, (*channel==i)?KEY_WIDTH:0, 0, SRCCOPY);
     RestoreDC(memdc,dcant);
 }
 
