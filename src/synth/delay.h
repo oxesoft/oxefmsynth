@@ -19,20 +19,20 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 class CDelay
 {
 private:
-	float ti;  // time
-	float fe;  // feedback
-	float lf;  // LFO rate
-	float la;  // LFO amount
-	// 1.486 seconds buffer
-	int bdelay[0x10000];
-	// LFO
-	COscillator osc;
-	// buffer iterator
-	unsigned short idelay; // here is the trick
-	// auxiliar
-	int  tempoant;
+    float ti;  // time
+    float fe;  // feedback
+    float lf;  // LFO rate
+    float la;  // LFO amount
+    // 1.486 seconds buffer
+    int bdelay[0x10000];
+    // LFO
+    COscillator osc;
+    // buffer iterator
+    unsigned short idelay; // here is the trick
+    // auxiliar
+    int  tempoant;
 public:
-	void Init(short *b);
-	void Process(int *b, int size);
-	void SetPar(char param, float value);
+    void Init(short *b);
+    void Process(int *b, int size);
+    void SetPar(char param, float value);
 };

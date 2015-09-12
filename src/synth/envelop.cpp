@@ -32,206 +32,206 @@ If we remove this, the times will respect the program values from
 
 void CEnvelop::Init()
 {
-	sr         = 0.f;
-	es         = INACTIVE;
-	counter    = 0;
-	coef       = 0;
-	sa         = 0;
-	dl         = 0.f;
-	at         = 0.f;
-	de         = 0.f;
-	st         = 0.f;
-	su         = 0.f;
-	re         = 0.f;
-	ss         = 0.f;
+    sr         = 0.f;
+    es         = INACTIVE;
+    counter    = 0;
+    coef       = 0;
+    sa         = 0;
+    dl         = 0.f;
+    at         = 0.f;
+    de         = 0.f;
+    st         = 0.f;
+    su         = 0.f;
+    re         = 0.f;
+    ss         = 0.f;
 }
 
 void CEnvelop::SetPar(char param, float value)
 {
-	switch (param)
-	{
-		case SAMPLERATE:
-			sr = value;
-			break;
-		case DELAY:
-			dl = value;
-			break;
-		case ATTACK:
-			at = value;
-			break;
-		case DECAY:
-			de = value;
-			break;
-		case SUSTAIN:
-			su = value;
-			break;
-		case SUSTAINTIME:
-			st = value;
-			break;
-		case RELEASE:
-			re = value;
-			break;
-		case SINGLESAMPLEMODE:
-			ss = value;
-			break;
-	}
+    switch (param)
+    {
+        case SAMPLERATE:
+            sr = value;
+            break;
+        case DELAY:
+            dl = value;
+            break;
+        case ATTACK:
+            at = value;
+            break;
+        case DECAY:
+            de = value;
+            break;
+        case SUSTAIN:
+            su = value;
+            break;
+        case SUSTAINTIME:
+            st = value;
+            break;
+        case RELEASE:
+            re = value;
+            break;
+        case SINGLESAMPLEMODE:
+            ss = value;
+            break;
+    }
 }
 
 void CEnvelop::SendEvent(char event, int remainingSamples)
 {
-	switch (event)
-	{
-		case NOTEON:
-			if      (dl)
-				es = DELAY;
-			else if (at)
-				es = ATTACK;
-			else if (de)
-				es = DECAY;
-			else if (su)
-				es = SUSTAIN;
-			else
-				es = ENDED;
-			break;
-		case NOTEOFF:
-			counter = remainingSamples;
-			if (re)
-				es = RELEASE;
-			else
-				es = ENDED;
-			break;
-	}
+    switch (event)
+    {
+        case NOTEON:
+            if      (dl)
+                es = DELAY;
+            else if (at)
+                es = ATTACK;
+            else if (de)
+                es = DECAY;
+            else if (su)
+                es = SUSTAIN;
+            else
+                es = ENDED;
+            break;
+        case NOTEOFF:
+            counter = remainingSamples;
+            if (re)
+                es = RELEASE;
+            else
+                es = ENDED;
+            break;
+    }
 }
 
 int CEnvelop::CalcCoef()
 {
-	if (counter)
-		return counter;
-	switch (es)
-	{
-		case DELAY:
-			counter = lrintf(dl * sr);
-			KEEP_OLD_BEHAVIOUR
-			coef     = 0;
-			if (at)
-				es = ATTACK;
-			else if (de)
-				es = DECAY;
-			else if (su)
-				es = SUSTAIN;
-			else
-				es = ENDED;
-			break;
-		case ATTACK:
-			counter = lrintf(at * sr);
-			KEEP_OLD_BEHAVIOUR
-			if (counter < 1)
-			{
-				counter = 1;
-			}
-			coef = MAXINT / counter;
-			if (de)
-				es = DECAY;
-			else if (su)
-				es = SUSTAIN;
-			else
-				es = ENDED;
-			break;
-		case DECAY:
-			counter = lrintf(de * sr);
-			KEEP_OLD_BEHAVIOUR
-			if (counter < 1)
-			{
-				counter = 1;
-			}
-			coef     = lrintf((-1.f + su) / counter * FMAXINT);
-			sa       = MAXINT;
-			if (su)
-				es = SUSTAIN;
-			else
-				es = RELEASE;
-			break;
-		case SUSTAIN:
-			if (st)
-			{
-				counter = lrintf(st * sr);
-				KEEP_OLD_BEHAVIOUR
-				if (counter < 1)
-				{
-					counter = 1;
-				}
-				coef     = lrintf(-su / counter * FMAXINT);
-				es       = RELEASE;
-			}
-			else
-			{
-				counter = MAXINT;
-				coef    = 0;
-			}
-			sa = lrintf(su*FMAXINT);
-			break;
-		case RELEASE:
-			counter = lrintf(re * sr);
-			KEEP_OLD_BEHAVIOUR
-			if (counter < 1)
-			{
-				counter = 1;
-			}
-			coef     = -sa / counter;
-			es = ENDED;
-			break;
-		case ENDED:
-			es       = INACTIVE;
-			counter  = MAXINT;
-			coef     = 0;
-			sa       = 0;
-			break;
-	}
-	return counter;
+    if (counter)
+        return counter;
+    switch (es)
+    {
+        case DELAY:
+            counter = lrintf(dl * sr);
+            KEEP_OLD_BEHAVIOUR
+            coef     = 0;
+            if (at)
+                es = ATTACK;
+            else if (de)
+                es = DECAY;
+            else if (su)
+                es = SUSTAIN;
+            else
+                es = ENDED;
+            break;
+        case ATTACK:
+            counter = lrintf(at * sr);
+            KEEP_OLD_BEHAVIOUR
+            if (counter < 1)
+            {
+                counter = 1;
+            }
+            coef = MAXINT / counter;
+            if (de)
+                es = DECAY;
+            else if (su)
+                es = SUSTAIN;
+            else
+                es = ENDED;
+            break;
+        case DECAY:
+            counter = lrintf(de * sr);
+            KEEP_OLD_BEHAVIOUR
+            if (counter < 1)
+            {
+                counter = 1;
+            }
+            coef     = lrintf((-1.f + su) / counter * FMAXINT);
+            sa       = MAXINT;
+            if (su)
+                es = SUSTAIN;
+            else
+                es = RELEASE;
+            break;
+        case SUSTAIN:
+            if (st)
+            {
+                counter = lrintf(st * sr);
+                KEEP_OLD_BEHAVIOUR
+                if (counter < 1)
+                {
+                    counter = 1;
+                }
+                coef     = lrintf(-su / counter * FMAXINT);
+                es       = RELEASE;
+            }
+            else
+            {
+                counter = MAXINT;
+                coef    = 0;
+            }
+            sa = lrintf(su*FMAXINT);
+            break;
+        case RELEASE:
+            counter = lrintf(re * sr);
+            KEEP_OLD_BEHAVIOUR
+            if (counter < 1)
+            {
+                counter = 1;
+            }
+            coef     = -sa / counter;
+            es = ENDED;
+            break;
+        case ENDED:
+            es       = INACTIVE;
+            counter  = MAXINT;
+            coef     = 0;
+            sa       = 0;
+            break;
+    }
+    return counter;
 }
 
 float CEnvelop::Process()
 {
-	if (!counter)
-		CalcCoef();
-	counter--;
-	sa  += coef;
-	float  temp  = float(sa>>16);
-	       temp /= 32768.f      ;
-	       temp *= temp         ;
-	return temp                 ;
+    if (!counter)
+        CalcCoef();
+    counter--;
+    sa  += coef;
+    float  temp  = float(sa>>16);
+           temp /= 32768.f      ;
+           temp *= temp         ;
+    return temp                 ;
 }
 
 char CEnvelop::GetState()
 {
-	return es;
+    return es;
 }
 
 void CEnvelop::Process(int *b, int size, int offset, float volume)
 {
-	int temp;
-	int vol = lrintf(volume * 127.f);
-	while (counter <= size - offset)
-	{
-		for (int i = offset; i < offset + counter; i++)
-		{
-			sa  += coef           ;
-			temp = sa>>16         ;
-			temp = (temp*temp)>>15;
-			b[i] = (b[i] * vol)>>7;
-			b[i] = (temp*b[i])>>15;
-		}
-		offset += counter;
-		counter = 0;
-		CalcCoef();
-	}
-	for (int i = offset; i < size; i++)
-	{
-		sa  += coef           ;
-		temp = sa>>16         ;
-		temp = (temp*temp)>>15;
-		b[i] = (b[i] * vol)>>7;
-		b[i] = (temp*b[i])>>15;
-	}
-	counter -= size - offset;
+    int temp;
+    int vol = lrintf(volume * 127.f);
+    while (counter <= size - offset)
+    {
+        for (int i = offset; i < offset + counter; i++)
+        {
+            sa  += coef           ;
+            temp = sa>>16         ;
+            temp = (temp*temp)>>15;
+            b[i] = (b[i] * vol)>>7;
+            b[i] = (temp*b[i])>>15;
+        }
+        offset += counter;
+        counter = 0;
+        CalcCoef();
+    }
+    for (int i = offset; i < size; i++)
+    {
+        sa  += coef           ;
+        temp = sa>>16         ;
+        temp = (temp*temp)>>15;
+        b[i] = (b[i] * vol)>>7;
+        b[i] = (temp*b[i])>>15;
+    }
+    counter -= size - offset;
 }

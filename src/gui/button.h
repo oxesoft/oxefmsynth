@@ -22,21 +22,21 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 class CButton : public CControl
 {
 private:
-	char          *channel;       // MIDI channel
-	RECT          rect;           // button rect
-	HWND          hwnd;           // window handle
-	HDC           dc;             // used by offscreen buffer
-	HDC           memdc;          // used by offscreen buffer
-	HBITMAP       bmp;            // bitmap
-	CSynthesizer  *synthesizer;   // object to get/set the value
-	int           type;           // button type
-	int           index;
-	void Repaint();
+    char          *channel;       // MIDI channel
+    RECT          rect;           // button rect
+    HWND          hwnd;           // window handle
+    HDC           dc;             // used by offscreen buffer
+    HDC           memdc;          // used by offscreen buffer
+    HBITMAP       bmp;            // bitmap
+    CSynthesizer  *synthesizer;   // object to get/set the value
+    int           type;           // button type
+    int           index;
+    void Repaint();
 public:
-	CButton(HBITMAP bmp, int index, CSynthesizer *synthesizer, char &channel, int type, int x, int y);
-	void OnClick(POINT point);
-	bool IsMouseOver(POINT point);
-	bool GetName(char* str);
-	int  GetType(void);
-	void SetHandlers(HWND hwnd, HDC dc, HDC memdc);
+    CButton(HBITMAP bmp, int index, CSynthesizer *synthesizer, char &channel, int type, int x, int y);
+    void OnClick(POINT point);
+    bool IsMouseOver(POINT point);
+    bool GetName(char* str);
+    int  GetType(void);
+    void SetHandlers(HWND hwnd, HDC dc, HDC memdc);
 };

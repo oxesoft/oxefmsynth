@@ -30,10 +30,10 @@ typedef struct
 class CTuneReader
 {
 private:
-	unsigned int tune_cursor;
-	void read_bytes(void *p, char size);
-	static void quick_sort(EVENT* events, int left, int right);
+    unsigned int tune_cursor;
+    void read_bytes(void *p, char size);
+    static void quick_sort(EVENT* events, int left, int right);
 public:
-	CTuneReader();
+    CTuneReader();
     EVENT events[NEVENTS];
 };

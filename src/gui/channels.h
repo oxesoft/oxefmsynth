@@ -22,19 +22,19 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 class CChannels : public CControl
 {
 private:
-	char          *channel;       // MIDI channel
-	RECT          rect;           // control rect
-	HWND          hwnd;           // window handle
-	HDC           dc;             // used by offscreen buffer
-	HDC           memdc;          // used by offscreen buffer
-	HBITMAP       bmp;            // bitmap
-	CSynthesizer *synthesizer;    // object to get/set the value
-	void Repaint();
+    char          *channel;       // MIDI channel
+    RECT          rect;           // control rect
+    HWND          hwnd;           // window handle
+    HDC           dc;             // used by offscreen buffer
+    HDC           memdc;          // used by offscreen buffer
+    HBITMAP       bmp;            // bitmap
+    CSynthesizer *synthesizer;    // object to get/set the value
+    void Repaint();
 public:
-	CChannels(HBITMAP bmp, CSynthesizer *synthesizer, char &channel, int x, int y);
-	void OnClick(POINT point);
-	bool IsMouseOver(POINT point);
-	bool GetName(char* str);
-	void SetHandlers(HWND hwnd, HDC dc, HDC memdc);
-	int  GetType(void);
+    CChannels(HBITMAP bmp, CSynthesizer *synthesizer, char &channel, int x, int y);
+    void OnClick(POINT point);
+    bool IsMouseOver(POINT point);
+    bool GetName(char* str);
+    void SetHandlers(HWND hwnd, HDC dc, HDC memdc);
+    int  GetType(void);
 };

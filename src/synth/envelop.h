@@ -24,24 +24,24 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 class CEnvelop
 {
 private:
-	float  sr;
-	char   es;         // envelop state
-	int    counter;    // to the next state
-	int    coef;       // coeficient
-	int    sa;         // output signal
-	float  dl;         // delay time
-	float  at;         // attack time
-	float  de;         // decay time
-	float  su;         // sustain level
-	float  st;         // sustein time
-	float  re;         // release time
-	float  ss;         // single sample mode
-	int CalcCoef();
+    float  sr;
+    char   es;         // envelop state
+    int    counter;    // to the next state
+    int    coef;       // coeficient
+    int    sa;         // output signal
+    float  dl;         // delay time
+    float  at;         // attack time
+    float  de;         // decay time
+    float  su;         // sustain level
+    float  st;         // sustein time
+    float  re;         // release time
+    float  ss;         // single sample mode
+    int CalcCoef();
 public:
-	void  Init();
-	float Process();   // single sample mode
-	void  SendEvent(char event, int remainingSamples);
-	char  GetState(void);
-	void  SetPar(char param, float value);
-	void  Process(int *b, int size, int offset, float volume);
+    void  Init();
+    float Process();   // single sample mode
+    void  SendEvent(char event, int remainingSamples);
+    char  GetState(void);
+    void  SetPar(char param, float value);
+    void  Process(int *b, int size, int offset, float volume);
 };

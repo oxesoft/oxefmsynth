@@ -45,37 +45,37 @@ typedef struct {
 class CController
 {
 private:
-	WAVEFORMATEX        pcmwf;
-	CSynthesizer        synthesizer;
-	CTuneReader         tuneReader;
-	char                nextPosition;
-	char                previousPosition;
-	unsigned int        bufferPos;
+    WAVEFORMATEX        pcmwf;
+    CSynthesizer        synthesizer;
+    CTuneReader         tuneReader;
+    char                nextPosition;
+    char                previousPosition;
+    unsigned int        bufferPos;
 #ifdef __DSOUND_INCLUDED__
-	IDirectSound        *lpDS;
-	IDirectSoundBuffer  *lplpDsb;
-	DSBUFFERDESC        dsbdesc;
-	void                *BufPtr;
-	DWORD               BufBytes;
-	DWORD               playCursor;
-	volatile char       stopProcess;
-	HANDLE hthread;
-	HWND   hWnd;
-	static DWORD WINAPI Process(void*);
-	void RenderToSoundcard(void);
+    IDirectSound        *lpDS;
+    IDirectSoundBuffer  *lplpDsb;
+    DSBUFFERDESC        dsbdesc;
+    void                *BufPtr;
+    DWORD               BufBytes;
+    DWORD               playCursor;
+    volatile char       stopProcess;
+    HANDLE hthread;
+    HWND   hWnd;
+    static DWORD WINAPI Process(void*);
+    void RenderToSoundcard(void);
 #endif
-	int           tunePointer; 
-	int           posExt;
-	int           posInt;
-	void FillBuffer(short *bShort, int size);
+    int           tunePointer; 
+    int           posExt;
+    int           posInt;
+    void FillBuffer(short *bShort, int size);
 public:
-	CController();
+    CController();
 #ifndef __RENDER_TO_MEMORY__ONLY__
-	void RenderToFile(void);
+    void RenderToFile(void);
 #endif
-	void RenderToProfiling(void);
+    void RenderToProfiling(void);
 #ifdef __DSOUND_INCLUDED__
-	void Start(HWND hWnd);
-	void Stop();
+    void Start(HWND hWnd);
+    void Stop();
 #endif
 };

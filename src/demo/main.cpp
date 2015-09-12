@@ -28,69 +28,69 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <time.h>
 unsigned int GetTick()
 {
-	struct timespec ts;
-	unsigned int theTick = 0U;
-	clock_gettime(CLOCK_MONOTONIC, &ts);
-	theTick  = ts.tv_nsec / 1000000;
-	theTick += ts.tv_sec * 1000;
-	return theTick;
+    struct timespec ts;
+    unsigned int theTick = 0U;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    theTick  = ts.tv_nsec / 1000000;
+    theTick += ts.tv_sec * 1000;
+    return theTick;
 }
 
 int main(int argc, char* argv[])
 {
-	CController controller;
-	printf(TITLE_FULL);
-	printf("\n");
+    CController controller;
+    printf(TITLE_FULL);
+    printf("\n");
 #ifdef __RENDER_TO_MEMORY__ONLY__
-	unsigned int Temporizador = GetTick();
-	controller.RenderToProfiling();
-	Temporizador = GetTick() - Temporizador;
-	printf("Total time: %u\n", Temporizador);
+    unsigned int Temporizador = GetTick();
+    controller.RenderToProfiling();
+    Temporizador = GetTick() - Temporizador;
+    printf("Total time: %u\n", Temporizador);
 #else
-	if (argc>1)
-	{
-		if (!strcmp(argv[1], "-f"))
-		{
-			printf("Writing the file...\n");
-			unsigned int Temporizador = GetTick();
-			controller.RenderToFile();
-			Temporizador = GetTick() - Temporizador;
-			printf("Total time: %u\n", Temporizador);
-		}
-		else if (!strcmp(argv[1], "-m"))
-		{
-			printf("Rendering to memory...\n");
-			unsigned int Temporizador = GetTick();
-			controller.RenderToProfiling();
-			Temporizador = GetTick() - Temporizador;
-			printf("Total time: %u\n", Temporizador);
-		}
-		else
-		{
-			printf("Invalid option.\n");
-		}
+    if (argc>1)
+    {
+        if (!strcmp(argv[1], "-f"))
+        {
+            printf("Writing the file...\n");
+            unsigned int Temporizador = GetTick();
+            controller.RenderToFile();
+            Temporizador = GetTick() - Temporizador;
+            printf("Total time: %u\n", Temporizador);
+        }
+        else if (!strcmp(argv[1], "-m"))
+        {
+            printf("Rendering to memory...\n");
+            unsigned int Temporizador = GetTick();
+            controller.RenderToProfiling();
+            Temporizador = GetTick() - Temporizador;
+            printf("Total time: %u\n", Temporizador);
+        }
+        else
+        {
+            printf("Invalid option.\n");
+        }
 #ifdef __DSOUND_INCLUDED__
-	}
-	else
-	{
-		controller.Start(GetForegroundWindow());
-		printf("Press ESC to quit...\n");
-		while (GetAsyncKeyState(VK_ESCAPE)>=0) 
-		{ 
-			static const char* anim[]={"|","/","-","\\"};
-			static       char  pos = 0;
-			printf(anim[pos++&3]);
-			printf("\r");
-			Sleep(100); 
-		}
-		controller.Stop();
+    }
+    else
+    {
+        controller.Start(GetForegroundWindow());
+        printf("Press ESC to quit...\n");
+        while (GetAsyncKeyState(VK_ESCAPE)>=0) 
+        { 
+            static const char* anim[]={"|","/","-","\\"};
+            static       char  pos = 0;
+            printf(anim[pos++&3]);
+            printf("\r");
+            Sleep(100); 
+        }
+        controller.Stop();
 #else
-	}
-	else
-	{
-		printf("Usage:\n    \"%s -f\" to render to a wav file\n    \"%s -m\" to render to memory (to measure performance)\n", EXECUTABLE_NAME, EXECUTABLE_NAME);
+    }
+    else
+    {
+        printf("Usage:\n    \"%s -f\" to render to a wav file\n    \"%s -m\" to render to memory (to measure performance)\n", EXECUTABLE_NAME, EXECUTABLE_NAME);
 #endif
-	}
+    }
 #endif
-	return 0;
+    return 0;
 }

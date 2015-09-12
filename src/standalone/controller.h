@@ -26,54 +26,54 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 class CController
 {
 private:
-	IDirectSound        *lpDS;
-	IDirectSoundBuffer  *lplpDsb;
-	DSBUFFERDESC        dsbdesc;
-	WAVEFORMATEX        pcmwf;
-	CSynthesizer        synthesizer;
-	char                nextPosition;
-	char                previousPosition;
-	volatile char       stopProcess;
-	void                *BufPtr;
-	int                 bufferPos;
-	DWORD               BufBytes;
-	DWORD               playCursor;
-	int                 posExt;
-	int                 posInt;
-	HWND                hWnd;
-	void FillBuffer(short *bShort, int size);
-	void RenderToSoundcard(void);
-	HANDLE hthread;
-	static DWORD WINAPI Process(void*);
-	// MIDI ----------------------------------------------------------------------------------------
-	HMIDIIN	m_hmi;
-	static void CALLBACK callback(HMIDIIN hmi, UINT wMsg, DWORD dwInstance, DWORD dw1, DWORD dw2);
-	struct MIDIEvent
-	{
-		unsigned char bstat;
-		unsigned char bdad1;
-		unsigned char bdad2;
-		         int  pos;
-	};
-	struct MIDIEvents
-	{
-		int       eventsCount;
-		int       nextEvent;
-		MIDIEvent event[256];
-	};
-	MIDIEvents   events;
-	int          bufferPosAnt;
-	unsigned int timestampant;
-	// ---------------------------------------------------------------------------------------------
+    IDirectSound        *lpDS;
+    IDirectSoundBuffer  *lplpDsb;
+    DSBUFFERDESC        dsbdesc;
+    WAVEFORMATEX        pcmwf;
+    CSynthesizer        synthesizer;
+    char                nextPosition;
+    char                previousPosition;
+    volatile char       stopProcess;
+    void                *BufPtr;
+    int                 bufferPos;
+    DWORD               BufBytes;
+    DWORD               playCursor;
+    int                 posExt;
+    int                 posInt;
+    HWND                hWnd;
+    void FillBuffer(short *bShort, int size);
+    void RenderToSoundcard(void);
+    HANDLE hthread;
+    static DWORD WINAPI Process(void*);
+    // MIDI ----------------------------------------------------------------------------------------
+    HMIDIIN m_hmi;
+    static void CALLBACK callback(HMIDIIN hmi, UINT wMsg, DWORD dwInstance, DWORD dw1, DWORD dw2);
+    struct MIDIEvent
+    {
+        unsigned char bstat;
+        unsigned char bdad1;
+        unsigned char bdad2;
+                 int  pos;
+    };
+    struct MIDIEvents
+    {
+        int       eventsCount;
+        int       nextEvent;
+        MIDIEvent event[256];
+    };
+    MIDIEvents   events;
+    int          bufferPosAnt;
+    unsigned int timestampant;
+    // ---------------------------------------------------------------------------------------------
 public:
-	CController();
-	// MIDI ----------------------------------------------------------------------------------------
-	void SendMIDIEvent(unsigned char bstat,unsigned char bdad1,unsigned char bdad2,unsigned int timestamp);
-	// ---------------------------------------------------------------------------------------------
-	// GUI --------------------------------------
-	CSynthesizer* GetSynth();
-	// ------------------------------------------
-	bool Start(HWND hWnd,unsigned int portamidi, LPGUID portaaudio);
-	void Stop();
+    CController();
+    // MIDI ----------------------------------------------------------------------------------------
+    void SendMIDIEvent(unsigned char bstat,unsigned char bdad1,unsigned char bdad2,unsigned int timestamp);
+    // ---------------------------------------------------------------------------------------------
+    // GUI --------------------------------------
+    CSynthesizer* GetSynth();
+    // ------------------------------------------
+    bool Start(HWND hWnd,unsigned int portamidi, LPGUID portaaudio);
+    void Stop();
 };
 extern CController *controller; // used by MIDI capture

@@ -19,27 +19,27 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 class CFilter
 {
 private:
-	float  sr;
-	char   tf;  // filter type
-	float  fr;  // central frequency
-	float  fr1; // previous central frenquecy
-	float  re;  // resonance
-	float  re1; // previous resonance
-	float  en;  // envelop
-	// coeficients
-	float b0a0;
-	float b1a0;
-	float b2a0;
-	float a1a0;
-	float a2a0;
-	// in/out history
-	float ou1;
-	float ou2;
-	float in1;
-	float in2;
-	void  CalcCoef(int const type, double const frequencia, double const q);
+    float  sr;
+    char   tf;  // filter type
+    float  fr;  // central frequency
+    float  fr1; // previous central frenquecy
+    float  re;  // resonance
+    float  re1; // previous resonance
+    float  en;  // envelop
+    // coeficients
+    float b0a0;
+    float b1a0;
+    float b2a0;
+    float a1a0;
+    float a2a0;
+    // in/out history
+    float ou1;
+    float ou2;
+    float in1;
+    float in2;
+    void  CalcCoef(int const type, double const frequencia, double const q);
 public:
-	void  Init();
-	void  Process(int *b, int size, int offset);
-	void  SetPar(char param, float value);
+    void  Init();
+    void  Process(int *b, int size, int offset);
+    void  SetPar(char param, float value);
 };

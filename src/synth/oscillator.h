@@ -19,20 +19,20 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 class COscillator
 {
 private:
-	float sr;              // sample rate
-	float fr;              // frequency
-	float tu;              // tune
-	float pt;              // frequency multiplier (pitch curve and LFO)
-	short prevout;         // previous output value
-	int   phase;           // current phase
-	int   self;            // used for self-modulation
-	short *bwave;          // waveform
-	bool  hq;              // high quality (interpolation)
-	int   freq;            // constant phase
+    float sr;              // sample rate
+    float fr;              // frequency
+    float tu;              // tune
+    float pt;              // frequency multiplier (pitch curve and LFO)
+    short prevout;         // previous output value
+    int   phase;           // current phase
+    int   self;            // used for self-modulation
+    short *bwave;          // waveform
+    bool  hq;              // high quality (interpolation)
+    int   freq;            // constant phase
 public:
-	void  Init();
-	float Process();
-	void  SetBuffer(char param, short *b);
-	void  SetPar(char param, float value);
-	void  Process(int *b, int size, int offset);
+    void  Init();
+    float Process();
+    void  SetBuffer(char param, short *b);
+    void  SetPar(char param, float value);
+    void  Process(int *b, int size, int offset);
 };

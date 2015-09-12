@@ -19,7 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 class CMapper
 {
 public:
-	static char  FloatValueToIntValue(CSynthesizer *synthesizer, char channel, int par, int type, float fvalue);
-	static float IntValueToFloatValue(CSynthesizer *synthesizer, char channel, int par, int type, char  value );
-	static void  GetDisplayValue     (CSynthesizer *synthesizer, char channel, int par, int type, char* str   );
+    static char  FloatValueToIntValue(CSynthesizer *synthesizer, char channel, int par, int type, float fvalue);
+    static float IntValueToFloatValue(CSynthesizer *synthesizer, char channel, int par, int type, char  value );
+    static void  GetDisplayValue     (CSynthesizer *synthesizer, char channel, int par, int type, char* str   );
 };

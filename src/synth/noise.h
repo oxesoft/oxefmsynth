@@ -19,28 +19,28 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 class CNoise
 {
 private:
-	float sr;
-	float fr;  // central frequency
-	float fr1; // previous central frequency
-	float re;  // resonance
-	float re1; // previous resonance
-	// coeficients
-	int b0a0;
-	int b2a0;
-	int a1a0;
-	int a2a0;
-	// in/out history
-	int ou1;
-	int ou2;
-	int in1;
-	int in2;
-	// noise volume
-	int am;
-	int bp;
-	// calculates the filter coefs
-	void  CalcCoef(double const frequencia, double const q);
+    float sr;
+    float fr;  // central frequency
+    float fr1; // previous central frequency
+    float re;  // resonance
+    float re1; // previous resonance
+    // coeficients
+    int b0a0;
+    int b2a0;
+    int a1a0;
+    int a2a0;
+    // in/out history
+    int ou1;
+    int ou2;
+    int in1;
+    int in2;
+    // noise volume
+    int am;
+    int bp;
+    // calculates the filter coefs
+    void  CalcCoef(double const frequencia, double const q);
 public:
-	void Init();
-	void Process(int *b, int size, int offset);
-	void SetPar(char param, float value);
+    void Init();
+    void Process(int *b, int size, int offset);
+    void SetPar(char param, float value);
 };

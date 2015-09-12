@@ -19,29 +19,29 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 class CKnob : public CControl
 {
 private:
-	char          *channel;       // MIDI channel
-	char          value;          // integer value
-	float         fvalue;         // float value
-	RECT          rect;           // knob rect
-	char          name[TEXT_SIZE];// knob name
-	HWND          hwnd;           // windown handle
-	HDC           dc;             // used by offscreen buffer
-	HDC           memdc;          // used by offscreen buffer
-	HBITMAP       bmp;            // knob bitmap
-	int           knobSize;       // size in pixels
-	CSynthesizer *synthesizer;    // obj to get/set the value
-	int           par;            // synth parameter assigned
-	int           type;           // control type
-	void Repaint();
+    char          *channel;       // MIDI channel
+    char          value;          // integer value
+    float         fvalue;         // float value
+    RECT          rect;           // knob rect
+    char          name[TEXT_SIZE];// knob name
+    HWND          hwnd;           // windown handle
+    HDC           dc;             // used by offscreen buffer
+    HDC           memdc;          // used by offscreen buffer
+    HBITMAP       bmp;            // knob bitmap
+    int           knobSize;       // size in pixels
+    CSynthesizer *synthesizer;    // obj to get/set the value
+    int           par;            // synth parameter assigned
+    int           type;           // control type
+    void Repaint();
 public:
-	CKnob(HBITMAP bmp, int knobSize, const char *name, CSynthesizer *synthesizer, char &channel, int type, int par, int x, int y);
-	bool  IsMouseOver    (POINT point);
-	bool  Update         (void);
-	bool  GetName        (char* str);
-	bool  IsKnob()       {return true;}
-	bool  IncreaseValue  (int delta);
-	int   GetIndex       (void);
-	int   GetType        (void);
-	float GetValue       (char channel);
-	void  SetHandlers    (HWND hwnd, HDC dc, HDC memdc);
+    CKnob(HBITMAP bmp, int knobSize, const char *name, CSynthesizer *synthesizer, char &channel, int type, int par, int x, int y);
+    bool  IsMouseOver    (POINT point);
+    bool  Update         (void);
+    bool  GetName        (char* str);
+    bool  IsKnob()       {return true;}
+    bool  IncreaseValue  (int delta);
+    int   GetIndex       (void);
+    int   GetType        (void);
+    float GetValue       (char channel);
+    void  SetHandlers    (HWND hwnd, HDC dc, HDC memdc);
 };

@@ -21,74 +21,74 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 CTuneReader::CTuneReader()
 {
-	unsigned short division;
-	unsigned short nchunks;
-	unsigned int   evcursor = 0;
-	unsigned int   currcoef;
-	unsigned int   i;
-	unsigned int   endpos;
-	unsigned int   len;
-	EVENT auxev;
-	tune_cursor = 0;
-	read_bytes(&division, sizeof(short));
-	read_bytes(&nchunks,  sizeof(short));
-	while (nchunks--)
-	{
-		/* Read chunk data */
-		read_bytes(&len, sizeof(int));
-		endpos = evcursor + len;
-		for (i=evcursor;i<endpos;i++)
-			read_bytes(&events[i].timestamp, sizeof(int));
-		for (i=evcursor;i<endpos;i++)
-			read_bytes(&events[i].status   , sizeof(char));
-		for (i=evcursor;i<endpos;i++)
-			read_bytes(&events[i].data1    , sizeof(char));
-		for (i=evcursor;i<endpos;i++)
-			read_bytes(&events[i].data2    , sizeof(char));
-		/* Delta decode data */
-		auxev.timestamp = 0;
-		auxev.status    = 0;
-		auxev.data1     = 0;
-		auxev.data2     = 0;
-		for (i=evcursor;i<endpos;i++)
-		{
-			events[i].timestamp += auxev.timestamp;
-			events[i].status    += auxev.status;
-			events[i].data1     += auxev.data1;
-			events[i].data2     += auxev.data2;
-			auxev.timestamp = events[i].timestamp;
-			auxev.status    = events[i].status;
-			auxev.data1     = events[i].data1;
-			auxev.data2     = events[i].data2;
-		}
-		/* iterate the chunk cursor */
-		evcursor = endpos;
-	}
-	/* rearranges the events in accordance with the timestamps. */
-	quick_sort(events, 0, evcursor - 1);
-	/* apply tempo meta events in all midi timestamps and make then "sample based" timestamps */
-	/* 
-	beat             = quarter_note
-	beats_per_minute = 120
-	beats_per_second = beats_per_minute / 60
-	ticks_per_beats  = division
-	ticks_per_second = ticks_per_beat * beats_per_second
-	samples_per_tick = SAMPLE_RATE / ticks_per_second
-	*/
-	currcoef = (unsigned int)(SAMPLE_RATE / ((float)division * (120.f / 60.f))); /* initializes the coefficient with a default value (120BPM) */
-	for (i=0;i<evcursor;i++)
-	{
-		if (0x51 == events[i].status)
-			currcoef = (unsigned int)(SAMPLE_RATE / ((float)division * ((float)events[i].data1 / 60.f)));
-		events[i].timestamp *= currcoef;
-	}
+    unsigned short division;
+    unsigned short nchunks;
+    unsigned int   evcursor = 0;
+    unsigned int   currcoef;
+    unsigned int   i;
+    unsigned int   endpos;
+    unsigned int   len;
+    EVENT auxev;
+    tune_cursor = 0;
+    read_bytes(&division, sizeof(short));
+    read_bytes(&nchunks,  sizeof(short));
+    while (nchunks--)
+    {
+        /* Read chunk data */
+        read_bytes(&len, sizeof(int));
+        endpos = evcursor + len;
+        for (i=evcursor;i<endpos;i++)
+            read_bytes(&events[i].timestamp, sizeof(int));
+        for (i=evcursor;i<endpos;i++)
+            read_bytes(&events[i].status   , sizeof(char));
+        for (i=evcursor;i<endpos;i++)
+            read_bytes(&events[i].data1    , sizeof(char));
+        for (i=evcursor;i<endpos;i++)
+            read_bytes(&events[i].data2    , sizeof(char));
+        /* Delta decode data */
+        auxev.timestamp = 0;
+        auxev.status    = 0;
+        auxev.data1     = 0;
+        auxev.data2     = 0;
+        for (i=evcursor;i<endpos;i++)
+        {
+            events[i].timestamp += auxev.timestamp;
+            events[i].status    += auxev.status;
+            events[i].data1     += auxev.data1;
+            events[i].data2     += auxev.data2;
+            auxev.timestamp = events[i].timestamp;
+            auxev.status    = events[i].status;
+            auxev.data1     = events[i].data1;
+            auxev.data2     = events[i].data2;
+        }
+        /* iterate the chunk cursor */
+        evcursor = endpos;
+    }
+    /* rearranges the events in accordance with the timestamps. */
+    quick_sort(events, 0, evcursor - 1);
+    /* apply tempo meta events in all midi timestamps and make then "sample based" timestamps */
+    /* 
+    beat             = quarter_note
+    beats_per_minute = 120
+    beats_per_second = beats_per_minute / 60
+    ticks_per_beats  = division
+    ticks_per_second = ticks_per_beat * beats_per_second
+    samples_per_tick = SAMPLE_RATE / ticks_per_second
+    */
+    currcoef = (unsigned int)(SAMPLE_RATE / ((float)division * (120.f / 60.f))); /* initializes the coefficient with a default value (120BPM) */
+    for (i=0;i<evcursor;i++)
+    {
+        if (0x51 == events[i].status)
+            currcoef = (unsigned int)(SAMPLE_RATE / ((float)division * ((float)events[i].data1 / 60.f)));
+        events[i].timestamp *= currcoef;
+    }
 }
 
 void CTuneReader::read_bytes(void *p, char size)
 {
-	char i;
-	for (i=0;i<size;i++)
-		*((char*)p+i) = tune[tune_cursor++];
+    char i;
+    for (i=0;i<size;i++)
+        *((char*)p+i) = tune[tune_cursor++];
 }
 
 void CTuneReader::quick_sort(EVENT* events, int left, int right)

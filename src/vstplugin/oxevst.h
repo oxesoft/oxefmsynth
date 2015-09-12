@@ -27,9 +27,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 enum
 {
-	kNumPrograms = MAX_PROGRAMS,
-	kNumOutputs = STEREOPHONIC,
-	kNumParams = PARAMETERS_COUNT
+    kNumPrograms = MAX_PROGRAMS,
+    kNumOutputs = STEREOPHONIC,
+    kNumParams = PARAMETERS_COUNT
 };
 
 #define MAX_EVENTS_AT_ONCE_POWEROFTWO 8
@@ -39,51 +39,51 @@ enum
 class COxeVst : public AudioEffectX
 {
 public:
-	COxeVst(audioMasterCallback audioMaster);
+    COxeVst(audioMasterCallback audioMaster);
 
-	virtual void processReplacing(float **inputs, float **outputs, VstInt32 sampleframes);
-	virtual VstInt32 processEvents(VstEvents* events);
-	virtual void setProgram(VstInt32 program);
-	virtual void setProgramName (char *name);
-	virtual void getProgramName(char *name);
-	virtual bool getProgramNameIndexed (VstInt32 category, VstInt32 index, char* text);
-	virtual VstInt32 getChunk (void** data, bool isPreset = false);
-	virtual VstInt32 setChunk (void* data, VstInt32 byteSize, bool isPreset = false);
-	virtual void setSampleRate (float sampleRate);
-	virtual void suspend();
-	virtual bool getOutputProperties (VstInt32 index, VstPinProperties* properties);
-	virtual bool copyProgram (VstInt32 destination);
-	virtual bool getEffectName (char* name);
-	virtual bool getVendorString (char* text);
-	virtual bool getProductString (char* text);
-	virtual VstInt32 getVendorVersion ();
-	virtual VstInt32 canDo (char* text);
-	virtual VstInt32 getNumMidiInputChannels ();
-	virtual VstInt32 getNumMidiOutputChannels ();
-	virtual void setParameter (VstInt32 index, float value);
-	virtual float getParameter (VstInt32 index);
-	virtual void getParameterLabel (VstInt32 index, char* label);
-	virtual void getParameterDisplay (VstInt32 index, char* text);
-	virtual void getParameterName (VstInt32 index, char* text);
+    virtual void processReplacing(float **inputs, float **outputs, VstInt32 sampleframes);
+    virtual VstInt32 processEvents(VstEvents* events);
+    virtual void setProgram(VstInt32 program);
+    virtual void setProgramName (char *name);
+    virtual void getProgramName(char *name);
+    virtual bool getProgramNameIndexed (VstInt32 category, VstInt32 index, char* text);
+    virtual VstInt32 getChunk (void** data, bool isPreset = false);
+    virtual VstInt32 setChunk (void* data, VstInt32 byteSize, bool isPreset = false);
+    virtual void setSampleRate (float sampleRate);
+    virtual void suspend();
+    virtual bool getOutputProperties (VstInt32 index, VstPinProperties* properties);
+    virtual bool copyProgram (VstInt32 destination);
+    virtual bool getEffectName (char* name);
+    virtual bool getVendorString (char* text);
+    virtual bool getProductString (char* text);
+    virtual VstInt32 getVendorVersion ();
+    virtual VstInt32 canDo (char* text);
+    virtual VstInt32 getNumMidiInputChannels ();
+    virtual VstInt32 getNumMidiOutputChannels ();
+    virtual void setParameter (VstInt32 index, float value);
+    virtual float getParameter (VstInt32 index);
+    virtual void getParameterLabel (VstInt32 index, char* label);
+    virtual void getParameterDisplay (VstInt32 index, char* text);
+    virtual void getParameterName (VstInt32 index, char* text);
 private:
-	CSynthesizer *synthesizer;
-	VstInt32 posExt;
-	VstInt32 posInt;
-	VstInt32 bufferPos;
-	struct MIDIEvent
-	{
-		unsigned char bstat;
-		unsigned char bdad1;
-		unsigned char bdad2;
-		VstInt32      pos;
-	};
-	struct MIDIEvents
-	{
-		VstInt32  eventsCount;
-		VstInt32  nextEvent;
-		MIDIEvent event[1<<MAX_EVENTS_AT_ONCE_POWEROFTWO];
-	};
-	MIDIEvents events;
+    CSynthesizer *synthesizer;
+    VstInt32 posExt;
+    VstInt32 posInt;
+    VstInt32 bufferPos;
+    struct MIDIEvent
+    {
+        unsigned char bstat;
+        unsigned char bdad1;
+        unsigned char bdad2;
+        VstInt32      pos;
+    };
+    struct MIDIEvents
+    {
+        VstInt32  eventsCount;
+        VstInt32  nextEvent;
+        MIDIEvent event[1<<MAX_EVENTS_AT_ONCE_POWEROFTWO];
+    };
+    MIDIEvents events;
 };
 
 #endif

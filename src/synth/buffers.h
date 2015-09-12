@@ -19,25 +19,25 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 class CBuffers
 {
 private:
-	void FillWaveforms();
-	void Filtrar(int indorigem, int inddestino);
-	void Normalizar(int indice);
+    void FillWaveforms();
+    void Filtrar(int indorigem, int inddestino);
+    void Normalizar(int indice);
 public:
-	int  bOPA          [SAMPLES_PER_PROCESS];
-	int  bOPB          [SAMPLES_PER_PROCESS];
-	int  bOPC          [SAMPLES_PER_PROCESS];
-	int  bOPD          [SAMPLES_PER_PROCESS];
-	int  bOPE          [SAMPLES_PER_PROCESS];
-	int  bOPF          [SAMPLES_PER_PROCESS];
-	int  bOPX          [SAMPLES_PER_PROCESS];
-	int  bOPZ          [SAMPLES_PER_PROCESS];
-	int  bREV          [SAMPLES_PER_PROCESS];
-	int  bDLY          [SAMPLES_PER_PROCESS];
-	// output
-	int  bNoteOut      [SAMPLES_PER_PROCESS<<1];
-	int  bSynthOut     [SAMPLES_PER_PROCESS<<1];
-	// waveforms
-	short bWaves       [WAVEFORMS][WAVEFORM_BSIZE];
-	// construtor
-	CBuffers();
+    int  bOPA          [SAMPLES_PER_PROCESS];
+    int  bOPB          [SAMPLES_PER_PROCESS];
+    int  bOPC          [SAMPLES_PER_PROCESS];
+    int  bOPD          [SAMPLES_PER_PROCESS];
+    int  bOPE          [SAMPLES_PER_PROCESS];
+    int  bOPF          [SAMPLES_PER_PROCESS];
+    int  bOPX          [SAMPLES_PER_PROCESS];
+    int  bOPZ          [SAMPLES_PER_PROCESS];
+    int  bREV          [SAMPLES_PER_PROCESS];
+    int  bDLY          [SAMPLES_PER_PROCESS];
+    // output
+    int  bNoteOut      [SAMPLES_PER_PROCESS<<1];
+    int  bSynthOut     [SAMPLES_PER_PROCESS<<1];
+    // waveforms
+    short bWaves       [WAVEFORMS][WAVEFORM_BSIZE];
+    // construtor
+    CBuffers();
 };

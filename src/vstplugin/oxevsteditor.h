@@ -24,21 +24,21 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 class COxeVstEditor : public AEffEditor
 {
 public:
-	COxeVstEditor(AudioEffectX *effect, CSynthesizer *synth);
-	virtual ~COxeVstEditor();
+    COxeVstEditor(AudioEffectX *effect, CSynthesizer *synth);
+    virtual ~COxeVstEditor();
 
-	virtual bool getRect(ERect **rect);
-	virtual bool open(void *ptr);
-	virtual void close();
-	
-	AudioEffectX*   getEffectX()      { return effectx;            }
-	CSynthesizer*   getSynth()        { return synth;              }
-	CEditor*        getEditor()       { return oxeeditor;          }
-	HWND            getSystemWindow() { return (HWND)systemWindow; }
+    virtual bool getRect(ERect **rect);
+    virtual bool open(void *ptr);
+    virtual void close();
+    
+    AudioEffectX*   getEffectX()      { return effectx;            }
+    CSynthesizer*   getSynth()        { return synth;              }
+    CEditor*        getEditor()       { return oxeeditor;          }
+    HWND            getSystemWindow() { return (HWND)systemWindow; }
 private:
-	AudioEffectX*   effectx;
-	CSynthesizer*   synth;
-	CEditor*        oxeeditor;
+    AudioEffectX*   effectx;
+    CSynthesizer*   synth;
+    CEditor*        oxeeditor;
 };
 
 //-----------------------------------------------------------------------------

@@ -60,28 +60,28 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef __GNUC__
 __inline long int lrint (double flt)
 {
-	int intgr;
+    int intgr;
 
-	_asm
-	{
-		fld flt
-		fistp intgr
-	};
-		
-	return intgr;
+    _asm
+    {
+        fld flt
+        fistp intgr
+    };
+        
+    return intgr;
 } 
 
 __inline long int lrintf (float flt)
 {
-	int intgr;
+    int intgr;
 
-	_asm
-	{
-		fld flt
-		fistp intgr
-	};
-		
-	return intgr;
+    _asm
+    {
+        fld flt
+        fistp intgr
+    };
+        
+    return intgr;
 }
 #endif
 
@@ -90,39 +90,39 @@ __inline long int lrintf (float flt)
 // ------------------------------------------------------------------
 enum
 {
-	INACTIVE,
-	ACTIVE,
-	ENDED,
-	STATE,
-	FREQUENCY,
-	TYPE,
-	RESONANCE,
-	ATTACK,
-	DECAY,
-	SUSTAIN,
-	RELEASE,
-	NOTEON,
-	NOTEOFF,
-	PITCH,
-	AFTERTOUCH,
-	MODULATION,
-	VOLUME,
-	PAN,
-	ENVELOP,
-	SELFOSC,
-	TUNING,
-	BWAVE,
-	DELAY,
-	SUSTAINTIME,
-	BYPASS,
-	INTERPOLATION,
-	SAMPLERATE,
-	TIME,
-	FEEDBACK,
-	DAMP,
-	RATE,
-	AMOUNT,
-	SINGLESAMPLEMODE
+    INACTIVE,
+    ACTIVE,
+    ENDED,
+    STATE,
+    FREQUENCY,
+    TYPE,
+    RESONANCE,
+    ATTACK,
+    DECAY,
+    SUSTAIN,
+    RELEASE,
+    NOTEON,
+    NOTEOFF,
+    PITCH,
+    AFTERTOUCH,
+    MODULATION,
+    VOLUME,
+    PAN,
+    ENVELOP,
+    SELFOSC,
+    TUNING,
+    BWAVE,
+    DELAY,
+    SUSTAINTIME,
+    BYPASS,
+    INTERPOLATION,
+    SAMPLERATE,
+    TIME,
+    FEEDBACK,
+    DAMP,
+    RATE,
+    AMOUNT,
+    SINGLESAMPLEMODE
 };
 
 #ifndef min

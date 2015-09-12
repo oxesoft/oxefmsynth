@@ -23,5 +23,5 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 AudioEffect* createEffectInstance (audioMasterCallback audioMaster)
 {
-	return new COxeVst (audioMaster);
+    return new COxeVst (audioMaster);
 }

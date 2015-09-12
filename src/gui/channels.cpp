@@ -25,65 +25,65 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 CChannels::CChannels(HBITMAP bmp, CSynthesizer *synthesizer, char &channel, int x, int y)
 {
-	this->hwnd        = NULL;
-	this->bmp         = bmp;
-	this->channel     = &channel;
-	this->synthesizer = synthesizer;
-	rect.left         = x;
-	rect.top          = y;
-	rect.right        = x + CHAVE_H * 8;
-	rect.bottom       = y + CHAVE_V * 2;
+    this->hwnd        = NULL;
+    this->bmp         = bmp;
+    this->channel     = &channel;
+    this->synthesizer = synthesizer;
+    rect.left         = x;
+    rect.top          = y;
+    rect.right        = x + CHAVE_H * 8;
+    rect.bottom       = y + CHAVE_V * 2;
 }
 
 void CChannels::SetHandlers(HWND hwnd, HDC dc, HDC memdc)
 {
-	this->hwnd  = hwnd;
-	this->dc    = dc;
-	this->memdc = memdc;
-	if (this->hwnd && this->dc && this->memdc)
-	{
-		Repaint();
-	}
+    this->hwnd  = hwnd;
+    this->dc    = dc;
+    this->memdc = memdc;
+    if (this->hwnd && this->dc && this->memdc)
+    {
+        Repaint();
+    }
 }
 
 void CChannels::OnClick(POINT point)
 {
-	*channel = (char)((point.x - rect.left) / CHAVE_H);
-	if (point.y > rect.top + CHAVE_V)
-	{
-		*channel += 8;
-	}
-	if (hwnd)
-	{
-		Repaint();
-		InvalidateRect(hwnd, &rect, FALSE);
-	}
+    *channel = (char)((point.x - rect.left) / CHAVE_H);
+    if (point.y > rect.top + CHAVE_V)
+    {
+        *channel += 8;
+    }
+    if (hwnd)
+    {
+        Repaint();
+        InvalidateRect(hwnd, &rect, FALSE);
+    }
 }
 
 bool CChannels::IsMouseOver(POINT point)
 {
-	return PtInRect(&rect,point);
+    return PtInRect(&rect,point);
 }
 
 void CChannels::Repaint()
 {
-	char i;
-	int  dcant = SaveDC(memdc);
-	SelectObject(memdc,bmp);
-	for (i=0;i< 8;i++)
-		BitBlt(dc, rect.left +  i    * CHAVE_H, rect.top          , CHAVE_H, CHAVE_V, memdc, (*channel==i)?CHAVE_H:0, 0, SRCCOPY);
-	for (i=8;i<16;i++)
-		BitBlt(dc, rect.left + (i-8) * CHAVE_H, rect.top + CHAVE_V, CHAVE_H, CHAVE_V, memdc, (*channel==i)?CHAVE_H:0, 0, SRCCOPY);
-	RestoreDC(memdc,dcant);
+    char i;
+    int  dcant = SaveDC(memdc);
+    SelectObject(memdc,bmp);
+    for (i=0;i< 8;i++)
+        BitBlt(dc, rect.left +  i    * CHAVE_H, rect.top          , CHAVE_H, CHAVE_V, memdc, (*channel==i)?CHAVE_H:0, 0, SRCCOPY);
+    for (i=8;i<16;i++)
+        BitBlt(dc, rect.left + (i-8) * CHAVE_H, rect.top + CHAVE_V, CHAVE_H, CHAVE_V, memdc, (*channel==i)?CHAVE_H:0, 0, SRCCOPY);
+    RestoreDC(memdc,dcant);
 }
 
 int CChannels::GetType()
 {
-	return VL_CHANNELS;
+    return VL_CHANNELS;
 }
 
 bool CChannels::GetName(char* str)
 {
-	StringCchPrintfA(str, TEXT_SIZE, "Channel %02i", *channel + 1);
-	return TRUE;
+    StringCchPrintfA(str, TEXT_SIZE, "Channel %02i", *channel + 1);
+    return TRUE;
 }

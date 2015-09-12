@@ -19,29 +19,29 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 class CKey : public CControl
 {
 private:
-	char          *channel;       // MIDI channel
-	char          value;          // value
-	RECT          rect;           // key rect
-	char          name[TEXT_SIZE];// key name
-	HWND          hwnd;           // window handle
-	HDC           dc;             // used by offscreen buffer
-	HDC           memdc;          // used by offscreen buffer
-	HBITMAP       bmp;            // bitmap
-	int           chave_h;        // width in pixels
-	int           chave_v;        // height in pixels
-	CSynthesizer *synthesizer;    // object to get/set the value
-	int           par;            // synth parameter assigned
-	int           index;          // bitmap index in bitmap table
-	void Repaint();
+    char          *channel;       // MIDI channel
+    char          value;          // value
+    RECT          rect;           // key rect
+    char          name[TEXT_SIZE];// key name
+    HWND          hwnd;           // window handle
+    HDC           dc;             // used by offscreen buffer
+    HDC           memdc;          // used by offscreen buffer
+    HBITMAP       bmp;            // bitmap
+    int           chave_h;        // width in pixels
+    int           chave_v;        // height in pixels
+    CSynthesizer *synthesizer;    // object to get/set the value
+    int           par;            // synth parameter assigned
+    int           index;          // bitmap index in bitmap table
+    void Repaint();
 public:
-	CKey(HBITMAP bmp, int index, int chave_h, int chave_v, const char *name, CSynthesizer *synthesizer, char &channel, int par, int x, int y);
-	void  OnClick        (POINT point);
-	bool  IsMouseOver    (POINT point);
-	bool  Update         (void);
-	bool  GetName        (char* str);
-	int   GetIndex       (void);
-	int   GetType        (void);
-	bool  SetValue       (char channel, char value);
-	float GetValue       (char channel);
-	void  SetHandlers    (HWND hwnd, HDC dc, HDC memdc);
+    CKey(HBITMAP bmp, int index, int chave_h, int chave_v, const char *name, CSynthesizer *synthesizer, char &channel, int par, int x, int y);
+    void  OnClick        (POINT point);
+    bool  IsMouseOver    (POINT point);
+    bool  Update         (void);
+    bool  GetName        (char* str);
+    int   GetIndex       (void);
+    int   GetType        (void);
+    bool  SetValue       (char channel, char value);
+    float GetValue       (char channel);
+    void  SetHandlers    (HWND hwnd, HDC dc, HDC memdc);
 };
