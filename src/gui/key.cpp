@@ -63,11 +63,6 @@ void CKey::OnClick(POINT point)
     }
 }
 
-bool CKey::IsMouseOver(POINT point)
-{
-    return PtInRect(&rect, point);
-}
-
 void CKey::Repaint()
 {
     int dcant = SaveDC(memdc);

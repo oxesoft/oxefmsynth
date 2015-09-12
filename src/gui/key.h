@@ -21,7 +21,6 @@ class CKey : public CControl
 private:
     char          *channel;       // MIDI channel
     char          value;          // value
-    RECT          rect;           // key rect
     char          name[TEXT_SIZE];// key name
     HWND          hwnd;           // window handle
     HDC           dc;             // used by offscreen buffer
@@ -36,7 +35,6 @@ private:
 public:
     CKey(HBITMAP bmp, int index, int chave_h, int chave_v, const char *name, CSynthesizer *synthesizer, char &channel, int par, int x, int y);
     void  OnClick        (POINT point);
-    bool  IsMouseOver    (POINT point);
     bool  Update         (void);
     bool  GetName        (char* str);
     int   GetIndex       (void);

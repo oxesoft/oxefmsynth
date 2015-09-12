@@ -20,7 +20,6 @@ class CChannels : public CControl
 {
 private:
     char          *channel;       // MIDI channel
-    RECT          rect;           // control rect
     HWND          hwnd;           // window handle
     HDC           dc;             // used by offscreen buffer
     HDC           memdc;          // used by offscreen buffer
@@ -30,7 +29,6 @@ private:
 public:
     CChannels(HBITMAP bmp, CSynthesizer *synthesizer, char &channel, int x, int y);
     void OnClick(POINT point);
-    bool IsMouseOver(POINT point);
     bool GetName(char* str);
     void SetHandlers(HWND hwnd, HDC dc, HDC memdc);
     int  GetType(void);

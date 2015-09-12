@@ -155,11 +155,6 @@ void CButton::OnClick(POINT point)
     }
 }
 
-bool CButton::IsMouseOver(POINT point)
-{
-    return PtInRect(&rect, point);
-}
-
 void CButton::Repaint()
 {
     int dcant = SaveDC(memdc);

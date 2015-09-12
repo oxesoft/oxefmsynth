@@ -18,7 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #define LCD_COLS    16 // columns
 
-class CLcd
+class CLcd : CControl
 {
 private:
     char    text0[LCD_COLS];
@@ -29,7 +29,6 @@ private:
     HWND    hwnd;      // window handle
     HDC     dc;        // used by offscreen buffer
     HDC     memdc;     // used by offscreen buffer
-    RECT    rect;
     void Repaint();
 public:
     CLcd(HBITMAP bmpchars, int x, int y);

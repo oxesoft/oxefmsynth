@@ -22,7 +22,6 @@ private:
     char          *channel;       // MIDI channel
     char          value;          // integer value
     float         fvalue;         // float value
-    RECT          rect;           // knob rect
     char          name[TEXT_SIZE];// knob name
     HWND          hwnd;           // windown handle
     HDC           dc;             // used by offscreen buffer
@@ -35,7 +34,6 @@ private:
     void Repaint();
 public:
     CKnob(HBITMAP bmp, int knobSize, const char *name, CSynthesizer *synthesizer, char &channel, int type, int par, int x, int y);
-    bool  IsMouseOver    (POINT point);
     bool  Update         (void);
     bool  GetName        (char* str);
     bool  IsKnob()       {return true;}

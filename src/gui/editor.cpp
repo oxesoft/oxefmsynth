@@ -536,7 +536,7 @@ void CEditor::OnLButtonDblClick(POINT point)
 {
     for (int i=0;i<GUI_CONTROLS;i++)
     {
-        if (ctl[i]->IsMouseOver(point))
+        if (ctl[i]->IsMouseOver(point.x, point.y))
         {
             int index = ctl[i]->GetIndex();
             if (index >= 0)
@@ -558,7 +558,7 @@ void CEditor::OnLButtonDown(POINT point)
     char prevchannel = channel; // saves the current channel in case of the clicked control be CChannels
     for (int i=0;i<GUI_CONTROLS;i++)
     {
-        if (ctl[i]->IsMouseOver(point))
+        if (ctl[i]->IsMouseOver(point.x, point.y))
         {
             ctl[i]->OnClick(point);
             synthesizer->SetEditingName(ctl[i]->GetType() == BT_NAME);
@@ -629,7 +629,7 @@ void CEditor::OnMouseWheel(POINT point, int delta)
     char str[TEXT_SIZE];
     for (int i=0;i<GUI_CONTROLS;i++)
     {
-        if (ctl[i]->IsMouseOver(point))
+        if (ctl[i]->IsMouseOver(point.x, point.y))
         {
             if (ctl[i]->IsKnob() == true)
             {
@@ -693,7 +693,7 @@ void CEditor::OnTimer(HWND hWnd)
     }
     for (int i=0;i<GUI_CONTROLS;i++)
     {
-        if (ctl[i]->IsMouseOver(point) && cID != i)
+        if (ctl[i]->IsMouseOver(point.x, point.y) && cID != i)
         {
             cID = i;
             char str[TEXT_SIZE];

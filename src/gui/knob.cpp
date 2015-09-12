@@ -54,11 +54,6 @@ void CKnob::SetHandlers(HWND hwnd, HDC dc, HDC memdc)
     }
 }
 
-bool CKnob::IsMouseOver(POINT point)
-{
-    return PtInRect(&rect, point);
-}
-
 void CKnob::Repaint()
 {
     int dcant = SaveDC(memdc);

@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
+#include "control.h"
 #include "lcd.h"
 
 #define LCD_LINES   2  // lines

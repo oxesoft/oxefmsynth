@@ -63,11 +63,6 @@ void CChannels::OnClick(POINT point)
     }
 }
 
-bool CChannels::IsMouseOver(POINT point)
-{
-    return PtInRect(&rect,point);
-}
-
 void CChannels::Repaint()
 {
     char i;

@@ -20,10 +20,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 class CControl
 {
+protected:
+    RECT rect;
 public:
     virtual void  OnClick        (POINT point)                  {             }
-    virtual bool  IsMouseOver    (POINT point)                  {return false;}
-    virtual bool  Repaint        (HDC dc, HDC memdc)            {return false;}
     virtual bool  GetName        (char* str)                    {return false;}
     virtual bool  Update         (void)                         {return false;}
     virtual bool  IsKnob         (void)                         {return false;}
@@ -31,6 +31,10 @@ public:
     virtual int   GetIndex       (void)                         {return -1   ;}
     virtual int   GetType        (void)                         {return -1   ;}
     virtual void  SetHandlers    (HWND hwnd, HDC dc, HDC memdc) {             }
+    virtual bool  IsMouseOver    (int x, int y)
+    {
+        return ((x >= rect.left) && (x < rect.right) && (y >= rect.top) && (y < rect.bottom));
+    }
 };
 
 enum
