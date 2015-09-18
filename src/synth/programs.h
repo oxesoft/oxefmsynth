@@ -435,10 +435,7 @@ private:
     bool          isEditingName;      // indicates if the user is editing program name
     bool          bankMode;           // indicates if the user is choosing a bank
     bool          haschanges;         // self-explanatory
-/*
-    void          InitBank();
-*/
-    void          *hWndEditor;
+    CToolkit      *toolkit;
 public:
     float         SetDefault    (char channel, int par);
     float         GetPar        (char channel, int par);
@@ -462,6 +459,6 @@ public:
     void          SetBank       (SBank *bank);
     void          SetProgram    (char numprg, SProgram *program);
     bool          HasChanges    ();
-    void          SetEditorHn   (void *hWndEditor);
+    void          SetToolkit    (CToolkit *toolkit);
 #endif
 };

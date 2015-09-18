@@ -94,6 +94,6 @@ public:
     void          SetBank       (SBank *bank);
     void          SetProgram    (char numprg, SProgram *program);
     bool          HasChanges    ();
-    void          SetEditorHn   (void *hWndEditor);
+    void          SetToolkit    (CToolkit *toolkit);
 #endif
 };

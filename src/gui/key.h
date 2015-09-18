@@ -22,24 +22,22 @@ private:
     char          *channel;       // MIDI channel
     char          value;          // value
     char          name[TEXT_SIZE];// key name
-    HWND          hwnd;           // window handle
-    HDC           dc;             // used by offscreen buffer
-    HDC           memdc;          // used by offscreen buffer
-    HBITMAP       bmp;            // bitmap
-    int           chave_h;        // width in pixels
-    int           chave_v;        // height in pixels
+    int           bmp;            // bitmap
+    int           w;              // width in pixels
+    int           h;              // height in pixels
     CSynthesizer *synthesizer;    // object to get/set the value
+    CToolkit     *toolkit;        // graphical toolkit
     int           par;            // synth parameter assigned
     int           index;          // bitmap index in bitmap table
     void Repaint();
 public:
-    CKey(HBITMAP bmp, int index, int chave_h, int chave_v, const char *name, CSynthesizer *synthesizer, char &channel, int par, int x, int y);
-    void  OnClick        (POINT point);
+    CKey(int bmp, int index, int w, int h, const char *name, CSynthesizer *synthesizer, char &channel, int par, int x, int y);
+    void  OnClick        (int x, int y);
     bool  Update         (void);
     bool  GetName        (char* str);
     int   GetIndex       (void);
     int   GetType        (void);
     bool  SetValue       (char channel, char value);
     float GetValue       (char channel);
-    void  SetHandlers    (HWND hwnd, HDC dc, HDC memdc);
+    void  SetToolkit     (CToolkit *toolkit);
 };

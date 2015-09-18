@@ -23,17 +23,15 @@ private:
     char          value;          // integer value
     float         fvalue;         // float value
     char          name[TEXT_SIZE];// knob name
-    HWND          hwnd;           // windown handle
-    HDC           dc;             // used by offscreen buffer
-    HDC           memdc;          // used by offscreen buffer
-    HBITMAP       bmp;            // knob bitmap
+    int           bmp;            // knob bitmap
     int           knobSize;       // size in pixels
     CSynthesizer *synthesizer;    // obj to get/set the value
+    CToolkit     *toolkit;        // graphical toolkit
     int           par;            // synth parameter assigned
     int           type;           // control type
     void Repaint();
 public:
-    CKnob(HBITMAP bmp, int knobSize, const char *name, CSynthesizer *synthesizer, char &channel, int type, int par, int x, int y);
+    CKnob(int bmp, int knobSize, const char *name, CSynthesizer *synthesizer, char &channel, int type, int par, int x, int y);
     bool  Update         (void);
     bool  GetName        (char* str);
     bool  IsKnob()       {return true;}
@@ -41,5 +39,5 @@ public:
     int   GetIndex       (void);
     int   GetType        (void);
     float GetValue       (char channel);
-    void  SetHandlers    (HWND hwnd, HDC dc, HDC memdc);
+    void  SetToolkit     (CToolkit *toolkit);
 };

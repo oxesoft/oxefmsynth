@@ -16,39 +16,38 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-#include <strsafe.h>
+#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
+#include "toolkit.h"
 #include "control.h"
 #include "synthesizer.h"
 #include "knob.h"
 #include "mapper.h"
 
-CKnob::CKnob(HBITMAP bmp, int knobSize, const char *name, CSynthesizer *synthesizer, char &channel, int type, int par, int x, int y)
+CKnob::CKnob(int bmp, int knobSize, const char *name, CSynthesizer *synthesizer, char &channel, int type, int par, int x, int y)
 {
-    StringCchCopyA(this->name, TEXT_SIZE, name);
-    this->hwnd        = NULL;
+    strncpy(this->name, name, TEXT_SIZE);
+    this->toolkit     = NULL;
     this->bmp         = bmp;
     this->knobSize    = knobSize;
     this->channel     = &channel;
     this->synthesizer = synthesizer;
     this->par         = par;
     this->type        = type;
-    this->rect.left   = x;
-    this->rect.top    = y;
-    this->rect.right  = x + knobSize;
-    this->rect.bottom = y + knobSize;
+    this->left        = x;
+    this->top         = y;
+    this->right       = x + knobSize;
+    this->bottom      = y + knobSize;
     this->value       = 0;
     this->fvalue      = 999.f;
 }
 
-void CKnob::SetHandlers(HWND hwnd, HDC dc, HDC memdc)
+void CKnob::SetToolkit(CToolkit *toolkit)
 {
-    this->hwnd  = hwnd;
-    this->dc    = dc;
-    this->memdc = memdc;
-    if (this->hwnd && this->dc && this->memdc)
+    this->toolkit = toolkit;
+    if (toolkit)
     {
         Repaint();
     }
@@ -56,7 +55,6 @@ void CKnob::SetHandlers(HWND hwnd, HDC dc, HDC memdc)
 
 void CKnob::Repaint()
 {
-    int dcant = SaveDC(memdc);
     char valtemp = value;
     switch (type)
     {
@@ -75,9 +73,10 @@ void CKnob::Repaint()
     }
     if (valtemp > 99)
         valtemp = 99;
-    SelectObject(memdc,bmp);
-    BitBlt(dc, rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top, memdc, (valtemp - (abs(valtemp/10) * 10)) * knobSize, abs(valtemp/10) * knobSize, SRCCOPY);
-    RestoreDC(memdc,dcant);
+    if (toolkit)
+    {
+        toolkit->CopyRect(this->left, this->top, this->right - this->left, this->bottom - this->top, this->bmp, (valtemp - (abs(valtemp/10) * 10)) * this->knobSize, abs(valtemp/10) * this->knobSize);
+    }
 }
 
 bool CKnob::Update(void)
@@ -87,13 +86,9 @@ bool CKnob::Update(void)
     {
         this->fvalue = newValue;
         this->value = CMapper::FloatValueToIntValue(this->synthesizer, *channel, this->par, this->type, this->fvalue);
-        if (hwnd)
-        {
-            Repaint();
-            InvalidateRect(hwnd, &rect, FALSE);
-        }
+        Repaint();
     }
-    return TRUE;
+    return true;
 }
 
 bool CKnob::IncreaseValue(int delta)
@@ -109,18 +104,14 @@ bool CKnob::IncreaseValue(int delta)
     }
     this->fvalue = CMapper::IntValueToFloatValue(this->synthesizer, *channel, this->par, this->type, this->value);
     synthesizer->SetPar(*channel, this->par, this->fvalue);
-    if (hwnd)
-    {
-        Repaint();
-        InvalidateRect(hwnd, &rect, FALSE);
-    }
-    return TRUE;
+    Repaint();
+    return true;
 }
 
 bool CKnob::GetName(char* str)
 {
-    StringCchCopyA(str, TEXT_SIZE, name);
-    return TRUE;
+    strncpy(str, name, TEXT_SIZE);
+    return true;
 }
 
 int CKnob::GetIndex()

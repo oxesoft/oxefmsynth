@@ -16,9 +16,9 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-#include <strsafe.h>
+#include <string.h>
+#include <stdio.h>
+#include "toolkit.h"
 #include "control.h"
 #include "synthesizer.h"
 #include "channels.h"
@@ -26,53 +26,48 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define KEY_WIDTH   10
 #define KEY_HEIGHT  10
 
-CChannels::CChannels(HBITMAP bmp, CSynthesizer *synthesizer, char &channel, int x, int y)
+CChannels::CChannels(int bmp, CSynthesizer *synthesizer, char &channel, int x, int y)
 {
-    this->hwnd        = NULL;
+    this->toolkit     = NULL;
     this->bmp         = bmp;
     this->channel     = &channel;
     this->synthesizer = synthesizer;
-    rect.left         = x;
-    rect.top          = y;
-    rect.right        = x + KEY_WIDTH  * 8;
-    rect.bottom       = y + KEY_HEIGHT * 2;
+    this->left        = x;
+    this->top         = y;
+    this->right       = x + KEY_WIDTH  * 8;
+    this->bottom      = y + KEY_HEIGHT * 2;
 }
 
-void CChannels::SetHandlers(HWND hwnd, HDC dc, HDC memdc)
+void CChannels::SetToolkit(CToolkit *toolkit)
 {
-    this->hwnd  = hwnd;
-    this->dc    = dc;
-    this->memdc = memdc;
-    if (this->hwnd && this->dc && this->memdc)
+    this->toolkit = toolkit;
+    if (toolkit)
     {
         Repaint();
     }
 }
 
-void CChannels::OnClick(POINT point)
+void CChannels::OnClick(int x, int y)
 {
-    *channel = (char)((point.x - rect.left) / KEY_WIDTH);
-    if (point.y > rect.top + KEY_HEIGHT)
+    *channel = (char)((x - this->left) / KEY_WIDTH);
+    if (y > this->top + KEY_HEIGHT)
     {
         *channel += 8;
     }
-    if (hwnd)
-    {
-        Repaint();
-        InvalidateRect(hwnd, &rect, FALSE);
-    }
+    Repaint();
 }
 
 void CChannels::Repaint()
 {
     char i;
-    int  dcant = SaveDC(memdc);
-    SelectObject(memdc,bmp);
+    if (!toolkit)
+    {
+        return;
+    }
     for (i=0;i< 8;i++)
-        BitBlt(dc, rect.left +  i    * KEY_WIDTH, rect.top             , KEY_WIDTH, KEY_HEIGHT, memdc, (*channel==i)?KEY_WIDTH:0, 0, SRCCOPY);
+        toolkit->CopyRect(this->left +  i    * KEY_WIDTH, this->top             , KEY_WIDTH, KEY_HEIGHT, this->bmp, (*channel==i)?KEY_WIDTH:0, 0);
     for (i=8;i<16;i++)
-        BitBlt(dc, rect.left + (i-8) * KEY_WIDTH, rect.top + KEY_HEIGHT, KEY_WIDTH, KEY_HEIGHT, memdc, (*channel==i)?KEY_WIDTH:0, 0, SRCCOPY);
-    RestoreDC(memdc,dcant);
+        toolkit->CopyRect(this->left + (i-8) * KEY_WIDTH, this->top + KEY_HEIGHT, KEY_WIDTH, KEY_HEIGHT, this->bmp, (*channel==i)?KEY_WIDTH:0, 0);
 }
 
 int CChannels::GetType()
@@ -82,6 +77,6 @@ int CChannels::GetType()
 
 bool CChannels::GetName(char* str)
 {
-    StringCchPrintfA(str, TEXT_SIZE, "Channel %02i", *channel + 1);
-    return TRUE;
+    snprintf(str, TEXT_SIZE, "Channel %02i", *channel + 1);
+    return true;
 }

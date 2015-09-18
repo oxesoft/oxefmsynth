@@ -16,6 +16,9 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#ifndef __OXEDMO__
+#include "toolkit.h"
+#endif
 #include "synthesizer.h"
 #include <string.h>
 #include <math.h>
@@ -720,9 +723,9 @@ bool CSynthesizer::HasChanges()
     return programs.HasChanges();
 }
 
-void CSynthesizer::SetEditorHn(void *hWndEditor)
+void CSynthesizer::SetToolkit(CToolkit *toolkit)
 {
-    programs.SetEditorHn(hWndEditor);
+    programs.SetToolkit(toolkit);
 }
 
 #endif

@@ -23,6 +23,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <strsafe.h>
 #include "oxevsteditor.h"
 #include "oxevst.h"
+#include "windowstoolkit.h"
 
 //-----------------------------------------------------------------------------
 
@@ -46,28 +47,19 @@ LRESULT CALLBACK WindowProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lPar
     {
     case WM_LBUTTONDBLCLK:
     {
-        POINT point;
-        point.x = GET_X_LPARAM(lParam); 
-        point.y = GET_Y_LPARAM(lParam);
-        editor->getEditor()->OnLButtonDblClick(point);
+        editor->getEditor()->OnLButtonDblClick(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
         return 0L;
     }
     case WM_LBUTTONDOWN:
     {
-        POINT point;
-        point.x = GET_X_LPARAM(lParam); 
-        point.y = GET_Y_LPARAM(lParam);
-        editor->getEditor()->OnLButtonDown(point);
+        editor->getEditor()->OnLButtonDown(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+        SetFocus(hwnd);
         return 0L;
     }
     case WM_LBUTTONUP:
     {
         editor->getEditor()->OnLButtonUp();
-        return 0L;
-    }
-    case WM_RBUTTONDOWN:
-    {
-        editor->getEditor()->OnRButtonDown();
+        SetFocus(hwnd);
         return 0L;
     }
     case WM_KEYDOWN:
@@ -90,10 +82,7 @@ LRESULT CALLBACK WindowProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lPar
     }
     case WM_MOUSEMOVE:
     {
-        POINT point;
-        point.x = GET_X_LPARAM(lParam); 
-        point.y = GET_Y_LPARAM(lParam);
-        editor->getEditor()->OnMouseMove(point);
+        editor->getEditor()->OnMouseMove(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
         return 0L;
     }
     case WM_MOUSEWHEEL:
@@ -110,7 +99,8 @@ LRESULT CALLBACK WindowProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lPar
             int zDelta = GET_WHEEL_DELTA_WPARAM(wParam);
             zDelta /= WHEEL_DELTA;
             ScreenToClient(hwnd, &point);
-            editor->getEditor()->OnMouseWheel(point, zDelta);
+            editor->getEditor()->OnMouseWheel(point.x, point.y, zDelta);
+            SetFocus(hwnd);
             return 0L;
         }
         break;
@@ -119,21 +109,24 @@ LRESULT CALLBACK WindowProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lPar
     {
         PAINTSTRUCT ps;
         HDC dc = BeginPaint(hwnd, &ps);
-        editor->getEditor()->OnPaint(dc, ps.rcPaint);
+        RECT *rect = &ps.rcPaint;
+        int w = rect->right  - rect->left;
+        int h = rect->bottom - rect->top;
+        BitBlt(dc, rect->left, rect->top, w, h, (HDC)editor->getEditor()->GetToolkit()->GetImageBuffer(), rect->left, rect->top, SRCCOPY);
         EndPaint(hwnd, &ps); 
         return 0L;
     }
     case WM_TIMER:
     {
-        editor->getEditor()->OnTimer(hwnd);
+        editor->getEditor()->Update();
         return 0L;
     }
-    case WM_UPDATE_DISPLAY:
+    case WM_USER + UPDATE_DISPLAY:
     {
         editor->getEffectX()->updateDisplay();
         return 0L;
     }
-    case WM_SET_PROGRAM:
+    case WM_USER + SET_PROGRAM:
     {
         char channel = (char)wParam;
         unsigned char numprog = (unsigned char)lParam;
@@ -148,7 +141,7 @@ LRESULT CALLBACK WindowProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lPar
         }
         return 0L;
     }
-    case WM_SET_PARAMETER:
+    case WM_USER + SET_PARAMETER:
     {
         int index = (int)wParam;
         float value = (float)lParam / MAXPARVALUE;
@@ -169,8 +162,9 @@ COxeVstEditor::COxeVstEditor (AudioEffectX *effectx, CSynthesizer *synth)
     effectx(effectx),
     synth(synth)
 {
-    oxeeditor = new CEditor((HINSTANCE)hInstance, synth);
+    oxeeditor = new CEditor(synth);
     effect->setEditor(this);
+    this->toolkit = NULL;
 }
 
 //-----------------------------------------------------------------------------
@@ -236,7 +230,8 @@ bool COxeVstEditor::open (void *ptr)
 #else
     SetWindowLong(hwnd, GWL_USERDATA, (LONG)this);
 #endif
-    oxeeditor->SetHandle(hwnd);
+    this->toolkit = new CWindowsToolkit((HINSTANCE)hInstance, hwnd);
+    oxeeditor->SetToolkit(this->toolkit);
 
     return true;
 }
@@ -250,5 +245,7 @@ void COxeVstEditor::close ()
     {
         UnregisterClassW(L"OxeVstEditorClass", (HINSTANCE)hInstance);
     }
-    oxeeditor->SetHandle(NULL);
+    oxeeditor->SetToolkit(NULL);
+    delete this->toolkit;
+    this->toolkit = NULL;
 }

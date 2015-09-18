@@ -16,9 +16,9 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-#include <strsafe.h>
+#include <string.h>
+#include <stdio.h>
+#include "toolkit.h"
 #include "control.h"
 #include "synthesizer.h"
 #include "button.h"
@@ -26,32 +26,30 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define BUTTON_WIDTH   42
 #define BUTTON_HEIGHT  16
 
-CButton::CButton(HBITMAP bmp, int index, CSynthesizer *synthesizer, char &channel, int type, int x, int y)
+CButton::CButton(int bmp, int index, CSynthesizer *synthesizer, char &channel, int type, int x, int y)
 {
-    this->hwnd        = NULL;
+    this->toolkit     = NULL;
     this->index       = index;
     this->bmp         = bmp;
     this->synthesizer = synthesizer;
     this->channel     = &channel;
     this->type        = type;
-    rect.left         = x;
-    rect.top          = y;
-    rect.right        = x + BUTTON_WIDTH;
-    rect.bottom       = y + BUTTON_HEIGHT;
+    this->left        = x;
+    this->top         = y;
+    this->right       = x + BUTTON_WIDTH;
+    this->bottom      = y + BUTTON_HEIGHT;
 }
 
-void CButton::SetHandlers(HWND hwnd, HDC dc, HDC memdc)
+void CButton::SetToolkit(CToolkit *toolkit)
 {
-    this->hwnd  = hwnd;
-    this->dc    = dc;
-    this->memdc = memdc;
-    if (this->hwnd && this->dc && this->memdc)
+    this->toolkit = toolkit;
+    if (toolkit)
     {
         Repaint();
     }
 }
 
-void CButton::OnClick(POINT point)
+void CButton::OnClick(int x, int y)
 {
     // fires the assigned action
     switch (type)
@@ -73,7 +71,10 @@ void CButton::OnClick(POINT point)
                 numprog -= 10;
                 if (numprog > 127)
                     numprog = 127;
-                PostMessage(hwnd, WM_SET_PROGRAM, *channel, numprog);
+                if (toolkit)
+                {
+                    toolkit->SendMessageToHost(SET_PROGRAM, *channel, numprog);
+                }
             }
             break;
         case BT_MINUS_1:
@@ -96,7 +97,10 @@ void CButton::OnClick(POINT point)
                 numprog -= 1;
                 if (numprog > 127)
                     numprog = 127;
-                PostMessage(hwnd, WM_SET_PROGRAM, *channel, numprog);
+                if (toolkit)
+                {
+                    toolkit->SendMessageToHost(SET_PROGRAM, *channel, numprog);
+                }
             }
             break;
         case BT_PLUS_1:
@@ -117,7 +121,10 @@ void CButton::OnClick(POINT point)
                 numprog += 1;
                 if (numprog > 127)
                     numprog = 0;
-                PostMessage(hwnd, WM_SET_PROGRAM, *channel, numprog);
+                if (toolkit)
+                {
+                    toolkit->SendMessageToHost(SET_PROGRAM, *channel, numprog);
+                }
             }
             break;
         case BT_PLUS_10:
@@ -138,7 +145,10 @@ void CButton::OnClick(POINT point)
                 numprog += 10;
                 if (numprog > 127)
                     numprog = 0;
-                PostMessage(hwnd, WM_SET_PROGRAM, *channel, numprog);
+                if (toolkit)
+                {
+                    toolkit->SendMessageToHost(SET_PROGRAM, *channel, numprog);
+                }
             }
             break;
         case BT_STORE:
@@ -157,27 +167,27 @@ void CButton::OnClick(POINT point)
 
 void CButton::Repaint()
 {
-    int dcant = SaveDC(memdc);
-    SelectObject(memdc,bmp);
-    BitBlt(dc, rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top, memdc, 0, index * BUTTON_HEIGHT, SRCCOPY );
-    RestoreDC(memdc,dcant);
+    if (toolkit)
+    {
+        toolkit->CopyRect(this->left, this->top, this->right - this->left, this->bottom - this->top, this->bmp, 0, index * BUTTON_HEIGHT);
+    }
 }
 
 bool CButton::GetName(char* str)
 {
     if (synthesizer->GetBankMode())
     {
-        StringCchCopyA(str, TEXT_SIZE, "SoundBank");
+        strncpy(str, "SoundBank", TEXT_SIZE);
     }
     else if (synthesizer->GetStandBy(*channel))
     {
-        StringCchCopyA(str, TEXT_SIZE, "Store current");
+        strncpy(str, "Store current", TEXT_SIZE);
     }
     else
     {
-        StringCchPrintfA(str, TEXT_SIZE, "Program %03i", synthesizer->GetNumProgr(*channel));
+        snprintf(str, TEXT_SIZE, "Program %03i", synthesizer->GetNumProgr(*channel));
     }
-    return TRUE;
+    return true;
 }
 
 int CButton::GetType()

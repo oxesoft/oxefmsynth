@@ -16,8 +16,8 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
+#include <string.h>
+#include "toolkit.h"
 #include "control.h"
 #include "lcd.h"
 
@@ -29,29 +29,27 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define LCD_X       0  // bg left
 #define LCD_Y       0  // bg top
 
-CLcd::CLcd(HBITMAP bmpchars, int x, int y)
+CLcd::CLcd(int bmpchars, int x, int y)
 {
-    this->hwnd        = NULL;
-    this->lcdx        = x;
-    this->lcdy        = y;
-    this->bmpchars    = bmpchars;
     int i;
     for (i=0;i<LCD_COLS;i++)
         text0[i] = ' ';
     for (i=0;i<LCD_COLS;i++)
         text1[i] = ' ';
-    this->rect.left   = x + LCD_X;
-    this->rect.top    = y + LCD_Y;
-    this->rect.right  = rect.left + (LCD_CHAR_W * LCD_COLS ) + (LCD_SEP_H * LCD_COLS );
-    this->rect.bottom = rect.top  + (LCD_CHAR_H * LCD_LINES) + (LCD_SEP_V * LCD_LINES);
+    this->lcdx     = x;
+    this->lcdy     = y;
+    this->bmpchars = bmpchars;
+    this->left     = x + LCD_X;
+    this->top      = y + LCD_Y;
+    this->right    = this->left + (LCD_CHAR_W * LCD_COLS ) + (LCD_SEP_H * LCD_COLS );
+    this->bottom   = this->top  + (LCD_CHAR_H * LCD_LINES) + (LCD_SEP_V * LCD_LINES);
+    this->toolkit  = NULL;
 }
 
-void CLcd::SetHandlers(HWND hwnd, HDC dc, HDC memdc)
+void CLcd::SetToolkit(CToolkit *toolkit)
 {
-    this->hwnd  = hwnd;
-    this->dc    = dc;
-    this->memdc = memdc;
-    if (this->hwnd && this->dc && this->memdc)
+    this->toolkit = toolkit;
+    if (toolkit)
     {
         Repaint();
     }
@@ -60,20 +58,21 @@ void CLcd::SetHandlers(HWND hwnd, HDC dc, HDC memdc)
 void CLcd::Repaint()
 {
     int i;
-    int dcant = SaveDC(memdc);
-    SelectObject(memdc,bmpchars);
+    if (!toolkit)
+    {
+        return;
+    }
     for (i=0;i<LCD_COLS;i++)
-        BitBlt(dc, lcdx + LCD_X + LCD_SEP_H + ((LCD_SEP_H + LCD_CHAR_W) * i), lcdy + LCD_Y + LCD_SEP_V,                         LCD_CHAR_W, LCD_CHAR_H, memdc, (0xF & (text0[i] - ' ')) * LCD_CHAR_W, ((0xF0 & (text0[i] - ' ')) / 0x10) * LCD_CHAR_H, SRCCOPY);
+        toolkit->CopyRect(lcdx + LCD_X + LCD_SEP_H + ((LCD_SEP_H + LCD_CHAR_W) * i), lcdy + LCD_Y + LCD_SEP_V,                          LCD_CHAR_W, LCD_CHAR_H, this->bmpchars, (0xF & (text0[i] - ' ')) * LCD_CHAR_W, ((0xF0 & (text0[i] - ' ')) / 0x10) * LCD_CHAR_H);
     for (i=0;i<LCD_COLS;i++)
-        BitBlt(dc, lcdx + LCD_X + LCD_SEP_H + ((LCD_SEP_H + LCD_CHAR_W) * i), lcdy + LCD_Y + LCD_SEP_V + LCD_CHAR_H + LCD_SEP_V, LCD_CHAR_W, LCD_CHAR_H, memdc, (0xF & (text1[i] - ' ')) * LCD_CHAR_W, ((0xF0 & (text1[i] - ' ')) / 0x10) * LCD_CHAR_H, SRCCOPY);
-    RestoreDC(memdc,dcant);
+        toolkit->CopyRect(lcdx + LCD_X + LCD_SEP_H + ((LCD_SEP_H + LCD_CHAR_W) * i), lcdy + LCD_Y + LCD_SEP_V + LCD_CHAR_H + LCD_SEP_V, LCD_CHAR_W, LCD_CHAR_H, this->bmpchars, (0xF & (text1[i] - ' ')) * LCD_CHAR_W, ((0xF0 & (text1[i] - ' ')) / 0x10) * LCD_CHAR_H);
 }
 
-bool CLcd::SetText(char linha, const char* text)
+bool CLcd::SetText(char lineIndex, const char* text)
 {
     int i = 0;
     int tam = strlen(text);
-    if (linha == 0)
+    if (lineIndex == 0)
     {
         if (tam >= LCD_COLS)
         {
@@ -85,13 +84,9 @@ bool CLcd::SetText(char linha, const char* text)
             for (i=tam;i<LCD_COLS;i++)
                 text0[i] = ' ';
         }
-        if (hwnd)
-        {
-            Repaint();
-            InvalidateRect(hwnd, &rect, FALSE);
-        }
+        Repaint();
     }
-    else if (linha == 1)
+    else if (lineIndex == 1)
     {
         if (tam >= LCD_COLS)
         {
@@ -103,13 +98,9 @@ bool CLcd::SetText(char linha, const char* text)
             for (i=tam;i<LCD_COLS;i++)
                 text1[i] = ' ';
         }
-        if (hwnd)
-        {
-            Repaint();
-            InvalidateRect(hwnd, &rect, FALSE);
-        }
+        Repaint();
     }
     else
-        return FALSE;
-    return TRUE;
+        return false;
+    return true;
 }

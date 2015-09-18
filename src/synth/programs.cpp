@@ -20,9 +20,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifdef __OXEDMO__
 #include "soundbank.h"
 #else
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
 #include "persist.h"
+#include "toolkit.h"
 #endif
 #include "programs.h"
 #include <string.h>
@@ -46,7 +45,6 @@ void CPrograms::Init()
         iCurrentBank = 0;
         currentbank  = (SBank*)persist.GetSoundBank(iCurrentBank);
     }
-    hWndEditor = NULL;
 #else
     currentbank = (SBank*)soundbank;
 #endif
@@ -98,7 +96,10 @@ void CPrograms::SetBankIndex(int nbank)
         }
     }
     haschanges = true;
-    PostMessage((HWND)hWndEditor, WM_UPDATE_DISPLAY, 0, 0);
+    if (toolkit)
+    {
+        toolkit->SendMessageToHost(UPDATE_DISPLAY, 0, 0);
+    }
 #endif
 }
 
@@ -682,34 +683,40 @@ void CPrograms::SetBankMode(bool bankMode)
 
 void CPrograms::GetProgName(char* str, char channel)
 {
-    CopyMemory(str, currentbank->prg[numprg[channel]].PNAME, PG_NAME_SIZE);
+    memcpy(str, currentbank->prg[numprg[channel]].PNAME, PG_NAME_SIZE);
 }
 
 void CPrograms::SetProgName(char* str, char channel)
 {
-    CopyMemory(currentbank->prg[numprg[channel]].PNAME, str, PG_NAME_SIZE);
+    memcpy(currentbank->prg[numprg[channel]].PNAME, str, PG_NAME_SIZE);
     haschanges = true;
-    PostMessage((HWND)hWndEditor, WM_UPDATE_DISPLAY, 0, 0);
+    if (toolkit)
+    {
+        toolkit->SendMessageToHost(UPDATE_DISPLAY, 0, 0);
+    }
 }
 
 void CPrograms::GetProgName(char* str, int numpg)
 {
-    CopyMemory(str, currentbank->prg[numpg].PNAME, PG_NAME_SIZE);
+    memcpy(str, currentbank->prg[numpg].PNAME, PG_NAME_SIZE);
     str[PG_NAME_SIZE] = 0;
 }
 
 void CPrograms::SetProgName(char* str, int numpg)
 {
-    CopyMemory(currentbank->prg[numpg].PNAME, str, min(lstrlenA(str), PG_NAME_SIZE));
+    memcpy(currentbank->prg[numpg].PNAME, str, min(strlen(str), PG_NAME_SIZE));
     for (int i=0;i<MIDICHANNELS;i++)
     {
         if (numprg[i] == numpg)
         {
-            CopyMemory(currentbank->prg[numpg].PNAME, str, min(lstrlenA(str), PG_NAME_SIZE));
+            memcpy(currentbank->prg[numpg].PNAME, str, min(strlen(str), PG_NAME_SIZE));
         }
     }
     haschanges = true;
-    PostMessage((HWND)hWndEditor, WM_UPDATE_DISPLAY, 0, 0);
+    if (toolkit)
+    {
+        toolkit->SendMessageToHost(UPDATE_DISPLAY, 0, 0);
+    }
 }
 
 void CPrograms::GetBankName(char *str)
@@ -746,17 +753,23 @@ void CPrograms::StoreProgram(char channel)
     {
         haschanges = true;
         isWaiting[channel] = false;
-        CopyMemory(&currentbank->prg[prgtmp], &currentbank->prg[numprg[channel]],sizeof(SProgram));
+        memcpy(&currentbank->prg[prgtmp], &currentbank->prg[numprg[channel]],sizeof(SProgram));
         numprg[channel] = prgtmp;
-        PostMessage((HWND)hWndEditor, WM_UPDATE_DISPLAY, 0, 0);
+        if (toolkit)
+        {
+            toolkit->SendMessageToHost(UPDATE_DISPLAY, 0, 0);
+        }
     }
 }
 
 void CPrograms::CopyProgram(int destination, int source)
 {
-    CopyMemory(&currentbank->prg[destination], &currentbank->prg[source], sizeof(SProgram));
+    memcpy(&currentbank->prg[destination], &currentbank->prg[source], sizeof(SProgram));
     haschanges = true;
-    PostMessage((HWND)hWndEditor, WM_UPDATE_DISPLAY, 0, 0);
+    if (toolkit)
+    {
+        toolkit->SendMessageToHost(UPDATE_DISPLAY, 0, 0);
+    }
 }
 
 void CPrograms::SetBank(SBank *bank)
@@ -768,12 +781,15 @@ void CPrograms::SetBank(SBank *bank)
         SetNumProgr(i, numprg[i]);
     }
     haschanges = true;
-    PostMessage((HWND)hWndEditor, WM_UPDATE_DISPLAY, 0, 0);
+    if (toolkit)
+    {
+        toolkit->SendMessageToHost(UPDATE_DISPLAY, 0, 0);
+    }
 }
 
 void CPrograms::SetProgram(char num, SProgram *program)
 {
-    CopyMemory(&currentbank->prg[num], program, sizeof(SProgram));
+    memcpy(&currentbank->prg[num], program, sizeof(SProgram));
     for (int i = 0; i < MIDICHANNELS; i++)
     {
         if (numprg[i] == num)
@@ -782,7 +798,10 @@ void CPrograms::SetProgram(char num, SProgram *program)
         }
     }
     haschanges = true;
-    PostMessage((HWND)hWndEditor, WM_UPDATE_DISPLAY, 0, 0);
+    if (toolkit)
+    {
+        toolkit->SendMessageToHost(UPDATE_DISPLAY, 0, 0);
+    }
 }
 
 bool CPrograms::HasChanges()
@@ -795,9 +814,9 @@ bool CPrograms::HasChanges()
     return false;
 }
 
-void CPrograms::SetEditorHn(void *hWndEditor)
+void CPrograms::SetToolkit(CToolkit *toolkit)
 {
-    this->hWndEditor = hWndEditor;
+    this->toolkit = toolkit;
 }
 
 #endif

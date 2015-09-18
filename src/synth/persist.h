@@ -24,20 +24,13 @@ typedef void CPersist;
 #define MAX_BANKS      8
 #define SOUNDBANK_SIZE 90688
 
-void GetDllPath(char *caminho, int tam);
-
 class CPersist
 {
 private:
     unsigned char banks[MAX_BANKS][SOUNDBANK_SIZE];
-    char dll_path[MAX_PATH];
     char SoundBankNames[MAX_BANKS][MAX_FILENAME];
     int  banks_count;
     int  bank_from_host;
-    void GetSoundBankPath(void);
-    void LoadExternalBank(void *bank, char *filename);
-    void EnumerateBanks();
-    void SortFilenames(int inLow, int inHi);
 public:
     CPersist();
     int   GetNumberBanks(void);

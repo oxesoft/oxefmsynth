@@ -16,59 +16,53 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-#include <strsafe.h>
+#include <string.h>
+#include <stdio.h>
+#include "toolkit.h"
 #include "control.h"
 #include "synthesizer.h"
 #include "key.h"
 
-CKey::CKey(HBITMAP bmp, int index, int chave_h, int chave_v, const char *name, CSynthesizer *synthesizer, char &channel, int par, int x, int y)
+CKey::CKey(int bmp, int index, int w, int h, const char *name, CSynthesizer *synthesizer, char &channel, int par, int x, int y)
 {
-    StringCchCopyA(this->name, TEXT_SIZE, name);
-    this->hwnd        = NULL;
+    strncpy(this->name, name, TEXT_SIZE);
+    this->toolkit     = NULL;
     this->bmp         = bmp;
     this->index       = index;
-    this->chave_h     = chave_h;
-    this->chave_v     = chave_v;
+    this->w           = w;
+    this->h           = h;
     this->channel     = &channel;
     this->synthesizer = synthesizer;
     this->par         = par;
-    this->rect.left   = x;
-    this->rect.top    = y;
-    this->rect.right  = x + chave_h;
-    this->rect.bottom = y + chave_v;
+    this->left        = x;
+    this->top         = y;
+    this->right       = x + w;
+    this->bottom      = y + h;
     this->value       = 0;
 }
 
-void CKey::SetHandlers(HWND hwnd, HDC dc, HDC memdc)
+void CKey::SetToolkit(CToolkit *toolkit)
 {
-    this->hwnd  = hwnd;
-    this->dc    = dc;
-    this->memdc = memdc;
-    if (this->hwnd && this->dc && this->memdc)
+    this->toolkit = toolkit;
+    if (toolkit)
     {
         Repaint();
     }
 }
 
-void CKey::OnClick(POINT point)
+void CKey::OnClick(int x, int y)
 {
     this->value = !this->value;
     synthesizer->SetPar(*channel, par, this->value);
-    if (hwnd)
-    {
-        Repaint();
-        InvalidateRect(hwnd, &rect, FALSE);
-    }
+    Repaint();
 }
 
 void CKey::Repaint()
 {
-    int dcant = SaveDC(memdc);
-    SelectObject(memdc,bmp);
-    BitBlt(dc, rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top, memdc, value?chave_h:0, chave_v * index, SRCCOPY);
-    RestoreDC(memdc,dcant);
+    if (toolkit)
+    {
+        toolkit->CopyRect(this->left, this->top, this->right - this->left, this->bottom - this->top, this->bmp, value?this->w:0, this->h * this->index);
+    }
 }
 
 bool CKey::Update(void)
@@ -76,19 +70,15 @@ bool CKey::Update(void)
     if (this->value != (char)synthesizer->GetPar(*channel,par))
     {
         this->value = !this->value;
-        if (hwnd)
-        {
-            Repaint();
-            InvalidateRect(hwnd, &rect, FALSE);
-        }
+        Repaint();
     }
-    return TRUE;
+    return true;
 }
 
 bool CKey::GetName(char* str)
 {
-    StringCchCopyA(str, TEXT_SIZE, name);
-    return TRUE;
+    strncpy(str, name, TEXT_SIZE);
+    return true;
 }
 
 int CKey::GetIndex()

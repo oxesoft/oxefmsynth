@@ -20,6 +20,7 @@ INCLUDES+=-Isrc/gui
 
 SOURCES:=src/standalone/controller.cpp
 SOURCES+=src/standalone/main.cpp
+SOURCES+=src/standalone/windowstoolkit.cpp
 SOURCES+=src/gui/button.cpp
 SOURCES+=src/gui/channels.cpp
 SOURCES+=src/gui/editor.cpp

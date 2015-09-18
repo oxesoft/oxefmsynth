@@ -137,8 +137,14 @@ enum
 #define MAX_PATH 256
 #endif
 
-#define OXEDEBUG(...) {char tmpb[128]; StringCchPrintfA(tmpb, sizeof(tmpb), __VA_ARGS__); OutputDebugStringA(tmpb); StringCchCatA(tmpb, sizeof(tmpb), "\n"); printf(tmpb);}
+#define OXEDEBUG(...) {char tmpb[128]; snprintf(tmpb, sizeof(tmpb), __VA_ARGS__); if (toolkit) toolkit->OutputDebugString(tmpb);}
 
-#define WM_UPDATE_DISPLAY (WM_USER + 0)
-#define WM_SET_PROGRAM    (WM_USER + 1)
-#define WM_SET_PARAMETER  (WM_USER + 2)
+enum {
+    UPDATE_DISPLAY,
+    SET_PROGRAM   ,
+    SET_PARAMETER
+};
+
+#ifdef WIN32
+    #define snprintf sprintf_s
+#endif

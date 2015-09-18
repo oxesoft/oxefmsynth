@@ -21,17 +21,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 class CLcd : CControl
 {
 private:
-    char    text0[LCD_COLS];
-    char    text1[LCD_COLS];
-    int     lcdx;
-    int     lcdy;
-    HBITMAP bmpchars;  // characters table 16x2
-    HWND    hwnd;      // window handle
-    HDC     dc;        // used by offscreen buffer
-    HDC     memdc;     // used by offscreen buffer
+    char     text0[LCD_COLS];
+    char     text1[LCD_COLS];
+    int      lcdx;
+    int      lcdy;
+    int      bmpchars;  // characters table 16x2
+    CToolkit *toolkit;  // graphical toolkit
     void Repaint();
 public:
-    CLcd(HBITMAP bmpchars, int x, int y);
-    bool SetText(char linha, const char *text);
-    void SetHandlers(HWND hwnd, HDC dc, HDC memdc);
+    CLcd(int bmpchars, int x, int y);
+    bool SetText(char lineIndex, const char *text);
+    void SetToolkit(CToolkit *toolkit);
 };

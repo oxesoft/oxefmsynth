@@ -18,6 +18,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "constants.h"
 #include "persist.h"
+#ifndef __OXEDMO__
+#include "toolkit.h"
+#endif
 #include "programs.h"
 #include "oscillator.h"
 #include "envelop.h"

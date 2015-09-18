@@ -23,13 +23,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "editor.h"
 #include "controller.h"
 #include "resource.h"
+#include "windowstoolkit.h"
 
 #define MAX_DEVICES    32
 #define MAX_DEVICENAME 128
 #define AUDIOID        100
 #define MIDIID         200
 
-LRESULT CALLBACK ProcJanela      (HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+LRESULT CALLBACK WndProc         (HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 INT_PTR CALLBACK ProcDialogoMIDI (HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 INT_PTR CALLBACK ProcDialogoAUDIO(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 BOOL    CALLBACK DSEnumProc      (LPGUID lpGUID, LPCWSTR lpszDesc, LPCTSTR lpszDrvName, LPVOID lpContext);
@@ -161,7 +162,7 @@ void AddMenus(HWND hWnd)
     InsertMenuItem(sysmenu, 0, true, &menuItem);
 }
 
-int APIENTRY WinMain(HINSTANCE hInstancia, HINSTANCE InstanciaAnt, LPSTR LinhaDeComando, int EstadoDaJanela)
+int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE InstanciaAnt, LPSTR LinhaDeComando, int EstadoDaJanela)
 {
     WNDCLASS wc;
     HWND     hWnd;
@@ -192,10 +193,10 @@ int APIENTRY WinMain(HINSTANCE hInstancia, HINSTANCE InstanciaAnt, LPSTR LinhaDe
     if( !InstanciaAnt )
     {
         wc.lpszClassName = "OxeFMSynthStandAlone";
-        wc.lpfnWndProc   = ProcJanela;
+        wc.lpfnWndProc   = WndProc;
         wc.style         = CS_DBLCLKS;
-        wc.hInstance     = hInstancia;
-        wc.hIcon         = LoadIcon(hInstancia,MAKEINTRESOURCE(IDI_ICONE));
+        wc.hInstance     = hInstance;
+        wc.hIcon         = LoadIcon(hInstance,MAKEINTRESOURCE(IDI_ICONE));
         wc.hCursor       = LoadCursor( NULL, IDC_ARROW );
         wc.hbrBackground = NULL;
         wc.lpszMenuName  = NULL;
@@ -223,17 +224,18 @@ int APIENTRY WinMain(HINSTANCE hInstancia, HINSTANCE InstanciaAnt, LPSTR LinhaDe
         rect.bottom, 
         0,
         0,
-        hInstancia,
+        hInstance,
         NULL
     );
 
     AddMenus(hWnd);
-
+    
+    CWindowsToolkit toolkit = CWindowsToolkit(hInstance, hWnd);
     controller = new CController();
     if (controller->Start(hWnd,portamidi,audiodevices[portaaudio].GUID))
     {
-        editor = new CEditor(hInstancia,controller->GetSynth());
-        editor->SetHandle(hWnd);
+        editor = new CEditor(controller->GetSynth());
+        editor->SetToolkit(&toolkit);
         ShowWindow(hWnd, EstadoDaJanela);
         MSG msg;
         while( GetMessage( &msg, NULL, 0, 0 ) )
@@ -246,7 +248,7 @@ int APIENTRY WinMain(HINSTANCE hInstancia, HINSTANCE InstanciaAnt, LPSTR LinhaDe
     return 0;
 }
 
-LRESULT CALLBACK ProcJanela( HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam )
+LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
     PAINTSTRUCT ps;
     HDC         dc;
@@ -255,30 +257,22 @@ LRESULT CALLBACK ProcJanela( HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam )
         case WM_LBUTTONDBLCLK:
             if (editor)
             {
-                POINT point;
-                point.x = GET_X_LPARAM(lParam); 
-                point.y = GET_Y_LPARAM(lParam);
-                editor->OnLButtonDblClick(point);
+                editor->OnLButtonDblClick(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
                 return 0L;
             }
         case WM_LBUTTONDOWN:
             if (editor)
             {
-                POINT point;
-                point.x = GET_X_LPARAM(lParam); 
-                point.y = GET_Y_LPARAM(lParam);
-                editor->OnLButtonDown(point);
-            }
-            return 0L;
-        case WM_RBUTTONDOWN:
-            if (editor)
-            {
-                editor->OnRButtonDown();
+                editor->OnLButtonDown(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+                SetFocus(hWnd);
             }
             return 0L;
         case WM_LBUTTONUP:
             if (editor)
+            {
                 editor->OnLButtonUp();
+                SetFocus(hWnd);
+            }
             return 0L;
         case WM_KEYDOWN:
             if (editor)
@@ -299,10 +293,7 @@ LRESULT CALLBACK ProcJanela( HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam )
         case WM_MOUSEMOVE:
             if (editor)
             {
-                POINT point;
-                point.x = GET_X_LPARAM(lParam); 
-                point.y = GET_Y_LPARAM(lParam);
-                editor->OnMouseMove(point);
+                editor->OnMouseMove(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
             }
             return 0L;
         case WM_MOUSEWHEEL:
@@ -314,20 +305,26 @@ LRESULT CALLBACK ProcJanela( HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam )
                 int zDelta = GET_WHEEL_DELTA_WPARAM(wParam);
                 zDelta /= WHEEL_DELTA;
                 ScreenToClient(hWnd, &point);
-                editor->OnMouseWheel(point, zDelta);
+                editor->OnMouseWheel(point.x, point.y, zDelta);
+                SetFocus(hWnd);
             }
             return 0L;
         case WM_PAINT:
             dc = BeginPaint(hWnd, &ps);
             if (editor)
-                editor->OnPaint(dc, ps.rcPaint);
+            {
+                RECT *rect = &ps.rcPaint;
+                int w = rect->right  - rect->left;
+                int h = rect->bottom - rect->top;
+                BitBlt(dc, rect->left, rect->top, w, h, (HDC)editor->GetToolkit()->GetImageBuffer(), rect->left, rect->top, SRCCOPY);
+            }
             EndPaint(hWnd, &ps); 
             return 0L;
         case WM_TIMER:
             if (editor)
-                editor->OnTimer(hWnd);
+                editor->Update();
             return 0L;
-        case WM_SET_PROGRAM:
+        case WM_USER + SET_PROGRAM:
             if (editor)
             {
                 char channel = (char)wParam;
@@ -385,7 +382,7 @@ LRESULT CALLBACK ProcJanela( HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam )
             delete editor;
             controller->Stop();
             delete controller;
-            editor      = NULL;
+            editor     = NULL;
             controller = NULL;
             PostQuitMessage( 0 );
             return 0L;

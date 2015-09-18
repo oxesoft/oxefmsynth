@@ -20,16 +20,14 @@ class CChannels : public CControl
 {
 private:
     char          *channel;       // MIDI channel
-    HWND          hwnd;           // window handle
-    HDC           dc;             // used by offscreen buffer
-    HDC           memdc;          // used by offscreen buffer
-    HBITMAP       bmp;            // bitmap
+    int           bmp;            // bitmap
     CSynthesizer *synthesizer;    // object to get/set the value
+    CToolkit     *toolkit;        // graphical toolkit
     void Repaint();
 public:
-    CChannels(HBITMAP bmp, CSynthesizer *synthesizer, char &channel, int x, int y);
-    void OnClick(POINT point);
+    CChannels(int bmp, CSynthesizer *synthesizer, char &channel, int x, int y);
+    void OnClick(int x, int y);
     bool GetName(char* str);
-    void SetHandlers(HWND hwnd, HDC dc, HDC memdc);
     int  GetType(void);
+    void SetToolkit(CToolkit *toolkit);
 };

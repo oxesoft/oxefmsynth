@@ -16,6 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "toolkit.h"
 #include "synthesizer.h"
 #include "control.h"
 #include "lcd.h"
@@ -28,50 +29,50 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define GUI_WIDTH    633
 #define GUI_HEIGHT   437
 
+enum
+{
+    BMP_CHARS  ,
+    BMP_KNOB   ,
+    BMP_KNOB2  ,
+    BMP_KNOB3  ,
+    BMP_KEY    ,
+    BMP_BG     ,
+    BMP_BUTTONS,
+    BMP_OPS    ,
+    BMP_COUNT
+};
+
 class CEditor
 {
 private:
     bool          changingControl;
-    HCURSOR       cursor;
-    POINT         prevpoint;
-    HBITMAP       bmpchars;
-    HBITMAP       bmpknob;
-    HBITMAP       bmpknob2;
-    HBITMAP       bmpknob3;
-    HBITMAP       bmpkey;
-    HBITMAP       bmpbg;
-    HBITMAP       bmpbuttons;
-    HBITMAP       bmpops;
-    HWND          hwnd;
+    int           prevX;
+    int           prevY;
     CLcd          *lcd;
     CControl      *ctl[GUI_CONTROLS];
     CSynthesizer  *synthesizer;
     int           cID;
     char          channel;
     int           TranslateNote(int cod);
-    // double buffering stuff
-    HDC           hdc;
-    HDC           hdcMem;
-    HDC           hdcAux;
-    HBITMAP       bitmap;
+    CToolkit      *toolkit;
 public:
-    CEditor(HINSTANCE hInstance, CSynthesizer *synthesizer);
+    CEditor(CSynthesizer *synthesizer);
     ~CEditor();
     void  ProgramChanged();
     void  ProgramChangedWaiting();
-    void  OnLButtonDblClick(POINT point);
-    void  OnLButtonDown    (POINT point);
+    void  OnLButtonDblClick(int x, int y);
+    void  OnLButtonDown    (int x, int y);
     void  OnLButtonUp      ();
     void  OnRButtonDown    ();
     bool  OnChar           (int cod);
-    void  OnMouseMove      (POINT point);
-    void  OnMouseWheel     (POINT point, int delta);
-    void  OnPaint          (HDC dc, RECT rect);
-    void  OnTimer          (HWND hWnd);
+    void  OnMouseMove      (int x, int y);
+    void  OnMouseWheel     (int x, int y, int delta);
     void  SetPar           (int index, float value);
     float GetPar           (int index);
     void  GetParLabel      (int index, char* label);
     void  GetParDisplay    (int index, char* text);
     void  GetParName       (int index, char* text);
-    void  SetHandle        (HWND hwnd);
+    void  Update           ();
+    void  SetToolkit       (CToolkit *toolkit);
+    CToolkit *GetToolkit   (void) { return this->toolkit; }
 };

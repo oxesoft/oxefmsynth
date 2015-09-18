@@ -16,10 +16,10 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-#include <strsafe.h>
+#include <string.h>
+#include <stdio.h>
 #include <math.h>
+#include "toolkit.h"
 #include "control.h"
 #include "synthesizer.h"
 #include "mapper.h"
@@ -193,13 +193,13 @@ void CMapper::GetDisplayValue(CSynthesizer *synthesizer, char channel, int par, 
     switch (type)
     {
         case VL_ZERO_TO_ONE:
-            StringCchPrintfA(str, TEXT_SIZE, "%.2f", fvalue);
+            snprintf(str, TEXT_SIZE, "%.2f", fvalue);
             break;
         case VL_MINUS1_2_PLUS1:
-            StringCchPrintfA(str, TEXT_SIZE, "%.2f", fvalue);
+            snprintf(str, TEXT_SIZE, "%.2f", fvalue);
             break;
         case VL_FILTER_CUTOFF:
-            StringCchPrintfA(str, TEXT_SIZE, "%.2fHz", C0 * powf(2.0f, ((float)value/MAXPARVALUE * MAXFREQOSC) / 12.0f));
+            snprintf(str, TEXT_SIZE, "%.2fHz", C0 * powf(2.0f, ((float)value/MAXPARVALUE * MAXFREQOSC) / 12.0f));
             break;
         case VL_COARSE_TUNE:
         {
@@ -208,9 +208,9 @@ void CMapper::GetDisplayValue(CSynthesizer *synthesizer, char channel, int par, 
             if (!kbTrack)
             {
                 if (value)
-                    StringCchPrintfA(str, TEXT_SIZE, "%.2fHz", C0 * fineTun * powf(2.0f, ((float)value/MAXPARVALUE * MAXFREQOSC) / 12.0f));
+                    snprintf(str, TEXT_SIZE, "%.2fHz", C0 * fineTun * powf(2.0f, ((float)value/MAXPARVALUE * MAXFREQOSC) / 12.0f));
                 else
-                    StringCchPrintfA(str, TEXT_SIZE, "%.2fHz", C0 * fineTun);
+                    snprintf(str, TEXT_SIZE, "%.2fHz", C0 * fineTun);
             }
             else
             {
@@ -219,18 +219,18 @@ void CMapper::GetDisplayValue(CSynthesizer *synthesizer, char channel, int par, 
                     char lval = value - 50;
                     char octa = lval / 12;
                     char semi = lval - (octa * 12);
-                    StringCchPrintfA(str, TEXT_SIZE, "+%i oct & %02i semi", octa, semi);
+                    snprintf(str, TEXT_SIZE, "+%i oct & %02i semi", octa, semi);
                 }
                 else if (value<50)
                 {
                     char lval = 50 - value;
                     char octa = lval / 12;
                     char semi = lval - (octa * 12);
-                    StringCchPrintfA(str, TEXT_SIZE, "-%i oct & %02i semi", octa, semi);
+                    snprintf(str, TEXT_SIZE, "-%i oct & %02i semi", octa, semi);
                 }
                 else
                 {
-                    StringCchCopyA(str, TEXT_SIZE, "Center");
+                    strncpy(str, "Center", TEXT_SIZE);
                 }
             }
             break;
@@ -241,121 +241,121 @@ void CMapper::GetDisplayValue(CSynthesizer *synthesizer, char channel, int par, 
             float coarseT = synthesizer->GetPar(channel,par-1);
             if (!coarseT && !kbTrack)
             {
-                StringCchPrintfA(str, TEXT_SIZE, "%.2fHz", C0 * fvalue);
+                snprintf(str, TEXT_SIZE, "%.2fHz", C0 * fvalue);
             }
             else
             {
                 if (!kbTrack)
                 {
-                    StringCchPrintfA(str, TEXT_SIZE, "%.2fHz", C0 * fvalue * powf(2.0f, (coarseT/MAXPARVALUE * MAXFREQOSC) / 12.0f));
+                    snprintf(str, TEXT_SIZE, "%.2fHz", C0 * fvalue * powf(2.0f, (coarseT/MAXPARVALUE * MAXFREQOSC) / 12.0f));
                 }
                 else
                 {
-                    StringCchPrintfA(str, TEXT_SIZE, "%.2f semitone", (float)((value-(MAXPARVALUE/2))*2)/MAXPARVALUE);
+                    snprintf(str, TEXT_SIZE, "%.2f semitone", (float)((value-(MAXPARVALUE/2))*2)/MAXPARVALUE);
                 }
             }
             break;
         }
         case VL_TEMPO:
-            StringCchPrintfA(str, TEXT_SIZE, "%fs", fvalue);
+            snprintf(str, TEXT_SIZE, "%fs", fvalue);
             break;
         case VL_PORTAMENTO:
-            StringCchPrintfA(str, TEXT_SIZE, "%fs", fvalue);
+            snprintf(str, TEXT_SIZE, "%fs", fvalue);
             break;
         case VL_WAVEFORM:
             switch (lrintf(fvalue))
             {
                 case 0:
-                    StringCchCopyA(str, TEXT_SIZE, "Sine");
+                    strncpy(str, "Sine", TEXT_SIZE);
                     break;
                 case 1:
-                    StringCchCopyA(str, TEXT_SIZE, "Saw");
+                    strncpy(str, "Saw", TEXT_SIZE);
                     break;
                 case 2:
-                    StringCchCopyA(str, TEXT_SIZE, "Triangle");
+                    strncpy(str, "Triangle", TEXT_SIZE);
                     break;
                 case 3:
-                    StringCchCopyA(str, TEXT_SIZE, "Square");
+                    strncpy(str, "Square", TEXT_SIZE);
                     break;
                 case 4:
-                    StringCchCopyA(str, TEXT_SIZE, "Square bandlimit");
+                    strncpy(str, "Square bandlimit", TEXT_SIZE);
                     break;
                 case 5:
-                    StringCchCopyA(str, TEXT_SIZE, "Saw bandlimited");
+                    strncpy(str, "Saw bandlimited", TEXT_SIZE);
                     break;
                 default:
-                    StringCchCopyA(str, TEXT_SIZE, "?");
+                    strncpy(str, "?", TEXT_SIZE);
                     break;
             }
             break;
         case VL_FILTER:
             if      (fvalue == 0.f)
-                StringCchCopyA(str, TEXT_SIZE, "Lowpass");
+                strncpy(str, "Lowpass", TEXT_SIZE);
             else if (fvalue == 1.f)
-                StringCchCopyA(str, TEXT_SIZE, "Hipass");
+                strncpy(str, "Hipass", TEXT_SIZE);
             else if (fvalue == 2.f)
-                StringCchCopyA(str, TEXT_SIZE, "Bandpass");
+                strncpy(str, "Bandpass", TEXT_SIZE);
             else
-                StringCchCopyA(str, TEXT_SIZE, "?");
+                strncpy(str, "?", TEXT_SIZE);
             break;
         case VL_MOD:
-            StringCchPrintfA(str, TEXT_SIZE, "%i", value);
+            snprintf(str, TEXT_SIZE, "%i", value);
             break;
         case VL_PAN:
             if      (fvalue < 0.f)
-                StringCchPrintfA(str, TEXT_SIZE, "%i%% Left", lrintf(-fvalue*100.f));
+                snprintf(str, TEXT_SIZE, "%i%% Left", lrintf(-fvalue*100.f));
             else if (fvalue > 0.f)
-                StringCchPrintfA(str, TEXT_SIZE, "%i%% Right", (int)lrintf(fvalue*100.f));
+                snprintf(str, TEXT_SIZE, "%i%% Right", (int)lrintf(fvalue*100.f));
             else
-                StringCchCopyA(str, TEXT_SIZE, "Center");
+                strncpy(str, "Center", TEXT_SIZE);
             break;
         case VL_PITCH_CURVE:
         {
             char maxvalue = (char)lrintf(MAXPARVALUE);
             if      (value > (maxvalue/2))
-                StringCchPrintfA(str, TEXT_SIZE, "down %i%%", (value - (maxvalue>>1))<<1);
+                snprintf(str, TEXT_SIZE, "down %i%%", (value - (maxvalue>>1))<<1);
             else if (value < (maxvalue/2))
-                StringCchPrintfA(str, TEXT_SIZE, "up %i%%", maxvalue - (value<<1));
+                snprintf(str, TEXT_SIZE, "up %i%%", maxvalue - (value<<1));
             else
-                StringCchCopyA(str, TEXT_SIZE, "Curve Off");
+                strncpy(str, "Curve Off", TEXT_SIZE);
             break;
         }
         case VL_LFO_RATE:
-            StringCchPrintfA(str, TEXT_SIZE, "%.2fHz", fvalue);
+            snprintf(str, TEXT_SIZE, "%.2fHz", fvalue);
             break;
         case VL_LFO_DEST:
             if      (fvalue == 0.f)
-                StringCchCopyA(str, TEXT_SIZE, "Pitch");
+                strncpy(str, "Pitch", TEXT_SIZE);
             else if (fvalue == 1.f)
-                StringCchCopyA(str, TEXT_SIZE, "OPX");
+                strncpy(str, "OPX", TEXT_SIZE);
             else if (fvalue == 2.f)
-                StringCchCopyA(str, TEXT_SIZE, "OPZ");
+                strncpy(str, "OPZ", TEXT_SIZE);
             else
-                StringCchCopyA(str, TEXT_SIZE, "?");
+                strncpy(str, "?", TEXT_SIZE);
             break;
         case VL_MOD_DEST:
             if      (fvalue == 0.f)
-                StringCchCopyA(str, TEXT_SIZE, "LFO Depth");
+                strncpy(str, "LFO Depth", TEXT_SIZE);
             else if (fvalue == 1.f)
-                StringCchCopyA(str, TEXT_SIZE, "LFO Rate");
+                strncpy(str, "LFO Rate", TEXT_SIZE);
             else if (fvalue == 2.f)
-                StringCchCopyA(str, TEXT_SIZE, "Filter Cuttof");
+                strncpy(str, "Filter Cuttof", TEXT_SIZE);
             else if (fvalue == 3.f)
-                StringCchCopyA(str, TEXT_SIZE, "LFO Depth Invert");
+                strncpy(str, "LFO Depth Invert", TEXT_SIZE);
             else if (fvalue == 4.f)
-                StringCchCopyA(str, TEXT_SIZE, "LFO Rate Invert");
+                strncpy(str, "LFO Rate Invert", TEXT_SIZE);
             else if (fvalue == 5.f)
-                StringCchCopyA(str, TEXT_SIZE, "Filter Cutt Invr");
+                strncpy(str, "Filter Cutt Invr", TEXT_SIZE);
             else if (fvalue == 6.f)
-                StringCchCopyA(str, TEXT_SIZE, "None");
+                strncpy(str, "None", TEXT_SIZE);
             else
-                StringCchCopyA(str, TEXT_SIZE, "?");
+                strncpy(str, "?", TEXT_SIZE);
             break;
         case VL_ON_OFF:
-            StringCchCopyA(str, TEXT_SIZE, fvalue?"On":"Off");
+            strncpy(str, fvalue?"On":"Off", TEXT_SIZE);
             break;
         case VL_CHANNELS:
-            StringCchPrintfA(str, TEXT_SIZE, "Program %03i", synthesizer->GetNumProgr(channel));
+            snprintf(str, TEXT_SIZE, "Program %03i", synthesizer->GetNumProgr(channel));
             break;
         case BT_MINUS_10:
         case BT_MINUS_1:
@@ -369,7 +369,7 @@ void CMapper::GetDisplayValue(CSynthesizer *synthesizer, char channel, int par, 
             {
                 if (synthesizer->GetStandBy(channel))
                 {
-                    StringCchPrintfA(str, TEXT_SIZE, "conf in Prg%03i?", synthesizer->GetNumProgr(channel));
+                    snprintf(str, TEXT_SIZE, "conf in Prg%03i?", synthesizer->GetNumProgr(channel));
                 }
                 else
                 {
@@ -383,11 +383,11 @@ void CMapper::GetDisplayValue(CSynthesizer *synthesizer, char channel, int par, 
         case BT_STORE:
             if (synthesizer->GetStandBy(channel))
             {
-                StringCchPrintfA(str, TEXT_SIZE, "conf in Prg%03i?", synthesizer->GetNumProgr(channel));
+                snprintf(str, TEXT_SIZE, "conf in Prg%03i?", synthesizer->GetNumProgr(channel));
             }
             else
             {
-                StringCchPrintfA(str, TEXT_SIZE, "was stored!");
+                snprintf(str, TEXT_SIZE, "was stored!");
             }
             break;
         case BT_BANK:
@@ -397,7 +397,7 @@ void CMapper::GetDisplayValue(CSynthesizer *synthesizer, char channel, int par, 
             synthesizer->GetProgName(str, channel);
             break;
         default:
-            StringCchPrintfA(str, TEXT_SIZE, "%i", value);
+            snprintf(str, TEXT_SIZE, "%i", value);
             break;
     }
 }

@@ -16,20 +16,14 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-class CButton : public CControl
+class CToolkit
 {
-private:
-    char          *channel;       // MIDI channel
-    int           bmp;            // bitmap
-    CSynthesizer  *synthesizer;   // object to get/set the value
-    CToolkit      *toolkit;       // graphical toolkit
-    int           type;           // button type
-    int           index;
-    void Repaint();
 public:
-    CButton(int bmp, int index, CSynthesizer *synthesizer, char &channel, int type, int x, int y);
-    void OnClick(int x, int y);
-    bool GetName(char* str);
-    int  GetType(void);
-    void SetToolkit(CToolkit *toolkit);
+    virtual void CopyRect(int destX, int destY, int width, int height, int origBmp, int origX, int origY) {}
+    virtual void SendMessageToHost(unsigned int messageID, unsigned int par1, unsigned int par2) {}
+    virtual void GetMousePosition(int *x, int *y) {}
+    virtual void StartMouseCapture() {}
+    virtual void StopMouseCapture() {}
+    virtual void OutputDebugString(char *text) {}
+    virtual void *GetImageBuffer() { return 0; }
 };

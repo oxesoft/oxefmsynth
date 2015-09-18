@@ -21,19 +21,22 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 class CControl
 {
 protected:
-    RECT rect;
+    int left;
+    int top;
+    int right;
+    int bottom;
 public:
-    virtual void  OnClick        (POINT point)                  {             }
+    virtual void  OnClick        (int x, int y)                 {             }
     virtual bool  GetName        (char* str)                    {return false;}
     virtual bool  Update         (void)                         {return false;}
     virtual bool  IsKnob         (void)                         {return false;}
     virtual bool  IncreaseValue  (int delta)                    {return false;}
     virtual int   GetIndex       (void)                         {return -1   ;}
     virtual int   GetType        (void)                         {return -1   ;}
-    virtual void  SetHandlers    (HWND hwnd, HDC dc, HDC memdc) {             }
+    virtual void  SetToolkit     (CToolkit *toolkit)            {             }
     virtual bool  IsMouseOver    (int x, int y)
     {
-        return ((x >= rect.left) && (x < rect.right) && (y >= rect.top) && (y < rect.bottom));
+        return ((x >= left) && (x < right) && (y >= top) && (y < bottom));
     }
 };
 

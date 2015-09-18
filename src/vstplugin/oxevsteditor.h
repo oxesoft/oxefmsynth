@@ -39,6 +39,7 @@ private:
     AudioEffectX*   effectx;
     CSynthesizer*   synth;
     CEditor*        oxeeditor;
+    CToolkit*       toolkit;
 };
 
 //-----------------------------------------------------------------------------
