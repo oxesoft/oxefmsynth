@@ -248,82 +248,18 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE InstanciaAnt, LPSTR LinhaDeC
     return 0;
 }
 
-LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-    PAINTSTRUCT ps;
-    HDC         dc;
-    switch(msg)
+    if (!editor)
     {
-        case WM_LBUTTONDBLCLK:
-            if (editor)
-            {
-                editor->OnLButtonDblClick(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
-                return 0L;
-            }
-        case WM_LBUTTONDOWN:
-            if (editor)
-            {
-                editor->OnLButtonDown(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
-                SetFocus(hWnd);
-            }
-            return 0L;
-        case WM_LBUTTONUP:
-            if (editor)
-            {
-                editor->OnLButtonUp();
-                SetFocus(hWnd);
-            }
-            return 0L;
-        case WM_KEYDOWN:
-            if (editor)
-            {
-                // from juce_win32_Windowing.cpp:doKeyDown
-                const UINT keyChar  = MapVirtualKey ((UINT) wParam, 2);
-                const UINT scanCode = MapVirtualKey ((UINT) wParam, 0);
-                BYTE keyState[256];
-                GetKeyboardState (keyState);
-                
-                WCHAR text[16] = { 0 };
-                if (ToUnicode ((UINT) wParam, scanCode, keyState, text, 8, 0) != 1)
-                    text[0] = 0;
-                editor->OnChar(text[0]);
-                // ---------------------------------------
-            }
-            return 0L;
-        case WM_MOUSEMOVE:
-            if (editor)
-            {
-                editor->OnMouseMove(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
-            }
-            return 0L;
-        case WM_MOUSEWHEEL:
-            if (editor)
-            {
-                POINT point;
-                point.x = GET_X_LPARAM(lParam); 
-                point.y = GET_Y_LPARAM(lParam);
-                int zDelta = GET_WHEEL_DELTA_WPARAM(wParam);
-                zDelta /= WHEEL_DELTA;
-                ScreenToClient(hWnd, &point);
-                editor->OnMouseWheel(point.x, point.y, zDelta);
-                SetFocus(hWnd);
-            }
-            return 0L;
-        case WM_PAINT:
-            dc = BeginPaint(hWnd, &ps);
-            if (editor)
-            {
-                RECT *rect = &ps.rcPaint;
-                int w = rect->right  - rect->left;
-                int h = rect->bottom - rect->top;
-                BitBlt(dc, rect->left, rect->top, w, h, (HDC)editor->GetToolkit()->GetImageBuffer(), rect->left, rect->top, SRCCOPY);
-            }
-            EndPaint(hWnd, &ps); 
-            return 0L;
-        case WM_TIMER:
-            if (editor)
-                editor->Update();
-            return 0L;
+        return DefWindowProc(hWnd, message, wParam, lParam);
+    }
+    if (((CWindowsToolkit*)editor->GetToolkit())->CommonWindowProc(hWnd, message, wParam, lParam, editor, NULL) == 0)
+    {
+        return 0L;
+    }
+    switch (message)
+    {
         case WM_USER + SET_PROGRAM:
             if (editor)
             {
@@ -387,7 +323,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
             PostQuitMessage( 0 );
             return 0L;
     }
-    return DefWindowProc( hWnd, msg, wParam, lParam );
+    return DefWindowProc(hWnd, message, wParam, lParam);
 }
 
 BOOL CALLBACK DSEnumProc(LPGUID lpGUID, LPCWSTR lpszDesc, LPCTSTR lpszDrvName, LPVOID lpContext)

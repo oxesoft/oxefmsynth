@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "constants.h"
 #include "buffers.h"
+#include "toolkit.h"
 #include "persist.h"
 #include "programs.h"
 #include "reverb.h"

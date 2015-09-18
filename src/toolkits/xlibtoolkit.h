@@ -16,5 +16,20 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "oxevst.h"
-typedef COxeVst CController;
+class CXlibToolkit : public CToolkit
+{
+private:
+    Display d;
+    Window  w;
+public:
+    CXlibToolkit(Display d, Window w);
+    ~CXlibToolkit();
+    void CopyRect(int destX, int destY, int width, int height, int origBmp, int origX, int origY);
+    void SendMessageToHost(unsigned int messageID, unsigned int par1, unsigned int par2);
+    void GetMousePosition(int *x, int *y);
+    void StartMouseCapture();
+    void StopMouseCapture();
+    void OutputDebugString(char *text);
+    void *GetImageBuffer();
+    int  CommonWindowProc(XEvent *e);
+};

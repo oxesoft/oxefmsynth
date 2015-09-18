@@ -16,6 +16,8 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#ifndef __OXEDMO__
+
 class CToolkit
 {
 public:
@@ -27,3 +29,5 @@ public:
     virtual void OutputDebugString(char *text) {}
     virtual void *GetImageBuffer() { return 0; }
 };
+
+#endif

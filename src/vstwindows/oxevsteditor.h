@@ -34,7 +34,7 @@ public:
     AudioEffectX*   getEffectX()      { return effectx;            }
     CSynthesizer*   getSynth()        { return synth;              }
     CEditor*        getEditor()       { return oxeeditor;          }
-    HWND            getSystemWindow() { return (HWND)systemWindow; }
+    void*           getSystemWindow() { return systemWindow;       }
 private:
     AudioEffectX*   effectx;
     CSynthesizer*   synth;

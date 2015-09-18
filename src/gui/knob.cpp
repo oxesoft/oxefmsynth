@@ -20,9 +20,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include "toolkit.h"
-#include "control.h"
 #include "synthesizer.h"
+#include "control.h"
 #include "knob.h"
 #include "mapper.h"
 

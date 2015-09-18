@@ -16,23 +16,47 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-class CWindowsToolkit : public CToolkit
+CXlibToolkit::CXlibToolkit(Display d, Window w)
 {
-private:
-    HWND    hWnd;
-    HDC     hdc;
-    HDC     hdcMem;
-    HDC     hdcAux;
-    HBITMAP bitmap;
-    HBITMAP bmps[BMP_COUNT];
-public:
-    CWindowsToolkit(HINSTANCE hInstance, HWND hWnd);
-    ~CWindowsToolkit();
-    void CopyRect(int destX, int destY, int width, int height, int origBmp, int origX, int origY);
-    void SendMessageToHost(unsigned int messageID, unsigned int par1, unsigned int par2);
-    void GetMousePosition(int *x, int *y);
-    void StartMouseCapture();
-    void StopMouseCapture();
-    void OutputDebugString(char *text);
-    void *GetImageBuffer();
-};
+    this->d = d;
+    this->w = w;
+}
+
+CXlibToolkit::~CXlibToolkit()
+{
+}
+
+void CXlibToolkit::CopyRect(int destX, int destY, int width, int height, int origBmp, int origX, int origY)
+{
+}
+
+void CXlibToolkit::SendMessageToHost(unsigned int messageID, unsigned int par1, unsigned int par2)
+{
+}
+
+void CXlibToolkit::GetMousePosition(int *x, int *y)
+{
+}
+
+void CXlibToolkit::StartMouseCapture()
+{
+}
+
+void CXlibToolkit::StopMouseCapture()
+{
+}
+
+void CXlibToolkit::OutputDebugString(char *text)
+{
+    printf("%s\n", text);
+}
+
+void *CXlibToolkit::GetImageBuffer()
+{
+    return 0;
+}
+
+int CXlibToolkit::CommonWindowProc(XEvent *e)
+{
+    return -1;
+}

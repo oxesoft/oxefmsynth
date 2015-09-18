@@ -166,3 +166,93 @@ void *CWindowsToolkit::GetImageBuffer()
 {
     return hdcMem;
 }
+
+int CWindowsToolkit::CommonWindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam, CEditor *editor, HWND systemWindow)
+{
+    if (!editor)
+    {
+        return -1;
+    }
+    switch (message)
+    {
+    case WM_LBUTTONDBLCLK:
+    {
+        editor->OnLButtonDblClick(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+        return 0;
+    }
+    case WM_LBUTTONDOWN:
+    {
+        editor->OnLButtonDown(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+        SetFocus(hWnd);
+        return 0;
+    }
+    case WM_LBUTTONUP:
+    {
+        editor->OnLButtonUp();
+        SetFocus(hWnd);
+        return 0;
+    }
+    case WM_KEYDOWN:
+    {
+        // from juce_win32_Windowing.cpp:doKeyDown
+        const UINT keyChar  = MapVirtualKey ((UINT) wParam, 2);
+        const UINT scanCode = MapVirtualKey ((UINT) wParam, 0);
+        BYTE keyState[256];
+        GetKeyboardState (keyState);
+        
+        WCHAR text[16] = { 0 };
+        if (ToUnicode ((UINT) wParam, scanCode, keyState, text, 8, 0) != 1)
+            text[0] = 0;
+        if (editor->OnChar(text[0]) == true)
+            return 0;
+        else if (systemWindow)
+            PostMessage(GetParent(systemWindow), message, wParam, lParam);
+        // ---------------------------------------
+        break;
+    }
+    case WM_MOUSEMOVE:
+    {
+        editor->OnMouseMove(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+        return 0;
+    }
+    case WM_MOUSEWHEEL:
+    {
+        RECT rect;
+        POINT point;
+        point.x = GET_X_LPARAM(lParam); 
+        point.y = GET_Y_LPARAM(lParam);
+        
+        GetWindowRect(hWnd, &rect);
+        GetCursorPos(&point);
+        if (PtInRect(&rect, point))
+        {
+            int zDelta = GET_WHEEL_DELTA_WPARAM(wParam);
+            zDelta /= WHEEL_DELTA;
+            ScreenToClient(hWnd, &point);
+            editor->OnMouseWheel(point.x, point.y, zDelta);
+            SetFocus(hWnd);
+            return 0;
+        }
+        break;
+    }
+    case WM_PAINT:
+    {
+        PAINTSTRUCT ps;
+        HDC dc = BeginPaint(hWnd, &ps);
+        RECT *rect = &ps.rcPaint;
+        int w = rect->right  - rect->left;
+        int h = rect->bottom - rect->top;
+        BitBlt(dc, rect->left, rect->top, w, h, (HDC)editor->GetToolkit()->GetImageBuffer(), rect->left, rect->top, SRCCOPY);
+        EndPaint(hWnd, &ps); 
+        return 0;
+    }
+    case WM_TIMER:
+    {
+        editor->Update();
+        return 0;
+    }
+    default:
+        break;
+    }
+    return -1;
+}

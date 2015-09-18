@@ -18,9 +18,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <string.h>
 #include <stdio.h>
-#include "toolkit.h"
-#include "control.h"
 #include "synthesizer.h"
+#include "control.h"
 #include "channels.h"
 
 #define KEY_WIDTH   10

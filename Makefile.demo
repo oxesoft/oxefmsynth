@@ -18,6 +18,7 @@ EXECUTABLE_NAME:=oxefmsynthdemo
 
 INCLUDES:=-Isrc/demo
 INCLUDES+=-Isrc/synth
+INCLUDES+=-Isrc/toolkits
 
 SOURCES:=src/demo/controller.cpp
 SOURCES+=src/demo/main.cpp

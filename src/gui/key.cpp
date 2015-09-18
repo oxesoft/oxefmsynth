@@ -18,9 +18,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <string.h>
 #include <stdio.h>
-#include "toolkit.h"
-#include "control.h"
 #include "synthesizer.h"
+#include "control.h"
 #include "key.h"
 
 CKey::CKey(int bmp, int index, int w, int h, const char *name, CSynthesizer *synthesizer, char &channel, int par, int x, int y)

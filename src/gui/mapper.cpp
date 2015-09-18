@@ -19,9 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <string.h>
 #include <stdio.h>
 #include <math.h>
-#include "toolkit.h"
-#include "control.h"
 #include "synthesizer.h"
+#include "control.h"
 #include "mapper.h"
 
 char CMapper::FloatValueToIntValue(CSynthesizer *synthesizer, char channel, int par, int type, float fvalue)
