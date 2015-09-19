@@ -302,7 +302,7 @@ void CMapper::GetDisplayValue(CSynthesizer *synthesizer, char channel, int par, 
             break;
         case VL_PAN:
             if      (fvalue < 0.f)
-                snprintf(str, TEXT_SIZE, "%i%% Left", lrintf(-fvalue*100.f));
+                snprintf(str, TEXT_SIZE, "%i%% Left", (int)lrintf(-fvalue*100.f));
             else if (fvalue > 0.f)
                 snprintf(str, TEXT_SIZE, "%i%% Right", (int)lrintf(fvalue*100.f));
             else

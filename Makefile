@@ -21,8 +21,10 @@ all:
 	@$(MAKE) -s -f Makefile.demo
 	@echo "Building standalone"
 	@$(MAKE) -s -f Makefile.standalone
-	@echo "Building plugin"
+	@echo "Building Windows VST plugin"
 	@$(MAKE) -s -f Makefile.vstwindows
+	@echo "Building Linux VST plugin"
+	@$(MAKE) -s -f Makefile.vstlinux
 
 clean:
-	@rm -f converter oxefmsynthdemo oxefmsynthdemo.exe oxefmsynthdemo.wav oxefmsynth.exe oxevst64.dll oxevst.dll
+	@rm -f converter oxefmsynthdemo oxefmsynthdemo.exe oxefmsynthdemo.wav oxefmsynth.exe oxevst64.dll oxevst.dll oxevst.so

@@ -395,8 +395,9 @@ void CEditor::SetToolkit(CToolkit *toolkit)
     {
         // show version
         char version_info[LCD_COLS + 1];
+        int centeredPos = (LCD_COLS / 2) - (strlen(VERSION_STR) / 2);
         strncpy(version_info, "                ", LCD_COLS);
-        strncpy(version_info + (LCD_COLS / 2) - (strlen(VERSION_STR) / 2), VERSION_STR, LCD_COLS);
+        strncpy(version_info + centeredPos, VERSION_STR, LCD_COLS - centeredPos);
         lcd->SetText(0, "  Oxe FM Synth  ");
         lcd->SetText(1, version_info);
     }
@@ -452,7 +453,7 @@ bool CEditor::OnChar(int cod)
             synthesizer->SetProgName(str1, channel);
         }
     }
-    snprintf(str0, TEXT_SIZE, "Program %03i", synthesizer->GetNumProgr(channel));
+    snprintf(str0, sizeof(str0), "Program %03i", synthesizer->GetNumProgr(channel));
     lcd->SetText(0, str0);
     return true;
 }

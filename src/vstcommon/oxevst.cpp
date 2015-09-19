@@ -16,9 +16,6 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-#include <strsafe.h>
 #include <stdio.h>
 #include "oxevsteditor.h"
 #include "oxevst.h"
@@ -102,7 +99,7 @@ bool COxeVst::getOutputProperties(VstInt32 index, VstPinProperties* properties)
 {
     if (index < kNumOutputs)
     {
-        StringCchPrintfA(properties->label, sizeof(properties->label), "Vstx %1d", index + 1);
+        snprintf(properties->label, sizeof(properties->label), "Vstx %1d", index + 1);
         properties->flags = kVstPinIsActive;
         if (index < 2)
             properties->flags |= kVstPinIsStereo;    // test, make channel 1+2 stereo
@@ -116,7 +113,7 @@ bool COxeVst::getProgramNameIndexed(VstInt32 category, VstInt32 index, char* tex
     synthesizer->GetProgName(text, index);
     if (strlen(text) < 1)
     {
-        StringCchPrintfA(text, kVstMaxNameLen, "(empty)");
+        snprintf(text, kVstMaxNameLen, "(empty)");
     }
     return true;
 }
@@ -129,19 +126,19 @@ bool COxeVst::copyProgram(VstInt32 destination)
 
 bool COxeVst::getEffectName(char* name)
 {
-    StringCchCopyA(name, kVstMaxNameLen, "Oxe FM Synth");
+    strncpy(name, "Oxe FM Synth", kVstMaxNameLen);
     return true;
 }
 
 bool COxeVst::getVendorString(char* text)
 {
-    StringCchCopyA(text, kVstMaxNameLen, "Oxe Music Software");
+    strncpy(text, "Oxe Music Software", kVstMaxNameLen);
     return true;
 }
 
 bool COxeVst::getProductString(char* text)
 {
-    StringCchCopyA(text, kVstMaxNameLen, "Oxe FM Synth");
+    strncpy(text, "Oxe FM Synth", kVstMaxNameLen);
     return true;
 }
 
@@ -152,7 +149,7 @@ VstInt32 COxeVst::getVendorVersion()
 
 VstInt32 COxeVst::canDo(char* text)
 {
-    if (!lstrcmpA(text, "receiveVstMidiEvent"))
+    if (!strcmp(text, "receiveVstMidiEvent"))
         return 1;
     return -1;    // explicitly can't do; 0 => don't know
 }

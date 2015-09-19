@@ -16,7 +16,12 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-CXlibToolkit::CXlibToolkit(Display d, Window w)
+#include <X11/Xlib.h>
+#include <stdio.h>
+#include "editor.h"
+#include "xlibtoolkit.h"
+
+CXlibToolkit::CXlibToolkit(Display *d, Window w)
 {
     this->d = d;
     this->w = w;
