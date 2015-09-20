@@ -54,8 +54,14 @@ SOURCES+=$(VST_PATH)/public.sdk/source/vst2.x/vstplugmain.cpp
 LIBS:=-lX11
 CFLAGS+=-fPIC 
 
+ifeq ($(DEBUG),YES)
+	CFLAGS+=-g -O0
+else
+	CFLAGS+=-s -O3
+endif
+
 all:
-	@g++ -s -O3 -shared -o oxevst.so $(CFLAGS) $(SOURCES) $(INCLUDES) $(LIBS)
+	@g++ -shared -o oxevst.so $(CFLAGS) $(SOURCES) $(INCLUDES) $(LIBS)
 
 clean:
 	@rm -f oxevst.so
