@@ -40,7 +40,7 @@ class COxeVst : public AudioEffectX
 {
 public:
     COxeVst(audioMasterCallback audioMaster);
-
+    ~COxeVst();
     virtual void processReplacing(float **inputs, float **outputs, VstInt32 sampleframes);
     virtual VstInt32 processEvents(VstEvents* events);
     virtual void setProgram(VstInt32 program);
@@ -66,7 +66,7 @@ public:
     virtual void getParameterDisplay (VstInt32 index, char* text);
     virtual void getParameterName (VstInt32 index, char* text);
 private:
-    CSynthesizer *synthesizer;
+    CSynthesizer synthesizer;
     VstInt32 posExt;
     VstInt32 posInt;
     VstInt32 bufferPos;

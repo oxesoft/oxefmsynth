@@ -16,18 +16,12 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <stdio.h>
 #include "oxevsteditor.h"
 #include "oxevst.h"
 
 COxeVst::COxeVst(audioMasterCallback audioMaster) : AudioEffectX(audioMaster, kNumPrograms, kNumParams)
 {
-    synthesizer = new CSynthesizer();
-    if (!synthesizer)
-    {
-        return;
-    }
-    editor = new COxeVstEditor(this, synthesizer);
+    editor = new COxeVstEditor(this, &synthesizer);
     if (!editor)
     {
         return;
@@ -48,32 +42,38 @@ COxeVst::COxeVst(audioMasterCallback audioMaster) : AudioEffectX(audioMaster, kN
     memset(&events,0,sizeof(events));
 }
 
+COxeVst::~COxeVst()
+{
+    //TODO investigate why it crashes the windows version
+    //delete editor;
+}
+
 void COxeVst::setProgram(VstInt32 program)
 {
     AudioEffectX::setProgram(program);
-    synthesizer->SendEvent(0xC0, getProgram(), 0, 0);
+    synthesizer.SendEvent(0xC0, getProgram(), 0, 0);
 }
 
-void COxeVst::getProgramName(char *name)
+void COxeVst::getProgramName(char *name) // kVstMaxProgNameLen
 {
-    synthesizer->GetProgName(name, getProgram());
+    synthesizer.GetProgName(name, getProgram());
 }
 
-void COxeVst::setProgramName(char *name)
+void COxeVst::setProgramName(char *name) // kVstMaxProgNameLen
 {
-    synthesizer->SetProgName(name, getProgram());
+    synthesizer.SetProgName(name, getProgram());
 }
 
 VstInt32 COxeVst::getChunk(void **data, bool isPreset)
 {
     if (isPreset)
     {
-        *data = &synthesizer->GetBank()->prg[getProgram()];
+        *data = &synthesizer.GetBank()->prg[getProgram()];
         return sizeof(SProgram);
     }
     else
     {
-        *data = synthesizer->GetBank();
+        *data = synthesizer.GetBank();
         return sizeof(SBank);
     }
 }
@@ -84,13 +84,13 @@ VstInt32 COxeVst::setChunk(void *data, VstInt32 byteSize, bool isPreset)
     {
         if (byteSize != sizeof(SProgram))
             return 0;
-        synthesizer->SetProgram(getProgram(), (SProgram*)data);
+        synthesizer.SetProgram(getProgram(), (SProgram*)data);
     }
     else
     {
         if (byteSize != sizeof(SBank))
             return 0;
-        synthesizer->SetBank((SBank*)data);
+        synthesizer.SetBank((SBank*)data);
     }
     return 1;
 }
@@ -99,10 +99,14 @@ bool COxeVst::getOutputProperties(VstInt32 index, VstPinProperties* properties)
 {
     if (index < kNumOutputs)
     {
-        snprintf(properties->label, sizeof(properties->label), "Vstx %1d", index + 1);
+        vst_strncpy (properties->label, "Vstx ", 63);
+        char temp[11] = {0};
+        int2string (index + 1, temp, 10);
+        vst_strncat (properties->label, temp, 63);
+        
         properties->flags = kVstPinIsActive;
         if (index < 2)
-            properties->flags |= kVstPinIsStereo;    // test, make channel 1+2 stereo
+            properties->flags |= kVstPinIsStereo;    // make channel 1+2 stereo
         return true;
     }
     return false;
@@ -110,35 +114,35 @@ bool COxeVst::getOutputProperties(VstInt32 index, VstPinProperties* properties)
 
 bool COxeVst::getProgramNameIndexed(VstInt32 category, VstInt32 index, char* text)
 {
-    synthesizer->GetProgName(text, index);
+    synthesizer.GetProgName(text, index);
     if (strlen(text) < 1)
     {
-        snprintf(text, kVstMaxNameLen, "(empty)");
+        vst_strncpy(text, "(empty)", kVstMaxProgNameLen);
     }
     return true;
 }
 
 bool COxeVst::copyProgram(VstInt32 destination)
 {
-    synthesizer->CopyProgram(destination, getProgram());
+    synthesizer.CopyProgram(destination, getProgram());
     return true;
 }
 
 bool COxeVst::getEffectName(char* name)
 {
-    strncpy(name, "Oxe FM Synth", kVstMaxNameLen);
+    vst_strncpy(name, "Oxe FM Synth", kVstMaxEffectNameLen);
     return true;
 }
 
 bool COxeVst::getVendorString(char* text)
 {
-    strncpy(text, "Oxe Music Software", kVstMaxNameLen);
+    vst_strncpy(text, "Oxe Music Software", kVstMaxVendorStrLen);
     return true;
 }
 
 bool COxeVst::getProductString(char* text)
 {
-    strncpy(text, "Oxe FM Synth", kVstMaxNameLen);
+    vst_strncpy(text, "Oxe FM Synth", kVstMaxProductStrLen);
     return true;
 }
 
@@ -156,7 +160,7 @@ VstInt32 COxeVst::canDo(char* text)
 
 VstInt32 COxeVst::getNumMidiInputChannels()
 {
-    return 16;
+    return MIDICHANNELS;
 }
 
 VstInt32 COxeVst::getNumMidiOutputChannels()
@@ -167,13 +171,12 @@ VstInt32 COxeVst::getNumMidiOutputChannels()
 void COxeVst::setSampleRate(float sampleRate)
 {
     AudioEffectX::setSampleRate(sampleRate);
-    synthesizer->SetSampleRate(sampleRate);
+    synthesizer.SetSampleRate(sampleRate);
 }
 
 void COxeVst::suspend()
 {
-    if (synthesizer)
-        synthesizer->KillNotes();
+    synthesizer.KillNotes();
 }
 
 void COxeVst::processReplacing(float **inputs, float **outputs, VstInt32 sampleFrames)
@@ -195,20 +198,20 @@ void COxeVst::processReplacing(float **inputs, float **outputs, VstInt32 sampleF
                     break;
                 if (events.event[events.nextEvent].pos < bufferPos)
                     events.event[events.nextEvent].pos = bufferPos;
-                synthesizer->SendEvent(events.event[events.nextEvent].bstat,events.event[events.nextEvent].bdad1,events.event[events.nextEvent].bdad2,events.event[events.nextEvent].pos);
+                synthesizer.SendEvent(events.event[events.nextEvent].bstat,events.event[events.nextEvent].bdad1,events.event[events.nextEvent].bdad2,events.event[events.nextEvent].pos);
                 events.eventsCount--;
                 events.nextEvent++;
                 events.nextEvent &= EVENTS_MASK;
             }
             // ------------------------------------------------------------------------------------------------------------
-            synthesizer->Process(synthesizer->buffers.bSynthOut, SAMPLES_PER_PROCESS, bufferPos);
+            synthesizer.Process(synthesizer.buffers.bSynthOut, SAMPLES_PER_PROCESS, bufferPos);
             bufferPos += SAMPLES_PER_PROCESS;
         }
         VstInt32 iaux = min(tambufferInt-posInt,tambufferExt-posExt);
         while (iaux>0)
         {
-            out1[posExt] = float(synthesizer->buffers.bSynthOut[posInt++])/32767.f;
-            out2[posExt] = float(synthesizer->buffers.bSynthOut[posInt++])/32767.f;
+            out1[posExt] = float(synthesizer.buffers.bSynthOut[posInt++])/32767.f;
+            out2[posExt] = float(synthesizer.buffers.bSynthOut[posInt++])/32767.f;
             posExt++;
             iaux-=2;
         }
@@ -254,17 +257,17 @@ float COxeVst::getParameter (VstInt32 index)
     return ((COxeVstEditor*)editor)->getEditor()->GetPar(index);
 }
 
-void COxeVst::getParameterLabel (VstInt32 index, char* label)
+void COxeVst::getParameterLabel (VstInt32 index, char* label) // kVstMaxParamStrLen
 {
     ((COxeVstEditor*)editor)->getEditor()->GetParLabel(index, label);
 }
 
-void COxeVst::getParameterDisplay (VstInt32 index, char* text)
+void COxeVst::getParameterDisplay (VstInt32 index, char* text) // kVstMaxParamStrLen
 {
     ((COxeVstEditor*)editor)->getEditor()->GetParDisplay(index, text);
 }
 
-void COxeVst::getParameterName (VstInt32 index, char* text)
+void COxeVst::getParameterName (VstInt32 index, char* text) // kVstMaxParamStrLen
 {
     ((COxeVstEditor*)editor)->getEditor()->GetParName(index, text);
 }
