@@ -21,7 +21,7 @@ all:
 	@$(MAKE) -s -f Makefile.demo
 	@echo "Building standalone"
 	@$(MAKE) -s -f Makefile.standalone
-	@echo "Building Windows VST plugin"
+	@echo "Building Windows VST plugin (32 and 64 bit)"
 	@$(MAKE) -s -f Makefile.vstwindows
 	@echo "Building Linux VST plugin"
 	@$(MAKE) -s -f Makefile.vstlinux

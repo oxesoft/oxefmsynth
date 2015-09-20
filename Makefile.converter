@@ -21,4 +21,7 @@ else
 endif
 
 all:
-	@$(CC) $(CFLAGS) -o converter src/converter/converter.c
+	@$(CC) $(CFLAGS) -o oxeconverter src/converter/converter.c
+
+clean:
+	@rm -f oxeconverter

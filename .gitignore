@@ -2,5 +2,5 @@
 *.wav
 *.dll
 *.so
-./oxefmsynthdemo
-./converter
+oxefmsynthdemo
+oxeconverter
