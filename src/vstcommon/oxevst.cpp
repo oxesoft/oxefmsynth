@@ -44,8 +44,8 @@ COxeVst::COxeVst(audioMasterCallback audioMaster) : AudioEffectX(audioMaster, kN
 
 COxeVst::~COxeVst()
 {
-    //TODO investigate why it crashes the windows version
-    //delete editor;
+    delete editor;
+    editor = NULL;
 }
 
 void COxeVst::setProgram(VstInt32 program)
