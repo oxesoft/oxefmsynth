@@ -65,6 +65,7 @@ public:
     virtual void getParameterLabel (VstInt32 index, char* label);
     virtual void getParameterDisplay (VstInt32 index, char* text);
     virtual void getParameterName (VstInt32 index, char* text);
+    virtual VstIntPtr dispatcher (VstInt32 opcode, VstInt32 index, VstIntPtr value, void* ptr, float opt);
 private:
     CSynthesizer synthesizer;
     VstInt32 posExt;

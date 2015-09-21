@@ -21,14 +21,20 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "editor.h"
 #include "xlibtoolkit.h"
 
-CXlibToolkit::CXlibToolkit(Display *d, Window w)
+CXlibToolkit::CXlibToolkit(Display *display, Window parentWindow)
 {
-    this->d = d;
-    this->w = w;
+    this->display = display;
+    window = XCreateSimpleWindow(display, parentWindow, 0, 0, GUI_WIDTH, GUI_HEIGHT, 0, 0, 0);
+    XGCValues gcvalues = {0};
+    gc = XCreateGC(display, window, 0, &gcvalues);
+    XSelectInput(display, window, ExposureMask | KeyPressMask);
+    XMapWindow(display, window);
 }
 
 CXlibToolkit::~CXlibToolkit()
 {
+    XFreeGC(display, gc);
+    XDestroyWindow(display, window);
 }
 
 void CXlibToolkit::CopyRect(int destX, int destY, int width, int height, int origBmp, int origX, int origY)

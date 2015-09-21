@@ -48,6 +48,25 @@ COxeVst::~COxeVst()
     editor = NULL;
 }
 
+VstIntPtr COxeVst::dispatcher (VstInt32 opcode, VstInt32 index, VstIntPtr value, void* ptr, float opt)
+{
+    VstIntPtr v = 0;
+    switch (opcode)
+    {
+        case effEditOpen:
+            if (editor)
+            {
+                v = ((COxeVstEditor*)editor)->open(value, ptr) ? 1 : 0;
+            }
+            break;
+        default:
+        {
+            v = AudioEffectX::dispatcher (opcode, index, value, ptr, opt);
+        }
+    }
+    return v;
+}
+
 void COxeVst::setProgram(VstInt32 program)
 {
     AudioEffectX::setProgram(program);
