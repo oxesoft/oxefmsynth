@@ -8,7 +8,7 @@ This repository contains the synth core and three different ways to use it:
 
 - as a [demo](https://en.wikipedia.org/wiki/Demoscene) (for profiling or just for fun)
 - as a standalone Windows application
-- as a [VST plugin](https://pt.wikipedia.org/wiki/Virtual_Studio_Technology) for Windows 32/64 bit
+- as a [VST plugin](https://pt.wikipedia.org/wiki/Virtual_Studio_Technology) for Windows 32/64 bit and Linux
 
 Building
 --------
@@ -18,7 +18,7 @@ On Windows, install both 32 and 64bit (run the installer twice).
 
 To build on Windows (on the [msys](https://msysgit.github.io/) shell) just type ``mingw32-make``.
 On Linux just type ``make``.
-All the code is always built by once on purpose, to make sure everything is fine (because it is a tiny project).
+All the code is always compiled by once on purpose, to make sure everything is fine (because it is a tiny project).
 ``converter`` is a development tool for creating the demos. It converts a .mid file in a tune.h used for the demo player.
 
 Using the demo

@@ -47,8 +47,11 @@ ifeq ($(OS),Windows_NT)
 	CC:=g++.exe
 	RC:=windres.exe
 else
-	CC:=i686-w64-mingw32-g++
-	RC:=i686-w64-mingw32-windres
+    CC:=i686-w64-mingw32-g++
+    RC:=i686-w64-mingw32-windres
+    ifeq ($(shell which $(CC)),)
+        $(error Please install mingw-w64. Skipping...)
+    endif
 endif
 
 all: resources.o

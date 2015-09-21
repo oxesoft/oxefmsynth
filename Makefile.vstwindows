@@ -54,15 +54,20 @@ SOURCES+=$(VST_PATH)/public.sdk/source/vst2.x/vstplugmain.cpp
 LIBS:=-lgdi32
 
 ifeq ($(OS),Windows_NT)
-	CC:=i686-w64-mingw32-g++.exe
-	RC:=windres.exe
-	CC64:=x86_64-w64-mingw32-g++.exe
-	RC64:=windres.exe
+    CC:=i686-w64-mingw32-g++.exe
+    RC:=windres.exe
+    CC64:=x86_64-w64-mingw32-g++.exe
+    RC64:=windres.exe
 else
-	CC:=i686-w64-mingw32-g++
-	RC:=i686-w64-mingw32-windres
-	CC64:=x86_64-w64-mingw32-g++
-	RC64:=x86_64-w64-mingw32-windres
+    CC:=i686-w64-mingw32-g++
+    RC:=i686-w64-mingw32-windres
+    CC64:=x86_64-w64-mingw32-g++
+    RC64:=x86_64-w64-mingw32-windres
+    CC:=i686-w64-mingw32-g++
+    RC:=i686-w64-mingw32-windres
+    ifeq ($(shell which $(CC)),)
+        $(error Please install mingw-w64.)
+    endif
 endif
 
 all: oxevst32 oxevst64
