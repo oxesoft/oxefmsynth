@@ -23,6 +23,8 @@ public:
     Window   window;
     GC       gc;
     Atom     customMessage;
+    Pixmap   offscreen;
+    XImage   *bmps[BMP_COUNT];
     bool     threadFinished;
     CXlibToolkit(void *parentWindow, CEditor *editor);
     ~CXlibToolkit();

@@ -46,8 +46,12 @@ void* eventProc(void* ptr)
                 printf("ButtonRelease\n");
                 break;
             case Expose:
-                printf("Expose\n");
+            {
+                XGraphicsExposeEvent *e = (XGraphicsExposeEvent*)&event;
+                printf("Expose x=%d y=%d w=%d h=%d\n", e->x, e->y, e->width, e->height);
+                XCopyArea(toolkit->display, toolkit->offscreen, toolkit->window, toolkit->gc, e->x, e->y, e->width, e->height, e->x, e->y);
                 break;
+            }
             case KeyPress: 
                 printf("KeyPress\n");
                 break;
@@ -96,13 +100,9 @@ CXlibToolkit::CXlibToolkit(void *parentWindow, CEditor *editor)
     pthread_t thread;
     pthread_create(&thread, NULL, &eventProc, (void*)this);
     
-    /*
-    Generally you create your own loader to grab the pixels out of whatever
-    image format you need. Then, you use XCreateImage to make an XImage, 
-    which you put, using XPutImage, on an offscreen pixmap you generate with
-    XCreatePixmap. Once you have your pixmap, you paint it to the window
-    with XCopyArea. You must re-copy the image on any expose events.
-    */
+    //bmps[BMP_CHARS] = XCreateImage(display, CopyFromParent, 24, ZPixmap, 0, (char*)data, width, height, 32, width * 3);
+    
+    offscreen = XCreatePixmap(this->display, window, GUI_WIDTH, GUI_HEIGHT, 24);
 }
 
 CXlibToolkit::~CXlibToolkit()
@@ -119,11 +119,10 @@ CXlibToolkit::~CXlibToolkit()
 
 void CXlibToolkit::CopyRect(int destX, int destY, int width, int height, int origBmp, int origX, int origY)
 {
-    /*
-    XCopyArea
-    XClearArea
-    XSync
-    */
+    return;
+    XPutImage(display, offscreen, gc, bmps[origBmp], origX, origY, destX, destY, width, height);
+    XClearArea(display, window, destX, destY, width, height, true);
+    XSync(display, false);
 }
 
 void CXlibToolkit::SendMessageToHost(unsigned int messageID, unsigned int par1, unsigned int par2)
