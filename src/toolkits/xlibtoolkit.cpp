@@ -17,87 +17,85 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include <X11/Xlib.h>
+#include <pthread.h>
+#include <string.h>
+#include <stdlib.h>
 #include <stdio.h>
+#include <unistd.h>
 #include "editor.h"
 #include "xlibtoolkit.h"
 
-#define EDITOR_ATOM "_editor"
-#define CUSTOM_ATOM "_custom"
-
-void eventProc()
+void* eventProc(void* ptr)
 {
-    XEvent        event;
-    Atom          type;
-    int           format  = 0;
-    unsigned long items   = 0;
-    unsigned long bytes   = 0;
-    unsigned char *data   = 0;
-    CEditor       *editor = 0;
-    while (true)
+    XEvent event;
+    CXlibToolkit *toolkit = (CXlibToolkit*)ptr;
+    bool stopThread = false;
+    while (!stopThread)
     {
-        XNextEvent(event.xany.display, &event);
-        printf("---event received\n");
-        XGetWindowProperty(
-            event.xany.display,
-            event.xany.window,
-            XInternAtom(event.xany.display, EDITOR_ATOM, false),
-            0,
-            1,
-            false,
-            AnyPropertyType,
-            &type,
-            &format,
-            &items,
-            &bytes,
-            &data
-        );
-        editor = (CEditor*)*(long*)data;
-        if (items != 1)
+        XNextEvent(toolkit->display, &event);
+        if (event.xany.display != toolkit->display || event.xany.window != toolkit->window)
         {
             continue;
         }
         switch (event.type) 
         {
             case ButtonPress: 
+                printf("ButtonPress\n");
                 break;
             case ButtonRelease:
+                printf("ButtonRelease\n");
                 break;
             case Expose:
+                printf("Expose\n");
                 break;
             case KeyPress: 
+                printf("KeyPress\n");
                 break;
             case ClientMessage:
             {
+                printf("ClientMessage\n");
                 XClientMessageEvent *message = (XClientMessageEvent *)&event;
-                if (message->message_type == XInternAtom(event.xany.display, CUSTOM_ATOM, false))
+                if (message->message_type == toolkit->customMessage)
                 {
                     unsigned int messageID = message->data.l[0];
                     unsigned int par1      = message->data.l[1];
                     unsigned int par2      = message->data.l[2];
                     if (messageID == KILL_EDITOR)
                     {
-                        return;
+                        stopThread = true;
+                        break;
                     }
                 }
             }
         }
     }
+    printf("exit eventProc\n");
+    toolkit->threadFinished = true;
+    return NULL;
 }
 
-CXlibToolkit::CXlibToolkit(Display *display, Window parentWindow, CEditor *editor)
+CXlibToolkit::CXlibToolkit(void *parentWindow, CEditor *editor)
 {
-    this->display = display;
-    window = XCreateSimpleWindow(display, parentWindow, 0, 0, GUI_WIDTH, GUI_HEIGHT, 0, 0, 0);
+    char *displayName = getenv("DISPLAY");
+    if (!displayName || !strlen(displayName))
+    {
+        displayName = (char*)":0.0";
+    }
+    this->display = XOpenDisplay(displayName);
+    window = XCreateSimpleWindow(this->display, (Window)parentWindow, 0, 0, GUI_WIDTH, GUI_HEIGHT, 0, 0, 0);
     
-    void* data = editor;
-    Atom atom = XInternAtom(display, EDITOR_ATOM, false);
-    XChangeProperty(display, window, atom, atom, 32, PropModeReplace, (unsigned char*)&data, 1);
-
     XGCValues gcvalues = {0};
-    gc = XCreateGC(display, window, 0, &gcvalues);
-    XSelectInput(display, window, ButtonPressMask | ButtonReleaseMask | ExposureMask | KeyPressMask);
-    XMapWindow(display, window);
-
+    gc = XCreateGC(this->display, window, 0, &gcvalues);
+    XSelectInput(this->display, window, ButtonPressMask | ButtonReleaseMask | ExposureMask | KeyPressMask);
+    XMapWindow(this->display, window);
+    XFlush(this->display);
+    
+    this->customMessage = XInternAtom(display, "_customMessage", false);
+    
+    threadFinished = false;
+    pthread_t thread;
+    pthread_create(&thread, NULL, &eventProc, (void*)this);
+    
     /*
     Generally you create your own loader to grab the pixels out of whatever
     image format you need. Then, you use XCreateImage to make an XImage, 
@@ -110,6 +108,10 @@ CXlibToolkit::CXlibToolkit(Display *display, Window parentWindow, CEditor *edito
 CXlibToolkit::~CXlibToolkit()
 {
     SendMessageToHost(KILL_EDITOR, 0, 0);
+    while (!threadFinished)
+    {
+        usleep(1000);
+    }
     XFreeGC(display, gc);
     XDestroyWindow(display, window);
     XSync(display, false);
@@ -134,7 +136,7 @@ void CXlibToolkit::SendMessageToHost(unsigned int messageID, unsigned int par1, 
     event.data.l[0]    = messageID;
     event.data.l[1]    = par1;
     event.data.l[2]    = par2;
-    event.message_type = XInternAtom(display, CUSTOM_ATOM, false);
+    event.message_type = customMessage;
     XSendEvent(display, window, false, 0L, (XEvent*)&event);
     XFlush(display);
 }
@@ -159,9 +161,4 @@ void CXlibToolkit::OutputDebugString(char *text)
 void *CXlibToolkit::GetImageBuffer()
 {
     return 0;
-}
-
-int CXlibToolkit::CommonWindowProc(XEvent *e)
-{
-    return -1;
 }

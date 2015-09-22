@@ -21,6 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 class CToolkit
 {
 public:
+    virtual ~CToolkit() {}
     virtual void CopyRect(int destX, int destY, int width, int height, int origBmp, int origX, int origY) {}
     virtual void SendMessageToHost(unsigned int messageID, unsigned int par1, unsigned int par2) {}
     virtual void GetMousePosition(int *x, int *y) {}

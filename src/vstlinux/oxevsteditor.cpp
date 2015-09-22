@@ -53,19 +53,18 @@ bool COxeVstEditor::getRect (ERect **erect)
 
 //-----------------------------------------------------------------------------
 
-bool COxeVstEditor::open (VstIntPtr value, void *ptr)
+bool COxeVstEditor::open (void *ptr)
 {
     // Remember the parent window
     systemWindow = ptr;
 
-    this->toolkit = new CXlibToolkit((Display*)value, (Window)ptr, oxeeditor);
+    this->toolkit = new CXlibToolkit(ptr, oxeeditor);
     oxeeditor->SetToolkit(this->toolkit);
 
     return true;
 }
 
 //-----------------------------------------------------------------------------
-
 void COxeVstEditor::close ()
 {
     oxeeditor->SetToolkit(NULL);

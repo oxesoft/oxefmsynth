@@ -113,7 +113,7 @@ bool COxeVstEditor::getRect (ERect **erect)
 
 //-----------------------------------------------------------------------------
 
-bool COxeVstEditor::open (VstIntPtr value, void *ptr)
+bool COxeVstEditor::open (void *ptr)
 {
     // Remember the parent window
     systemWindow = ptr;

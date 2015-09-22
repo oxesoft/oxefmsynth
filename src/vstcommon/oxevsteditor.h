@@ -28,7 +28,7 @@ public:
     virtual ~COxeVstEditor();
 
     virtual bool getRect(ERect **rect);
-    virtual bool open(VstIntPtr value, void *ptr);
+    virtual bool open(void *ptr);
     virtual void close();
     
     AudioEffectX*   getEffectX()      { return effectx;            }

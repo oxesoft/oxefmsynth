@@ -18,12 +18,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 class CXlibToolkit : public CToolkit
 {
-private:
+public:
     Display *display;
     Window   window;
     GC       gc;
-public:
-    CXlibToolkit(Display *display, Window parentWindow, CEditor *editor);
+    Atom     customMessage;
+    bool     threadFinished;
+    CXlibToolkit(void *parentWindow, CEditor *editor);
     ~CXlibToolkit();
     void CopyRect(int destX, int destY, int width, int height, int origBmp, int origX, int origY);
     void SendMessageToHost(unsigned int messageID, unsigned int par1, unsigned int par2);
@@ -32,5 +33,4 @@ public:
     void StopMouseCapture();
     void OutputDebugString(char *text);
     void *GetImageBuffer();
-    int  CommonWindowProc(XEvent *e);
 };
