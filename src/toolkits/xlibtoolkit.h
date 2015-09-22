@@ -25,7 +25,9 @@ public:
     Atom     customMessage;
     Pixmap   offscreen;
     XImage   *bmps[BMP_COUNT];
+    char     *bmpsData[BMP_COUNT];
     bool     threadFinished;
+    CEditor  *editor;
     CXlibToolkit(void *parentWindow, CEditor *editor);
     ~CXlibToolkit();
     void CopyRect(int destX, int destY, int width, int height, int origBmp, int origX, int origY);

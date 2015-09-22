@@ -17,6 +17,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include <X11/Xlib.h>
+#include <X11/Xutil.h>
 #include <pthread.h>
 #include <string.h>
 #include <stdlib.h>
@@ -24,6 +25,31 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <unistd.h>
 #include "editor.h"
 #include "xlibtoolkit.h"
+
+struct BITMAPFILEHEADER
+{
+    char         signature[2];
+    unsigned int fileSize;
+    short        reserved[2];
+    unsigned int fileOffsetToPixelArray;
+} __attribute__((packed));
+
+struct BITMAPV5HEADER
+{
+    unsigned int   dibHeaderSize;
+    unsigned int   width;
+    unsigned int   height;
+    unsigned short planes;
+    unsigned short bitsPerPixel;
+    unsigned int   compression;
+    unsigned int   imageSize;
+} __attribute__((packed));
+
+struct BITMAPHEADER
+{
+    BITMAPFILEHEADER fh;
+    BITMAPV5HEADER   v5;
+};
 
 void* eventProc(void* ptr)
 {
@@ -86,10 +112,10 @@ CXlibToolkit::CXlibToolkit(void *parentWindow, CEditor *editor)
         displayName = (char*)":0.0";
     }
     this->display = XOpenDisplay(displayName);
+    this->editor  = editor;
     window = XCreateSimpleWindow(this->display, (Window)parentWindow, 0, 0, GUI_WIDTH, GUI_HEIGHT, 0, 0, 0);
     
-    XGCValues gcvalues = {0};
-    gc = XCreateGC(this->display, window, 0, &gcvalues);
+    gc = XCreateGC(this->display, window, 0, 0);
     XSelectInput(this->display, window, ButtonPressMask | ButtonReleaseMask | ExposureMask | KeyPressMask);
     XMapWindow(this->display, window);
     XFlush(this->display);
@@ -99,10 +125,45 @@ CXlibToolkit::CXlibToolkit(void *parentWindow, CEditor *editor)
     threadFinished = false;
     pthread_t thread;
     pthread_create(&thread, NULL, &eventProc, (void*)this);
-    
-    //bmps[BMP_CHARS] = XCreateImage(display, CopyFromParent, 24, ZPixmap, 0, (char*)data, width, height, 32, width * 3);
-    
+   
     offscreen = XCreatePixmap(this->display, window, GUI_WIDTH, GUI_HEIGHT, 24);
+    if (XCreatePixmap)
+
+    memset(bmps    , 0, sizeof(bmps));
+    memset(bmpsData, 0, sizeof(bmpsData));
+
+    FILE *f = fopen("skins/default/bg.bmp", "rb");
+    if (!f)
+    {
+        printf("file not found\n");
+        return;                                                                                                         
+    }
+    BITMAPHEADER header = {0};
+    if (!fread(&header, sizeof(header), 1, f))
+    {
+        fclose(f);
+        return;                                                                                                         
+    }
+    fclose(f);
+
+    printf("signature              %c%c\n", header.fh.signature[0], header.fh.signature[1]);
+    printf("fileSize               %u\n", header.fh.fileSize);
+    printf("fileOffsetToPixelArray %u\n", header.fh.fileOffsetToPixelArray);
+    printf("width                  %u\n", header.v5.width);
+    printf("height                 %u\n", header.v5.height);
+    printf("bitsPerPixel           %u\n", header.v5.bitsPerPixel);
+    printf("imageSize              %u\n", header.v5.imageSize);
+    
+    bmpsData[BMP_BG] = (char*)malloc(header.v5.imageSize);
+    f = fopen("skins/default/bg.bmp", "rb");
+    fseek(f, header.fh.fileOffsetToPixelArray, SEEK_SET);
+    if (!fread(bmpsData[BMP_BG], header.v5.imageSize, 1, f))
+    {
+        fclose(f);
+        return;
+    }
+    fclose(f);
+    //bmps[BMP_BG] = XCreateImage(this->display, CopyFromParent, header.v5.bitsPerPixel, ZPixmap, 0, bmpsData[BMP_BG], header.v5.width, header.v5.height, 32, 0);
 }
 
 CXlibToolkit::~CXlibToolkit()
@@ -115,14 +176,36 @@ CXlibToolkit::~CXlibToolkit()
     XFreeGC(display, gc);
     XDestroyWindow(display, window);
     XSync(display, false);
+    XFreePixmap(display, offscreen);
+    XCloseDisplay(display);
+    for (int i = 0; i < BMP_COUNT; i++)
+    {
+        if (bmps[i])
+        {
+            XDestroyImage(bmps[i]);
+        }
+        if (bmpsData[i])
+        {
+            free(bmpsData[i]);
+        }
+    }
 }
 
 void CXlibToolkit::CopyRect(int destX, int destY, int width, int height, int origBmp, int origX, int origY)
 {
-    return;
-    XPutImage(display, offscreen, gc, bmps[origBmp], origX, origY, destX, destY, width, height);
+    if (!bmps[origBmp])
+    {
+        return;
+    }
+    //printf("XPutImage\n");
+    //GC gc = XCreateGC(display, offscreen, 0, 0);
+    //XPutImage(display, offscreen, gc, bmps[origBmp], origX, origY, destX, destY, width, height);
+    //XFreeGC(display, gc);
+    printf("1\n");
     XClearArea(display, window, destX, destY, width, height, true);
-    XSync(display, false);
+    printf("2\n");
+    //XSync(display, false);
+    printf("3\n");
 }
 
 void CXlibToolkit::SendMessageToHost(unsigned int messageID, unsigned int par1, unsigned int par2)
