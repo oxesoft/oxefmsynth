@@ -142,7 +142,8 @@ enum
 enum {
     UPDATE_DISPLAY,
     SET_PROGRAM   ,
-    SET_PARAMETER
+    SET_PARAMETER ,
+    KILL_EDITOR
 };
 
 #ifdef WIN32

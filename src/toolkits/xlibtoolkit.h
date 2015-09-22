@@ -23,7 +23,7 @@ private:
     Window   window;
     GC       gc;
 public:
-    CXlibToolkit(Display *display, Window parentWindow);
+    CXlibToolkit(Display *display, Window parentWindow, CEditor *editor);
     ~CXlibToolkit();
     void CopyRect(int destX, int destY, int width, int height, int origBmp, int origX, int origY);
     void SendMessageToHost(unsigned int messageID, unsigned int par1, unsigned int par2);
