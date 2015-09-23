@@ -21,10 +21,23 @@ On Linux just type ``make``.
 All the code is always compiled by once on purpose, to make sure everything is fine (because it is a tiny project).
 ``converter`` is a development tool for creating the demos. It converts a .mid file in a tune.h used for the demo player.
 
+Using the standalone
+--------------------
+While we are working on GUI (changing code or making skins) this standalone version helps a lot,
+because it is faster then open the plugin host, create a track, add the plugin, and so on.
+With the standalone version we reduce it in only one step.
+To cross-compile it for Windows, from Linux, run ``make -f Makefile.standalone TARGET=WIN32``.
+To build a native version, just type ``make -f Makefile.standalone``.
+
+
 Using the demo
 --------------
 By default, a native plataform executable is generated.
-The tune can be rendered to a .wav file, to the memory (for profiling purposes) and, optionally, to the sound card in real time, using DirectSound. You can enable this building it with ``make -f Makefile.demo WITH_DSOUND=YES``. Once it is done, the default behaviour is to start playing. The command line parameters ``-f`` (to file) and ``-m`` (to memory) still works if used.
+The tune can be rendered to a .wav file, to the memory (for profiling purposes) and, optionally, to the sound card in real time, using DirectSound.
+You can enable this building it with ``make -f Makefile.demo WITH_DSOUND=YES``. Once it is done, the default behaviour is to start playing. The command
+line parameters ``-f`` (to file) and ``-m`` (to memory) still works if used.
+To cross-compile it for Windows, from Linux, run ``make -f Makefile.demo TARGET=WIN32``.
+To build a native version, just type ``make -f Makefile.demo``.
 
 Skins
 -----

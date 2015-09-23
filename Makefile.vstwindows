@@ -27,7 +27,7 @@ INCLUDES+=-I$(VST_PATH)
 
 SOURCES:=src/vstcommon/oxevst.cpp
 SOURCES+=src/vstcommon/oxevstmain.cpp
-SOURCES+=src/vstwindows/oxevsteditor.cpp
+SOURCES+=src/vstcommon/oxevsteditor.cpp
 SOURCES+=src/toolkits/windowstoolkit.cpp
 SOURCES+=src/gui/button.cpp
 SOURCES+=src/gui/channels.cpp
