@@ -132,7 +132,6 @@ CXlibToolkit::CXlibToolkit(void *parentWindow, CEditor *editor)
     pthread_create(&thread, NULL, &eventProc, (void*)this);
    
     offscreen = XCreatePixmap(this->display, window, GUI_WIDTH, GUI_HEIGHT, 24);
-    if (XCreatePixmap)
 
     memset(bmps, 0, sizeof(bmps));
     bmps[BMP_CHARS]   = LoadImage(BMP_PATH"chars.bmp");
@@ -156,33 +155,33 @@ CXlibToolkit::~CXlibToolkit()
     XDestroyWindow(display, window);
     XSync(display, false);
     XFreePixmap(display, offscreen);
-    XCloseDisplay(display);
     for (int i = 0; i < BMP_COUNT; i++)
     {
         if (bmps[i])
         {
-            XDestroyImage(bmps[i]);
+            XFreePixmap(display, bmps[i]);
         }
     }
+    XCloseDisplay(display);
 }
 
-XImage* CXlibToolkit::LoadImage(const char *path)
+Pixmap CXlibToolkit::LoadImage(const char *path)
 {
     FILE *f = fopen(path, "rb");
     if (!f)
     {
-        return NULL;
+        return 0;
     }
     BITMAPHEADER header = {0};
     if (!fread(&header, sizeof(header), 1, f))
     {
         fclose(f);
-        return NULL;
+        return 0;
     }
     if (header.fh.signature[0] != 'B' || header.fh.signature[1] != 'M')
     {
         fclose(f);
-        return NULL;
+        return 0;
     }
     
     char *data = (char*)malloc(header.v5.width * header.v5.height * 4);
@@ -193,7 +192,7 @@ XImage* CXlibToolkit::LoadImage(const char *path)
     {
         free(tmp);
         fclose(f);
-        return NULL;
+        return 0;
     }
     fclose(f);
     
@@ -217,7 +216,12 @@ XImage* CXlibToolkit::LoadImage(const char *path)
     {
         free(data);
     }
-    return image;
+    Pixmap pixmap = XCreatePixmap(this->display, window, header.v5.width, header.v5.height, 24);
+    GC gc = XCreateGC(display, pixmap, 0, 0);
+    XPutImage(display, pixmap, gc, image, 0, 0, 0, 0, header.v5.width, header.v5.height);
+    XFreeGC (display, gc);
+    XDestroyImage(image);
+    return pixmap;
 }
 
 void CXlibToolkit::CopyRect(int destX, int destY, int width, int height, int origBmp, int origX, int origY)
@@ -226,7 +230,7 @@ void CXlibToolkit::CopyRect(int destX, int destY, int width, int height, int ori
     {
         return;
     }
-    XPutImage(display, offscreen, gc, bmps[origBmp], origX, origY, destX, destY, width, height);
+    XCopyArea(display, bmps[origBmp], offscreen, gc, origX, origY, width, height, destX, destY);
     XClearArea(display, window, destX, destY, width, height, true);
 }
 

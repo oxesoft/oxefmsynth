@@ -19,14 +19,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 class CXlibToolkit : public CToolkit
 {
 private:
-    XImage* LoadImage(const char *path);
+    Pixmap LoadImage(const char *path);
 public:
     Display *display;
     Window   window;
     GC       gc;
     Atom     customMessage;
     Pixmap   offscreen;
-    XImage   *bmps[BMP_COUNT];
+    Pixmap   bmps[BMP_COUNT];
     bool     threadFinished;
     CEditor  *editor;
     CXlibToolkit(void *parentWindow, CEditor *editor);
