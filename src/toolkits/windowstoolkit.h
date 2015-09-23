@@ -16,17 +16,25 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "public.sdk/source/vst2.x/audioeffectx.h"
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+
 class CWindowsToolkit : public CToolkit
 {
 private:
-    HWND    hWnd;
-    HDC     hdc;
-    HDC     hdcMem;
-    HDC     hdcAux;
-    HBITMAP bitmap;
-    HBITMAP bmps[BMP_COUNT];
+    HWND         hWnd;
+    HDC          hdc;
+    HDC          hdcAux;
+    HBITMAP      bitmap;
+    HBITMAP      bmps[BMP_COUNT];
 public:
-    CWindowsToolkit(HINSTANCE hInstance, HWND hWnd);
+    HWND         parentWindow;
+    HDC          hdcMem;
+    AudioEffectX *effectx;
+    CSynthesizer *synth;
+    CEditor      *editor;
+    CWindowsToolkit(void *parentWindow, CEditor *editor, AudioEffectX *effectx, CSynthesizer *synth);
     ~CWindowsToolkit();
     void CopyRect(int destX, int destY, int width, int height, int origBmp, int origX, int origY);
     void SendMessageToHost(unsigned int messageID, unsigned int par1, unsigned int par2);
@@ -34,6 +42,5 @@ public:
     void StartMouseCapture();
     void StopMouseCapture();
     void OutputDebugString(char *text);
-    void *GetImageBuffer();
-    int  CommonWindowProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam, CEditor *editor, HWND systemWindow);
+    int  WaitWindowClosed();
 };

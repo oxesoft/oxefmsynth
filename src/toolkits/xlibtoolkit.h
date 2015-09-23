@@ -17,22 +17,25 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include <X11/Xlib.h>
+#include "public.sdk/source/vst2.x/audioeffectx.h"
 
 class CXlibToolkit : public CToolkit
 {
 private:
+    Pixmap bmps[BMP_COUNT];
     Pixmap LoadImage(const char *path);
 public:
-    Display *display;
-    Window   window;
-    GC       gc;
-    Atom     customMessage;
-    Atom     WM_DELETE_WINDOW;
-    Pixmap   offscreen;
-    Pixmap   bmps[BMP_COUNT];
-    bool     threadFinished;
-    CEditor  *editor;
-    CXlibToolkit(void *parentWindow, CEditor *editor);
+    Display      *display;
+    Window       window;
+    GC           gc;
+    Atom         customMessage;
+    Atom         WM_DELETE_WINDOW;
+    Pixmap       offscreen;
+    bool         threadFinished;
+    AudioEffectX *effectx;
+    CSynthesizer *synth;
+    CEditor      *editor;
+    CXlibToolkit(void *parentWindow, CEditor *editor, AudioEffectX *effectx, CSynthesizer *synth);
     ~CXlibToolkit();
     void CopyRect(int destX, int destY, int width, int height, int origBmp, int origX, int origY);
     void SendMessageToHost(unsigned int messageID, unsigned int par1, unsigned int par2);
@@ -40,6 +43,5 @@ public:
     void StartMouseCapture();
     void StopMouseCapture();
     void OutputDebugString(char *text);
-    void *GetImageBuffer();
-    void WaitWindowClosed();
+    int  WaitWindowClosed();
 };

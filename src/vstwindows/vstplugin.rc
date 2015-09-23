@@ -2,8 +2,8 @@
 #include "resource.h"
 #include "constants.h"
 
-IDI_ICONE               ICON    DISCARDABLE     "icon.ico"
-IDB_CARACTERES          BITMAP  DISCARDABLE     "chars.bmp"
+IDI_ICON                ICON    DISCARDABLE     "icon.ico"
+IDB_CHARS               BITMAP  DISCARDABLE     "chars.bmp"
 IDB_KNOB                BITMAP  DISCARDABLE     "knob.bmp"
 IDB_KNOB2               BITMAP  DISCARDABLE     "knob2.bmp"
 IDB_KNOB3               BITMAP  DISCARDABLE     "knob3.bmp"

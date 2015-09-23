@@ -31,10 +31,7 @@ public:
     virtual bool open(void *ptr);
     virtual void close();
     
-    AudioEffectX*   getEffectX()      { return effectx;            }
-    CSynthesizer*   getSynth()        { return synth;              }
     CEditor*        getEditor()       { return oxeeditor;          }
-    void*           getSystemWindow() { return systemWindow;       }
 private:
     AudioEffectX*   effectx;
     CSynthesizer*   synth;

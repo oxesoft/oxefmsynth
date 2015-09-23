@@ -14,14 +14,20 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-INCLUDES:=-Isrc/standalone
-INCLUDES+=-Isrc/synth
-INCLUDES+=-Isrc/gui
-INCLUDES+=-Isrc/toolkits
+ifeq ($(VST_PATH),)
+    $(error Please set the VST_PATH environment variable to the vstsdk2.4 path)
+endif
 
-SOURCES:=src/standalone/controller.cpp
+EXECUTABLE_NAME:=oxefmsynth
+
+INCLUDES:=-Isrc/vstcommon
+INCLUDES+=-Isrc/vstlinux
+INCLUDES+=-Isrc/gui
+INCLUDES+=-Isrc/synth
+INCLUDES+=-Isrc/toolkits
+INCLUDES+=-I$(VST_PATH)
+
 SOURCES+=src/standalone/main.cpp
-SOURCES+=src/toolkits/windowstoolkit.cpp
 SOURCES+=src/gui/button.cpp
 SOURCES+=src/gui/channels.cpp
 SOURCES+=src/gui/editor.cpp
@@ -33,33 +39,54 @@ SOURCES+=src/synth/buffers.cpp
 SOURCES+=src/synth/delay.cpp
 SOURCES+=src/synth/envelop.cpp
 SOURCES+=src/synth/filter.cpp
-SOURCES+=src/synth/persist.cpp
+SOURCES+=src/synth/noise.cpp
 SOURCES+=src/synth/note.cpp
 SOURCES+=src/synth/oscillator.cpp
+SOURCES+=src/synth/persist.cpp
 SOURCES+=src/synth/programs.cpp
 SOURCES+=src/synth/reverb.cpp
-SOURCES+=src/synth/noise.cpp
 SOURCES+=src/synth/synthesizer.cpp
 
-LIBS:=-ldsound -lwinmm -lgdi32
+ifeq ($(DEBUG),YES)
+    CFLAGS+=-g -O0
+else
+    CFLAGS+=-s -O3
+endif
 
 ifeq ($(OS),Windows_NT)
-	CC:=g++.exe
-	RC:=windres.exe
+    EXECUTABLE_NAME:=$(EXECUTABLE_NAME).exe
+    CC:=g++.exe
+    RC:=windres.exe
+    RC_CMD:=$(RC) -Isrc/synth -Iskins/default src/standalone/standalone.rc resources.o
+    RM_CMD:=rm resources.o
+    INCLUDES+=-Isrc/standalone
+    SOURCES+=src/toolkits/windowstoolkit.cpp
+    LDFLAGS+=-lgdi32
+    LDFLAGS+=resources.o
 else
-    CC:=i686-w64-mingw32-g++
-    RC:=i686-w64-mingw32-windres
-    ifeq ($(shell which $(CC)),)
-        $(error Please install mingw-w64. Skipping...)
+    ifeq ($(TARGET),WIN32)
+        EXECUTABLE_NAME:=$(EXECUTABLE_NAME).exe
+        CC:=i686-w64-mingw32-g++
+        RC:=i686-w64-mingw32-windres
+        RC_CMD:=$(RC) -Isrc/synth -Iskins/default src/standalone/standalone.rc resources.o
+        RM_CMD:=rm resources.o
+        LDFLAGS+=-static
+        INCLUDES+=-Isrc/standalone
+        SOURCES+=src/toolkits/windowstoolkit.cpp
+        LDFLAGS+=-lgdi32
+        LDFLAGS+=resources.o
+    else
+        CC:=g++
+        LDFLAGS+=-lX11
+        LDFLAGS+=-lpthread
+        SOURCES+=src/toolkits/xlibtoolkit.cpp
     endif
 endif
 
-all: resources.o
-	@$(CC) -static -s -Os -o oxefmsynth.exe -mwindows $(CFLAGS) $(SOURCES) $(INCLUDES) $(LIBS) resources.o
-	@rm resources.o
-
-resources.o:
-	@$(RC) -Isrc/synth -Iskins/default src/standalone/standalone.rc $@
+all:
+	@$(RC_CMD)
+	@$(CC) -o $(EXECUTABLE_NAME) -DEXECUTABLE_NAME=\"$(EXECUTABLE_NAME)\" $(CFLAGS) $(SOURCES) $(INCLUDES) $(LDFLAGS)
+	@$(RM_CMD)
 
 clean:
-	rm oxefmsynth.exe
+	@rm -f $(EXECUTABLE_NAME)

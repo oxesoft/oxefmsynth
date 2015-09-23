@@ -16,17 +16,154 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-#include <windowsx.h>
-#include <strsafe.h>
-#include <stdio.h>
 #include "editor.h"
 #include "windowstoolkit.h"
 #include "resource.h"
+#include <windowsx.h>
+#include <strsafe.h>
+#include <stdio.h>
 
 #define TIMER_RESOLUTION_MS 20
 #define BMP_PATH "skin\\"
+
+static int g_useCount = 0;
+extern void* hInstance;
+
+LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+{
+#ifdef _WIN64
+    CWindowsToolkit* toolkit = (CWindowsToolkit*)GetWindowLongPtr(hWnd, GWLP_USERDATA);
+#else
+    CWindowsToolkit* toolkit = (CWindowsToolkit*)GetWindowLong   (hWnd, GWL_USERDATA );
+#endif
+    if (!toolkit)
+    {
+        return DefWindowProc(hWnd, message, wParam, lParam);
+    }
+    switch (message)
+    {
+    case WM_LBUTTONDBLCLK:
+    {
+        toolkit->editor->OnLButtonDblClick(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+        return 0;
+    }
+    case WM_LBUTTONDOWN:
+    {
+        toolkit->editor->OnLButtonDown(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+        SetFocus(hWnd);
+        return 0;
+    }
+    case WM_LBUTTONUP:
+    {
+        toolkit->editor->OnLButtonUp();
+        SetFocus(hWnd);
+        return 0;
+    }
+    case WM_KEYDOWN:
+    {
+        // from juce_win32_Windowing.cpp:doKeyDown
+        const UINT keyChar  = MapVirtualKey ((UINT) wParam, 2);
+        const UINT scanCode = MapVirtualKey ((UINT) wParam, 0);
+        BYTE keyState[256];
+        GetKeyboardState (keyState);
+        
+        WCHAR text[16] = { 0 };
+        if (ToUnicode ((UINT) wParam, scanCode, keyState, text, 8, 0) != 1)
+            text[0] = 0;
+        if (toolkit->editor->OnChar(text[0]) == true)
+            return 0;
+        else if (toolkit->parentWindow)
+            PostMessage(GetParent(toolkit->parentWindow), message, wParam, lParam);
+        // ---------------------------------------
+        break;
+    }
+    case WM_MOUSEMOVE:
+    {
+        toolkit->editor->OnMouseMove(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+        return 0;
+    }
+    case WM_MOUSEWHEEL:
+    {
+        RECT rect;
+        POINT point;
+        point.x = GET_X_LPARAM(lParam); 
+        point.y = GET_Y_LPARAM(lParam);
+        
+        GetWindowRect(hWnd, &rect);
+        GetCursorPos(&point);
+        if (PtInRect(&rect, point))
+        {
+            int zDelta = GET_WHEEL_DELTA_WPARAM(wParam);
+            zDelta /= WHEEL_DELTA;
+            ScreenToClient(hWnd, &point);
+            toolkit->editor->OnMouseWheel(point.x, point.y, zDelta);
+            SetFocus(hWnd);
+            return 0;
+        }
+        break;
+    }
+    case WM_PAINT:
+    {
+        PAINTSTRUCT ps;
+        HDC dc = BeginPaint(hWnd, &ps);
+        RECT *rect = &ps.rcPaint;
+        int w = rect->right  - rect->left;
+        int h = rect->bottom - rect->top;
+        BitBlt(dc, rect->left, rect->top, w, h, toolkit->hdcMem, rect->left, rect->top, SRCCOPY);
+        EndPaint(hWnd, &ps); 
+        return 0;
+    }
+    case WM_TIMER:
+    {
+        toolkit->editor->Update();
+        return 0;
+    }
+    case WM_USER + UPDATE_DISPLAY:
+    {
+        if (toolkit->effectx)
+        {
+            toolkit->effectx->updateDisplay();
+        }
+        return 0L;
+    }
+    case WM_USER + SET_PROGRAM:
+    {
+        char channel = (char)wParam;
+        unsigned char numprog = (unsigned char)lParam;
+        if (channel == 0)
+        {
+            if (toolkit->effectx)
+            {
+                toolkit->effectx->setProgram(numprog);
+                toolkit->effectx->updateDisplay();
+            }
+        }
+        else
+        {
+            toolkit->synth->SendEvent(0xC0 + channel, numprog, 0, 0);
+        }
+        return 0L;
+    }
+    case WM_USER + SET_PARAMETER:
+    {
+        int index = (int)wParam;
+        float value = (float)lParam / MAXPARVALUE;
+        if (toolkit->effectx)
+        {
+            toolkit->effectx->setParameterAutomated(index, value);
+        }
+        return 0L;
+    }
+    case WM_DESTROY:
+    {
+        PostQuitMessage(0);
+        return 0L;
+    }
+    default:
+        break;
+    }
+    return DefWindowProc (hWnd, message, wParam, lParam);
+}
 
 void GetResourcesPath(char *path, int size)
 {
@@ -52,9 +189,87 @@ void GetResourcesPath(char *path, int size)
     }
 }
 
-CWindowsToolkit::CWindowsToolkit(HINSTANCE hInstance, HWND hWnd)
+CWindowsToolkit::CWindowsToolkit(void *parentWindow, CEditor *editor, AudioEffectX *effectx, CSynthesizer *synth)
 {
-    this->hWnd = hWnd;
+    this->parentWindow = (HWND)parentWindow;
+    this->editor  = editor;
+    this->effectx = effectx;
+    this->synth   = synth;
+
+    g_useCount++;
+    if (g_useCount == 1)
+    {
+        WNDCLASSW windowClass;
+        windowClass.style         = CS_DBLCLKS;
+        windowClass.lpfnWndProc   = WindowProc;
+        windowClass.cbClsExtra    = 0;
+        windowClass.cbWndExtra    = 0;
+        windowClass.hInstance     = (HINSTANCE)hInstance;
+        windowClass.hIcon         = LoadIcon((HINSTANCE)hInstance,MAKEINTRESOURCE(IDI_ICON));
+        windowClass.hCursor       = LoadCursor( NULL, IDC_ARROW );
+        windowClass.hbrBackground = NULL;
+        windowClass.lpszMenuName  = 0;
+        windowClass.lpszClassName = L"OxeVstEditorClass";
+        RegisterClassW(&windowClass);
+    }
+
+    if (!parentWindow)
+    {
+        RECT rect;
+        rect.left   = 100;
+        rect.top    = 100;
+        rect.right  = GUI_WIDTH;
+        rect.bottom = GUI_HEIGHT;
+        AdjustWindowRect(&rect, WS_SYSMENU | WS_CAPTION, FALSE);
+        rect.bottom += GetSystemMetrics(SM_CYCAPTION);
+        rect.bottom += GetSystemMetrics(SM_CYFIXEDFRAME);
+        rect.right  += GetSystemMetrics(SM_CXFIXEDFRAME);
+        
+        this->hWnd = CreateWindowW
+        (
+            L"OxeVstEditorClass",
+            L"",
+            WS_SYSMENU | WS_CAPTION | WS_MINIMIZEBOX,
+            rect.left,
+            rect.top,
+            rect.right,
+            rect.bottom, 
+            0,
+            0,
+            (HINSTANCE)hInstance,
+            NULL
+        );
+    }
+    else
+    {
+        this->hWnd = CreateWindowExW
+        (
+            0,
+            L"OxeVstEditorClass",
+            L"",
+            WS_CHILD | WS_VISIBLE,
+            0,
+            0,
+            GUI_WIDTH,
+            GUI_HEIGHT, 
+            (HWND)parentWindow,
+            NULL,
+            (HINSTANCE)hInstance,
+            NULL
+        );
+    }
+
+#ifdef _WIN64
+    SetWindowLongPtr(hWnd, GWLP_USERDATA, (LONG_PTR)this);
+#else
+    SetWindowLong(hWnd, GWL_USERDATA, (LONG)this);
+#endif
+
+    if (!parentWindow)
+    {
+        ShowWindow(this->hWnd, SW_SHOWNORMAL);
+    }
+
     // load resources
     char dll_path[MAX_PATH];
     char tmp_path[MAX_PATH];
@@ -83,14 +298,14 @@ CWindowsToolkit::CWindowsToolkit(HINSTANCE hInstance, HWND hWnd)
     StringCchCopyA(tmp_path, MAX_PATH, dll_path);
     StringCchCatA (tmp_path, MAX_PATH, BMP_PATH"ops.bmp");
     bmps[BMP_OPS]     = (HBITMAP)LoadImageA(NULL, tmp_path, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-    if (!bmps[BMP_CHARS  ]) bmps[BMP_CHARS  ] = LoadBitmap(hInstance,MAKEINTRESOURCE(IDB_CARACTERES));
-    if (!bmps[BMP_KNOB   ]) bmps[BMP_KNOB   ] = LoadBitmap(hInstance,MAKEINTRESOURCE(IDB_KNOB));
-    if (!bmps[BMP_KNOB2  ]) bmps[BMP_KNOB2  ] = LoadBitmap(hInstance,MAKEINTRESOURCE(IDB_KNOB2));
-    if (!bmps[BMP_KNOB3  ]) bmps[BMP_KNOB3  ] = LoadBitmap(hInstance,MAKEINTRESOURCE(IDB_KNOB3));
-    if (!bmps[BMP_KEY    ]) bmps[BMP_KEY    ] = LoadBitmap(hInstance,MAKEINTRESOURCE(IDB_CHAVE));
-    if (!bmps[BMP_BG     ]) bmps[BMP_BG     ] = LoadBitmap(hInstance,MAKEINTRESOURCE(IDB_FUNDO));
-    if (!bmps[BMP_BUTTONS]) bmps[BMP_BUTTONS] = LoadBitmap(hInstance,MAKEINTRESOURCE(IDB_BUTTONS));
-    if (!bmps[BMP_OPS    ]) bmps[BMP_OPS    ] = LoadBitmap(hInstance,MAKEINTRESOURCE(IDB_OPS));
+    if (!bmps[BMP_CHARS  ]) bmps[BMP_CHARS  ] = LoadBitmap((HINSTANCE)hInstance,MAKEINTRESOURCE(IDB_CHARS));
+    if (!bmps[BMP_KNOB   ]) bmps[BMP_KNOB   ] = LoadBitmap((HINSTANCE)hInstance,MAKEINTRESOURCE(IDB_KNOB));
+    if (!bmps[BMP_KNOB2  ]) bmps[BMP_KNOB2  ] = LoadBitmap((HINSTANCE)hInstance,MAKEINTRESOURCE(IDB_KNOB2));
+    if (!bmps[BMP_KNOB3  ]) bmps[BMP_KNOB3  ] = LoadBitmap((HINSTANCE)hInstance,MAKEINTRESOURCE(IDB_KNOB3));
+    if (!bmps[BMP_KEY    ]) bmps[BMP_KEY    ] = LoadBitmap((HINSTANCE)hInstance,MAKEINTRESOURCE(IDB_CHAVE));
+    if (!bmps[BMP_BG     ]) bmps[BMP_BG     ] = LoadBitmap((HINSTANCE)hInstance,MAKEINTRESOURCE(IDB_FUNDO));
+    if (!bmps[BMP_BUTTONS]) bmps[BMP_BUTTONS] = LoadBitmap((HINSTANCE)hInstance,MAKEINTRESOURCE(IDB_BUTTONS));
+    if (!bmps[BMP_OPS    ]) bmps[BMP_OPS    ] = LoadBitmap((HINSTANCE)hInstance,MAKEINTRESOURCE(IDB_OPS));
     // create offscreen buffer
     hdc = GetDC(hWnd); 
     hdcMem = CreateCompatibleDC(hdc);
@@ -103,6 +318,11 @@ CWindowsToolkit::CWindowsToolkit(HINSTANCE hInstance, HWND hWnd)
 CWindowsToolkit::~CWindowsToolkit()
 {
     KillTimer(hWnd, 0);
+    g_useCount--;
+    if (g_useCount == 0)
+    {
+        UnregisterClassW(L"OxeVstEditorClass", (HINSTANCE)hInstance);
+    }
     DeleteDC(hdcAux);
     DeleteDC(hdcMem);
     DeleteObject(bitmap);
@@ -162,97 +382,13 @@ void CWindowsToolkit::OutputDebugString(char *text)
     printf("%s\n", text);
 }
 
-void *CWindowsToolkit::GetImageBuffer()
+int CWindowsToolkit::WaitWindowClosed()
 {
-    return hdcMem;
-}
-
-int CWindowsToolkit::CommonWindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam, CEditor *editor, HWND systemWindow)
-{
-    if (!editor)
+    MSG msg;
+    while( GetMessage( &msg, NULL, 0, 0 ) )
     {
-        return -1;
+        TranslateMessage( &msg );
+        DispatchMessage( &msg );
     }
-    switch (message)
-    {
-    case WM_LBUTTONDBLCLK:
-    {
-        editor->OnLButtonDblClick(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
-        return 0;
-    }
-    case WM_LBUTTONDOWN:
-    {
-        editor->OnLButtonDown(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
-        SetFocus(hWnd);
-        return 0;
-    }
-    case WM_LBUTTONUP:
-    {
-        editor->OnLButtonUp();
-        SetFocus(hWnd);
-        return 0;
-    }
-    case WM_KEYDOWN:
-    {
-        // from juce_win32_Windowing.cpp:doKeyDown
-        const UINT keyChar  = MapVirtualKey ((UINT) wParam, 2);
-        const UINT scanCode = MapVirtualKey ((UINT) wParam, 0);
-        BYTE keyState[256];
-        GetKeyboardState (keyState);
-        
-        WCHAR text[16] = { 0 };
-        if (ToUnicode ((UINT) wParam, scanCode, keyState, text, 8, 0) != 1)
-            text[0] = 0;
-        if (editor->OnChar(text[0]) == true)
-            return 0;
-        else if (systemWindow)
-            PostMessage(GetParent(systemWindow), message, wParam, lParam);
-        // ---------------------------------------
-        break;
-    }
-    case WM_MOUSEMOVE:
-    {
-        editor->OnMouseMove(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
-        return 0;
-    }
-    case WM_MOUSEWHEEL:
-    {
-        RECT rect;
-        POINT point;
-        point.x = GET_X_LPARAM(lParam); 
-        point.y = GET_Y_LPARAM(lParam);
-        
-        GetWindowRect(hWnd, &rect);
-        GetCursorPos(&point);
-        if (PtInRect(&rect, point))
-        {
-            int zDelta = GET_WHEEL_DELTA_WPARAM(wParam);
-            zDelta /= WHEEL_DELTA;
-            ScreenToClient(hWnd, &point);
-            editor->OnMouseWheel(point.x, point.y, zDelta);
-            SetFocus(hWnd);
-            return 0;
-        }
-        break;
-    }
-    case WM_PAINT:
-    {
-        PAINTSTRUCT ps;
-        HDC dc = BeginPaint(hWnd, &ps);
-        RECT *rect = &ps.rcPaint;
-        int w = rect->right  - rect->left;
-        int h = rect->bottom - rect->top;
-        BitBlt(dc, rect->left, rect->top, w, h, (HDC)editor->GetToolkit()->GetImageBuffer(), rect->left, rect->top, SRCCOPY);
-        EndPaint(hWnd, &ps); 
-        return 0;
-    }
-    case WM_TIMER:
-    {
-        editor->Update();
-        return 0;
-    }
-    default:
-        break;
-    }
-    return -1;
+    return (int)msg.wParam;
 }

@@ -29,7 +29,7 @@ public:
     virtual void StopMouseCapture() {}
     virtual void OutputDebugString(char *text) {}
     virtual void *GetImageBuffer() { return 0; }
-    virtual void WaitWindowClosed() {}
+    virtual int  WaitWindowClosed() {}
 };
 
 #endif

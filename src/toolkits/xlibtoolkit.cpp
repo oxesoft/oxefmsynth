@@ -109,15 +109,18 @@ void* eventProc(void* ptr)
     return NULL;
 }
 
-CXlibToolkit::CXlibToolkit(void *parentWindow, CEditor *editor)
+CXlibToolkit::CXlibToolkit(void *parentWindow, CEditor *editor, AudioEffectX *effectx, CSynthesizer *synth)
 {
+    this->editor  = editor;
+    this->effectx = effectx;
+    this->synth   = synth;
+
     char *displayName = getenv("DISPLAY");
     if (!displayName || !strlen(displayName))
     {
         displayName = (char*)":0.0";
     }
     this->display = XOpenDisplay(displayName);
-    this->editor  = editor;
     
     if (!parentWindow)
     {
@@ -274,15 +277,11 @@ void CXlibToolkit::OutputDebugString(char *text)
     printf("%s\n", text);
 }
 
-void *CXlibToolkit::GetImageBuffer()
-{
-    return 0;
-}
-
-void CXlibToolkit::WaitWindowClosed()
+int CXlibToolkit::WaitWindowClosed()
 {
     while (!threadFinished)
     {
         usleep(1000 * 100);
     }
+    return 0;
 }

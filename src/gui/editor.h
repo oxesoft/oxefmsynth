@@ -73,5 +73,4 @@ public:
     void  GetParName       (int index, char* text);
     void  Update           ();
     void  SetToolkit       (CToolkit *toolkit);
-    CToolkit *GetToolkit   (void) { return this->toolkit; }
 };

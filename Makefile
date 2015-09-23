@@ -27,4 +27,4 @@ all:
 	@$(MAKE) -s -f Makefile.vstlinux
 
 clean:
-	@rm -f converter oxefmsynthdemo oxefmsynthdemo.exe oxefmsynthdemo.wav oxefmsynth.exe oxevst64.dll oxevst.dll oxevst.so
+	@rm -f converter oxefmsynthdemo oxefmsynthdemo.exe oxefmsynthdemo.wav oxefmsynth oxefmsynth.exe oxevst64.dll oxevst.dll oxevst.so

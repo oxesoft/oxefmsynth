@@ -17,7 +17,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include "public.sdk/source/vst2.x/audioeffectx.h"
-#include <X11/Xlib.h>
 #include "oxevsteditor.h"
 #include "oxevst.h"
 #include "xlibtoolkit.h"
@@ -58,13 +57,14 @@ bool COxeVstEditor::open (void *ptr)
     // Remember the parent window
     systemWindow = ptr;
 
-    this->toolkit = new CXlibToolkit(ptr, oxeeditor);
+    this->toolkit = new CXlibToolkit(ptr, oxeeditor, effectx, synth);
     oxeeditor->SetToolkit(this->toolkit);
 
     return true;
 }
 
 //-----------------------------------------------------------------------------
+
 void COxeVstEditor::close ()
 {
     oxeeditor->SetToolkit(NULL);

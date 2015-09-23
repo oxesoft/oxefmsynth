@@ -16,8 +16,8 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#define IDI_ICONE                       100
-#define IDB_CARACTERES                  101
+#define IDI_ICON                        100
+#define IDB_CHARS                       101
 #define IDB_KNOB                        102
 #define IDB_KNOB2                       103
 #define IDB_KNOB3                       104
