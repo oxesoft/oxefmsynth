@@ -16,6 +16,8 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <X11/Xlib.h>
+
 class CXlibToolkit : public CToolkit
 {
 private:
@@ -25,6 +27,7 @@ public:
     Window   window;
     GC       gc;
     Atom     customMessage;
+    Atom     WM_DELETE_WINDOW;
     Pixmap   offscreen;
     Pixmap   bmps[BMP_COUNT];
     bool     threadFinished;
@@ -38,4 +41,5 @@ public:
     void StopMouseCapture();
     void OutputDebugString(char *text);
     void *GetImageBuffer();
+    void WaitWindowClosed();
 };

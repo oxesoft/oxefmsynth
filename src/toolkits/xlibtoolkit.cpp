@@ -16,15 +16,14 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <X11/Xlib.h>
+#include "editor.h"
+#include "xlibtoolkit.h"
 #include <X11/Xutil.h>
 #include <pthread.h>
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
-#include "editor.h"
-#include "xlibtoolkit.h"
 
 #define TIMER_RESOLUTION_MS 20
 #define BMP_PATH "skins/default/"
@@ -59,6 +58,7 @@ void* eventProc(void* ptr)
     XEvent event;
     CXlibToolkit *toolkit = (CXlibToolkit*)ptr;
     bool stopThread = false;
+    usleep(1000 * 1);
     while (!stopThread)
     {
         XNextEvent(toolkit->display, &event);
@@ -85,7 +85,6 @@ void* eventProc(void* ptr)
                 break;
             case ClientMessage:
             {
-                printf("ClientMessage\n");
                 XClientMessageEvent *message = (XClientMessageEvent *)&event;
                 if (message->message_type == toolkit->customMessage)
                 {
@@ -97,6 +96,11 @@ void* eventProc(void* ptr)
                         stopThread = true;
                         break;
                     }
+                }
+                else if (message->data.l[0] == toolkit->WM_DELETE_WINDOW)
+                {
+                    stopThread = true;
+                    break;
                 }
             }
         }
@@ -114,23 +118,23 @@ CXlibToolkit::CXlibToolkit(void *parentWindow, CEditor *editor)
     }
     this->display = XOpenDisplay(displayName);
     this->editor  = editor;
+    
     if (!parentWindow)
     {
         parentWindow = (void*)RootWindow(this->display, DefaultScreen(this->display));
     }
+    
     window = XCreateSimpleWindow(this->display, (Window)parentWindow, 0, 0, GUI_WIDTH, GUI_HEIGHT, 0, 0, 0);
     
     gc = XCreateGC(this->display, window, 0, 0);
     XSelectInput(this->display, window, ButtonPressMask | ButtonReleaseMask | ExposureMask | KeyPressMask);
     XMapWindow(this->display, window);
     XFlush(this->display);
+        
+    this->customMessage    = XInternAtom(this->display, "_customMessage"  , false);
+    this->WM_DELETE_WINDOW = XInternAtom(this->display, "WM_DELETE_WINDOW", false); 
+    XSetWMProtocols(this->display, window, &WM_DELETE_WINDOW, 1);
     
-    this->customMessage = XInternAtom(display, "_customMessage", false);
-    
-    threadFinished = false;
-    pthread_t thread;
-    pthread_create(&thread, NULL, &eventProc, (void*)this);
-   
     offscreen = XCreatePixmap(this->display, window, GUI_WIDTH, GUI_HEIGHT, 24);
 
     memset(bmps, 0, sizeof(bmps));
@@ -142,6 +146,10 @@ CXlibToolkit::CXlibToolkit(void *parentWindow, CEditor *editor)
     bmps[BMP_BG]      = LoadImage(BMP_PATH"bg.bmp");
     bmps[BMP_BUTTONS] = LoadImage(BMP_PATH"buttons.bmp");
     bmps[BMP_OPS]     = LoadImage(BMP_PATH"ops.bmp");
+
+    threadFinished = false;
+    pthread_t thread;
+    pthread_create(&thread, NULL, &eventProc, (void*)this);
 }
 
 CXlibToolkit::~CXlibToolkit()
@@ -149,7 +157,7 @@ CXlibToolkit::~CXlibToolkit()
     SendMessageToHost(KILL_EDITOR, 0, 0);
     while (!threadFinished)
     {
-        usleep(1000);
+        usleep(1000 * 1);
     }
     XFreeGC(display, gc);
     XDestroyWindow(display, window);
@@ -219,7 +227,7 @@ Pixmap CXlibToolkit::LoadImage(const char *path)
     Pixmap pixmap = XCreatePixmap(this->display, window, header.v5.width, header.v5.height, 24);
     GC gc = XCreateGC(display, pixmap, 0, 0);
     XPutImage(display, pixmap, gc, image, 0, 0, 0, 0, header.v5.width, header.v5.height);
-    XFreeGC (display, gc);
+    XFreeGC(display, gc);
     XDestroyImage(image);
     return pixmap;
 }
@@ -269,4 +277,12 @@ void CXlibToolkit::OutputDebugString(char *text)
 void *CXlibToolkit::GetImageBuffer()
 {
     return 0;
+}
+
+void CXlibToolkit::WaitWindowClosed()
+{
+    while (!threadFinished)
+    {
+        usleep(1000 * 100);
+    }
 }
