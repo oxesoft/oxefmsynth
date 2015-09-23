@@ -78,7 +78,7 @@ CWindowsToolkit::CWindowsToolkit(HINSTANCE hInstance, HWND hWnd)
     StringCchCatA (tmp_path, MAX_PATH, BMP_PATH"bg.bmp");
     bmps[BMP_BG]      = (HBITMAP)LoadImageA(NULL, tmp_path, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
     StringCchCopyA(tmp_path, MAX_PATH, dll_path);
-    StringCchCatA (tmp_path, MAX_PATH, BMP_PATH"buttons.bmp ");
+    StringCchCatA (tmp_path, MAX_PATH, BMP_PATH"buttons.bmp");
     bmps[BMP_BUTTONS] = (HBITMAP)LoadImageA(NULL, tmp_path, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
     StringCchCopyA(tmp_path, MAX_PATH, dll_path);
     StringCchCatA (tmp_path, MAX_PATH, BMP_PATH"ops.bmp");

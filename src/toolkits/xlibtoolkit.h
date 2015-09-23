@@ -18,6 +18,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 class CXlibToolkit : public CToolkit
 {
+private:
+    XImage* LoadImage(const char *path);
 public:
     Display *display;
     Window   window;
@@ -25,7 +27,6 @@ public:
     Atom     customMessage;
     Pixmap   offscreen;
     XImage   *bmps[BMP_COUNT];
-    char     *bmpsData[BMP_COUNT];
     bool     threadFinished;
     CEditor  *editor;
     CXlibToolkit(void *parentWindow, CEditor *editor);
