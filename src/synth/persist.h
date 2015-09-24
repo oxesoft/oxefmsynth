@@ -20,7 +20,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 typedef void CPersist;
 #else
 
-#define MAX_FILENAME   64
 #define MAX_BANKS      8
 #define SOUNDBANK_SIZE 90688
 
@@ -28,7 +27,7 @@ class CPersist
 {
 private:
     unsigned char banks[MAX_BANKS][SOUNDBANK_SIZE];
-    char SoundBankNames[MAX_BANKS][MAX_FILENAME];
+    char SoundBankNames[MAX_BANKS][TEXT_SIZE];
     int  banks_count;
     int  bank_from_host;
 public:

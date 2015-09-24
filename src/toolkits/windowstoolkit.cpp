@@ -118,42 +118,6 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
         toolkit->editor->Update();
         return 0;
     }
-    case WM_USER + UPDATE_DISPLAY:
-    {
-        if (toolkit->effectx)
-        {
-            toolkit->effectx->updateDisplay();
-        }
-        return 0L;
-    }
-    case WM_USER + SET_PROGRAM:
-    {
-        char channel = (char)wParam;
-        unsigned char numprog = (unsigned char)lParam;
-        if (channel == 0)
-        {
-            if (toolkit->effectx)
-            {
-                toolkit->effectx->setProgram(numprog);
-                toolkit->effectx->updateDisplay();
-            }
-        }
-        else
-        {
-            toolkit->synth->SendEvent(0xC0 + channel, numprog, 0, 0);
-        }
-        return 0L;
-    }
-    case WM_USER + SET_PARAMETER:
-    {
-        int index = (int)wParam;
-        float value = (float)lParam / MAXPARVALUE;
-        if (toolkit->effectx)
-        {
-            toolkit->effectx->setParameterAutomated(index, value);
-        }
-        return 0L;
-    }
     case WM_DESTROY:
     {
         PostQuitMessage(0);
@@ -354,16 +318,42 @@ void CWindowsToolkit::CopyRect(int destX, int destY, int width, int height, int 
 
 void CWindowsToolkit::SendMessageToHost(unsigned int messageID, unsigned int par1, unsigned int par2)
 {
-    PostMessage(this->hWnd, WM_USER + messageID, par1, par2);
-}
-
-void CWindowsToolkit::GetMousePosition(int *x, int *y)
-{
-    POINT point;
-    GetCursorPos(&point);
-    ScreenToClient(this->hWnd, &point);
-    *x = point.x;
-    *y = point.y;
+    switch (messageID)
+    {
+        case UPDATE_DISPLAY:
+        {
+            if (effectx)
+            {
+                effectx->updateDisplay();
+            }
+            break;
+        }
+        case SET_PROGRAM:
+        {
+            char channel = (char)par1;
+            unsigned char numprog = (unsigned char)par2;
+            if (channel == 0 && effectx)
+            {
+                effectx->setProgram(numprog);
+                effectx->updateDisplay();
+            }
+            else if (synth)
+            {
+                synth->SendEvent(0xC0 + channel, numprog, 0, 0);
+            }
+            break;
+        }
+        case SET_PARAMETER:
+        {
+            int index = (int)par1;
+            float value = (float)par2 / MAXPARVALUE;
+            if (effectx)
+            {
+                effectx->setParameterAutomated(index, value);
+            }
+            break;
+        }
+    }
 }
 
 void CWindowsToolkit::StartMouseCapture()

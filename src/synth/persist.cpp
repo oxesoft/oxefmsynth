@@ -29,6 +29,10 @@ CPersist::CPersist()
     bank_from_host = -1;
     banks_count = 0;
     memset(banks, 0, sizeof(banks));
+    for (int i = 0; i < MAX_BANKS; i++)
+    {
+        memset(SoundBankNames[i], 0, TEXT_SIZE);
+    }
     AddBank((void*)bank0, sizeof(bank0), (char*)"bank0 (internal)", false);
     AddBank((void*)bank1, sizeof(bank1), (char*)"bank1 (internal)", false);
 }
@@ -58,7 +62,7 @@ int CPersist::AddBank(void *bank, unsigned int size, char *name, bool from_host)
     if (bank != NULL && size == SOUNDBANK_SIZE)
     {
         memcpy(banks[index], bank, size);
-        strncpy(SoundBankNames[index], name, MAX_PATH);
+        strncpy(SoundBankNames[index], name, TEXT_SIZE);
     }
     return index;
 }
@@ -70,7 +74,7 @@ int CPersist::GetNumberBanks()
 
 void CPersist::GetBankName(char *str, int index)
 {
-    strncpy(str, SoundBankNames[index], MAX_FILENAME);
+    strncpy(str, SoundBankNames[index], TEXT_SIZE);
 }
 
 void* CPersist::GetSoundBank(int index)

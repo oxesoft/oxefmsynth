@@ -47,6 +47,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define OCTAVES_PITCH_CURVE 3.f      // number of octaves up and down
 #define MIDICHANNELS        16
 #define STEREOPHONIC        2
+#define TEXT_SIZE           32
 
 // ------------------------------------------------------------------
 // math constants
@@ -142,8 +143,7 @@ enum
 enum {
     UPDATE_DISPLAY,
     SET_PROGRAM   ,
-    SET_PARAMETER ,
-    KILL_EDITOR
+    SET_PARAMETER
 };
 
 #ifdef WIN32

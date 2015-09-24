@@ -369,6 +369,8 @@ CEditor::CEditor(CSynthesizer *synthesizer)
     }
 
     changingControl = false;
+    this->currentX  = -1;
+    this->currentY  = -1;
 }
 
 CEditor::~CEditor()
@@ -548,6 +550,8 @@ void CEditor::OnLButtonUp()
 
 void CEditor::OnMouseMove(int x, int y)
 {
+    this->currentX = x;
+    this->currentY = y;
     if (changingControl)
     {
         char str[TEXT_SIZE];
@@ -617,19 +621,13 @@ void CEditor::Update()
         changingControl = false;
     }
     // hover feature
-    int x = 0;
-    int y = 0;
-    if (toolkit)
-    {
-        toolkit->GetMousePosition(&x, &y);
-    }
-    if (x < 0 || y < 0 || changingControl)
+    if (currentX < 0 || currentY < 0 || changingControl)
     {
         return;
     }
-    for (int i=0;i<GUI_CONTROLS;i++)
+    for (int i = 0; i < GUI_CONTROLS; i++)
     {
-        if (ctl[i]->IsMouseOver(x, y) && cID != i)
+        if (ctl[i]->IsMouseOver(currentX, currentY) && cID != i)
         {
             cID = i;
             char str[TEXT_SIZE];

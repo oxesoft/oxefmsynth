@@ -58,6 +58,7 @@ void* eventProc(void* ptr)
     XEvent event;
     CXlibToolkit *toolkit = (CXlibToolkit*)ptr;
     bool stopThread = false;
+    unsigned int time = 0;
     usleep(1000 * 1);
     while (!stopThread)
     {
@@ -68,36 +69,52 @@ void* eventProc(void* ptr)
         }
         switch (event.type) 
         {
-            case ButtonPress: 
-                printf("ButtonPress\n");
+            case ButtonPress:
+            {
+                XButtonEvent *e = (XButtonEvent*)&event;
+                switch (e->button)
+                {
+                case 1:
+                    if (e->time - time > 400)
+                    {
+                        toolkit->editor->OnLButtonDown(e->x, e->y);
+                    }
+                    else
+                    {
+                        toolkit->editor->OnLButtonDblClick(e->x, e->y);
+                    }
+                    time = e->time;
+                    break;
+                case 4:
+                    toolkit->editor->OnMouseWheel(e->x, e->y,  1);
+                    break;
+                case 5:
+                    toolkit->editor->OnMouseWheel(e->x, e->y, -1);
+                    break;
+                }
                 break;
+            }
             case ButtonRelease:
-                printf("ButtonRelease\n");
+            {
+                toolkit->editor->OnLButtonUp();
                 break;
+            }
+            case MotionNotify:
+            {
+                XMotionEvent *e = (XMotionEvent*)&event;
+                toolkit->editor->OnMouseMove(e->x, e->y);
+                break;
+            }
             case Expose:
             {
                 XGraphicsExposeEvent *e = (XGraphicsExposeEvent*)&event;
                 XCopyArea(toolkit->display, toolkit->offscreen, toolkit->window, toolkit->gc, e->x, e->y, e->width, e->height, e->x, e->y);
                 break;
             }
-            case KeyPress: 
-                printf("KeyPress\n");
-                break;
             case ClientMessage:
             {
                 XClientMessageEvent *message = (XClientMessageEvent *)&event;
-                if (message->message_type == toolkit->customMessage)
-                {
-                    unsigned int messageID = message->data.l[0];
-                    unsigned int par1      = message->data.l[1];
-                    unsigned int par2      = message->data.l[2];
-                    if (messageID == KILL_EDITOR)
-                    {
-                        stopThread = true;
-                        break;
-                    }
-                }
-                else if (message->data.l[0] == toolkit->WM_DELETE_WINDOW)
+                if (message->data.l[0] == toolkit->WM_DELETE_WINDOW)
                 {
                     stopThread = true;
                     break;
@@ -107,6 +124,16 @@ void* eventProc(void* ptr)
     }
     toolkit->threadFinished = true;
     return NULL;
+}
+
+void* updateProc(void* ptr)
+{
+    CXlibToolkit *toolkit = (CXlibToolkit*)ptr;
+    while (!toolkit->threadFinished)
+    {
+        toolkit->editor->Update();
+        usleep(1000 * TIMER_RESOLUTION_MS);
+    }
 }
 
 CXlibToolkit::CXlibToolkit(void *parentWindow, CEditor *editor, AudioEffectX *effectx, CSynthesizer *synth)
@@ -130,11 +157,10 @@ CXlibToolkit::CXlibToolkit(void *parentWindow, CEditor *editor, AudioEffectX *ef
     window = XCreateSimpleWindow(this->display, (Window)parentWindow, 0, 0, GUI_WIDTH, GUI_HEIGHT, 0, 0, 0);
     
     gc = XCreateGC(this->display, window, 0, 0);
-    XSelectInput(this->display, window, ButtonPressMask | ButtonReleaseMask | ExposureMask | KeyPressMask);
+    XSelectInput(this->display, window, ButtonPressMask | ButtonReleaseMask | PointerMotionMask | ExposureMask);
     XMapWindow(this->display, window);
     XFlush(this->display);
         
-    this->customMessage    = XInternAtom(this->display, "_customMessage"  , false);
     this->WM_DELETE_WINDOW = XInternAtom(this->display, "WM_DELETE_WINDOW", false); 
     XSetWMProtocols(this->display, window, &WM_DELETE_WINDOW, 1);
     
@@ -151,13 +177,23 @@ CXlibToolkit::CXlibToolkit(void *parentWindow, CEditor *editor, AudioEffectX *ef
     bmps[BMP_OPS]     = LoadImage(BMP_PATH"ops.bmp");
 
     threadFinished = false;
-    pthread_t thread;
-    pthread_create(&thread, NULL, &eventProc, (void*)this);
+    pthread_t thread1;
+    pthread_create(&thread1, NULL, &eventProc,  (void*)this);
+    pthread_t thread2;
+    pthread_create(&thread2, NULL, &updateProc, (void*)this);
 }
 
 CXlibToolkit::~CXlibToolkit()
 {
-    SendMessageToHost(KILL_EDITOR, 0, 0);
+    XClientMessageEvent event;
+    event.display      = display;
+    event.window       = window;
+    event.type         = ClientMessage;
+    event.format       = 8;
+    event.data.l[0]    = WM_DELETE_WINDOW;
+    event.message_type = WM_DELETE_WINDOW;
+    XSendEvent(display, window, false, 0L, (XEvent*)&event);
+    XFlush(display);
     while (!threadFinished)
     {
         usleep(1000 * 1);
@@ -241,35 +277,48 @@ void CXlibToolkit::CopyRect(int destX, int destY, int width, int height, int ori
     {
         return;
     }
+    XCopyArea(display, bmps[origBmp], window   , gc, origX, origY, width, height, destX, destY);
     XCopyArea(display, bmps[origBmp], offscreen, gc, origX, origY, width, height, destX, destY);
-    XClearArea(display, window, destX, destY, width, height, true);
 }
 
 void CXlibToolkit::SendMessageToHost(unsigned int messageID, unsigned int par1, unsigned int par2)
 {
-    XClientMessageEvent event;
-    event.display      = display;
-    event.window       = window;
-    event.type         = ClientMessage;
-    event.format       = 8;
-    event.data.l[0]    = messageID;
-    event.data.l[1]    = par1;
-    event.data.l[2]    = par2;
-    event.message_type = customMessage;
-    XSendEvent(display, window, false, 0L, (XEvent*)&event);
-    XFlush(display);
-}
-
-void CXlibToolkit::GetMousePosition(int *x, int *y)
-{
-}
-
-void CXlibToolkit::StartMouseCapture()
-{
-}
-
-void CXlibToolkit::StopMouseCapture()
-{
+    switch (messageID)
+    {
+        case UPDATE_DISPLAY:
+        {
+            if (effectx)
+            {
+                effectx->updateDisplay();
+            }
+            break;
+        }
+        case SET_PROGRAM:
+        {
+            char channel = (char)par1;
+            unsigned char numprog = (unsigned char)par2;
+            if (channel == 0 && effectx)
+            {
+                effectx->setProgram(numprog);
+                effectx->updateDisplay();
+            }
+            else if (synth)
+            {
+                synth->SendEvent(0xC0 + channel, numprog, 0, 0);
+            }
+            break;
+        }
+        case SET_PARAMETER:
+        {
+            int index = (int)par1;
+            float value = (float)par2 / MAXPARVALUE;
+            if (effectx)
+            {
+                effectx->setParameterAutomated(index, value);
+            }
+            break;
+        }
+    }
 }
 
 void CXlibToolkit::OutputDebugString(char *text)

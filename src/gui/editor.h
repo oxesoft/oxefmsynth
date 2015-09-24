@@ -45,6 +45,8 @@ class CEditor
 {
 private:
     bool          changingControl;
+    int           currentX;
+    int           currentY;
     int           prevX;
     int           prevY;
     CLcd          *lcd;

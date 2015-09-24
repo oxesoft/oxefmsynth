@@ -24,12 +24,10 @@ public:
     virtual ~CToolkit() {}
     virtual void CopyRect(int destX, int destY, int width, int height, int origBmp, int origX, int origY) {}
     virtual void SendMessageToHost(unsigned int messageID, unsigned int par1, unsigned int par2) {}
-    virtual void GetMousePosition(int *x, int *y) {}
     virtual void StartMouseCapture() {}
     virtual void StopMouseCapture() {}
-    virtual void OutputDebugString(char *text) {}
-    virtual void *GetImageBuffer() { return 0; }
-    virtual int  WaitWindowClosed() {}
+    virtual void OutputDebugString(char *text) {} // for debug
+    virtual int  WaitWindowClosed() {}            // standalone only
 };
 
 #endif

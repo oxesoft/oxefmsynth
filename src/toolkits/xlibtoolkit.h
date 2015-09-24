@@ -28,7 +28,6 @@ public:
     Display      *display;
     Window       window;
     GC           gc;
-    Atom         customMessage;
     Atom         WM_DELETE_WINDOW;
     Pixmap       offscreen;
     bool         threadFinished;
@@ -39,9 +38,6 @@ public:
     ~CXlibToolkit();
     void CopyRect(int destX, int destY, int width, int height, int origBmp, int origX, int origY);
     void SendMessageToHost(unsigned int messageID, unsigned int par1, unsigned int par2);
-    void GetMousePosition(int *x, int *y);
-    void StartMouseCapture();
-    void StopMouseCapture();
     void OutputDebugString(char *text);
     int  WaitWindowClosed();
 };
