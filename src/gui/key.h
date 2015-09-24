@@ -19,16 +19,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 class CKey : public CControl
 {
 private:
-    char          *channel;       // MIDI channel
-    char          value;          // value
-    char          name[TEXT_SIZE];// key name
-    int           bmp;            // bitmap
-    int           w;              // width in pixels
-    int           h;              // height in pixels
-    CSynthesizer *synthesizer;    // object to get/set the value
-    CToolkit     *toolkit;        // graphical toolkit
-    int           par;            // synth parameter assigned
-    int           index;          // bitmap index in bitmap table
+    char value;           // value
+    char name[TEXT_SIZE]; // key name
+    int  w;               // width in pixels
+    int  h;               // height in pixels
+    int  par;             // synth parameter assigned
+    int  index;           // bitmap index in bitmap table
     void Repaint();
 public:
     CKey(int bmp, int index, int w, int h, const char *name, CSynthesizer *synthesizer, char &channel, int par, int x, int y);
@@ -39,5 +35,4 @@ public:
     int   GetType        (void);
     bool  SetValue       (char channel, char value);
     float GetValue       (char channel);
-    void  SetToolkit     (CToolkit *toolkit);
 };

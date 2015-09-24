@@ -19,17 +19,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 class CButton : public CControl
 {
 private:
-    char          *channel;       // MIDI channel
-    int           bmp;            // bitmap
-    CSynthesizer  *synthesizer;   // object to get/set the value
-    CToolkit      *toolkit;       // graphical toolkit
-    int           type;           // button type
-    int           index;
+    int type;  // button type
+    int index;
     void Repaint();
 public:
     CButton(int bmp, int index, CSynthesizer *synthesizer, char &channel, int type, int x, int y);
     void OnClick(int x, int y);
     bool GetName(char* str);
     int  GetType(void);
-    void SetToolkit(CToolkit *toolkit);
 };

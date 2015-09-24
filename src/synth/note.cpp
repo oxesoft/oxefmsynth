@@ -18,7 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "constants.h"
 #include "persist.h"
-#include "pluginhost.h"
+#include "hostinterface.h"
 #include "toolkit.h"
 #include "programs.h"
 #include "oscillator.h"

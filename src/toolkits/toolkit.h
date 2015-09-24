@@ -20,20 +20,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 class CToolkit
 {
-protected:
-    CPluginHost *host;
 public:
     virtual ~CToolkit() {}
     virtual void CopyRect(int destX, int destY, int width, int height, int origBmp, int origX, int origY) {}
-    virtual void SendMessageToHost(unsigned int messageID, unsigned int par1, unsigned int par2)
-    {
-        if (host)
-        {
-            host->ReceiveMessage(messageID, par1, par2);
-        }
-    }
     virtual void StartMouseCapture() {}
     virtual void StopMouseCapture() {}
+    virtual void StarWindowProcesses() {}
     virtual void OutputDebugString(char *text) {} // for debug
     virtual int  WaitWindowClosed() {}            // standalone only
 };

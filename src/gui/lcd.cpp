@@ -17,8 +17,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include <string.h>
-#include "pluginhost.h"
-#include "toolkit.h"
+#include "synthesizer.h"
 #include "control.h"
 #include "lcd.h"
 
@@ -30,7 +29,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define LCD_X       0  // bg left
 #define LCD_Y       0  // bg top
 
-CLcd::CLcd(int bmpchars, int x, int y)
+CLcd::CLcd(int bmp, int x, int y)
 {
     int i;
     for (i=0;i<LCD_COLS;i++)
@@ -39,21 +38,12 @@ CLcd::CLcd(int bmpchars, int x, int y)
         text1[i] = ' ';
     this->lcdx     = x;
     this->lcdy     = y;
-    this->bmpchars = bmpchars;
+    this->bmp      = bmp;
     this->left     = x + LCD_X;
     this->top      = y + LCD_Y;
     this->right    = this->left + (LCD_CHAR_W * LCD_COLS ) + (LCD_SEP_H * LCD_COLS );
     this->bottom   = this->top  + (LCD_CHAR_H * LCD_LINES) + (LCD_SEP_V * LCD_LINES);
     this->toolkit  = NULL;
-}
-
-void CLcd::SetToolkit(CToolkit *toolkit)
-{
-    this->toolkit = toolkit;
-    if (toolkit)
-    {
-        Repaint();
-    }
 }
 
 void CLcd::Repaint()
@@ -64,9 +54,9 @@ void CLcd::Repaint()
         return;
     }
     for (i=0;i<LCD_COLS;i++)
-        toolkit->CopyRect(lcdx + LCD_X + LCD_SEP_H + ((LCD_SEP_H + LCD_CHAR_W) * i), lcdy + LCD_Y + LCD_SEP_V,                          LCD_CHAR_W, LCD_CHAR_H, this->bmpchars, (0xF & (text0[i] - ' ')) * LCD_CHAR_W, ((0xF0 & (text0[i] - ' ')) / 0x10) * LCD_CHAR_H);
+        toolkit->CopyRect(lcdx + LCD_X + LCD_SEP_H + ((LCD_SEP_H + LCD_CHAR_W) * i), lcdy + LCD_Y + LCD_SEP_V,                          LCD_CHAR_W, LCD_CHAR_H, this->bmp, (0xF & (text0[i] - ' ')) * LCD_CHAR_W, ((0xF0 & (text0[i] - ' ')) / 0x10) * LCD_CHAR_H);
     for (i=0;i<LCD_COLS;i++)
-        toolkit->CopyRect(lcdx + LCD_X + LCD_SEP_H + ((LCD_SEP_H + LCD_CHAR_W) * i), lcdy + LCD_Y + LCD_SEP_V + LCD_CHAR_H + LCD_SEP_V, LCD_CHAR_W, LCD_CHAR_H, this->bmpchars, (0xF & (text1[i] - ' ')) * LCD_CHAR_W, ((0xF0 & (text1[i] - ' ')) / 0x10) * LCD_CHAR_H);
+        toolkit->CopyRect(lcdx + LCD_X + LCD_SEP_H + ((LCD_SEP_H + LCD_CHAR_W) * i), lcdy + LCD_Y + LCD_SEP_V + LCD_CHAR_H + LCD_SEP_V, LCD_CHAR_W, LCD_CHAR_H, this->bmp, (0xF & (text1[i] - ' ')) * LCD_CHAR_W, ((0xF0 & (text1[i] - ' ')) / 0x10) * LCD_CHAR_H);
 }
 
 bool CLcd::SetText(char lineIndex, const char* text)

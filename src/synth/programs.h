@@ -417,48 +417,48 @@ struct SBank
 class CPrograms
 {
 private:
-    SBank*        currentbank;
-    unsigned char numprg[MIDICHANNELS];    // programs numbers
-    bool          isWaiting[MIDICHANNELS]; // indicates if the GUI is waiting for store confirmation
-    unsigned char prgtmp;                  // the destination program slot to store
+    SBank*         currentbank;
+    unsigned char  numprg[MIDICHANNELS];    // programs numbers
+    bool           isWaiting[MIDICHANNELS]; // indicates if the GUI is waiting for store confirmation
+    unsigned char  prgtmp;                  // the destination program slot to store
 public:
-    void          Init();
-    SProgram*     GetProgram  (char channel);
-    SGlobal*      GetSGlobal  (void);
-    void          SetNumProgr (char channel, unsigned char numprog);
-    void          SetBankIndex(int nbank);
-    SBank*        GetBank     (void);
+    void           Init();
+    SProgram*      GetProgram  (char channel);
+    SGlobal*       GetSGlobal  (void);
+    void           SetNumProgr (char channel, unsigned char numprog);
+    void           SetBankIndex(int nbank);
+    SBank*         GetBank     (void);
 #ifndef __OXEDMO__
 private:
-    CPersist      persist;
-    int           iCurrentBank;       // current bank index
-    bool          isEditingName;      // indicates if the user is editing program name
-    bool          bankMode;           // indicates if the user is choosing a bank
-    bool          haschanges;         // self-explanatory
-    CToolkit      *toolkit;
+    CPersist       persist;
+    int            iCurrentBank;       // current bank index
+    bool           isEditingName;      // indicates if the user is editing program name
+    bool           bankMode;           // indicates if the user is choosing a bank
+    bool           haschanges;         // self-explanatory
+    CHostInterface *hostinterface;
 public:
-    float         SetDefault    (char channel, int par);
-    float         GetPar        (char channel, int par);
-    void          SetPar        (char channel, int par, float val);
-    bool          GetStandBy    (char channel);
-    void          SetStandBy    (char channel, bool isWaiting);
-    bool          IsEditingName ();
-    void          SetEditingName(bool isEditingName);
-    bool          GetBankMode   ();
-    void          SetBankMode   (bool bankMode);
-    void          GetProgName   (char *str, char channel);
-    void          SetProgName   (char *str, char channel);
-    void          GetProgName   (char *str, int numpg);
-    void          SetProgName   (char *str, int numpg);
-    void          GetBankName   (char *str);
-    int           GetBankCount  ();
-    int           GetBankIndex  ();
-    unsigned char GetNumProgr   (char channel);
-    void          StoreProgram  (char channel);
-    void          CopyProgram   (int destination, int source);
-    void          SetBank       (SBank *bank);
-    void          SetProgram    (char numprg, SProgram *program);
-    bool          HasChanges    ();
-    void          SetToolkit    (CToolkit *toolkit);
+    float          SetDefault      (char channel, int par);
+    float          GetPar          (char channel, int par);
+    void           SetPar          (char channel, int par, float val);
+    bool           GetStandBy      (char channel);
+    void           SetStandBy      (char channel, bool isWaiting);
+    bool           IsEditingName   ();
+    void           SetEditingName  (bool isEditingName);
+    bool           GetBankMode     ();
+    void           SetBankMode     (bool bankMode);
+    void           GetProgName     (char *str, char channel);
+    void           SetProgName     (char *str, char channel);
+    void           GetProgName     (char *str, int numpg);
+    void           SetProgName     (char *str, int numpg);
+    void           GetBankName     (char *str);
+    int            GetBankCount    ();
+    int            GetBankIndex    ();
+    unsigned char  GetNumProgr     (char channel);
+    void           StoreProgram    (char channel);
+    void           CopyProgram     (int destination, int source);
+    void           SetBank         (SBank *bank);
+    void           SetProgram      (char numprg, SProgram *program);
+    bool           HasChanges      ();
+    void           SetHostInterface(CHostInterface *hostinterface);
 #endif
 };

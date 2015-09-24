@@ -44,18 +44,19 @@ enum
 class CEditor
 {
 private:
-    bool          changingControl;
-    int           currentX;
-    int           currentY;
-    int           prevX;
-    int           prevY;
-    CLcd          *lcd;
-    CControl      *ctl[GUI_CONTROLS];
-    CSynthesizer  *synthesizer;
-    int           cID;
-    char          channel;
-    int           TranslateNote(int cod);
-    CToolkit      *toolkit;
+    bool           changingControl;
+    int            currentX;
+    int            currentY;
+    int            prevX;
+    int            prevY;
+    CLcd           *lcd;
+    CControl       *ctl[GUI_CONTROLS];
+    CSynthesizer   *synthesizer;
+    int            cID;
+    char           channel;
+    int            TranslateNote(int cod);
+    CToolkit       *toolkit;
+    CHostInterface *hostinterface;
 public:
     CEditor(CSynthesizer *synthesizer);
     ~CEditor();
@@ -75,4 +76,5 @@ public:
     void  GetParName       (int index, char* text);
     void  Update           ();
     void  SetToolkit       (CToolkit *toolkit);
+    void  SetHostInterface (CHostInterface *hostinterface);
 };

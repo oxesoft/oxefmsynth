@@ -720,9 +720,9 @@ bool CSynthesizer::HasChanges()
     return programs.HasChanges();
 }
 
-void CSynthesizer::SetToolkit(CToolkit *toolkit)
+void CSynthesizer::SetHostInterface(CHostInterface *hostinterface)
 {
-    programs.SetToolkit(toolkit);
+    programs.SetHostInterface(hostinterface);
 }
 
 #endif

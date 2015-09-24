@@ -23,16 +23,33 @@ protected:
     int top;
     int right;
     int bottom;
+    char           *channel;       // MIDI channel
+    int            bmp;            // image id
+    CSynthesizer   *synthesizer;   // object to get/set the value
+    CToolkit       *toolkit;       // graphical toolkit
+    CHostInterface *hostinterface;
+    virtual void  Repaint        ()                      {             }
 public:
-    virtual void  OnClick        (int x, int y)                 {             }
-    virtual bool  GetName        (char* str)                    {return false;}
-    virtual bool  Update         (void)                         {return false;}
-    virtual bool  IsKnob         (void)                         {return false;}
-    virtual bool  IncreaseValue  (int delta)                    {return false;}
-    virtual int   GetIndex       (void)                         {return -1   ;}
-    virtual int   GetType        (void)                         {return -1   ;}
-    virtual void  SetToolkit     (CToolkit *toolkit)            {             }
-    virtual bool  IsMouseOver    (int x, int y)
+    virtual void  OnClick        (int x, int y)          {             }
+    virtual bool  GetName        (char* str)             {return false;}
+    virtual bool  Update         (void)                  {return false;}
+    virtual bool  IsKnob         (void)                  {return false;}
+    virtual bool  IncreaseValue  (int delta)             {return false;}
+    virtual int   GetIndex       (void)                  {return -1   ;}
+    virtual int   GetType        (void)                  {return -1   ;}
+    void SetToolkit(CToolkit *toolkit)
+    {
+        this->toolkit = toolkit;
+        if (toolkit)
+        {
+            Repaint();
+        }
+    }
+    void SetHostInterface(CHostInterface *hostinterface)
+    {
+        this->hostinterface = hostinterface;
+    }
+    bool IsMouseOver(int x, int y)
     {
         return ((x >= left) && (x < right) && (y >= top) && (y < bottom));
     }

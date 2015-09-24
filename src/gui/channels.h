@@ -19,15 +19,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 class CChannels : public CControl
 {
 private:
-    char          *channel;       // MIDI channel
-    int           bmp;            // bitmap
-    CSynthesizer *synthesizer;    // object to get/set the value
-    CToolkit     *toolkit;        // graphical toolkit
     void Repaint();
 public:
     CChannels(int bmp, CSynthesizer *synthesizer, char &channel, int x, int y);
     void OnClick(int x, int y);
     bool GetName(char* str);
     int  GetType(void);
-    void SetToolkit(CToolkit *toolkit);
 };

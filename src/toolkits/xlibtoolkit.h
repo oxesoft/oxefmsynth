@@ -30,8 +30,9 @@ public:
     Atom         WM_DELETE_WINDOW;
     Pixmap       offscreen;
     bool         threadFinished;
-    CXlibToolkit(void *parentWindow, CEditor *editor, CPluginHost *host);
+    CXlibToolkit(void *parentWindow, CEditor *editor);
     ~CXlibToolkit();
+    void StarWindowProcesses();
     void CopyRect(int destX, int destY, int width, int height, int origBmp, int origX, int origY);
     void OutputDebugString(char *text);
     int  WaitWindowClosed();

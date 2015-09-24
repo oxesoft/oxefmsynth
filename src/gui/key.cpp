@@ -40,15 +40,6 @@ CKey::CKey(int bmp, int index, int w, int h, const char *name, CSynthesizer *syn
     this->value       = 0;
 }
 
-void CKey::SetToolkit(CToolkit *toolkit)
-{
-    this->toolkit = toolkit;
-    if (toolkit)
-    {
-        Repaint();
-    }
-}
-
 void CKey::OnClick(int x, int y)
 {
     this->value = !this->value;

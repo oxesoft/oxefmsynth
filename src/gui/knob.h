@@ -19,17 +19,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 class CKnob : public CControl
 {
 private:
-    char          *channel;       // MIDI channel
-    char          value;          // integer value
-    float         fvalue;         // float value
-    char          name[TEXT_SIZE];// knob name
-    int           bmp;            // knob bitmap
-    int           knobSize;       // size in pixels
-    CSynthesizer *synthesizer;    // obj to get/set the value
-    CToolkit     *toolkit;        // graphical toolkit
-    int           par;            // synth parameter assigned
-    int           type;           // control type
-    void Repaint();
+    char  value;           // integer value
+    float fvalue;          // float value
+    char  name[TEXT_SIZE]; // knob name
+    int   knobSize;        // size in pixels
+    int   par;             // synth parameter assigned
+    int   type;            // control type
+    void  Repaint();
 public:
     CKnob(int bmp, int knobSize, const char *name, CSynthesizer *synthesizer, char &channel, int type, int par, int x, int y);
     bool  Update         (void);
@@ -39,5 +35,4 @@ public:
     int   GetIndex       (void);
     int   GetType        (void);
     float GetValue       (char channel);
-    void  SetToolkit     (CToolkit *toolkit);
 };

@@ -19,16 +19,16 @@ ifeq ($(VST_PATH),)
 endif
 
 INCLUDES:=-Isrc/vst
-INCLUDES+=-Isrc/windows
 INCLUDES+=-Isrc/synth
 INCLUDES+=-Isrc/gui
 INCLUDES+=-Isrc/toolkits
+INCLUDES+=-Isrc/windows
 INCLUDES+=-I$(VST_PATH)
 
 SOURCES:=src/vst/oxevst.cpp
 SOURCES+=src/vst/oxevstmain.cpp
 SOURCES+=src/vst/oxevsteditor.cpp
-SOURCES+=src/vst/vstpluginhost.cpp
+SOURCES+=src/vst/vsthostinterface.cpp
 SOURCES+=src/toolkits/windowstoolkit.cpp
 SOURCES+=src/gui/button.cpp
 SOURCES+=src/gui/channels.cpp

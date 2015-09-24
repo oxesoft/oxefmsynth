@@ -18,18 +18,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #define LCD_COLS    16 // columns
 
-class CLcd : CControl
+class CLcd : public CControl
 {
 private:
     char     text0[LCD_COLS];
     char     text1[LCD_COLS];
     int      lcdx;
     int      lcdy;
-    int      bmpchars;  // characters table 16x2
-    CToolkit *toolkit;  // graphical toolkit
     void Repaint();
 public:
     CLcd(int bmpchars, int x, int y);
     bool SetText(char lineIndex, const char *text);
-    void SetToolkit(CToolkit *toolkit);
 };

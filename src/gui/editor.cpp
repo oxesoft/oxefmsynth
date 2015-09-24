@@ -24,10 +24,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 CEditor::CEditor(CSynthesizer *synthesizer)
 {
-    int ctlcount = 0;
-    this->synthesizer = synthesizer;
-    this->toolkit     = NULL;
-    channel           = 0;
+    int ctlcount        = 0;
+    this->synthesizer   = synthesizer;
+    this->toolkit       = NULL;
+    this->hostinterface = NULL;
+    channel             = 0;
     
     // auxiliar vars
     int aX   = 0;
@@ -404,7 +405,17 @@ void CEditor::SetToolkit(CToolkit *toolkit)
         lcd->SetText(1, version_info);
     }
     changingControl = false;
-    synthesizer->SetToolkit(toolkit);
+}
+
+void CEditor::SetHostInterface(CHostInterface *hostinterface)
+{
+    this->hostinterface = hostinterface;
+    lcd->SetHostInterface(hostinterface);
+    for (int i = 0; i < GUI_CONTROLS; i++)
+    {
+        ctl[i]->SetHostInterface(hostinterface);
+        synthesizer->SetHostInterface(hostinterface);
+    }
 }
 
 void CEditor::ProgramChanged()
@@ -472,9 +483,9 @@ void CEditor::OnLButtonDblClick(int x, int y)
                 synthesizer->SetDefault(channel, index);
                 if (channel == 0)
                 {
-                    if (toolkit)
+                    if (hostinterface)
                     {
-                        toolkit->SendMessageToHost(SET_PARAMETER, index, GetPar(index) * MAXPARVALUE);
+                        hostinterface->ReceiveMessageFromPlugin(SET_PARAMETER, index, GetPar(index) * MAXPARVALUE);
                     }
                 }
             }
@@ -515,9 +526,9 @@ void CEditor::OnLButtonDown(int x, int y)
                 int index = ctl[i]->GetIndex();
                 if (index >= 0)
                 {
-                    if (toolkit)
+                    if (hostinterface)
                     {
-                        toolkit->SendMessageToHost(SET_PARAMETER, index, GetPar(index) * MAXPARVALUE);
+                        hostinterface->ReceiveMessageFromPlugin(SET_PARAMETER, index, GetPar(index) * MAXPARVALUE);
                     }
                 }
             }
@@ -535,9 +546,9 @@ void CEditor::OnLButtonUp()
         int index = ctl[cID]->GetIndex();
         if (index >= 0)
         {
-            if (toolkit)
+            if (hostinterface)
             {
-                toolkit->SendMessageToHost(SET_PARAMETER, index, GetPar(index) * MAXPARVALUE);
+                hostinterface->ReceiveMessageFromPlugin(SET_PARAMETER, index, GetPar(index) * MAXPARVALUE);
             }
         }
     }
@@ -586,9 +597,9 @@ void CEditor::OnMouseWheel(int x, int y, int delta)
                         int index = ctl[i]->GetIndex();
                         if (index >= 0)
                         {
-                            if (toolkit)
+                            if (hostinterface)
                             {
-                                toolkit->SendMessageToHost(SET_PARAMETER, index, lrintf(GetPar(index) * MAXPARVALUE));
+                                hostinterface->ReceiveMessageFromPlugin(SET_PARAMETER, index, lrintf(GetPar(index) * MAXPARVALUE));
                             }
                         }
                     }

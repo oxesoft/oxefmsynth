@@ -30,7 +30,8 @@ int main(void)
 #endif
     CSynthesizer s;
     CEditor e(&s);
-    COSToolkit t(0, &e, 0);
+    COSToolkit t(0, &e);
     e.SetToolkit(&t);
+    t.StarWindowProcesses();
     return t.WaitWindowClosed();
 }

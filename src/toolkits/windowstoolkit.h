@@ -28,8 +28,9 @@ public:
     void        *parentWindow;
     CEditor     *editor;
     HDC          hdcMem;
-    CWindowsToolkit(void *parentWindow, CEditor *editor, CPluginHost *host);
+    CWindowsToolkit(void *parentWindow, CEditor *editor);
     ~CWindowsToolkit();
+    void StarWindowProcesses();
     void CopyRect(int destX, int destY, int width, int height, int origBmp, int origX, int origY);
     void StartMouseCapture();
     void StopMouseCapture();

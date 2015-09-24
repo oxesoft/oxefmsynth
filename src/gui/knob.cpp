@@ -43,15 +43,6 @@ CKnob::CKnob(int bmp, int knobSize, const char *name, CSynthesizer *synthesizer,
     this->fvalue      = 999.f;
 }
 
-void CKnob::SetToolkit(CToolkit *toolkit)
-{
-    this->toolkit = toolkit;
-    if (toolkit)
-    {
-        Repaint();
-    }
-}
-
 void CKnob::Repaint()
 {
     char valtemp = value;

@@ -16,12 +16,18 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-class CVSTPluginHost : public CPluginHost
+#ifndef __OXEDMO__
+
+class CHostInterface
 {
-private:
-    AudioEffectX *effectx;
-    CSynthesizer *synth;
 public:
-    CVSTPluginHost(AudioEffectX *effectx, CSynthesizer *synth);
-    virtual void ReceiveMessage(unsigned int messageID, unsigned int par1, unsigned int par2);
+    virtual void ReceiveMessageFromPlugin(unsigned int messageID, unsigned int par1, unsigned int par2) {}
 };
+
+enum {
+    UPDATE_DISPLAY,
+    SET_PROGRAM   ,
+    SET_PARAMETER
+};
+
+#endif

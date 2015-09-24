@@ -18,9 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "public.sdk/source/vst2.x/audioeffectx.h"
 #include "oxevsteditor.h"
-#include "oxevst.h"
 #include "ostoolkit.h"
-#include "vstpluginhost.h"
 
 //-----------------------------------------------------------------------------
 
@@ -30,10 +28,10 @@ COxeVstEditor::COxeVstEditor (AudioEffectX *effectx, CSynthesizer *synth)
     effectx(effectx),
     synth(synth)
 {
-    host = new CVSTPluginHost(effectx, synth);
     oxeeditor = new CEditor(synth);
     effect->setEditor(this);
-    this->toolkit = NULL;
+    hostinterface = NULL;
+    toolkit = NULL;
 }
 
 //-----------------------------------------------------------------------------
@@ -41,7 +39,6 @@ COxeVstEditor::COxeVstEditor (AudioEffectX *effectx, CSynthesizer *synth)
 COxeVstEditor::~COxeVstEditor ()
 {
     delete oxeeditor;
-    delete host;
 }
 
 //-----------------------------------------------------------------------------
@@ -60,9 +57,11 @@ bool COxeVstEditor::open (void *ptr)
     // Remember the parent window
     systemWindow = ptr;
 
-    this->toolkit = new COSToolkit(ptr, oxeeditor, host);
-    oxeeditor->SetToolkit(this->toolkit);
-
+    hostinterface = new CVstHostInterface(effectx, synth);
+    toolkit = new COSToolkit(ptr, oxeeditor);
+    oxeeditor->SetToolkit(toolkit);
+    oxeeditor->SetHostInterface(hostinterface);
+    this->toolkit->StarWindowProcesses();
     return true;
 }
 
@@ -71,6 +70,9 @@ bool COxeVstEditor::open (void *ptr)
 void COxeVstEditor::close ()
 {
     oxeeditor->SetToolkit(NULL);
-    delete this->toolkit;
-    this->toolkit = NULL;
+    oxeeditor->SetHostInterface(NULL);
+    delete toolkit;
+    toolkit = NULL;
+    delete hostinterface;
+    hostinterface = NULL;
 }

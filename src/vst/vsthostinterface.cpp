@@ -18,15 +18,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "public.sdk/source/vst2.x/audioeffectx.h"
 #include "synthesizer.h"
-#include "vstpluginhost.h"
+#include "vsthostinterface.h"
 
-CVSTPluginHost::CVSTPluginHost(AudioEffectX *effectx, CSynthesizer *synth)
+CVstHostInterface::CVstHostInterface(AudioEffectX *effectx, CSynthesizer *synth)
 {
     this->effectx = effectx;
     this->synth = synth;
 }
 
-void CVSTPluginHost::ReceiveMessage(unsigned int messageID, unsigned int par1, unsigned int par2)
+void CVstHostInterface::ReceiveMessageFromPlugin(unsigned int messageID, unsigned int par1, unsigned int par2)
 {
     switch (messageID)
     {

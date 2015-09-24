@@ -21,8 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "soundbank.h"
 #else
 #include "persist.h"
-#include "pluginhost.h"
-#include "toolkit.h"
+#include "hostinterface.h"
 #endif
 #include "programs.h"
 #include <string.h>
@@ -97,9 +96,9 @@ void CPrograms::SetBankIndex(int nbank)
         }
     }
     haschanges = true;
-    if (toolkit)
+    if (hostinterface)
     {
-        toolkit->SendMessageToHost(UPDATE_DISPLAY, 0, 0);
+        hostinterface->ReceiveMessageFromPlugin(UPDATE_DISPLAY, 0, 0);
     }
 #endif
 }
@@ -691,9 +690,9 @@ void CPrograms::SetProgName(char* str, char channel)
 {
     memcpy(currentbank->prg[numprg[channel]].PNAME, str, PG_NAME_SIZE);
     haschanges = true;
-    if (toolkit)
+    if (hostinterface)
     {
-        toolkit->SendMessageToHost(UPDATE_DISPLAY, 0, 0);
+        hostinterface->ReceiveMessageFromPlugin(UPDATE_DISPLAY, 0, 0);
     }
 }
 
@@ -714,9 +713,9 @@ void CPrograms::SetProgName(char* str, int numpg)
         }
     }
     haschanges = true;
-    if (toolkit)
+    if (hostinterface)
     {
-        toolkit->SendMessageToHost(UPDATE_DISPLAY, 0, 0);
+        hostinterface->ReceiveMessageFromPlugin(UPDATE_DISPLAY, 0, 0);
     }
 }
 
@@ -756,9 +755,9 @@ void CPrograms::StoreProgram(char channel)
         isWaiting[channel] = false;
         memcpy(&currentbank->prg[prgtmp], &currentbank->prg[numprg[channel]],sizeof(SProgram));
         numprg[channel] = prgtmp;
-        if (toolkit)
+        if (hostinterface)
         {
-            toolkit->SendMessageToHost(UPDATE_DISPLAY, 0, 0);
+            hostinterface->ReceiveMessageFromPlugin(UPDATE_DISPLAY, 0, 0);
         }
     }
 }
@@ -767,9 +766,9 @@ void CPrograms::CopyProgram(int destination, int source)
 {
     memcpy(&currentbank->prg[destination], &currentbank->prg[source], sizeof(SProgram));
     haschanges = true;
-    if (toolkit)
+    if (hostinterface)
     {
-        toolkit->SendMessageToHost(UPDATE_DISPLAY, 0, 0);
+        hostinterface->ReceiveMessageFromPlugin(UPDATE_DISPLAY, 0, 0);
     }
 }
 
@@ -782,9 +781,9 @@ void CPrograms::SetBank(SBank *bank)
         SetNumProgr(i, numprg[i]);
     }
     haschanges = true;
-    if (toolkit)
+    if (hostinterface)
     {
-        toolkit->SendMessageToHost(UPDATE_DISPLAY, 0, 0);
+        hostinterface->ReceiveMessageFromPlugin(UPDATE_DISPLAY, 0, 0);
     }
 }
 
@@ -799,9 +798,9 @@ void CPrograms::SetProgram(char num, SProgram *program)
         }
     }
     haschanges = true;
-    if (toolkit)
+    if (hostinterface)
     {
-        toolkit->SendMessageToHost(UPDATE_DISPLAY, 0, 0);
+        hostinterface->ReceiveMessageFromPlugin(UPDATE_DISPLAY, 0, 0);
     }
 }
 
@@ -815,9 +814,8 @@ bool CPrograms::HasChanges()
     return false;
 }
 
-void CPrograms::SetToolkit(CToolkit *toolkit)
+void CPrograms::SetHostInterface(CHostInterface *hostinterface)
 {
-    this->toolkit = toolkit;
+    this->hostinterface = hostinterface;
 }
-
 #endif

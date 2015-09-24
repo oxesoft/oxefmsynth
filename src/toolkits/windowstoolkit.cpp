@@ -155,11 +155,10 @@ void GetResourcesPath(char *path, int size)
     }
 }
 
-CWindowsToolkit::CWindowsToolkit(void *parentWindow, CEditor *editor, CPluginHost *host)
+CWindowsToolkit::CWindowsToolkit(void *parentWindow, CEditor *editor)
 {
-    this->parentWindow = parentWindow;
-    this->editor       = editor;
-    this->host         = host;
+    this->parentWindow  = parentWindow;
+    this->editor        = editor;
 
     g_useCount++;
     if (g_useCount == 1)
@@ -230,11 +229,6 @@ CWindowsToolkit::CWindowsToolkit(void *parentWindow, CEditor *editor, CPluginHos
     SetWindowLong(hWnd, GWL_USERDATA, (LONG)this);
 #endif
 
-    if (!parentWindow)
-    {
-        ShowWindow(this->hWnd, SW_SHOWNORMAL);
-    }
-
     // load resources
     char dll_path[MAX_PATH];
     char tmp_path[MAX_PATH];
@@ -301,6 +295,14 @@ CWindowsToolkit::~CWindowsToolkit()
     DeleteObject(bmps[BMP_BG     ]);
     DeleteObject(bmps[BMP_BUTTONS]);
     DeleteObject(bmps[BMP_OPS    ]);
+}
+
+void CWindowsToolkit::StarWindowProcesses()
+{
+    if (!parentWindow)
+    {
+        ShowWindow(this->hWnd, SW_SHOWNORMAL);
+    }
 }
 
 void CWindowsToolkit::CopyRect(int destX, int destY, int width, int height, int origBmp, int origX, int origY)

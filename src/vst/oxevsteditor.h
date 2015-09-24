@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "public.sdk/source/vst2.x/aeffeditor.h"
 #include "editor.h"
+#include "vsthostinterface.h"
 
 //-----------------------------------------------------------------------------
 
@@ -33,11 +34,11 @@ public:
     
     CEditor*        getEditor()       { return oxeeditor;          }
 private:
-    AudioEffectX*   effectx;
-    CSynthesizer*   synth;
-    CEditor*        oxeeditor;
-    CToolkit*       toolkit;
-    CPluginHost*    host;
+    AudioEffectX*      effectx;
+    CSynthesizer*      synth;
+    CEditor*           oxeeditor;
+    CToolkit*          toolkit;
+    CVstHostInterface* hostinterface;
 };
 
 //-----------------------------------------------------------------------------

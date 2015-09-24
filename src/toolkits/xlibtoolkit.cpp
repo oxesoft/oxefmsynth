@@ -60,7 +60,6 @@ void* eventProc(void* ptr)
     CXlibToolkit *toolkit = (CXlibToolkit*)ptr;
     bool stopThread = false;
     unsigned int time = 0;
-    usleep(1000 * 1);
     while (!stopThread)
     {
         XNextEvent(toolkit->display, &event);
@@ -137,11 +136,10 @@ void* updateProc(void* ptr)
     }
 }
 
-CXlibToolkit::CXlibToolkit(void *parentWindow, CEditor *editor, CPluginHost *host)
+CXlibToolkit::CXlibToolkit(void *parentWindow, CEditor *editor)
 {
-    this->parentWindow = parentWindow;
-    this->editor       = editor;
-    this->host         = host;
+    this->parentWindow  = parentWindow;
+    this->editor        = editor;
 
     char *displayName = getenv("DISPLAY");
     if (!displayName || !strlen(displayName))
@@ -177,11 +175,7 @@ CXlibToolkit::CXlibToolkit(void *parentWindow, CEditor *editor, CPluginHost *hos
     bmps[BMP_BUTTONS] = LoadImage(BMP_PATH"buttons.bmp");
     bmps[BMP_OPS]     = LoadImage(BMP_PATH"ops.bmp");
 
-    threadFinished = false;
-    pthread_t thread1;
-    pthread_create(&thread1, NULL, &eventProc,  (void*)this);
-    pthread_t thread2;
-    pthread_create(&thread2, NULL, &updateProc, (void*)this);
+    threadFinished = true;
 }
 
 CXlibToolkit::~CXlibToolkit()
@@ -211,6 +205,15 @@ CXlibToolkit::~CXlibToolkit()
         }
     }
     XCloseDisplay(display);
+}
+
+void CXlibToolkit::StarWindowProcesses()
+{
+    threadFinished = false;
+    pthread_t thread1;
+    pthread_create(&thread1, NULL, &eventProc,  (void*)this);
+    pthread_t thread2;
+    pthread_create(&thread2, NULL, &updateProc, (void*)this);
 }
 
 Pixmap CXlibToolkit::LoadImage(const char *path)

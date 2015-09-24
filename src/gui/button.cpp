@@ -39,15 +39,6 @@ CButton::CButton(int bmp, int index, CSynthesizer *synthesizer, char &channel, i
     this->bottom      = y + BUTTON_HEIGHT;
 }
 
-void CButton::SetToolkit(CToolkit *toolkit)
-{
-    this->toolkit = toolkit;
-    if (toolkit)
-    {
-        Repaint();
-    }
-}
-
 void CButton::OnClick(int x, int y)
 {
     // fires the assigned action
@@ -70,9 +61,9 @@ void CButton::OnClick(int x, int y)
                 numprog -= 10;
                 if (numprog > 127)
                     numprog = 127;
-                if (toolkit)
+                if (hostinterface)
                 {
-                    toolkit->SendMessageToHost(SET_PROGRAM, *channel, numprog);
+                    hostinterface->ReceiveMessageFromPlugin(SET_PROGRAM, *channel, numprog);
                 }
             }
             break;
@@ -96,9 +87,9 @@ void CButton::OnClick(int x, int y)
                 numprog -= 1;
                 if (numprog > 127)
                     numprog = 127;
-                if (toolkit)
+                if (hostinterface)
                 {
-                    toolkit->SendMessageToHost(SET_PROGRAM, *channel, numprog);
+                    hostinterface->ReceiveMessageFromPlugin(SET_PROGRAM, *channel, numprog);
                 }
             }
             break;
@@ -120,9 +111,9 @@ void CButton::OnClick(int x, int y)
                 numprog += 1;
                 if (numprog > 127)
                     numprog = 0;
-                if (toolkit)
+                if (hostinterface)
                 {
-                    toolkit->SendMessageToHost(SET_PROGRAM, *channel, numprog);
+                    hostinterface->ReceiveMessageFromPlugin(SET_PROGRAM, *channel, numprog);
                 }
             }
             break;
@@ -144,9 +135,9 @@ void CButton::OnClick(int x, int y)
                 numprog += 10;
                 if (numprog > 127)
                     numprog = 0;
-                if (toolkit)
+                if (hostinterface)
                 {
-                    toolkit->SendMessageToHost(SET_PROGRAM, *channel, numprog);
+                    hostinterface->ReceiveMessageFromPlugin(SET_PROGRAM, *channel, numprog);
                 }
             }
             break;

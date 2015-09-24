@@ -37,15 +37,6 @@ CChannels::CChannels(int bmp, CSynthesizer *synthesizer, char &channel, int x, i
     this->bottom      = y + KEY_HEIGHT * 2;
 }
 
-void CChannels::SetToolkit(CToolkit *toolkit)
-{
-    this->toolkit = toolkit;
-    if (toolkit)
-    {
-        Repaint();
-    }
-}
-
 void CChannels::OnClick(int x, int y)
 {
     *channel = (char)((x - this->left) / KEY_WIDTH);

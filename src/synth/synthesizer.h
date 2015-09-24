@@ -18,7 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "constants.h"
 #include "buffers.h"
-#include "pluginhost.h"
+#include "hostinterface.h"
 #include "toolkit.h"
 #include "persist.h"
 #include "programs.h"
@@ -58,44 +58,44 @@ private:
     char                      revrbON; // reverb on
     char                      delayON; // delay on
     // sum signals
-    void SumMonoStereo    (int *bInput, int *bNoteOut,               int size);
-    void SumStereoMono    (int *bInput, int *bNoteOut, float volume, int size);
-    void SumStereoStereo  (int *bInput, int *bNoteOut, float volume, int size);
-    inline float Val2Mul  (float  valor);
-    void UpdateGlobalEffects();
+    void SumMonoStereo            (int *bInput, int *bNoteOut,               int size);
+    void SumStereoMono            (int *bInput, int *bNoteOut, float volume, int size);
+    void SumStereoStereo          (int *bInput, int *bNoteOut, float volume, int size);
+    inline float Val2Mul          (float  valor);
+    void UpdateGlobalEffects      ();
 public:
     CSynthesizer();
-    void          SetSampleRate (float samplerate);
-    void          Process       (int *b, int size, int position /* the start sample number */);
-    void          SendEvent     (unsigned char bS, unsigned char bD1,unsigned char bD2,int position /* the start position */);
-    void          KillNotes     (void);
-    char          GetState      ();
+    void          SetSampleRate   (float samplerate);
+    void          Process         (int *b, int size, int position /* the start sample number */);
+    void          SendEvent       (unsigned char bS, unsigned char bD1,unsigned char bD2,int position /* the start position */);
+    void          KillNotes       (void);
+    char          GetState        ();
 #ifndef __OXEDMO__
-    float         SetDefault    (char channel, int par           );
-    void          SetPar        (char channel, int par, float val);
-    float         GetPar        (char channel, int par           );
-    bool          GetStandBy    (char channel);
-    void          SetStandBy    (char channel, bool isWaiting);
-    bool          IsEditingName ();
-    void          SetEditingName(bool value);
-    bool          GetBankMode   ();
-    void          SetBankMode   (bool bankMode);
-    unsigned char GetNumProgr   (char channel);
-    void          GetProgName   (char *str, char channel);
-    void          SetProgName   (char *str, char channel);
-    void          GetProgName   (char *str, int numpg);
-    void          SetProgName   (char *str, int numpg);
-    void          GetBankName   (char *str);
-    int           GetBankCount  ();
-    int           GetBankIndex  ();
-    void          SetBankIndex  (int nbank);
-    void          SetNumProgr   (char channel, unsigned char numprog);
-    void          StoreProgram  (char channel);
-    SBank*        GetBank       (void);
-    void          CopyProgram   (int destination, int source);
-    void          SetBank       (SBank *bank);
-    void          SetProgram    (char numprg, SProgram *program);
-    bool          HasChanges    ();
-    void          SetToolkit    (CToolkit *toolkit);
+    float         SetDefault      (char channel, int par           );
+    void          SetPar          (char channel, int par, float val);
+    float         GetPar          (char channel, int par           );
+    bool          GetStandBy      (char channel);
+    void          SetStandBy      (char channel, bool isWaiting);
+    bool          IsEditingName   ();
+    void          SetEditingName  (bool value);
+    bool          GetBankMode     ();
+    void          SetBankMode     (bool bankMode);
+    unsigned char GetNumProgr     (char channel);
+    void          GetProgName     (char *str, char channel);
+    void          SetProgName     (char *str, char channel);
+    void          GetProgName     (char *str, int numpg);
+    void          SetProgName     (char *str, int numpg);
+    void          GetBankName     (char *str);
+    int           GetBankCount    ();
+    int           GetBankIndex    ();
+    void          SetBankIndex    (int nbank);
+    void          SetNumProgr     (char channel, unsigned char numprog);
+    void          StoreProgram    (char channel);
+    SBank*        GetBank         (void);
+    void          CopyProgram     (int destination, int source);
+    void          SetBank         (SBank *bank);
+    void          SetProgram      (char numprg, SProgram *program);
+    bool          HasChanges      ();
+    void          SetHostInterface(CHostInterface *hostinterface);
 #endif
 };
