@@ -60,8 +60,15 @@ else
 	CFLAGS+=-s -O3
 endif
 
-all:
-	@g++ -shared -o oxevst.so $(CFLAGS) $(SOURCES) $(INCLUDES) $(LIBS)
+ARCH := $(shell getconf LONG_BIT)
+
+all: oxevst$(ARCH)
+
+oxevst32:
+	@g++ -shared -m32 -o oxevst32.so $(CFLAGS) $(SOURCES) $(INCLUDES) $(LIBS)
+
+oxevst64:
+	@g++ -shared -m64 -o oxevst64.so $(CFLAGS) $(SOURCES) $(INCLUDES) $(LIBS)
 
 clean:
-	@rm -f oxevst.so
+	@rm -f oxevst*.so
