@@ -20,11 +20,11 @@ endif
 
 EXECUTABLE_NAME:=oxefmsynth
 
-INCLUDES:=-Isrc/vstcommon
-INCLUDES+=-Isrc/vstlinux
+INCLUDES:=-Isrc/vst
 INCLUDES+=-Isrc/gui
 INCLUDES+=-Isrc/synth
 INCLUDES+=-Isrc/toolkits
+INCLUDES+=-Isrc/windows
 INCLUDES+=-I$(VST_PATH)
 
 SOURCES+=src/standalone/main.cpp
@@ -57,7 +57,7 @@ ifeq ($(OS),Windows_NT)
     EXECUTABLE_NAME:=$(EXECUTABLE_NAME).exe
     CC:=g++.exe
     RC:=windres.exe
-    RC_CMD:=$(RC) -Isrc/synth -Iskins/default src/standalone/standalone.rc resources.o
+    RC_CMD:=$(RC) -Isrc/synth -Iskins/default src/windows/resources.rc resources.o
     RM_CMD:=rm resources.o
     INCLUDES+=-Isrc/standalone
     SOURCES+=src/toolkits/windowstoolkit.cpp
@@ -68,7 +68,7 @@ else
         EXECUTABLE_NAME:=$(EXECUTABLE_NAME).exe
         CC:=i686-w64-mingw32-g++
         RC:=i686-w64-mingw32-windres
-        RC_CMD:=$(RC) -Isrc/synth -Iskins/default src/standalone/standalone.rc resources.o
+        RC_CMD:=$(RC) -Isrc/synth -Iskins/default src/windows/resources.rc resources.o
         RM_CMD:=rm resources.o
         LDFLAGS+=-static
         INCLUDES+=-Isrc/standalone

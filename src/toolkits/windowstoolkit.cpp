@@ -17,8 +17,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include "editor.h"
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
 #include "windowstoolkit.h"
-#include "resource.h"
+#include "resources.h"
 #include <windowsx.h>
 #include <strsafe.h>
 #include <stdio.h>
@@ -73,7 +75,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
         if (toolkit->editor->OnChar(text[0]) == true)
             return 0;
         else if (toolkit->parentWindow)
-            PostMessage(GetParent(toolkit->parentWindow), message, wParam, lParam);
+            PostMessage(GetParent((HWND)toolkit->parentWindow), message, wParam, lParam);
         // ---------------------------------------
         break;
     }
@@ -153,12 +155,11 @@ void GetResourcesPath(char *path, int size)
     }
 }
 
-CWindowsToolkit::CWindowsToolkit(void *parentWindow, CEditor *editor, AudioEffectX *effectx, CSynthesizer *synth)
+CWindowsToolkit::CWindowsToolkit(void *parentWindow, CEditor *editor, CPluginHost *host)
 {
-    this->parentWindow = (HWND)parentWindow;
-    this->editor  = editor;
-    this->effectx = effectx;
-    this->synth   = synth;
+    this->parentWindow = parentWindow;
+    this->editor       = editor;
+    this->host         = host;
 
     g_useCount++;
     if (g_useCount == 1)
@@ -314,46 +315,6 @@ void CWindowsToolkit::CopyRect(int destX, int destY, int width, int height, int 
     rect.right  = destX + width;
     rect.bottom = destY + height;
     InvalidateRect(this->hWnd, &rect, FALSE);
-}
-
-void CWindowsToolkit::SendMessageToHost(unsigned int messageID, unsigned int par1, unsigned int par2)
-{
-    switch (messageID)
-    {
-        case UPDATE_DISPLAY:
-        {
-            if (effectx)
-            {
-                effectx->updateDisplay();
-            }
-            break;
-        }
-        case SET_PROGRAM:
-        {
-            char channel = (char)par1;
-            unsigned char numprog = (unsigned char)par2;
-            if (channel == 0 && effectx)
-            {
-                effectx->setProgram(numprog);
-                effectx->updateDisplay();
-            }
-            else if (synth)
-            {
-                synth->SendEvent(0xC0 + channel, numprog, 0, 0);
-            }
-            break;
-        }
-        case SET_PARAMETER:
-        {
-            int index = (int)par1;
-            float value = (float)par2 / MAXPARVALUE;
-            if (effectx)
-            {
-                effectx->setParameterAutomated(index, value);
-            }
-            break;
-        }
-    }
 }
 
 void CWindowsToolkit::StartMouseCapture()

@@ -16,27 +16,18 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "public.sdk/source/vst2.x/aeffeditor.h"
-#include "editor.h"
+#ifndef __OXEDMO__
 
-//-----------------------------------------------------------------------------
-
-class COxeVstEditor : public AEffEditor
+class CPluginHost
 {
 public:
-    COxeVstEditor(AudioEffectX *effect, CSynthesizer *synth);
-    virtual ~COxeVstEditor();
-
-    virtual bool getRect(ERect **rect);
-    virtual bool open(void *ptr);
-    virtual void close();
-    
-    CEditor*        getEditor()       { return oxeeditor;          }
-private:
-    AudioEffectX*   effectx;
-    CSynthesizer*   synth;
-    CEditor*        oxeeditor;
-    CToolkit*       toolkit;
+    virtual void ReceiveMessage(unsigned int messageID, unsigned int par1, unsigned int par2);
 };
 
-//-----------------------------------------------------------------------------
+enum {
+    UPDATE_DISPLAY,
+    SET_PROGRAM   ,
+    SET_PARAMETER
+};
+
+#endif

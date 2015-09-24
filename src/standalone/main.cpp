@@ -17,28 +17,20 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include "editor.h"
+#include "ostoolkit.h"
 
-#ifdef __linux
-#include "xlibtoolkit.h"
-#else
-#include "windowstoolkit.h"
+#ifndef __linux
 void* hInstance;
 #endif
 
-#ifdef __linux
 int main(void)
-#else
-int APIENTRY WinMain(HINSTANCE hInst, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
-#endif
 {
+#ifndef __linux
+    hInstance = GetModuleHandle(NULL);
+#endif
     CSynthesizer s;
     CEditor e(&s);
-#ifdef __linux
-    CXlibToolkit t(0, &e, NULL, &s);
-#else
-    hInstance = (void*)hInst;
-    CWindowsToolkit t(0, &e, NULL, &s);
-#endif
+    COSToolkit t(0, &e, 0);
     e.SetToolkit(&t);
     return t.WaitWindowClosed();
 }

@@ -18,16 +18,15 @@ ifeq ($(VST_PATH),)
     $(error Please set the VST_PATH environment variable to the vstsdk2.4 path)
 endif
 
-INCLUDES:=-Isrc/vstcommon
-INCLUDES+=-Isrc/vstlinux
+INCLUDES:=-Isrc/vst
 INCLUDES+=-Isrc/synth
 INCLUDES+=-Isrc/gui
 INCLUDES+=-Isrc/toolkits
 INCLUDES+=-I$(VST_PATH)
 
-SOURCES:=src/vstcommon/oxevst.cpp
-SOURCES+=src/vstcommon/oxevstmain.cpp
-SOURCES+=src/vstcommon/oxevsteditor.cpp
+SOURCES:=src/vst/oxevst.cpp
+SOURCES+=src/vst/oxevstmain.cpp
+SOURCES+=src/vst/oxevsteditor.cpp
 SOURCES+=src/toolkits/xlibtoolkit.cpp
 SOURCES+=src/gui/button.cpp
 SOURCES+=src/gui/channels.cpp

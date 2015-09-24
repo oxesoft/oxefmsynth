@@ -17,6 +17,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include "editor.h"
+#include <X11/Xlib.h>
 #include "xlibtoolkit.h"
 #include <X11/Xutil.h>
 #include <pthread.h>
@@ -136,11 +137,11 @@ void* updateProc(void* ptr)
     }
 }
 
-CXlibToolkit::CXlibToolkit(void *parentWindow, CEditor *editor, AudioEffectX *effectx, CSynthesizer *synth)
+CXlibToolkit::CXlibToolkit(void *parentWindow, CEditor *editor, CPluginHost *host)
 {
-    this->editor  = editor;
-    this->effectx = effectx;
-    this->synth   = synth;
+    this->parentWindow = parentWindow;
+    this->editor       = editor;
+    this->host         = host;
 
     char *displayName = getenv("DISPLAY");
     if (!displayName || !strlen(displayName))
@@ -279,46 +280,6 @@ void CXlibToolkit::CopyRect(int destX, int destY, int width, int height, int ori
     }
     XCopyArea(display, bmps[origBmp], window   , gc, origX, origY, width, height, destX, destY);
     XCopyArea(display, bmps[origBmp], offscreen, gc, origX, origY, width, height, destX, destY);
-}
-
-void CXlibToolkit::SendMessageToHost(unsigned int messageID, unsigned int par1, unsigned int par2)
-{
-    switch (messageID)
-    {
-        case UPDATE_DISPLAY:
-        {
-            if (effectx)
-            {
-                effectx->updateDisplay();
-            }
-            break;
-        }
-        case SET_PROGRAM:
-        {
-            char channel = (char)par1;
-            unsigned char numprog = (unsigned char)par2;
-            if (channel == 0 && effectx)
-            {
-                effectx->setProgram(numprog);
-                effectx->updateDisplay();
-            }
-            else if (synth)
-            {
-                synth->SendEvent(0xC0 + channel, numprog, 0, 0);
-            }
-            break;
-        }
-        case SET_PARAMETER:
-        {
-            int index = (int)par1;
-            float value = (float)par2 / MAXPARVALUE;
-            if (effectx)
-            {
-                effectx->setParameterAutomated(index, value);
-            }
-            break;
-        }
-    }
 }
 
 void CXlibToolkit::OutputDebugString(char *text)

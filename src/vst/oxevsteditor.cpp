@@ -19,11 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "public.sdk/source/vst2.x/audioeffectx.h"
 #include "oxevsteditor.h"
 #include "oxevst.h"
-#ifdef __linux
-#include "xlibtoolkit.h"
-#else
-#include "windowstoolkit.h"
-#endif
+#include "ostoolkit.h"
+#include "vstpluginhost.h"
 
 //-----------------------------------------------------------------------------
 
@@ -33,6 +30,7 @@ COxeVstEditor::COxeVstEditor (AudioEffectX *effectx, CSynthesizer *synth)
     effectx(effectx),
     synth(synth)
 {
+    host = new CVSTPluginHost(effectx, synth);
     oxeeditor = new CEditor(synth);
     effect->setEditor(this);
     this->toolkit = NULL;
@@ -43,6 +41,7 @@ COxeVstEditor::COxeVstEditor (AudioEffectX *effectx, CSynthesizer *synth)
 COxeVstEditor::~COxeVstEditor ()
 {
     delete oxeeditor;
+    delete host;
 }
 
 //-----------------------------------------------------------------------------
@@ -61,11 +60,7 @@ bool COxeVstEditor::open (void *ptr)
     // Remember the parent window
     systemWindow = ptr;
 
-#ifdef __linux
-    this->toolkit = new CXlibToolkit   (ptr, oxeeditor, effectx, synth);
-#else
-    this->toolkit = new CWindowsToolkit(ptr, oxeeditor, effectx, synth);
-#endif
+    this->toolkit = new COSToolkit(ptr, oxeeditor, host);
     oxeeditor->SetToolkit(this->toolkit);
 
     return true;

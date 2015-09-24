@@ -18,16 +18,17 @@ ifeq ($(VST_PATH),)
     $(error Please set the VST_PATH environment variable to the vstsdk2.4 path)
 endif
 
-INCLUDES:=-Isrc/vstcommon
-INCLUDES+=-Isrc/vstwindows
+INCLUDES:=-Isrc/vst
+INCLUDES+=-Isrc/windows
 INCLUDES+=-Isrc/synth
 INCLUDES+=-Isrc/gui
 INCLUDES+=-Isrc/toolkits
 INCLUDES+=-I$(VST_PATH)
 
-SOURCES:=src/vstcommon/oxevst.cpp
-SOURCES+=src/vstcommon/oxevstmain.cpp
-SOURCES+=src/vstcommon/oxevsteditor.cpp
+SOURCES:=src/vst/oxevst.cpp
+SOURCES+=src/vst/oxevstmain.cpp
+SOURCES+=src/vst/oxevsteditor.cpp
+SOURCES+=src/vst/vstpluginhost.cpp
 SOURCES+=src/toolkits/windowstoolkit.cpp
 SOURCES+=src/gui/button.cpp
 SOURCES+=src/gui/channels.cpp
@@ -73,12 +74,12 @@ endif
 all: oxevst32 oxevst64
 
 oxevst32:
-	@$(RC)   -Isrc/synth -Iskins/default src/vstwindows/vstplugin.rc resources32.o
+	@$(RC)   -Isrc/synth -Iskins/default src/windows/resources.rc resources32.o
 	@$(CC)   -static -s -O3 -shared -o oxevst.dll   $(VST_PATH)/public.sdk/samples/vst2.x/win/vstplug.def $(CFLAGS) $(SOURCES) $(INCLUDES) $(LIBS) resources32.o
 	@rm resources32.o
 
 oxevst64:
-	@$(RC64) -Isrc/synth -Iskins/default src/vstwindows/vstplugin.rc resources64.o
+	@$(RC64) -Isrc/synth -Iskins/default src/windows/resources.rc resources64.o
 	@$(CC64) -static -s -O3 -shared -o oxevst64.dll $(VST_PATH)/public.sdk/samples/vst2.x/win/vstplug.def $(CFLAGS) $(SOURCES) $(INCLUDES) $(LIBS) resources64.o
 	@rm resources64.o
 

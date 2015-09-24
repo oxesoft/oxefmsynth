@@ -16,23 +16,12 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-class CXlibToolkit : public CToolkit
+class CVSTPluginHost : public CPluginHost
 {
 private:
-    Pixmap bmps[BMP_COUNT];
-    Pixmap LoadImage(const char *path);
+    AudioEffectX *effectx;
+    CSynthesizer *synth;
 public:
-    void        *parentWindow;
-    CEditor     *editor;
-    Display      *display;
-    Window       window;
-    GC           gc;
-    Atom         WM_DELETE_WINDOW;
-    Pixmap       offscreen;
-    bool         threadFinished;
-    CXlibToolkit(void *parentWindow, CEditor *editor, CPluginHost *host);
-    ~CXlibToolkit();
-    void CopyRect(int destX, int destY, int width, int height, int origBmp, int origX, int origY);
-    void OutputDebugString(char *text);
-    int  WaitWindowClosed();
+    CVSTPluginHost(AudioEffectX *effectx, CSynthesizer *synth);
+    virtual void ReceiveMessage(unsigned int messageID, unsigned int par1, unsigned int par2);
 };

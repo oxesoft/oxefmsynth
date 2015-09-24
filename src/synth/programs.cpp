@@ -21,6 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "soundbank.h"
 #else
 #include "persist.h"
+#include "pluginhost.h"
 #include "toolkit.h"
 #endif
 #include "programs.h"

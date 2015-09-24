@@ -16,12 +16,12 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#define IDI_ICON                        100
-#define IDB_CHARS                       101
-#define IDB_KNOB                        102
-#define IDB_KNOB2                       103
-#define IDB_KNOB3                       104
-#define IDB_CHAVE                       105
-#define IDB_FUNDO                       106
-#define IDB_BUTTONS                     107
-#define IDB_OPS                         108
+#ifdef __linux
+    #include <X11/Xlib.h>
+    #include "xlibtoolkit.h"
+    #define COSToolkit CXlibToolkit
+#else
+    #include <windows.h>
+    #include "windowstoolkit.h"
+    #define COSToolkit CWindowsToolkit
+#endif

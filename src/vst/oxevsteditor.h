@@ -16,23 +16,28 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-class CXlibToolkit : public CToolkit
+#include "public.sdk/source/vst2.x/aeffeditor.h"
+#include "editor.h"
+
+//-----------------------------------------------------------------------------
+
+class COxeVstEditor : public AEffEditor
 {
-private:
-    Pixmap bmps[BMP_COUNT];
-    Pixmap LoadImage(const char *path);
 public:
-    void        *parentWindow;
-    CEditor     *editor;
-    Display      *display;
-    Window       window;
-    GC           gc;
-    Atom         WM_DELETE_WINDOW;
-    Pixmap       offscreen;
-    bool         threadFinished;
-    CXlibToolkit(void *parentWindow, CEditor *editor, CPluginHost *host);
-    ~CXlibToolkit();
-    void CopyRect(int destX, int destY, int width, int height, int origBmp, int origX, int origY);
-    void OutputDebugString(char *text);
-    int  WaitWindowClosed();
+    COxeVstEditor(AudioEffectX *effect, CSynthesizer *synth);
+    virtual ~COxeVstEditor();
+
+    virtual bool getRect(ERect **rect);
+    virtual bool open(void *ptr);
+    virtual void close();
+    
+    CEditor*        getEditor()       { return oxeeditor;          }
+private:
+    AudioEffectX*   effectx;
+    CSynthesizer*   synth;
+    CEditor*        oxeeditor;
+    CToolkit*       toolkit;
+    CPluginHost*    host;
 };
+
+//-----------------------------------------------------------------------------
