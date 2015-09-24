@@ -119,6 +119,10 @@ void* eventProc(void* ptr)
                     stopThread = true;
                     break;
                 }
+                else if (message->data.l[0] == toolkit->WM_TIMER)
+                {
+                    toolkit->editor->Update();
+                }
             }
         }
     }
@@ -131,7 +135,15 @@ void* updateProc(void* ptr)
     CXlibToolkit *toolkit = (CXlibToolkit*)ptr;
     while (!toolkit->threadFinished)
     {
-        toolkit->editor->Update();
+        XClientMessageEvent event;
+        event.display      = toolkit->display;
+        event.window       = toolkit->window;
+        event.type         = ClientMessage;
+        event.format       = 8;
+        event.data.l[0]    = toolkit->WM_TIMER;
+        event.message_type = toolkit->WM_TIMER;
+        XSendEvent(toolkit->display, toolkit->window, false, 0L, (XEvent*)&event);
+        XFlush(toolkit->display);
         usleep(1000 * TIMER_RESOLUTION_MS);
     }
 }
@@ -145,6 +157,11 @@ CXlibToolkit::CXlibToolkit(void *parentWindow, CEditor *editor)
     if (!displayName || !strlen(displayName))
     {
         displayName = (char*)":0.0";
+    }
+    if (!XInitThreads())
+    {
+        fprintf(stderr, "Xlib threads support unavailable");
+        return;
     }
     this->display = XOpenDisplay(displayName);
     
@@ -160,6 +177,7 @@ CXlibToolkit::CXlibToolkit(void *parentWindow, CEditor *editor)
     XMapWindow(this->display, window);
     XFlush(this->display);
         
+    this->WM_TIMER         = XInternAtom(this->display, "WM_TIMER"        , false); 
     this->WM_DELETE_WINDOW = XInternAtom(this->display, "WM_DELETE_WINDOW", false); 
     XSetWMProtocols(this->display, window, &WM_DELETE_WINDOW, 1);
     

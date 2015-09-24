@@ -28,6 +28,7 @@ public:
     Window       window;
     GC           gc;
     Atom         WM_DELETE_WINDOW;
+    Atom         WM_TIMER;
     Pixmap       offscreen;
     bool         threadFinished;
     CXlibToolkit(void *parentWindow, CEditor *editor);
