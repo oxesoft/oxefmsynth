@@ -297,7 +297,7 @@ CWindowsToolkit::~CWindowsToolkit()
     DeleteObject(bmps[BMP_OPS    ]);
 }
 
-void CWindowsToolkit::StarWindowProcesses()
+void CWindowsToolkit::StartWindowProcesses()
 {
     if (!parentWindow)
     {

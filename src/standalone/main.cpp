@@ -32,6 +32,6 @@ int main(void)
     CEditor e(&s);
     COSToolkit t(0, &e);
     e.SetToolkit(&t);
-    t.StarWindowProcesses();
+    t.StartWindowProcesses();
     return t.WaitWindowClosed();
 }

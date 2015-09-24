@@ -207,7 +207,7 @@ CXlibToolkit::~CXlibToolkit()
     XCloseDisplay(display);
 }
 
-void CXlibToolkit::StarWindowProcesses()
+void CXlibToolkit::StartWindowProcesses()
 {
     threadFinished = false;
     pthread_t thread1;

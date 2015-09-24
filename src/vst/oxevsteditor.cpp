@@ -61,7 +61,7 @@ bool COxeVstEditor::open (void *ptr)
     toolkit = new COSToolkit(ptr, oxeeditor);
     oxeeditor->SetToolkit(toolkit);
     oxeeditor->SetHostInterface(hostinterface);
-    this->toolkit->StarWindowProcesses();
+    this->toolkit->StartWindowProcesses();
     return true;
 }
 

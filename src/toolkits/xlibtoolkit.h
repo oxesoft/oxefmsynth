@@ -32,7 +32,7 @@ public:
     bool         threadFinished;
     CXlibToolkit(void *parentWindow, CEditor *editor);
     ~CXlibToolkit();
-    void StarWindowProcesses();
+    void StartWindowProcesses();
     void CopyRect(int destX, int destY, int width, int height, int origBmp, int origX, int origY);
     void OutputDebugString(char *text);
     int  WaitWindowClosed();
