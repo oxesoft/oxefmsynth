@@ -8,7 +8,7 @@ This repository contains the synth core and three different ways to use it:
 
 - as a [demo](https://en.wikipedia.org/wiki/Demoscene) (for testing synth engine, for profiling or just for fun)
 - as a standalone application (for testing GUI)
-- as a [VST plugin](https://pt.wikipedia.org/wiki/Virtual_Studio_Technology) for Windows 32/64 bit and Linux
+- as a [VST plugin](https://pt.wikipedia.org/wiki/Virtual_Studio_Technology) for Windows and Linux, 32/64 bit
 
 Building
 --------
