@@ -30,4 +30,7 @@ public:
     virtual int  WaitWindowClosed() {}            // standalone only
 };
 
+#define TIMER_RESOLUTION_MS 20
+#define BMP_PATH "skin"
+
 #endif

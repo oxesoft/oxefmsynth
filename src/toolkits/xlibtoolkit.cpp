@@ -27,9 +27,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <stdio.h>
 #include <unistd.h>
 
-#define TIMER_RESOLUTION_MS 20
-#define BMP_PATH "skins/default/"
-
 struct BITMAPFILEHEADER
 {
     char         signature[2];
@@ -185,14 +182,14 @@ CXlibToolkit::CXlibToolkit(void *parentWindow, CEditor *editor)
     offscreen = XCreatePixmap(this->display, window, GUI_WIDTH, GUI_HEIGHT, 24);
 
     memset(bmps, 0, sizeof(bmps));
-    bmps[BMP_CHARS  ] = LoadImageFromFile(BMP_PATH"chars.bmp"  );
-    bmps[BMP_KNOB   ] = LoadImageFromFile(BMP_PATH"knob.bmp"   );
-    bmps[BMP_KNOB2  ] = LoadImageFromFile(BMP_PATH"knob2.bmp"  );
-    bmps[BMP_KNOB3  ] = LoadImageFromFile(BMP_PATH"knob3.bmp"  );
-    bmps[BMP_KEY    ] = LoadImageFromFile(BMP_PATH"key.bmp"    );
-    bmps[BMP_BG     ] = LoadImageFromFile(BMP_PATH"bg.bmp"     );
-    bmps[BMP_BUTTONS] = LoadImageFromFile(BMP_PATH"buttons.bmp");
-    bmps[BMP_OPS    ] = LoadImageFromFile(BMP_PATH"ops.bmp"    );
+    bmps[BMP_CHARS  ] = LoadImageFromFile(BMP_PATH"/chars.bmp"  );
+    bmps[BMP_KNOB   ] = LoadImageFromFile(BMP_PATH"/knob.bmp"   );
+    bmps[BMP_KNOB2  ] = LoadImageFromFile(BMP_PATH"/knob2.bmp"  );
+    bmps[BMP_KNOB3  ] = LoadImageFromFile(BMP_PATH"/knob3.bmp"  );
+    bmps[BMP_KEY    ] = LoadImageFromFile(BMP_PATH"/key.bmp"    );
+    bmps[BMP_BG     ] = LoadImageFromFile(BMP_PATH"/bg.bmp"     );
+    bmps[BMP_BUTTONS] = LoadImageFromFile(BMP_PATH"/buttons.bmp");
+    bmps[BMP_OPS    ] = LoadImageFromFile(BMP_PATH"/ops.bmp"    );
 
     if (!bmps[BMP_CHARS  ]) bmps[BMP_CHARS  ] = LoadImageFromBuffer(chars_bmp  );
     if (!bmps[BMP_KNOB   ]) bmps[BMP_KNOB   ] = LoadImageFromBuffer(knob_bmp   );

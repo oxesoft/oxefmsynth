@@ -25,9 +25,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <strsafe.h>
 #include <stdio.h>
 
-#define TIMER_RESOLUTION_MS 20
-#define BMP_PATH "skin\\"
-
 static int g_useCount = 0;
 extern void* hInstance;
 
@@ -234,28 +231,28 @@ CWindowsToolkit::CWindowsToolkit(void *parentWindow, CEditor *editor)
     char tmp_path[MAX_PATH];
     GetResourcesPath(dll_path, MAX_PATH);
     StringCchCopyA(tmp_path, MAX_PATH, dll_path);
-    StringCchCatA (tmp_path, MAX_PATH, BMP_PATH"chars.bmp");
+    StringCchCatA (tmp_path, MAX_PATH, BMP_PATH"\\chars.bmp");
     bmps[BMP_CHARS]   = (HBITMAP)LoadImageA(NULL, tmp_path, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
     StringCchCopyA(tmp_path, MAX_PATH, dll_path);
-    StringCchCatA (tmp_path, MAX_PATH, BMP_PATH"knob.bmp");
+    StringCchCatA (tmp_path, MAX_PATH, BMP_PATH"\\knob.bmp");
     bmps[BMP_KNOB]    = (HBITMAP)LoadImageA(NULL, tmp_path, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
     StringCchCopyA(tmp_path, MAX_PATH, dll_path);
-    StringCchCatA (tmp_path, MAX_PATH, BMP_PATH"knob2.bmp");
+    StringCchCatA (tmp_path, MAX_PATH, BMP_PATH"\\knob2.bmp");
     bmps[BMP_KNOB2]   = (HBITMAP)LoadImageA(NULL, tmp_path, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
     StringCchCopyA(tmp_path, MAX_PATH, dll_path);
-    StringCchCatA (tmp_path, MAX_PATH, BMP_PATH"knob3.bmp");
+    StringCchCatA (tmp_path, MAX_PATH, BMP_PATH"\\knob3.bmp");
     bmps[BMP_KNOB3]   = (HBITMAP)LoadImageA(NULL, tmp_path, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
     StringCchCopyA(tmp_path, MAX_PATH, dll_path);
-    StringCchCatA (tmp_path, MAX_PATH, BMP_PATH"key.bmp");
+    StringCchCatA (tmp_path, MAX_PATH, BMP_PATH"\\key.bmp");
     bmps[BMP_KEY]     = (HBITMAP)LoadImageA(NULL, tmp_path, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
     StringCchCopyA(tmp_path, MAX_PATH, dll_path);
-    StringCchCatA (tmp_path, MAX_PATH, BMP_PATH"bg.bmp");
+    StringCchCatA (tmp_path, MAX_PATH, BMP_PATH"\\bg.bmp");
     bmps[BMP_BG]      = (HBITMAP)LoadImageA(NULL, tmp_path, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
     StringCchCopyA(tmp_path, MAX_PATH, dll_path);
-    StringCchCatA (tmp_path, MAX_PATH, BMP_PATH"buttons.bmp");
+    StringCchCatA (tmp_path, MAX_PATH, BMP_PATH"\\buttons.bmp");
     bmps[BMP_BUTTONS] = (HBITMAP)LoadImageA(NULL, tmp_path, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
     StringCchCopyA(tmp_path, MAX_PATH, dll_path);
-    StringCchCatA (tmp_path, MAX_PATH, BMP_PATH"ops.bmp");
+    StringCchCatA (tmp_path, MAX_PATH, BMP_PATH"\\ops.bmp");
     bmps[BMP_OPS]     = (HBITMAP)LoadImageA(NULL, tmp_path, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
     if (!bmps[BMP_CHARS  ]) bmps[BMP_CHARS  ] = LoadBitmap((HINSTANCE)hInstance,MAKEINTRESOURCE(IDB_CHARS));
     if (!bmps[BMP_KNOB   ]) bmps[BMP_KNOB   ] = LoadBitmap((HINSTANCE)hInstance,MAKEINTRESOURCE(IDB_KNOB));
