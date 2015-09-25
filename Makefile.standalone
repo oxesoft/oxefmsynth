@@ -75,20 +75,20 @@ else
         LDFLAGS+=-lpthread
         SOURCES+=src/toolkits/xlibtoolkit.cpp
         INCLUDES+=-I.
-        DEPS:=resources.h
+        DEPS:=bitmaps.h
     endif
 endif
 
 all: $(DEPS)
 	@$(CC) -o $(EXECUTABLE_NAME) -DEXECUTABLE_NAME=\"$(EXECUTABLE_NAME)\" $(CFLAGS) $(SOURCES) $(INCLUDES) $(LDFLAGS)
 
-resources.h:
+bitmaps.h:
 	@$(CC) -o embedresources src/toolkits/embedresources.cpp
-	@./embedresources resources.h
+	@./embedresources $@
 	@rm embedresources
 
 resources.o:
 	@$(RC) -Isrc/synth -Iskins/default src/windows/resources.rc resources.o
 
 clean:
-	@rm -f $(EXECUTABLE_NAME) embedresources resources.h resources.o
+	@rm -f $(EXECUTABLE_NAME) embedresources bitmaps.h resources.o

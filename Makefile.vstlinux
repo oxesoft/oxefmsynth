@@ -65,15 +65,15 @@ ARCH := $(shell getconf LONG_BIT)
 
 all: oxevst$(ARCH)
 
-oxevst32: resources.h
+oxevst32: bitmaps.h
 	@g++ -shared -m32 -o oxevst32.so $(CFLAGS) $(SOURCES) $(INCLUDES) $(LIBS)
 
-oxevst64: resources.h
+oxevst64: bitmaps.h
 	@g++ -shared -m64 -o oxevst64.so $(CFLAGS) $(SOURCES) $(INCLUDES) $(LIBS)
 
-resources.h:
+bitmaps.h:
 	@$(CC) -o embedresources src/toolkits/embedresources.cpp
-	@./embedresources resources.h
+	@./embedresources $@
 	@rm embedresources
 
 clean:
