@@ -170,7 +170,7 @@ CXlibToolkit::CXlibToolkit(void *parentWindow, CEditor *editor)
         parentWindow = (void*)RootWindow(this->display, DefaultScreen(this->display));
     }
     
-    window = XCreateSimpleWindow(this->display, (Window)parentWindow, 0, 0, GUI_WIDTH, GUI_HEIGHT, 0, 0, 0);
+    window = XCreateWindow(this->display, (Window)parentWindow, 0, 0, GUI_WIDTH, GUI_HEIGHT, 0, 24, InputOutput, CopyFromParent, 0, 0);
     
     gc = XCreateGC(this->display, window, 0, 0);
     XSelectInput(this->display, window, ButtonPressMask | ButtonReleaseMask | PointerMotionMask | ExposureMask);
