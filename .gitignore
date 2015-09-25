@@ -2,6 +2,7 @@
 *.wav
 *.dll
 *.so
+*.o
 oxefmsynthdemo
 oxeconverter
 oxefmsynth
