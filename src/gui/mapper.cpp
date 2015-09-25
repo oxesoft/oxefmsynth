@@ -354,7 +354,7 @@ void CMapper::GetDisplayValue(CSynthesizer *synthesizer, char channel, int par, 
             strncpy(str, fvalue?"On":"Off", TEXT_SIZE);
             break;
         case VL_CHANNELS:
-            snprintf(str, TEXT_SIZE, "Program %03i", synthesizer->GetNumProgr(channel));
+            synthesizer->GetProgName(str, channel);
             break;
         case BT_MINUS_10:
         case BT_MINUS_1:

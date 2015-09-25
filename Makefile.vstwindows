@@ -14,8 +14,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-ifeq ($(VST_PATH),)
-    $(error Please set the VST_PATH environment variable to the vstsdk2.4 path)
+ifeq ($(VSTSDK_PATH),)
+    $(error Please set the VSTSDK_PATH environment variable to the vstsdk2.4 path)
 endif
 
 INCLUDES:=-Isrc/vst
@@ -23,7 +23,7 @@ INCLUDES+=-Isrc/synth
 INCLUDES+=-Isrc/gui
 INCLUDES+=-Isrc/toolkits
 INCLUDES+=-Isrc/windows
-INCLUDES+=-I$(VST_PATH)
+INCLUDES+=-I$(VSTSDK_PATH)
 
 SOURCES:=src/vst/oxevst.cpp
 SOURCES+=src/vst/oxevstmain.cpp
@@ -48,9 +48,9 @@ SOURCES+=src/synth/persist.cpp
 SOURCES+=src/synth/programs.cpp
 SOURCES+=src/synth/reverb.cpp
 SOURCES+=src/synth/synthesizer.cpp
-SOURCES+=$(VST_PATH)/public.sdk/source/vst2.x/audioeffect.cpp
-SOURCES+=$(VST_PATH)/public.sdk/source/vst2.x/audioeffectx.cpp
-SOURCES+=$(VST_PATH)/public.sdk/source/vst2.x/vstplugmain.cpp
+SOURCES+=$(VSTSDK_PATH)/public.sdk/source/vst2.x/audioeffect.cpp
+SOURCES+=$(VSTSDK_PATH)/public.sdk/source/vst2.x/audioeffectx.cpp
+SOURCES+=$(VSTSDK_PATH)/public.sdk/source/vst2.x/vstplugmain.cpp
 
 LIBS:=-lgdi32
 
@@ -75,12 +75,12 @@ all: oxevst32 oxevst64
 
 oxevst32:
 	@$(RC)   -Isrc/synth -Iskins/default src/windows/resources.rc resources32.o
-	@$(CC)   -static -s -O3 -shared -o oxevst.dll   $(VST_PATH)/public.sdk/samples/vst2.x/win/vstplug.def $(CFLAGS) $(SOURCES) $(INCLUDES) $(LIBS) resources32.o
+	@$(CC)   -static -s -O3 -shared -o oxevst.dll   $(VSTSDK_PATH)/public.sdk/samples/vst2.x/win/vstplug.def $(CFLAGS) $(SOURCES) $(INCLUDES) $(LIBS) resources32.o
 	@rm resources32.o
 
 oxevst64:
 	@$(RC64) -Isrc/synth -Iskins/default src/windows/resources.rc resources64.o
-	@$(CC64) -static -s -O3 -shared -o oxevst64.dll $(VST_PATH)/public.sdk/samples/vst2.x/win/vstplug.def $(CFLAGS) $(SOURCES) $(INCLUDES) $(LIBS) resources64.o
+	@$(CC64) -static -s -O3 -shared -o oxevst64.dll $(VSTSDK_PATH)/public.sdk/samples/vst2.x/win/vstplug.def $(CFLAGS) $(SOURCES) $(INCLUDES) $(LIBS) resources64.o
 	@rm resources64.o
 
 clean:

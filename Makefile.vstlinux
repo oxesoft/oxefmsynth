@@ -14,15 +14,15 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-ifeq ($(VST_PATH),)
-    $(error Please set the VST_PATH environment variable to the vstsdk2.4 path)
+ifeq ($(VSTSDK_PATH),)
+    $(error Please set the VSTSDK_PATH environment variable to the vstsdk2.4 path)
 endif
 
 INCLUDES:=-Isrc/vst
 INCLUDES+=-Isrc/synth
 INCLUDES+=-Isrc/gui
 INCLUDES+=-Isrc/toolkits
-INCLUDES+=-I$(VST_PATH)
+INCLUDES+=-I$(VSTSDK_PATH)
 INCLUDES+=-I.
 
 SOURCES:=src/vst/oxevst.cpp
@@ -48,9 +48,9 @@ SOURCES+=src/synth/persist.cpp
 SOURCES+=src/synth/programs.cpp
 SOURCES+=src/synth/reverb.cpp
 SOURCES+=src/synth/synthesizer.cpp
-SOURCES+=$(VST_PATH)/public.sdk/source/vst2.x/audioeffect.cpp
-SOURCES+=$(VST_PATH)/public.sdk/source/vst2.x/audioeffectx.cpp
-SOURCES+=$(VST_PATH)/public.sdk/source/vst2.x/vstplugmain.cpp
+SOURCES+=$(VSTSDK_PATH)/public.sdk/source/vst2.x/audioeffect.cpp
+SOURCES+=$(VSTSDK_PATH)/public.sdk/source/vst2.x/audioeffectx.cpp
+SOURCES+=$(VSTSDK_PATH)/public.sdk/source/vst2.x/vstplugmain.cpp
 
 LIBS:=-lX11
 CFLAGS+=-fPIC 
