@@ -20,7 +20,8 @@ class CXlibToolkit : public CToolkit
 {
 private:
     Pixmap bmps[BMP_COUNT];
-    Pixmap LoadImage(const char *path);
+    Pixmap LoadImageFromFile(const char *path);
+    Pixmap LoadImageFromBuffer(const char *buffer);
 public:
     void        *parentWindow;
     CEditor     *editor;

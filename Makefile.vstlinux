@@ -23,6 +23,7 @@ INCLUDES+=-Isrc/synth
 INCLUDES+=-Isrc/gui
 INCLUDES+=-Isrc/toolkits
 INCLUDES+=-I$(VST_PATH)
+INCLUDES+=-I.
 
 SOURCES:=src/vst/oxevst.cpp
 SOURCES+=src/vst/oxevstmain.cpp
@@ -64,11 +65,16 @@ ARCH := $(shell getconf LONG_BIT)
 
 all: oxevst$(ARCH)
 
-oxevst32:
+oxevst32: resources.h
 	@g++ -shared -m32 -o oxevst32.so $(CFLAGS) $(SOURCES) $(INCLUDES) $(LIBS)
 
-oxevst64:
+oxevst64: resources.h
 	@g++ -shared -m64 -o oxevst64.so $(CFLAGS) $(SOURCES) $(INCLUDES) $(LIBS)
 
+resources.h:
+	@$(CC) -o embedresources src/toolkits/embedresources.cpp
+	@./embedresources resources.h
+	@rm embedresources
+
 clean:
-	@rm -f oxevst*.so
+	@rm -f oxevst*.so embedresources resources.h

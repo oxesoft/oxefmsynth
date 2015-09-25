@@ -16,6 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "resources.h"
 #include "editor.h"
 #include <X11/Xlib.h>
 #include "xlibtoolkit.h"
@@ -184,14 +185,23 @@ CXlibToolkit::CXlibToolkit(void *parentWindow, CEditor *editor)
     offscreen = XCreatePixmap(this->display, window, GUI_WIDTH, GUI_HEIGHT, 24);
 
     memset(bmps, 0, sizeof(bmps));
-    bmps[BMP_CHARS]   = LoadImage(BMP_PATH"chars.bmp");
-    bmps[BMP_KNOB]    = LoadImage(BMP_PATH"knob.bmp");
-    bmps[BMP_KNOB2]   = LoadImage(BMP_PATH"knob2.bmp");
-    bmps[BMP_KNOB3]   = LoadImage(BMP_PATH"knob3.bmp");
-    bmps[BMP_KEY]     = LoadImage(BMP_PATH"key.bmp");
-    bmps[BMP_BG]      = LoadImage(BMP_PATH"bg.bmp");
-    bmps[BMP_BUTTONS] = LoadImage(BMP_PATH"buttons.bmp");
-    bmps[BMP_OPS]     = LoadImage(BMP_PATH"ops.bmp");
+    bmps[BMP_CHARS  ] = LoadImageFromFile(BMP_PATH"chars.bmp"  );
+    bmps[BMP_KNOB   ] = LoadImageFromFile(BMP_PATH"knob.bmp"   );
+    bmps[BMP_KNOB2  ] = LoadImageFromFile(BMP_PATH"knob2.bmp"  );
+    bmps[BMP_KNOB3  ] = LoadImageFromFile(BMP_PATH"knob3.bmp"  );
+    bmps[BMP_KEY    ] = LoadImageFromFile(BMP_PATH"key.bmp"    );
+    bmps[BMP_BG     ] = LoadImageFromFile(BMP_PATH"bg.bmp"     );
+    bmps[BMP_BUTTONS] = LoadImageFromFile(BMP_PATH"buttons.bmp");
+    bmps[BMP_OPS    ] = LoadImageFromFile(BMP_PATH"ops.bmp"    );
+
+    if (!bmps[BMP_CHARS  ]) bmps[BMP_CHARS  ] = LoadImageFromBuffer(chars_bmp  );
+    if (!bmps[BMP_KNOB   ]) bmps[BMP_KNOB   ] = LoadImageFromBuffer(knob_bmp   );
+    if (!bmps[BMP_KNOB2  ]) bmps[BMP_KNOB2  ] = LoadImageFromBuffer(knob2_bmp  );
+    if (!bmps[BMP_KNOB3  ]) bmps[BMP_KNOB3  ] = LoadImageFromBuffer(knob3_bmp  );
+    if (!bmps[BMP_KEY    ]) bmps[BMP_KEY    ] = LoadImageFromBuffer(key_bmp    );
+    if (!bmps[BMP_BG     ]) bmps[BMP_BG     ] = LoadImageFromBuffer(bg_bmp     );
+    if (!bmps[BMP_BUTTONS]) bmps[BMP_BUTTONS] = LoadImageFromBuffer(buttons_bmp);
+    if (!bmps[BMP_OPS    ]) bmps[BMP_OPS    ] = LoadImageFromBuffer(ops_bmp    );
 
     threadFinished = true;
 }
@@ -234,42 +244,42 @@ void CXlibToolkit::StartWindowProcesses()
     pthread_create(&thread2, NULL, &updateProc, (void*)this);
 }
 
-Pixmap CXlibToolkit::LoadImage(const char *path)
+Pixmap CXlibToolkit::LoadImageFromFile(const char *path)
 {
     FILE *f = fopen(path, "rb");
     if (!f)
     {
         return 0;
     }
-    BITMAPHEADER header = {0};
-    if (!fread(&header, sizeof(header), 1, f))
-    {
-        fclose(f);
-        return 0;
-    }
-    if (header.fh.signature[0] != 'B' || header.fh.signature[1] != 'M')
-    {
-        fclose(f);
-        return 0;
-    }
-    
-    char *data = (char*)malloc(header.v5.width * header.v5.height * 4);
-    char *tmp  = (char*)malloc(header.v5.imageSize);
-
-    fseek(f, header.fh.fileOffsetToPixelArray, SEEK_SET);
-    if (!fread(tmp, header.v5.imageSize, 1, f))
+    fseek(f, 0, SEEK_END);
+    int size = ftell(f);
+    fseek(f, 0, SEEK_SET);
+    char *tmp = (char*)malloc(size);
+    if (!fread(tmp, size, 1, f))
     {
         free(tmp);
         fclose(f);
         return 0;
     }
     fclose(f);
-    
-    char* dest = data;
-    for (int line = header.v5.height - 1; line >= 0; line--)
+    Pixmap result = LoadImageFromBuffer(tmp);
+    free(tmp);
+    return result;
+}
+
+Pixmap CXlibToolkit::LoadImageFromBuffer(const char *buffer)
+{
+    BITMAPHEADER *header = (BITMAPHEADER *)buffer;
+    if (header->fh.signature[0] != 'B' || header->fh.signature[1] != 'M')
     {
-        char* src  = tmp + (line * (header.v5.imageSize / header.v5.height));
-        int i = header.v5.width;
+        return 0;
+    }
+    char *data = (char*)malloc(header->v5.width * header->v5.height * 4);
+    char* dest = data;
+    for (int line = header->v5.height - 1; line >= 0; line--)
+    {
+        char* src  = (char*)buffer + header->fh.fileOffsetToPixelArray + (line * (header->v5.imageSize / header->v5.height));
+        int i = header->v5.width;
         while (i--)
         {
             *(dest++) = *(src++);
@@ -278,16 +288,15 @@ Pixmap CXlibToolkit::LoadImage(const char *path)
             *(dest++) = 0;
         }
     }
-    free(tmp);
-    
-    XImage *image = XCreateImage(this->display, CopyFromParent, header.v5.bitsPerPixel, ZPixmap, 0, data, header.v5.width, header.v5.height, 32, 0);
+    XImage *image = XCreateImage(this->display, CopyFromParent, header->v5.bitsPerPixel, ZPixmap, 0, data, header->v5.width, header->v5.height, 32, 0);
     if (!image)
     {
         free(data);
+        return 0;
     }
-    Pixmap pixmap = XCreatePixmap(this->display, window, header.v5.width, header.v5.height, 24);
+    Pixmap pixmap = XCreatePixmap(this->display, window, header->v5.width, header->v5.height, 24);
     GC gc = XCreateGC(display, pixmap, 0, 0);
-    XPutImage(display, pixmap, gc, image, 0, 0, 0, 0, header.v5.width, header.v5.height);
+    XPutImage(display, pixmap, gc, image, 0, 0, 0, 0, header->v5.width, header->v5.height);
     XFreeGC(display, gc);
     XDestroyImage(image);
     return pixmap;

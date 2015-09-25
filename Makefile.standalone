@@ -14,18 +14,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-ifeq ($(VST_PATH),)
-    $(error Please set the VST_PATH environment variable to the vstsdk2.4 path)
-endif
-
 EXECUTABLE_NAME:=oxefmsynth
 
 INCLUDES:=-Isrc/vst
 INCLUDES+=-Isrc/gui
 INCLUDES+=-Isrc/synth
 INCLUDES+=-Isrc/toolkits
-INCLUDES+=-Isrc/windows
-INCLUDES+=-I$(VST_PATH)
 
 SOURCES+=src/standalone/main.cpp
 SOURCES+=src/gui/button.cpp
@@ -57,36 +51,44 @@ ifeq ($(OS),Windows_NT)
     EXECUTABLE_NAME:=$(EXECUTABLE_NAME).exe
     CC:=g++.exe
     RC:=windres.exe
-    RC_CMD:=$(RC) -Isrc/synth -Iskins/default src/windows/resources.rc resources.o
-    RM_CMD:=rm resources.o
     INCLUDES+=-Isrc/standalone
     SOURCES+=src/toolkits/windowstoolkit.cpp
+    INCLUDES+=-Isrc/windows
     LDFLAGS+=-lgdi32
     LDFLAGS+=resources.o
+    DEPS:=resources.o
 else
     ifeq ($(TARGET),WIN32)
         EXECUTABLE_NAME:=$(EXECUTABLE_NAME).exe
         CC:=i686-w64-mingw32-g++
         RC:=i686-w64-mingw32-windres
-        RC_CMD:=$(RC) -Isrc/synth -Iskins/default src/windows/resources.rc resources.o
-        RM_CMD:=rm resources.o
         LDFLAGS+=-static
         INCLUDES+=-Isrc/standalone
         SOURCES+=src/toolkits/windowstoolkit.cpp
+        INCLUDES+=-Isrc/windows
         LDFLAGS+=-lgdi32
         LDFLAGS+=resources.o
+        DEPS:=resources.o
     else
         CC:=g++
         LDFLAGS+=-lX11
         LDFLAGS+=-lpthread
         SOURCES+=src/toolkits/xlibtoolkit.cpp
+        INCLUDES+=-I.
+        DEPS:=resources.h
     endif
 endif
 
-all:
-	@$(RC_CMD)
+all: $(DEPS)
 	@$(CC) -o $(EXECUTABLE_NAME) -DEXECUTABLE_NAME=\"$(EXECUTABLE_NAME)\" $(CFLAGS) $(SOURCES) $(INCLUDES) $(LDFLAGS)
-	@$(RM_CMD)
+
+resources.h:
+	@$(CC) -o embedresources src/toolkits/embedresources.cpp
+	@./embedresources resources.h
+	@rm embedresources
+
+resources.o:
+	@$(RC) -Isrc/synth -Iskins/default src/windows/resources.rc resources.o
 
 clean:
-	@rm -f $(EXECUTABLE_NAME)
+	@rm -f $(EXECUTABLE_NAME) embedresources resources.h resources.o
