@@ -103,6 +103,21 @@ void* eventProc(void* ptr)
                 toolkit->editor->OnMouseMove(e->x, e->y);
                 break;
             }
+            case KeyPress:
+            {
+                char buffer[64];
+                int count = XLookupString((XKeyEvent*)&event, buffer, sizeof(buffer), NULL, NULL);
+                if (buffer[0])
+                {
+                    toolkit->editor->OnChar(buffer[0]);
+                }
+                break;
+            }
+            case MappingNotify:
+            {
+                XRefreshKeyboardMapping((XMappingEvent*)&event);
+                break;
+            }
             case Expose:
             {
                 XGraphicsExposeEvent *e = (XGraphicsExposeEvent*)&event;
@@ -171,7 +186,7 @@ CXlibToolkit::CXlibToolkit(void *parentWindow, CEditor *editor)
     window = XCreateWindow(this->display, (Window)parentWindow, 0, 0, GUI_WIDTH, GUI_HEIGHT, 0, 24, InputOutput, CopyFromParent, 0, 0);
     
     gc = XCreateGC(this->display, window, 0, 0);
-    XSelectInput(this->display, window, ButtonPressMask | ButtonReleaseMask | PointerMotionMask | ExposureMask);
+    XSelectInput(this->display, window, ButtonPressMask | ButtonReleaseMask | PointerMotionMask | ExposureMask | KeyPressMask);
     XMapWindow(this->display, window);
     XFlush(this->display);
         
