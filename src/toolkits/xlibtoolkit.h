@@ -31,7 +31,8 @@ public:
     Atom         WM_DELETE_WINDOW;
     Atom         WM_TIMER;
     Pixmap       offscreen;
-    bool         threadFinished;
+    bool         thread1Finished;
+    bool         thread2Finished;
     CXlibToolkit(void *parentWindow, CEditor *editor);
     ~CXlibToolkit();
     void StartWindowProcesses();

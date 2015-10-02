@@ -139,14 +139,14 @@ void* eventProc(void* ptr)
             }
         }
     }
-    toolkit->threadFinished = true;
+    toolkit->thread1Finished = true;
     return NULL;
 }
 
 void* updateProc(void* ptr)
 {
     CXlibToolkit *toolkit = (CXlibToolkit*)ptr;
-    while (!toolkit->threadFinished)
+    while (!toolkit->thread1Finished)
     {
         XClientMessageEvent event;
         event.display      = toolkit->display;
@@ -159,6 +159,8 @@ void* updateProc(void* ptr)
         XFlush(toolkit->display);
         usleep(1000 * TIMER_RESOLUTION_MS);
     }
+    toolkit->thread2Finished = true;
+    return NULL;
 }
 
 CXlibToolkit::CXlibToolkit(void *parentWindow, CEditor *editor)
@@ -215,7 +217,8 @@ CXlibToolkit::CXlibToolkit(void *parentWindow, CEditor *editor)
     if (!bmps[BMP_BUTTONS]) bmps[BMP_BUTTONS] = LoadImageFromBuffer(buttons_bmp);
     if (!bmps[BMP_OPS    ]) bmps[BMP_OPS    ] = LoadImageFromBuffer(ops_bmp    );
 
-    threadFinished = true;
+    thread1Finished = true;
+    thread2Finished = true;
 }
 
 CXlibToolkit::~CXlibToolkit()
@@ -229,7 +232,7 @@ CXlibToolkit::~CXlibToolkit()
     event.message_type = WM_DELETE_WINDOW;
     XSendEvent(display, window, false, 0L, (XEvent*)&event);
     XFlush(display);
-    while (!threadFinished)
+    while (!thread1Finished || !thread2Finished)
     {
         usleep(1000 * 1);
     }
@@ -249,7 +252,8 @@ CXlibToolkit::~CXlibToolkit()
 
 void CXlibToolkit::StartWindowProcesses()
 {
-    threadFinished = false;
+    thread1Finished = false;
+    thread2Finished = false;
     pthread_t thread1;
     pthread_create(&thread1, NULL, &eventProc,  (void*)this);
     pthread_t thread2;
@@ -331,7 +335,7 @@ void CXlibToolkit::OutputDebugString(char *text)
 
 int CXlibToolkit::WaitWindowClosed()
 {
-    while (!threadFinished)
+    while (!thread1Finished || !thread2Finished)
     {
         usleep(1000 * 100);
     }
