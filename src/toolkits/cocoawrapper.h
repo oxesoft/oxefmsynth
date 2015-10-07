@@ -16,15 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifdef __linux
-    #include <X11/Xlib.h>
-    #include "xlibtoolkit.h"
-    #define COSToolkit CXlibToolkit
-#elif __APPLE__
-    #include "cocoatoolkit.h"
-    #define COSToolkit CCocoaToolkit
-#else
-    #include <windows.h>
-    #include "windowstoolkit.h"
-    #define COSToolkit CWindowsToolkit
-#endif
+
+void* CocoaToolkitInit();
+void  CocoaToolkitDeinit(void *self);
+int   CocoaToolkitTest(void *self, int par);

@@ -17,34 +17,37 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include "editor.h"
-#include <Carbon/Carbon.h>
-#include "carbontoolkit.h"
+#include "cocoawrapper.h"
+#include "cocoatoolkit.h"
 #include <stdio.h>
 
-CCarbonToolkit::CCarbonToolkit(void *parentWindow, CEditor *editor)
+CCocoaToolkit::CCocoaToolkit(void *parentWindow, CEditor *editor)
 {
     this->parentWindow  = parentWindow;
     this->editor        = editor;
+    this->objcInstance  = CocoaToolkitInit();
 }
 
-CCarbonToolkit::~CCarbonToolkit()
+CCocoaToolkit::~CCocoaToolkit()
+{
+    CocoaToolkitDeinit(this->objcInstance);
+}
+
+void CCocoaToolkit::StartWindowProcesses()
+{
+    printf("%d\n", CocoaToolkitTest(this->objcInstance, 1));
+}
+
+void CCocoaToolkit::CopyRect(int destX, int destY, int width, int height, int origBmp, int origX, int origY)
 {
 }
 
-void CCarbonToolkit::StartWindowProcesses()
-{
-}
-
-void CCarbonToolkit::CopyRect(int destX, int destY, int width, int height, int origBmp, int origX, int origY)
-{
-}
-
-void CCarbonToolkit::OutputDebugString(char *text)
+void CCocoaToolkit::OutputDebugString(char *text)
 {
     printf("%s\n", text);
 }
 
-int CCarbonToolkit::WaitWindowClosed()
+int CCocoaToolkit::WaitWindowClosed()
 {
     return 0;
 }

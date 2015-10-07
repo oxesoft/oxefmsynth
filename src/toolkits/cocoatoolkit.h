@@ -16,14 +16,15 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-class CCarbonToolkit : public CToolkit
+class CCocoaToolkit : public CToolkit
 {
 private:
+    void *objcInstance;
 public:
     void        *parentWindow;
     CEditor     *editor;
-    CCarbonToolkit(void *parentWindow, CEditor *editor);
-    ~CCarbonToolkit();
+    CCocoaToolkit(void *parentWindow, CEditor *editor);
+    ~CCocoaToolkit();
     void StartWindowProcesses();
     void CopyRect(int destX, int destY, int width, int height, int origBmp, int origX, int origY);
     void OutputDebugString(char *text);

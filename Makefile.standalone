@@ -75,9 +75,10 @@ else
         CC:=g++
         UNAME_S:=$(shell uname -s)
         ifeq ($(UNAME_S),Darwin)
-            LDFLAGS+=-framework Carbon
+            LDFLAGS+=-framework Cocoa
             CFLAGS+=-Wno-deprecated
-            SOURCES+=src/toolkits/carbontoolkit.cpp
+            SOURCES+=src/toolkits/cocoatoolkit.cpp
+            SOURCES+=src/toolkits/cocoatoolkit.mm
         else
             LDFLAGS+=-s
             LDFLAGS+=-lX11

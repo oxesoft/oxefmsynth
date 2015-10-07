@@ -16,15 +16,35 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifdef __linux
-    #include <X11/Xlib.h>
-    #include "xlibtoolkit.h"
-    #define COSToolkit CXlibToolkit
-#elif __APPLE__
-    #include "cocoatoolkit.h"
-    #define COSToolkit CCocoaToolkit
-#else
-    #include <windows.h>
-    #include "windowstoolkit.h"
-    #define COSToolkit CWindowsToolkit
-#endif
+#import "cocoawrapper.h"
+#import <Cocoa/Cocoa.h>
+
+@interface CocoaToolkit : NSObject
+{
+    int test;
+}
+- (int) test:(int) par;
+@end
+
+@implementation CocoaToolkit
+
+void* CocoaToolkitInit()
+{
+    return [[CocoaToolkit alloc] init];
+}
+void CocoaToolkitDeinit(void *self)
+{
+    [(id)self dealloc];
+}
+
+int CocoaToolkitTest(void *self, int par)
+{
+    return [(id)self test:par];
+}
+
+- (int) test:(int) par
+{
+    return par + 1;
+}
+
+@end
