@@ -679,6 +679,7 @@ float CEditor::GetPar(int index)
             return vstvalue / MAXPARVALUE;
         }
     }
+    return 0.f;
 }
 
 void CEditor::GetParLabel(int index, char* label)

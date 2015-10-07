@@ -56,7 +56,7 @@ public:
 
 int main(void)
 {
-#ifndef __linux
+#ifdef _WIN32
     hInstance = GetModuleHandle(NULL);
 #endif
     CSynthesizer s;

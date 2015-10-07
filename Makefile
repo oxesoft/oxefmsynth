@@ -14,6 +14,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+UNAME_S:=$(shell uname -s)
+
 all:
 	@echo "Building converter"
 	@$(MAKE) -s -f Makefile.converter
@@ -24,7 +26,8 @@ all:
 ifeq ($(OS),Windows_NT)
 	@echo "Building Windows VST plugin (32 and 64 bit)"
 	@$(MAKE) -s -f Makefile.vstwindows
-else
+endif
+ifeq ($(UNAME_S),Linux)
 	@echo "Building Linux VST plugin"
 	@$(MAKE) -s -f Makefile.vstlinux
 endif

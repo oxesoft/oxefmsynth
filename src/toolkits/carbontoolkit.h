@@ -16,21 +16,16 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef __OXEDMO__
-
-class CToolkit
+class CCarbonToolkit : public CToolkit
 {
+private:
 public:
-    virtual ~CToolkit() {}
-    virtual void CopyRect(int destX, int destY, int width, int height, int origBmp, int origX, int origY) {}
-    virtual void StartMouseCapture() {}
-    virtual void StopMouseCapture() {}
-    virtual void StartWindowProcesses() {}
-    virtual void OutputDebugString(char *text) {} // for debug
-    virtual int  WaitWindowClosed() {return 0;}   // standalone only
+    void        *parentWindow;
+    CEditor     *editor;
+    CCarbonToolkit(void *parentWindow, CEditor *editor);
+    ~CCarbonToolkit();
+    void StartWindowProcesses();
+    void CopyRect(int destX, int destY, int width, int height, int origBmp, int origX, int origY);
+    void OutputDebugString(char *text);
+    int  WaitWindowClosed();
 };
-
-#define TIMER_RESOLUTION_MS 20
-#define BMP_PATH "skin"
-
-#endif

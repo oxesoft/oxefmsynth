@@ -16,21 +16,35 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef __OXEDMO__
+#include "editor.h"
+#include <Carbon/Carbon.h>
+#include "carbontoolkit.h"
+#include <stdio.h>
 
-class CToolkit
+CCarbonToolkit::CCarbonToolkit(void *parentWindow, CEditor *editor)
 {
-public:
-    virtual ~CToolkit() {}
-    virtual void CopyRect(int destX, int destY, int width, int height, int origBmp, int origX, int origY) {}
-    virtual void StartMouseCapture() {}
-    virtual void StopMouseCapture() {}
-    virtual void StartWindowProcesses() {}
-    virtual void OutputDebugString(char *text) {} // for debug
-    virtual int  WaitWindowClosed() {return 0;}   // standalone only
-};
+    this->parentWindow  = parentWindow;
+    this->editor        = editor;
+}
 
-#define TIMER_RESOLUTION_MS 20
-#define BMP_PATH "skin"
+CCarbonToolkit::~CCarbonToolkit()
+{
+}
 
-#endif
+void CCarbonToolkit::StartWindowProcesses()
+{
+}
+
+void CCarbonToolkit::CopyRect(int destX, int destY, int width, int height, int origBmp, int origX, int origY)
+{
+}
+
+void CCarbonToolkit::OutputDebugString(char *text)
+{
+    printf("%s\n", text);
+}
+
+int CCarbonToolkit::WaitWindowClosed()
+{
+    return 0;
+}

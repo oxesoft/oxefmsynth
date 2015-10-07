@@ -20,6 +20,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     #include <X11/Xlib.h>
     #include "xlibtoolkit.h"
     #define COSToolkit CXlibToolkit
+#elif __APPLE__
+    #include <Carbon/Carbon.h>
+    #include "carbontoolkit.h"
+    #define COSToolkit CCarbonToolkit
 #else
     #include <windows.h>
     #include "windowstoolkit.h"

@@ -140,6 +140,6 @@ enum
 
 #define OXEDEBUG(...) {char tmpb[128]; snprintf(tmpb, sizeof(tmpb), __VA_ARGS__); if (toolkit) toolkit->OutputDebugString(tmpb);}
 
-#ifdef WIN32
+#ifdef _WIN32
     #define snprintf _snprintf
 #endif

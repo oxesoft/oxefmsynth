@@ -44,7 +44,7 @@ SOURCES+=src/synth/synthesizer.cpp
 ifeq ($(DEBUG),YES)
     CFLAGS+=-g -O0
 else
-    CFLAGS+=-s -O3
+    CFLAGS+=-O3
 endif
 
 ifeq ($(OS),Windows_NT)
@@ -57,6 +57,7 @@ ifeq ($(OS),Windows_NT)
     LDFLAGS+=-lgdi32
     LDFLAGS+=resources.o
     DEPS:=resources.o
+    LDFLAGS+=-s
 else
     ifeq ($(TARGET),WIN32)
         EXECUTABLE_NAME:=$(EXECUTABLE_NAME).exe
@@ -69,13 +70,22 @@ else
         LDFLAGS+=-lgdi32
         LDFLAGS+=resources.o
         DEPS:=resources.o
+        LDFLAGS+=-s
     else
         CC:=g++
-        LDFLAGS+=-lX11
-        LDFLAGS+=-lpthread
-        SOURCES+=src/toolkits/xlibtoolkit.cpp
-        INCLUDES+=-I.
-        DEPS:=bitmaps.h
+        UNAME_S:=$(shell uname -s)
+        ifeq ($(UNAME_S),Darwin)
+            LDFLAGS+=-framework Carbon
+            CFLAGS+=-Wno-deprecated
+            SOURCES+=src/toolkits/carbontoolkit.cpp
+        else
+            LDFLAGS+=-s
+            LDFLAGS+=-lX11
+            LDFLAGS+=-lpthread
+            SOURCES+=src/toolkits/xlibtoolkit.cpp
+            INCLUDES+=-I.
+            DEPS:=bitmaps.h
+        endif
     endif
 endif
 
