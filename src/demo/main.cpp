@@ -25,7 +25,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <string.h>
 
 #ifdef __APPLE__
-#include <Carbon/Carbon.h>
+#include <mach/mach_time.h>
 #else
 #include <unistd.h>
 #include <time.h>
@@ -33,7 +33,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 unsigned int GetTick()
 {
 #ifdef __APPLE__
-    return (TickCount() * 1000) / 60;
+    mach_timebase_info_data_t info;
+    mach_timebase_info(&info);
+    uint64_t value = mach_absolute_time();
+    value *= info.numer;
+    value /= info.denom;
+    value /= 1000000;
+    return (unsigned int)value;
 #else
     struct timespec ts;
     unsigned int theTick = 0U;
@@ -83,13 +89,13 @@ int main(int argc, char* argv[])
     {
         controller.Start(GetForegroundWindow());
         printf("Press ESC to quit...\n");
-        while (GetAsyncKeyState(VK_ESCAPE)>=0) 
-        { 
+        while (GetAsyncKeyState(VK_ESCAPE)>=0)
+        {
             static const char* anim[]={"|","/","-","\\"};
             static       char  pos = 0;
             printf(anim[pos++&3]);
             printf("\r");
-            Sleep(100); 
+            Sleep(100);
         }
         controller.Stop();
 #else

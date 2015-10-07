@@ -1,16 +1,16 @@
 # Oxe FM Synth: a software synthesizer
 # Copyright (C) 2015  Daniel Moura <oxe@oxesoft.com>
-# 
+#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
@@ -53,6 +53,7 @@ endif
 ifeq ($(OS),Windows_NT)
 	EXECUTABLE_NAME:=$(EXECUTABLE_NAME).exe
 	CC:=g++.exe
+    LDFLAGS+=-s
 else
 	ifeq ($(TARGET),WIN32)
 		EXECUTABLE_NAME:=$(EXECUTABLE_NAME).exe
@@ -61,10 +62,7 @@ else
 	else
 		CC:=g++
 		UNAME_S:=$(shell uname -s)
-		ifeq ($(UNAME_S),Darwin)
-			LDFLAGS+=-framework Carbon
-			CFLAGS+=-Wno-deprecated
-		else
+		ifneq ($(UNAME_S),Darwin)
 			LDFLAGS+=-s
 		endif
 	endif
