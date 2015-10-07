@@ -37,7 +37,7 @@ SOURCES+=src/synth/synthesizer.cpp
 ifeq ($(DEBUG),YES)
 	CFLAGS+=-g -O0
 else
-	CFLAGS+=-s -O3
+	CFLAGS+=-O3
 endif
 
 ifeq ($(PROFILING),YES)
@@ -57,9 +57,16 @@ else
 	ifeq ($(TARGET),WIN32)
 		EXECUTABLE_NAME:=$(EXECUTABLE_NAME).exe
 		CC:=i686-w64-mingw32-g++
-		LDFLAGS+=-static
+		LDFLAGS+=-static -s
 	else
 		CC:=g++
+		UNAME_S:=$(shell uname -s)
+		ifeq ($(UNAME_S),Darwin)
+			LDFLAGS+=-framework Carbon
+			CFLAGS+=-Wno-deprecated
+		else
+			LDFLAGS+=-s
+		endif
 	endif
 endif
 

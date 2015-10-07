@@ -24,16 +24,24 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <stdio.h>
 #include <string.h>
 
+#ifdef __APPLE__
+#include <Carbon/Carbon.h>
+#else
 #include <unistd.h>
 #include <time.h>
+#endif
 unsigned int GetTick()
 {
+#ifdef __APPLE__
+    return (TickCount() * 1000) / 60;
+#else
     struct timespec ts;
     unsigned int theTick = 0U;
     clock_gettime(CLOCK_MONOTONIC, &ts);
     theTick  = ts.tv_nsec / 1000000;
     theTick += ts.tv_sec * 1000;
     return theTick;
+#endif
 }
 
 int main(int argc, char* argv[])
