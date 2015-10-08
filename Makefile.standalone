@@ -47,6 +47,8 @@ else
     CFLAGS+=-O3
 endif
 
+UNAME_S:=$(shell uname -s)
+
 ifeq ($(OS),Windows_NT)
     EXECUTABLE_NAME:=$(EXECUTABLE_NAME).exe
     CC:=g++.exe
@@ -73,7 +75,6 @@ else
         LDFLAGS+=-s
     else
         CC:=g++
-        UNAME_S:=$(shell uname -s)
         ifeq ($(UNAME_S),Darwin)
             LDFLAGS+=-framework Cocoa
             SOURCES+=src/toolkits/cocoatoolkit.cpp
@@ -91,6 +92,10 @@ endif
 
 all: $(DEPS)
 	@$(CC) -o $(EXECUTABLE_NAME) -DEXECUTABLE_NAME=\"$(EXECUTABLE_NAME)\" $(CFLAGS) $(SOURCES) $(INCLUDES) $(LDFLAGS)
+ifeq ($(UNAME_S),Darwin)
+	@mkdir -p $(EXECUTABLE_NAME).app/Contents/MacOS
+	@mv $(EXECUTABLE_NAME) $(EXECUTABLE_NAME).app/Contents/MacOS/
+endif
 
 bitmaps.h:
 	@$(CC) -o embedresources src/toolkits/embedresources.cpp
@@ -101,4 +106,4 @@ resources.o:
 	@$(RC) -Isrc/synth -Iskins/default src/windows/resources.rc resources.o
 
 clean:
-	@rm -f $(EXECUTABLE_NAME) embedresources bitmaps.h resources.o
+	@rm -rf $(EXECUTABLE_NAME).app $(EXECUTABLE_NAME) embedresources bitmaps.h resources.o

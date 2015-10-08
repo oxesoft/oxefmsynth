@@ -16,35 +16,77 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "editor.h"
 #import "cocoawrapper.h"
 #import <Cocoa/Cocoa.h>
 
 @interface CocoaToolkit : NSObject
 {
-    int test;
+    NSApplication* app;
+    NSWindow* window;
 }
-- (int) test:(int) par;
+- (void) createWindow:(id)parent;
+- (void) showWindow;
+- (void) waitWindowClosed;
 @end
 
 @implementation CocoaToolkit
 
-void* CocoaToolkitInit()
+void* CocoaToolkitCreate()
 {
     return [[CocoaToolkit alloc] init];
 }
-void CocoaToolkitDeinit(void *self)
+
+void CocoaToolkitDestroy(void *self)
 {
     [(id)self dealloc];
 }
 
-int CocoaToolkitTest(void *self, int par)
+void CocoaToolkitCreateWindow(void *self, void* parent)
 {
-    return [(id)self test:par];
+    [(id)self createWindow:(id)parent];
 }
 
-- (int) test:(int) par
+void CocoaToolkitShowWindow(void *self)
 {
-    return par + 1;
+    [(id)self showWindow];
+}
+
+void CocoaToolkitWaitWindowClosed(void *self)
+{
+    [(id)self waitWindowClosed];
+}
+
+- (void) createWindow:(id)parent
+{
+    if (parent)
+    {
+        window = parent;
+    }
+    else
+    {
+        app = [NSApplication sharedApplication];
+        window = [[NSWindow alloc]
+            initWithContentRect: NSMakeRect(0, 0, GUI_WIDTH, GUI_HEIGHT)
+            styleMask: NSClosableWindowMask | NSTitledWindowMask
+            backing: NSBackingStoreBuffered
+            defer:NO
+        ];
+        [window setTitle:@"title test"];
+        [window center];
+        [window setAcceptsMouseMovedEvents:YES];
+        [window makeKeyAndOrderFront:nil];
+    }
+}
+
+- (void) showWindow
+{
+    [window setIsVisible:YES];
+}
+
+- (void) waitWindowClosed
+{
+    [app run];
 }
 
 @end

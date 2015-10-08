@@ -25,17 +25,18 @@ CCocoaToolkit::CCocoaToolkit(void *parentWindow, CEditor *editor)
 {
     this->parentWindow  = parentWindow;
     this->editor        = editor;
-    this->objcInstance  = CocoaToolkitInit();
+    this->objcInstance  = CocoaToolkitCreate();
+    CocoaToolkitCreateWindow(this->objcInstance, parentWindow);
 }
 
 CCocoaToolkit::~CCocoaToolkit()
 {
-    CocoaToolkitDeinit(this->objcInstance);
+    CocoaToolkitDestroy(this->objcInstance);
 }
 
 void CCocoaToolkit::StartWindowProcesses()
 {
-    printf("%d\n", CocoaToolkitTest(this->objcInstance, 1));
+    CocoaToolkitShowWindow(this->objcInstance);
 }
 
 void CCocoaToolkit::CopyRect(int destX, int destY, int width, int height, int origBmp, int origX, int origY)
@@ -49,5 +50,6 @@ void CCocoaToolkit::OutputDebugString(char *text)
 
 int CCocoaToolkit::WaitWindowClosed()
 {
+    CocoaToolkitWaitWindowClosed(this->objcInstance);
     return 0;
 }

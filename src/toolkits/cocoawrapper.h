@@ -17,6 +17,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 
-void* CocoaToolkitInit();
-void  CocoaToolkitDeinit(void *self);
-int   CocoaToolkitTest(void *self, int par);
+void* CocoaToolkitCreate();
+void  CocoaToolkitDestroy(void *self);
+void  CocoaToolkitCreateWindow(void *self, void *parent);
+void  CocoaToolkitShowWindow(void *self);
+void  CocoaToolkitWaitWindowClosed(void *self);
