@@ -714,3 +714,9 @@ void CEditor::GetParName(int index, char* text)
     }
     strncpy(text, "not found", TEXT_SIZE);
 }
+
+void CEditor::GetDimension(int *width, int *height)
+{
+    *width  = GUI_WIDTH;
+    *height = GUI_HEIGHT;
+}

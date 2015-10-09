@@ -21,11 +21,13 @@ extern "C"
 {
 #endif
 
-void* CocoaToolkitCreate();
+void* CocoaToolkitCreate(void *toolkit);
 void  CocoaToolkitDestroy(void *self);
 void  CocoaToolkitCreateWindow(void *self, void *parent);
 void  CocoaToolkitShowWindow(void *self);
 void  CocoaToolkitWaitWindowClosed(void *self);
+
+void  CppGetDimension(void *toolkit, int *width, int *height);
 
 #ifdef __cplusplus
 }

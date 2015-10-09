@@ -16,8 +16,6 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifdef __cplusplus
-
 #include "synthesizer.h"
 #include "control.h"
 #include "lcd.h"
@@ -27,6 +25,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "channels.h"
 
 #define GUI_CONTROLS 189
+#define GUI_WIDTH    633
+#define GUI_HEIGHT   437
 
 enum
 {
@@ -77,9 +77,5 @@ public:
     void  Update           ();
     void  SetToolkit       (CToolkit *toolkit);
     void  SetHostInterface (CHostInterface *hostinterface);
+    void  GetDimension     (int *width, int *height);
 };
-
-#endif
-
-#define GUI_WIDTH    633
-#define GUI_HEIGHT   437

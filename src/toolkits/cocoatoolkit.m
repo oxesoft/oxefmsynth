@@ -16,26 +16,63 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "editor.h"
+#import "constants.h"
 #import "cocoawrapper.h"
 #import <Cocoa/Cocoa.h>
 
+@interface PluginView : NSView
+{
+    void* toolkit;
+}
+- (id)   initWithFrame:(NSRect)frame:(void*)toolkitPtr;
+- (void) mouseDown:(NSEvent *)event;
+@end
+
 @interface CocoaToolkit : NSObject
 {
+    void* toolkit;
     NSAutoreleasePool* pool;
     NSApplication* app;
     NSWindow* window;
+    PluginView* view;
 }
+- (id)   init:(void*)toolkitPtr;
 - (void) createWindow:(id)parent;
 - (void) showWindow;
 - (void) waitWindowClosed;
 @end
 
+//----------------------------------------------------------------------
+
+@implementation PluginView
+
+- (id)initWithFrame:(NSRect)frame:(void*)toolkitPtr
+{
+    self = [super initWithFrame:frame];
+    if (self)
+    {
+        toolkit = toolkitPtr;
+    }
+    return self;
+}
+
+- (void) mouseDown:(NSEvent *)event
+{
+    NSLog(@"mouseDown");
+}
+
+@end
+
+//----------------------------------------------------------------------
+
 @implementation CocoaToolkit
 
-void* CocoaToolkitCreate()
+/**
+  * wrappers start
+**/
+void* CocoaToolkitCreate(void* toolkit)
 {
-    return [[CocoaToolkit alloc] init];
+    return [[CocoaToolkit alloc] init:toolkit];
 }
 
 void CocoaToolkitDestroy(void *self)
@@ -57,39 +94,66 @@ void CocoaToolkitWaitWindowClosed(void *self)
 {
     [(id)self waitWindowClosed];
 }
+/**
+  * wrappers end
+**/
+
+- (id) init:(void*)toolkitPtr
+{
+    self = [super init];
+    if (self)
+    {
+        toolkit = toolkitPtr;
+    }
+    return self;
+}
 
 - (void) createWindow:(id)parent
 {
+    int width  = 0;
+    int height = 0;
+    CppGetDimension(toolkit, &width, &height);
+    NSRect rect = NSMakeRect(0, 0, width, height);
+    view = [[PluginView alloc] initWithFrame: rect];
     if (parent)
     {
-        window = parent;
+        NSView* parentView = [(NSView*) parent retain];
+        [[parentView window] setAcceptsMouseMovedEvents: YES];
+        [parentView addSubview: view];
     }
     else
     {
         pool = [[NSAutoreleasePool alloc] init];
         app = [NSApplication sharedApplication];
         window = [[NSWindow alloc]
-            initWithContentRect: NSMakeRect(0, 0, GUI_WIDTH, GUI_HEIGHT)
+            initWithContentRect: rect
             styleMask: NSClosableWindowMask | NSTitledWindowMask
             backing: NSBackingStoreBuffered
             defer:NO
         ];
-        [window setTitle:@"title test"];
+        [window setTitle:@TITLE_FULL];
         [window center];
         [window setAcceptsMouseMovedEvents:YES];
-        [window makeKeyAndOrderFront:nil];
+        [window setAutodisplay: YES];
+        [window setContentView: view];
+        [NSApp setDelegate:self];
     }
 }
 
 - (void) showWindow
 {
-    [window setIsVisible:YES];
+    [window makeKeyAndOrderFront:nil];
 }
 
 - (void) waitWindowClosed
 {
     [app run];
     [pool release];
+}
+
+- (BOOL) applicationShouldTerminateAfterLastWindowClosed:(NSApplication *)theApplication
+{
+    return YES;
 }
 
 @end

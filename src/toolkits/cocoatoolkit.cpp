@@ -25,7 +25,7 @@ CCocoaToolkit::CCocoaToolkit(void *parentWindow, CEditor *editor)
 {
     this->parentWindow  = parentWindow;
     this->editor        = editor;
-    this->objcInstance  = CocoaToolkitCreate();
+    this->objcInstance  = CocoaToolkitCreate((void*)this);
     CocoaToolkitCreateWindow(this->objcInstance, parentWindow);
 }
 
@@ -52,4 +52,9 @@ int CCocoaToolkit::WaitWindowClosed()
 {
     CocoaToolkitWaitWindowClosed(this->objcInstance);
     return 0;
+}
+
+void CppGetDimension(void* toolkit, int *width, int *height)
+{
+    ((CCocoaToolkit*)toolkit)->editor->GetDimension(width, height);
 }
