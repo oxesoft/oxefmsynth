@@ -114,7 +114,8 @@ void CocoaToolkitWaitWindowClosed(void *self)
     int height = 0;
     CppGetDimension(toolkit, &width, &height);
     NSRect rect = NSMakeRect(0, 0, width, height);
-    view = [[PluginView alloc] initWithFrame: rect];
+    view = [[PluginView alloc] initWithFrame:rect :toolkit
+    ];
     if (parent)
     {
         NSView* parentView = [(NSView*) parent retain];
