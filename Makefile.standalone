@@ -78,7 +78,16 @@ else
         ifeq ($(UNAME_S),Darwin)
             LDFLAGS+=-framework Cocoa
             SOURCES+=src/toolkits/cocoatoolkit.cpp
-            SOURCES+=src/toolkits/cocoatoolkit.mm
+            SOURCES+=src/toolkits/cocoatoolkit.m
+        else ifeq ($(USE_GNUSTEP),YES)
+            CFLAGS+=-D__APPLE__
+            LDFLAGS+=-lobjc -lgnustep-base -lgnustep-gui
+            OBJCFLAGS+=`gnustep-config --objc-flags`
+            OBJCSOURCES+=src/toolkits/cocoatoolkit.m
+            SOURCES+=src/toolkits/cocoatoolkit.cpp
+            DEPS:=cocoatoolkit.o
+            SOURCES+=$(DEPS)
+            CMD:=rm $(DEPS)
         else
             LDFLAGS+=-s
             LDFLAGS+=-lX11
@@ -92,6 +101,7 @@ endif
 
 all: $(DEPS)
 	@$(CC) -o $(EXECUTABLE_NAME) -DEXECUTABLE_NAME=\"$(EXECUTABLE_NAME)\" $(CFLAGS) $(SOURCES) $(INCLUDES) $(LDFLAGS)
+	@$(CMD)
 ifeq ($(UNAME_S),Darwin)
 	@mkdir -p $(EXECUTABLE_NAME).app/Contents/MacOS
 	@mv $(EXECUTABLE_NAME) $(EXECUTABLE_NAME).app/Contents/MacOS/
@@ -102,8 +112,11 @@ bitmaps.h:
 	@./embedresources $@
 	@rm embedresources
 
+cocoatoolkit.o:
+	@gcc -c -o $@ $(OBJCSOURCES) $(INCLUDES) $(OBJCFLAGS)
+
 resources.o:
 	@$(RC) -Isrc/synth -Iskins/default src/windows/resources.rc resources.o
 
 clean:
-	@rm -rf $(EXECUTABLE_NAME).app $(EXECUTABLE_NAME) embedresources bitmaps.h resources.o
+	@rm -rf $(EXECUTABLE_NAME).app $(EXECUTABLE_NAME) embedresources bitmaps.h *.o *.d

@@ -22,6 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 @interface CocoaToolkit : NSObject
 {
+    NSAutoreleasePool* pool;
     NSApplication* app;
     NSWindow* window;
 }
@@ -65,6 +66,7 @@ void CocoaToolkitWaitWindowClosed(void *self)
     }
     else
     {
+        pool = [[NSAutoreleasePool alloc] init];
         app = [NSApplication sharedApplication];
         window = [[NSWindow alloc]
             initWithContentRect: NSMakeRect(0, 0, GUI_WIDTH, GUI_HEIGHT)
@@ -87,6 +89,7 @@ void CocoaToolkitWaitWindowClosed(void *self)
 - (void) waitWindowClosed
 {
     [app run];
+    [pool release];
 }
 
 @end

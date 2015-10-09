@@ -33,4 +33,4 @@ ifeq ($(UNAME_S),Linux)
 endif
 
 clean:
-	@rm -f oxeconverter oxefmsynthdemo oxefmsynthdemo.exe oxefmsynthdemo.wav oxefmsynth oxefmsynth.exe oxevst*.dll oxevst*.so embedresources bitmaps.h resources.o
+	@rm -f oxeconverter oxefmsynthdemo oxefmsynthdemo.exe oxefmsynthdemo.wav oxefmsynth oxefmsynth.exe oxevst*.dll oxevst*.so embedresources bitmaps.h *.o *.d

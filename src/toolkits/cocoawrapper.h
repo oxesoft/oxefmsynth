@@ -16,9 +16,17 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
 
 void* CocoaToolkitCreate();
 void  CocoaToolkitDestroy(void *self);
 void  CocoaToolkitCreateWindow(void *self, void *parent);
 void  CocoaToolkitShowWindow(void *self);
 void  CocoaToolkitWaitWindowClosed(void *self);
+
+#ifdef __cplusplus
+}
+#endif

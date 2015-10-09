@@ -16,13 +16,13 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifdef __linux
+#if defined(__APPLE__)
+    #include "cocoatoolkit.h"
+    #define COSToolkit CCocoaToolkit
+#elif defined(__linux)
     #include <X11/Xlib.h>
     #include "xlibtoolkit.h"
     #define COSToolkit CXlibToolkit
-#elif __APPLE__
-    #include "cocoatoolkit.h"
-    #define COSToolkit CCocoaToolkit
 #else
     #include <windows.h>
     #include "windowstoolkit.h"
