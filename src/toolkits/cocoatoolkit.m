@@ -24,7 +24,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 {
     void* toolkit;
 }
-- (id)   initWithFrame:(NSRect)frame:(void*)toolkitPtr;
+- (id)   initWithFrame:(NSRect)frame toolkit:(void*)toolkitPtr;
 - (void) mouseDown:(NSEvent *)event;
 @end
 
@@ -46,7 +46,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 @implementation PluginView
 
-- (id)initWithFrame:(NSRect)frame:(void*)toolkitPtr
+- (id)initWithFrame:(NSRect)frame toolkit:(void*)toolkitPtr
 {
     self = [super initWithFrame:frame];
     if (self)
@@ -114,7 +114,7 @@ void CocoaToolkitWaitWindowClosed(void *self)
     int height = 0;
     CppGetDimension(toolkit, &width, &height);
     NSRect rect = NSMakeRect(0, 0, width, height);
-    view = [[PluginView alloc] initWithFrame:rect :toolkit
+    view = [[PluginView alloc] initWithFrame:rect toolkit:toolkit
     ];
     if (parent)
     {
