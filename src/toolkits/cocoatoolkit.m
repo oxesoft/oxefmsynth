@@ -137,7 +137,7 @@ void CocoaToolkitWaitWindowClosed(void *self)
         [window setAcceptsMouseMovedEvents:YES];
         [window setAutodisplay: YES];
         [window setContentView: view];
-        [NSApp setDelegate:self];
+        [NSApp setDelegate:(id)self];
     }
 }
 
