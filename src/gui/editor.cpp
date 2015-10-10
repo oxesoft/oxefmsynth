@@ -29,11 +29,11 @@ CEditor::CEditor(CSynthesizer *synthesizer)
     this->toolkit       = NULL;
     this->hostinterface = NULL;
     channel             = 0;
-    
+
     // auxiliar vars
     int aX   = 0;
     int aY   = 0;
-    
+
     // separation between the operators controls
     int sX   = 32;
     int sX2  = sX/2;
@@ -42,7 +42,7 @@ CEditor::CEditor(CSynthesizer *synthesizer)
     // separation between the operators
     int oX   = 202;
     int oY   = 94;
-    
+
     // separation between the half matrix controls
     int fX   = 20;
     int fY   = 20;
@@ -54,7 +54,7 @@ CEditor::CEditor(CSynthesizer *synthesizer)
     // OPA coordinates
     int cX   = 17;
     int cY   = 80;
-    
+
     // half-matrix coordinates
     int mX   = 419;
     int mY   = 77;
@@ -97,7 +97,7 @@ CEditor::CEditor(CSynthesizer *synthesizer)
 
     // display
     lcd             = new CLcd     (BMP_CHARS, 25, 23);
-    
+
     // OPA
     aX = cX;
     aY = cY;
@@ -114,7 +114,7 @@ CEditor::CEditor(CSynthesizer *synthesizer)
     ctl[ctlcount++] = new CKnob    (BMP_KNOB,   25,   "OPA Sustain Lvl", synthesizer, channel, VL_ZERO_TO_ONE,   OPASU, aX+sX*3    , aY+sY   );
     ctl[ctlcount++] = new CKnob    (BMP_KNOB,   25,   "OPA SustainTime", synthesizer, channel, VL_PORTAMENTO,    OPAST, aX+sX*4    , aY+sY   );
     ctl[ctlcount++] = new CKnob    (BMP_KNOB,   25,   "OPA ReleaseTime", synthesizer, channel, VL_TEMPO,         OPARE, aX+sX*5    , aY+sY   );
-    
+
     // OPB
     aX = cX + oX;
     aY = cY;
@@ -131,7 +131,7 @@ CEditor::CEditor(CSynthesizer *synthesizer)
     ctl[ctlcount++] = new CKnob    (BMP_KNOB,   25,   "OPB Sustain Lvl", synthesizer, channel, VL_ZERO_TO_ONE,   OPBSU, aX+sX*3    , aY+sY   );
     ctl[ctlcount++] = new CKnob    (BMP_KNOB,   25,   "OPB SustainTime", synthesizer, channel, VL_PORTAMENTO,    OPBST, aX+sX*4    , aY+sY   );
     ctl[ctlcount++] = new CKnob    (BMP_KNOB,   25,   "OPB ReleaseTime", synthesizer, channel, VL_TEMPO,         OPBRE, aX+sX*5    , aY+sY   );
-    
+
     // OPC
     aX = cX;
     aY = cY + oY;
@@ -148,7 +148,7 @@ CEditor::CEditor(CSynthesizer *synthesizer)
     ctl[ctlcount++] = new CKnob    (BMP_KNOB,   25,   "OPC Sustain Lvl", synthesizer, channel, VL_ZERO_TO_ONE,   OPCSU, aX+sX*3    , aY+sY   );
     ctl[ctlcount++] = new CKnob    (BMP_KNOB,   25,   "OPC SustainTime", synthesizer, channel, VL_PORTAMENTO,    OPCST, aX+sX*4    , aY+sY   );
     ctl[ctlcount++] = new CKnob    (BMP_KNOB,   25,   "OPC ReleaseTime", synthesizer, channel, VL_TEMPO,         OPCRE, aX+sX*5    , aY+sY   );
-    
+
     // OPD
     aX = cX + oX;
     aY = cY + oY;
@@ -165,7 +165,7 @@ CEditor::CEditor(CSynthesizer *synthesizer)
     ctl[ctlcount++] = new CKnob    (BMP_KNOB,   25,   "OPD Sustain Lvl", synthesizer, channel, VL_ZERO_TO_ONE,   OPDSU, aX+sX*3    , aY+sY   );
     ctl[ctlcount++] = new CKnob    (BMP_KNOB,   25,   "OPD SustainTime", synthesizer, channel, VL_PORTAMENTO,    OPDST, aX+sX*4    , aY+sY   );
     ctl[ctlcount++] = new CKnob    (BMP_KNOB,   25,   "OPD ReleaseTime", synthesizer, channel, VL_TEMPO,         OPDRE, aX+sX*5    , aY+sY   );
-    
+
     // OPE
     aX = cX;
     aY = cY + oY * 2;
@@ -182,7 +182,7 @@ CEditor::CEditor(CSynthesizer *synthesizer)
     ctl[ctlcount++] = new CKnob    (BMP_KNOB,   25,   "OPE Sustain Lvl", synthesizer, channel, VL_ZERO_TO_ONE,   OPESU, aX+sX*3    , aY+sY   );
     ctl[ctlcount++] = new CKnob    (BMP_KNOB,   25,   "OPE SustainTime", synthesizer, channel, VL_PORTAMENTO,    OPEST, aX+sX*4    , aY+sY   );
     ctl[ctlcount++] = new CKnob    (BMP_KNOB,   25,   "OPE ReleaseTime", synthesizer, channel, VL_TEMPO,         OPERE, aX+sX*5    , aY+sY   );
-    
+
     // OPF
     aX = cX + oX;
     aY = cY + oY * 2;
@@ -199,7 +199,7 @@ CEditor::CEditor(CSynthesizer *synthesizer)
     ctl[ctlcount++] = new CKnob    (BMP_KNOB,   25,   "OPF Sustain Lvl", synthesizer, channel, VL_ZERO_TO_ONE,   OPFSU, aX+sX*3    , aY+sY   );
     ctl[ctlcount++] = new CKnob    (BMP_KNOB,   25,   "OPF SustainTime", synthesizer, channel, VL_PORTAMENTO,    OPFST, aX+sX*4    , aY+sY   );
     ctl[ctlcount++] = new CKnob    (BMP_KNOB,   25,   "OPF ReleaseTime", synthesizer, channel, VL_TEMPO,         OPFRE, aX+sX*5    , aY+sY   );
-    
+
     // OPX
     aX = cX;
     aY = cY + oY * 3;
@@ -216,7 +216,7 @@ CEditor::CEditor(CSynthesizer *synthesizer)
     ctl[ctlcount++] = new CKnob    (BMP_KNOB,   25,   "OPX Sustain Lvl", synthesizer, channel, VL_ZERO_TO_ONE,   OPXSU, aX+sX*3    , aY+sY   );
     ctl[ctlcount++] = new CKnob    (BMP_KNOB,   25,   "OPX SustainTime", synthesizer, channel, VL_PORTAMENTO,    OPXST, aX+sX*4    , aY+sY   );
     ctl[ctlcount++] = new CKnob    (BMP_KNOB,   25,   "OPX ReleaseTime", synthesizer, channel, VL_TEMPO,         OPXRE, aX+sX*5    , aY+sY   );
-    
+
     // OPZ
     aX = cX + oX;
     aY = cY + oY * 3;
@@ -233,7 +233,7 @@ CEditor::CEditor(CSynthesizer *synthesizer)
     ctl[ctlcount++] = new CKnob    (BMP_KNOB,   25,   "OPZ Sustain Lvl", synthesizer, channel, VL_ZERO_TO_ONE,   OPZSU, aX+sX*3    , aY+sY   );
     ctl[ctlcount++] = new CKnob    (BMP_KNOB,   25,   "OPZ SustainTime", synthesizer, channel, VL_PORTAMENTO,    OPZST, aX+sX*4    , aY+sY   );
     ctl[ctlcount++] = new CKnob    (BMP_KNOB,   25,   "OPZ ReleaseTime", synthesizer, channel, VL_TEMPO,         OPZRE, aX+sX*5    , aY+sY   );
-    
+
     // Matriz
     aX = mX;
     aY = mY;
@@ -298,7 +298,7 @@ CEditor::CEditor(CSynthesizer *synthesizer)
     ctl[ctlcount++] = new CKnob    (BMP_KNOB2,  20,   "FM OPX->OPZ",     synthesizer, channel, VL_MOD,           MXZ,     aX+fX*6  , aY+fY*8 );
     ctl[ctlcount++] = new CKnob    (BMP_KNOB2,  20,   "OPX Output",      synthesizer, channel, VL_MOD,           MXO,     aX+fX*6  , aY+fY*9 );
     ctl[ctlcount++] = new CKnob    (BMP_KNOB3,  20,   "OPX Pan",         synthesizer, channel, VL_PAN,           MXP,     aX+fX*6  , aY+fY*10);
-    
+
     ctl[ctlcount++] = new CKey     (BMP_OPS  ,7,20,20,"OPZ On/Off",      synthesizer, channel,                   OPZON,   aX+fX*7  , aY+fY*8 );
     ctl[ctlcount++] = new CKnob    (BMP_KNOB2,  20,   "OPZ Output",      synthesizer, channel, VL_MOD,           MZO,     aX+fX*7  , aY+fY*9 );
     ctl[ctlcount++] = new CKnob    (BMP_KNOB3,  20,   "OPZ Pan",         synthesizer, channel, VL_PAN,           MZP,     aX+fX*7  , aY+fY*10);
@@ -309,7 +309,7 @@ CEditor::CEditor(CSynthesizer *synthesizer)
     ctl[ctlcount++] = new CKnob    (BMP_KNOB,   25,   "Portamento",      synthesizer, channel, VL_PORTAMENTO,    PORTA, aX         , aY      );
     ctl[ctlcount++] = new CKnob    (BMP_KNOB,   25,   "Pitch Curve",     synthesizer, channel, VL_PITCH_CURVE,   PTCCU, aX+sX      , aY      );
     ctl[ctlcount++] = new CKnob    (BMP_KNOB,   25,   "PitchCurveTime",  synthesizer, channel, VL_PORTAMENTO,    PTCTI, aX+sX*2    , aY      );
-    
+
     // LFO
     aX = lX;
     aY = lY;
@@ -323,7 +323,7 @@ CEditor::CEditor(CSynthesizer *synthesizer)
     aX = dX;
     aY = dY;
     ctl[ctlcount++] = new CKnob    (BMP_KNOB,   25,   "Mod Destination", synthesizer, channel, VL_MOD_DEST,      MDLDS, aX         , aY      );
-    
+
     // Channels
     aX = gX;
     aY = gY;
@@ -334,7 +334,7 @@ CEditor::CEditor(CSynthesizer *synthesizer)
     aY = rY;
     ctl[ctlcount++] = new CKnob    (BMP_KNOB,   25,   "Reverb Time",     synthesizer, channel, VL_ZERO_TO_ONE,   REVTI, aX         , aY      );
     ctl[ctlcount++] = new CKnob    (BMP_KNOB,   25,   "Reverb Damp",     synthesizer, channel, VL_ZERO_TO_ONE,   REVDA, aX+sX      , aY      );
-    
+
     // Delay
     aX = eX;
     aY = eY;
@@ -713,10 +713,4 @@ void CEditor::GetParName(int index, char* text)
         }
     }
     strncpy(text, "not found", TEXT_SIZE);
-}
-
-void CEditor::GetDimension(int *width, int *height)
-{
-    *width  = GUI_WIDTH;
-    *height = GUI_HEIGHT;
 }

@@ -41,6 +41,7 @@ void CCocoaToolkit::StartWindowProcesses()
 
 void CCocoaToolkit::CopyRect(int destX, int destY, int width, int height, int origBmp, int origX, int origY)
 {
+    CocoaToolkitCopyRect(this->objcInstance, destX, destY, width, height, origBmp, origX, origY);
 }
 
 void CCocoaToolkit::OutputDebugString(char *text)
@@ -54,7 +55,17 @@ int CCocoaToolkit::WaitWindowClosed()
     return 0;
 }
 
-void CppGetDimension(void* toolkit, int *width, int *height)
+void CppOnLButtonDown(void *toolkit, int x, int y)
 {
-    ((CCocoaToolkit*)toolkit)->editor->GetDimension(width, height);
+    ((CCocoaToolkit*)toolkit)->editor->OnLButtonDown(x, y);
+}
+
+void CppOnLButtonUp(void *toolkit)
+{
+    ((CCocoaToolkit*)toolkit)->editor->OnLButtonUp();
+}
+
+void CppOnMouseMove(void *toolkit, int x, int y)
+{
+    ((CCocoaToolkit*)toolkit)->editor->OnMouseMove(x, y);
 }

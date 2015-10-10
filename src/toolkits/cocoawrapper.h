@@ -26,8 +26,11 @@ void  CocoaToolkitDestroy(void *self);
 void  CocoaToolkitCreateWindow(void *self, void *parent);
 void  CocoaToolkitShowWindow(void *self);
 void  CocoaToolkitWaitWindowClosed(void *self);
+void  CocoaToolkitCopyRect(void *self, int destX, int destY, int width, int height, int origBmp, int origX, int origY);
 
-void  CppGetDimension(void *toolkit, int *width, int *height);
+void  CppOnLButtonDown(void *toolkit, int x, int y);
+void  CppOnLButtonUp(void *toolkit);
+void  CppOnMouseMove(void *toolkit, int x, int y);
 
 #ifdef __cplusplus
 }

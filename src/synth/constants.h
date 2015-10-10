@@ -50,6 +50,25 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define TEXT_SIZE           32
 
 // ------------------------------------------------------------------
+// GUI constants
+// ------------------------------------------------------------------
+#define GUI_CONTROLS 189
+#define GUI_WIDTH    633
+#define GUI_HEIGHT   437
+enum
+{
+    BMP_CHARS  ,
+    BMP_KNOB   ,
+    BMP_KNOB2  ,
+    BMP_KNOB3  ,
+    BMP_KEY    ,
+    BMP_BG     ,
+    BMP_BUTTONS,
+    BMP_OPS    ,
+    BMP_COUNT
+};
+
+// ------------------------------------------------------------------
 // math constants
 // ------------------------------------------------------------------
 #define PI                 3.14159265358979f
@@ -68,9 +87,9 @@ __inline long int lrint (double flt)
         fld flt
         fistp intgr
     };
-        
+
     return intgr;
-} 
+}
 
 __inline long int lrintf (float flt)
 {
@@ -81,7 +100,7 @@ __inline long int lrintf (float flt)
         fld flt
         fistp intgr
     };
-        
+
     return intgr;
 }
 #endif
