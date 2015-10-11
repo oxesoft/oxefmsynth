@@ -29,6 +29,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 - (void) mouseDown:(NSEvent *)event;
 - (void) mouseUp:(NSEvent *)event;
 - (void) mouseMoved:(NSEvent *)event;
+- (void) mouseDragged:(NSEvent *)event;
 - (BOOL) isOpaque;
 @end
 
@@ -41,12 +42,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     PluginView* view;
     NSImage* bmps[BMP_COUNT];
     int bmps_height[BMP_COUNT];
+    NSTimer* timer;
 }
 - (id)   init:(void*)toolkitPtr;
 - (void) createWindow:(id)parent;
 - (void) showWindow;
 - (void) copyRectFromImageIndex:(int)index to:(NSPoint)point from:(NSRect)rect;
 - (void) waitWindowClosed;
+- (void) update;
 @end
 
 //----------------------------------------------------------------------
@@ -81,6 +84,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 }
 
 - (void) mouseMoved:(NSEvent *)event
+{
+    NSPoint loc = [event locationInWindow];
+    CppOnMouseMove(toolkit, (int)loc.x, GUI_HEIGHT - (int)loc.y);
+}
+
+- (void) mouseDragged:(NSEvent *)event;
 {
     NSPoint loc = [event locationInWindow];
     CppOnMouseMove(toolkit, (int)loc.x, GUI_HEIGHT - (int)loc.y);
@@ -162,6 +171,7 @@ void CocoaToolkitCopyRect(void *self, int destX, int destY, int width, int heigh
 }
 
 -(void)dealloc {
+    [timer invalidate];
     [pool release];
     [super dealloc];
 }
@@ -200,6 +210,11 @@ void CocoaToolkitCopyRect(void *self, int destX, int destY, int width, int heigh
 - (void) showWindow
 {
     [window makeKeyAndOrderFront:nil];
+    timer = [NSTimer scheduledTimerWithTimeInterval:(0.001 * TIMER_RESOLUTION_MS)
+                                             target:self
+                                           selector:@selector(update)
+                                           userInfo:nil
+                                            repeats:YES];
 }
 
 - (void) copyRectFromImageIndex:(int)index to:(NSPoint)point from:(NSRect)rect
@@ -222,6 +237,11 @@ void CocoaToolkitCopyRect(void *self, int destX, int destY, int width, int heigh
 - (BOOL) applicationShouldTerminateAfterLastWindowClosed:(NSApplication *)theApplication
 {
     return YES;
+}
+
+- (void) update
+{
+    CppUpdate(toolkit);
 }
 
 @end

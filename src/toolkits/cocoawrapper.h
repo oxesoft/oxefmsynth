@@ -31,6 +31,7 @@ void  CocoaToolkitCopyRect(void *self, int destX, int destY, int width, int heig
 void  CppOnLButtonDown(void *toolkit, int x, int y);
 void  CppOnLButtonUp(void *toolkit);
 void  CppOnMouseMove(void *toolkit, int x, int y);
+void  CppUpdate(void *toolkit);
 
 #ifdef __cplusplus
 }

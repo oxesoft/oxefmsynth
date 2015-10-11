@@ -69,3 +69,8 @@ void CppOnMouseMove(void *toolkit, int x, int y)
 {
     ((CCocoaToolkit*)toolkit)->editor->OnMouseMove(x, y);
 }
+
+void CppUpdate(void *toolkit)
+{
+    ((CCocoaToolkit*)toolkit)->editor->Update();
+}
