@@ -51,6 +51,7 @@ typedef struct
     void* toolkit;
 }
 - (id)   init:(void*)toolkitPtr withSize:(NSSize)size;
+- (void) viewDidMoveToWindow;
 - (void) mouseDown:(NSEvent *)event;
 - (void) mouseUp:(NSEvent *)event;
 - (void) mouseMoved:(NSEvent *)event;
@@ -92,9 +93,19 @@ typedef struct
     return self;
 }
 
+- (void)viewDidMoveToWindow {
+    [self addTrackingRect:NSMakeRect(0, 0, GUI_WIDTH, GUI_HEIGHT) owner:self userData:NULL assumeInside:NO];
+}
+
 - (BOOL) isOpaque
 {
     return YES;
+}
+
+- (void)mouseEntered:(NSEvent *)theEvent
+{
+    [[self window] setAcceptsMouseMovedEvents: YES];
+    [[self window] makeFirstResponder:self];
 }
 
 - (void) mouseDown:(NSEvent *)event
@@ -286,7 +297,6 @@ NSImage* LoadImageFromFile(const char *path)
     if (parent)
     {
         NSView* parentView = [(NSView*) parent retain];
-        [[parentView window] setAcceptsMouseMovedEvents: YES];
         [parentView addSubview: view];
     }
     else
@@ -300,7 +310,6 @@ NSImage* LoadImageFromFile(const char *path)
         ];
         [window setTitle:@TITLE_FULL];
         [window center];
-        [window setAcceptsMouseMovedEvents:YES];
         [window setAutodisplay: YES];
         [window setContentView: view];
         [NSApp setDelegate:(id)self];
