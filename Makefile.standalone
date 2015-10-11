@@ -75,6 +75,8 @@ else
         LDFLAGS+=-s
     else
         CC:=g++
+        INCLUDES+=-I.
+        DEPS:=bitmaps.h
         ifeq ($(UNAME_S),Darwin)
             LDFLAGS+=-framework Cocoa
             SOURCES+=src/toolkits/cocoatoolkit.cpp
@@ -85,7 +87,7 @@ else
             OBJCFLAGS+=`gnustep-config --objc-flags`
             OBJCSOURCES+=src/toolkits/cocoatoolkit.m
             SOURCES+=src/toolkits/cocoatoolkit.cpp
-            DEPS:=cocoatoolkit.o
+            DEPS+=cocoatoolkit.o
             SOURCES+=$(DEPS)
             CMD:=rm $(DEPS)
         else
@@ -93,8 +95,6 @@ else
             LDFLAGS+=-lX11
             LDFLAGS+=-lpthread
             SOURCES+=src/toolkits/xlibtoolkit.cpp
-            INCLUDES+=-I.
-            DEPS:=bitmaps.h
         endif
     endif
 endif

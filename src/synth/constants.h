@@ -52,9 +52,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // ------------------------------------------------------------------
 // GUI constants
 // ------------------------------------------------------------------
-#define GUI_CONTROLS 189
-#define GUI_WIDTH    633
-#define GUI_HEIGHT   437
+#define TIMER_RESOLUTION_MS 20
+#define BMP_PATH            "skin"
+#define GUI_CONTROLS        189
+#define GUI_WIDTH           633
+#define GUI_HEIGHT          437
 enum
 {
     BMP_CHARS  ,
