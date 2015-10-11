@@ -195,7 +195,6 @@ NSImage* LoadImageFromBuffer(const unsigned char *buffer)
             *(dest++) = 0;
         }
     }
-    //dest = (unsigned char*)buffer + header->fh.fileOffsetToPixelArray;
     NSBitmapImageRep *bitmap = [[NSBitmapImageRep alloc]
         initWithBitmapDataPlanes:(unsigned char **)&data
         pixelsWide:header->v5.width
@@ -245,14 +244,14 @@ NSImage* LoadImageFromFile(const char *path)
     {
         pool = [[NSAutoreleasePool alloc] init];
         toolkit = toolkitPtr;
-        bmps[BMP_CHARS  ] = LoadImageFromFile((const char*)@BMP_PATH"/chars.bmp"  );
-        bmps[BMP_KNOB   ] = LoadImageFromFile((const char*)@BMP_PATH"/knob.bmp"   );
-        bmps[BMP_KNOB2  ] = LoadImageFromFile((const char*)@BMP_PATH"/knob2.bmp"  );
-        bmps[BMP_KNOB3  ] = LoadImageFromFile((const char*)@BMP_PATH"/knob3.bmp"  );
-        bmps[BMP_KEY    ] = LoadImageFromFile((const char*)@BMP_PATH"/key.bmp"    );
-        bmps[BMP_BG     ] = LoadImageFromFile((const char*)@BMP_PATH"/bg.bmp"     );
-        bmps[BMP_BUTTONS] = LoadImageFromFile((const char*)@BMP_PATH"/buttons.bmp");
-        bmps[BMP_OPS    ] = LoadImageFromFile((const char*)@BMP_PATH"/ops.bmp"    );
+        bmps[BMP_CHARS  ] = LoadImageFromFile((const char*)BMP_PATH"/chars.bmp"  );
+        bmps[BMP_KNOB   ] = LoadImageFromFile((const char*)BMP_PATH"/knob.bmp"   );
+        bmps[BMP_KNOB2  ] = LoadImageFromFile((const char*)BMP_PATH"/knob2.bmp"  );
+        bmps[BMP_KNOB3  ] = LoadImageFromFile((const char*)BMP_PATH"/knob3.bmp"  );
+        bmps[BMP_KEY    ] = LoadImageFromFile((const char*)BMP_PATH"/key.bmp"    );
+        bmps[BMP_BG     ] = LoadImageFromFile((const char*)BMP_PATH"/bg.bmp"     );
+        bmps[BMP_BUTTONS] = LoadImageFromFile((const char*)BMP_PATH"/buttons.bmp");
+        bmps[BMP_OPS    ] = LoadImageFromFile((const char*)BMP_PATH"/ops.bmp"    );
         if (!bmps[BMP_CHARS  ]) bmps[BMP_CHARS  ] = LoadImageFromBuffer((unsigned char*)chars_bmp   );
         if (!bmps[BMP_KNOB   ]) bmps[BMP_KNOB   ] = LoadImageFromBuffer((unsigned char*)knob_bmp    );
         if (!bmps[BMP_KNOB2  ]) bmps[BMP_KNOB2  ] = LoadImageFromBuffer((unsigned char*)knob2_bmp   );
