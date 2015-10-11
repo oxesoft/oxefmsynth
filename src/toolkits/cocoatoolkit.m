@@ -21,6 +21,31 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #import "cocoawrapper.h"
 #import <Cocoa/Cocoa.h>
 
+typedef struct __attribute__((packed))
+{
+    char         signature[2];
+    unsigned int fileSize;
+    short        reserved[2];
+    unsigned int fileOffsetToPixelArray;
+} BITMAPFILEHEADER;
+
+typedef struct __attribute__((packed))
+{
+    unsigned int   dibHeaderSize;
+    unsigned int   width;
+    unsigned int   height;
+    unsigned short planes;
+    unsigned short bitsPerPixel;
+    unsigned int   compression;
+    unsigned int   imageSize;
+} BITMAPV5HEADER;
+
+typedef struct
+{
+    BITMAPFILEHEADER fh;
+    BITMAPV5HEADER   v5;
+} BITMAPHEADER;
+
 @interface PluginView : NSImageView
 {
     void* toolkit;
@@ -137,6 +162,82 @@ void CocoaToolkitCopyRect(void *self, int destX, int destY, int width, int heigh
   * wrappers end
 **/
 
+NSImage* LoadImageFromBuffer(const unsigned char *buffer)
+{
+    BITMAPHEADER *header = (BITMAPHEADER *)buffer;
+    if (header->fh.signature[0] != 'B' || header->fh.signature[1] != 'M')
+    {
+        return 0;
+    }
+    unsigned int bytesPerRow = (header->v5.imageSize / header->v5.height);
+    unsigned char *data = (unsigned char*)malloc(header->v5.imageSize);
+    unsigned char* dest = data;
+    int line;
+    unsigned char r;
+    unsigned char g;
+    unsigned char b;
+    for (line = header->v5.height - 1; line >= 0; line--)
+    {
+        unsigned char* src = (unsigned char*)buffer + header->fh.fileOffsetToPixelArray + (line * bytesPerRow);
+        unsigned int i = header->v5.width;
+        while (i--)
+        {
+            b = *(src++);
+            g = *(src++);
+            r = *(src++);
+            *(dest++) = r;
+            *(dest++) = g;
+            *(dest++) = b;
+        }
+        i = bytesPerRow - (header->v5.width * 3);
+        while (i--)
+        {
+            *(dest++) = 0;
+        }
+    }
+    //dest = (unsigned char*)buffer + header->fh.fileOffsetToPixelArray;
+    NSBitmapImageRep *bitmap = [[NSBitmapImageRep alloc]
+        initWithBitmapDataPlanes:(unsigned char **)&data
+        pixelsWide:header->v5.width
+        pixelsHigh:header->v5.height
+        bitsPerSample:8
+        samplesPerPixel:3
+        hasAlpha:NO
+        isPlanar:NO
+        colorSpaceName:NSDeviceRGBColorSpace
+        bitmapFormat:0
+        bytesPerRow:bytesPerRow
+        bitsPerPixel:24
+    ];
+    NSImage *image = [[NSImage alloc] initWithSize:NSMakeSize(header->v5.width, header->v5.height)];
+    [image addRepresentation:bitmap];
+    //free(data);
+    return image;
+}
+
+NSImage* LoadImageFromFile(const char *path)
+{
+    FILE *f = fopen(path, "rb");
+    if (!f)
+    {
+        return 0;
+    }
+    fseek(f, 0, SEEK_END);
+    int size = ftell(f);
+    fseek(f, 0, SEEK_SET);
+    unsigned char *tmp = (unsigned char*)malloc(size);
+    if (!fread(tmp, size, 1, f))
+    {
+        free(tmp);
+        fclose(f);
+        return 0;
+    }
+    fclose(f);
+    NSImage* result = LoadImageFromBuffer((const unsigned char*)tmp);
+    free(tmp);
+    return result;
+}
+
 - (id) init:(void*)toolkitPtr
 {
     self = [super init];
@@ -144,22 +245,22 @@ void CocoaToolkitCopyRect(void *self, int destX, int destY, int width, int heigh
     {
         pool = [[NSAutoreleasePool alloc] init];
         toolkit = toolkitPtr;
-        bmps[BMP_CHARS  ] = [[NSImage alloc] initByReferencingFile:@BMP_PATH"/chars.bmp"  ];
-        bmps[BMP_KNOB   ] = [[NSImage alloc] initByReferencingFile:@BMP_PATH"/knob.bmp"   ];
-        bmps[BMP_KNOB2  ] = [[NSImage alloc] initByReferencingFile:@BMP_PATH"/knob2.bmp"  ];
-        bmps[BMP_KNOB3  ] = [[NSImage alloc] initByReferencingFile:@BMP_PATH"/knob3.bmp"  ];
-        bmps[BMP_KEY    ] = [[NSImage alloc] initByReferencingFile:@BMP_PATH"/key.bmp"    ];
-        bmps[BMP_BG     ] = [[NSImage alloc] initByReferencingFile:@BMP_PATH"/bg.bmp"     ];
-        bmps[BMP_BUTTONS] = [[NSImage alloc] initByReferencingFile:@BMP_PATH"/buttons.bmp"];
-        bmps[BMP_OPS    ] = [[NSImage alloc] initByReferencingFile:@BMP_PATH"/ops.bmp"    ];
-        if (![bmps[BMP_CHARS  ] isValid]) bmps[BMP_CHARS  ] = [[NSImage alloc] initWithData:[NSData dataWithBytes:(void*)chars_bmp   length:sizeof(chars_bmp)  ]];
-        if (![bmps[BMP_KNOB   ] isValid]) bmps[BMP_KNOB   ] = [[NSImage alloc] initWithData:[NSData dataWithBytes:(void*)knob_bmp    length:sizeof(knob_bmp)   ]];
-        if (![bmps[BMP_KNOB2  ] isValid]) bmps[BMP_KNOB2  ] = [[NSImage alloc] initWithData:[NSData dataWithBytes:(void*)knob2_bmp   length:sizeof(knob2_bmp)  ]];
-        if (![bmps[BMP_KNOB3  ] isValid]) bmps[BMP_KNOB3  ] = [[NSImage alloc] initWithData:[NSData dataWithBytes:(void*)knob3_bmp   length:sizeof(knob3_bmp)  ]];
-        if (![bmps[BMP_KEY    ] isValid]) bmps[BMP_KEY    ] = [[NSImage alloc] initWithData:[NSData dataWithBytes:(void*)key_bmp     length:sizeof(key_bmp)    ]];
-        if (![bmps[BMP_BG     ] isValid]) bmps[BMP_BG     ] = [[NSImage alloc] initWithData:[NSData dataWithBytes:(void*)bg_bmp      length:sizeof(bg_bmp)     ]];
-        if (![bmps[BMP_BUTTONS] isValid]) bmps[BMP_BUTTONS] = [[NSImage alloc] initWithData:[NSData dataWithBytes:(void*)buttons_bmp length:sizeof(buttons_bmp)]];
-        if (![bmps[BMP_OPS    ] isValid]) bmps[BMP_OPS    ] = [[NSImage alloc] initWithData:[NSData dataWithBytes:(void*)ops_bmp     length:sizeof(ops_bmp)    ]];
+        bmps[BMP_CHARS  ] = LoadImageFromFile((const char*)@BMP_PATH"/chars.bmp"  );
+        bmps[BMP_KNOB   ] = LoadImageFromFile((const char*)@BMP_PATH"/knob.bmp"   );
+        bmps[BMP_KNOB2  ] = LoadImageFromFile((const char*)@BMP_PATH"/knob2.bmp"  );
+        bmps[BMP_KNOB3  ] = LoadImageFromFile((const char*)@BMP_PATH"/knob3.bmp"  );
+        bmps[BMP_KEY    ] = LoadImageFromFile((const char*)@BMP_PATH"/key.bmp"    );
+        bmps[BMP_BG     ] = LoadImageFromFile((const char*)@BMP_PATH"/bg.bmp"     );
+        bmps[BMP_BUTTONS] = LoadImageFromFile((const char*)@BMP_PATH"/buttons.bmp");
+        bmps[BMP_OPS    ] = LoadImageFromFile((const char*)@BMP_PATH"/ops.bmp"    );
+        if (!bmps[BMP_CHARS  ]) bmps[BMP_CHARS  ] = LoadImageFromBuffer((unsigned char*)chars_bmp   );
+        if (!bmps[BMP_KNOB   ]) bmps[BMP_KNOB   ] = LoadImageFromBuffer((unsigned char*)knob_bmp    );
+        if (!bmps[BMP_KNOB2  ]) bmps[BMP_KNOB2  ] = LoadImageFromBuffer((unsigned char*)knob2_bmp   );
+        if (!bmps[BMP_KNOB3  ]) bmps[BMP_KNOB3  ] = LoadImageFromBuffer((unsigned char*)knob3_bmp   );
+        if (!bmps[BMP_KEY    ]) bmps[BMP_KEY    ] = LoadImageFromBuffer((unsigned char*)key_bmp     );
+        if (!bmps[BMP_BG     ]) bmps[BMP_BG     ] = LoadImageFromBuffer((unsigned char*)bg_bmp      );
+        if (!bmps[BMP_BUTTONS]) bmps[BMP_BUTTONS] = LoadImageFromBuffer((unsigned char*)buttons_bmp );
+        if (!bmps[BMP_OPS    ]) bmps[BMP_OPS    ] = LoadImageFromBuffer((unsigned char*)ops_bmp     );
         int i;
         for (i = 0; i < BMP_COUNT; i++)
         {

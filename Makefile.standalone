@@ -89,7 +89,7 @@ else
             SOURCES+=src/toolkits/cocoatoolkit.cpp
             DEPS+=cocoatoolkit.o
             SOURCES+=$(DEPS)
-            CMD:=rm $(DEPS)
+            CMD:=rm cocoatoolkit.o
         else
             LDFLAGS+=-s
             LDFLAGS+=-lX11
