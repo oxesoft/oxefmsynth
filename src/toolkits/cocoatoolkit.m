@@ -111,7 +111,7 @@ typedef struct
 
 - (void) mouseDown:(NSEvent *)event
 {
-    NSPoint loc = [event locationInWindow];
+    NSPoint loc = [self convertPoint:[event locationInWindow] fromView:nil];
     CppOnLButtonDown(toolkit, (int)loc.x, GUI_HEIGHT - (int)loc.y);
 }
 
@@ -120,20 +120,20 @@ typedef struct
     CppOnLButtonUp(toolkit);
     if ([event clickCount] == 2)
     {
-        NSPoint loc = [event locationInWindow];
+        NSPoint loc = [self convertPoint:[event locationInWindow] fromView:nil];
         CppOnDblClick(toolkit, (int)loc.x, GUI_HEIGHT - (int)loc.y);
     }
 }
 
 - (void) mouseMoved:(NSEvent *)event
 {
-    NSPoint loc = [event locationInWindow];
+    NSPoint loc = [self convertPoint:[event locationInWindow] fromView:nil];
     CppOnMouseMove(toolkit, (int)loc.x, GUI_HEIGHT - (int)loc.y);
 }
 
 - (void) mouseDragged:(NSEvent *)event;
 {
-    NSPoint loc = [event locationInWindow];
+    NSPoint loc = [self convertPoint:[event locationInWindow] fromView:nil];
     CppOnMouseMove(toolkit, (int)loc.x, GUI_HEIGHT - (int)loc.y);
 }
 
@@ -368,7 +368,7 @@ NSImage* LoadImageFromFile(const char *path)
     NSImage* image = [view image];
     NSRect dest    = NSMakeRect(point.x, point.y, rect.size.width, rect.size.height);
     [image lockFocus];
-    [bmps[index] drawAtPoint:point fromRect:rect operation:NSCompositeCopy fraction:1.0];
+    [bmps[index] drawInRect:dest fromRect:rect operation:NSCompositeCopy fraction:1.0];
     [image unlockFocus];
     [view setNeedsDisplayInRect: dest];
 }
