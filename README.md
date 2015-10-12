@@ -8,16 +8,22 @@ This repository contains the synth core and three different ways to use it:
 
 - as a [demo](https://en.wikipedia.org/wiki/Demoscene) (for testing synth engine, for profiling or just for fun)
 - as a standalone application (for testing GUI)
-- as a [VST plugin](https://pt.wikipedia.org/wiki/Virtual_Studio_Technology) for Windows and Linux, 32/64 bit
+- as a [VST plugin](https://pt.wikipedia.org/wiki/Virtual_Studio_Technology) for Windows (32/64bit), Linux 32/64bit and MacOSX (64bit)
 
-Building
---------
-Requirement: [mingw-w64](http://mingw-w64.org/).
-On Ubuntu, type ``sudo apt-get install mingw-w64``.
-On Windows, install both 32 and 64bit (run the installer twice).
+# Building
 
-To build on Windows (on the [msys](https://msysgit.github.io/) shell) just type ``mingw32-make``.
-On Linux just type ``make``.
+## Windows
+Requirements: [mingw-w64](http://mingw-w64.org/) and [msys](https://msysgit.github.io/).
+Install both 32 and 64bit (run the installer twice).
+On the msys shell just type ``mingw32-make``.
+
+## Linux
+To build native executables just type ``make`` (requirement: g++).
+To build Windows executables on Ubuntu, type ``sudo apt-get install mingw-w64`` to install the required tools.
+
+## Mac OS X
+On Xcode install the "Command Line Tools" and type ``make`` on terminal. Xcode itself is not used.
+
 All the code is always compiled by once on purpose, to make sure everything is fine (because it is a tiny project).
 ``converter`` is a development tool for creating the demos. It converts a .mid file in a tune.h used for the demo player.
 
