@@ -63,6 +63,7 @@ typedef struct
 @interface CocoaToolkit : NSObject
 {
     void* toolkit;
+    NSView* parentView;
     NSAutoreleasePool* pool;
     NSApplication* app;
     NSWindow* window;
@@ -309,6 +310,10 @@ NSImage* LoadImageFromFile(const char *path)
     {
         [pool release];
     }
+    if (parentView)
+    {
+        [parentView release];
+    }
     [super dealloc];
 }
 
@@ -323,7 +328,7 @@ NSImage* LoadImageFromFile(const char *path)
     {
         [pool release];
         pool = NULL;
-        NSView* parentView = [(NSView*) parent retain];
+        parentView = [(NSView*) parent retain];
         [parentView addSubview: view];
     }
     else
