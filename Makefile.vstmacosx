@@ -1,0 +1,77 @@
+# Oxe FM Synth: a software synthesizer
+# Copyright (C) 2015  Daniel Moura <oxe@oxesoft.com>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+ifeq ($(VSTSDK_PATH),)
+    $(error Please set the VSTSDK_PATH environment variable to the vstsdk2.4 path)
+endif
+
+INCLUDES:=-Isrc/vst
+INCLUDES+=-Isrc/synth
+INCLUDES+=-Isrc/gui
+INCLUDES+=-Isrc/toolkits
+INCLUDES+=-I$(VSTSDK_PATH)
+INCLUDES+=-I.
+
+SOURCES:=src/vst/oxevst.cpp
+SOURCES+=src/vst/oxevstmain.cpp
+SOURCES+=src/vst/oxevsteditor.cpp
+SOURCES+=src/vst/vsthostinterface.cpp
+SOURCES+=src/toolkits/cocoatoolkit.cpp
+SOURCES+=src/toolkits/cocoatoolkit.m
+SOURCES+=src/gui/button.cpp
+SOURCES+=src/gui/channels.cpp
+SOURCES+=src/gui/editor.cpp
+SOURCES+=src/gui/key.cpp
+SOURCES+=src/gui/knob.cpp
+SOURCES+=src/gui/lcd.cpp
+SOURCES+=src/gui/mapper.cpp
+SOURCES+=src/synth/buffers.cpp
+SOURCES+=src/synth/delay.cpp
+SOURCES+=src/synth/envelop.cpp
+SOURCES+=src/synth/filter.cpp
+SOURCES+=src/synth/noise.cpp
+SOURCES+=src/synth/note.cpp
+SOURCES+=src/synth/oscillator.cpp
+SOURCES+=src/synth/persist.cpp
+SOURCES+=src/synth/programs.cpp
+SOURCES+=src/synth/reverb.cpp
+SOURCES+=src/synth/synthesizer.cpp
+SOURCES+=$(VSTSDK_PATH)/public.sdk/source/vst2.x/audioeffect.cpp
+SOURCES+=$(VSTSDK_PATH)/public.sdk/source/vst2.x/audioeffectx.cpp
+SOURCES+=$(VSTSDK_PATH)/public.sdk/source/vst2.x/vstplugmain.cpp
+
+CFLAGS+=-framework Cocoa
+
+ifeq ($(DEBUG),YES)
+	CFLAGS+=-g -O0
+else
+	CFLAGS+=-O3
+endif
+
+BUNDLE_NAME:=oxefmsynth.vst
+BUNDLE_FULL_PATH:=$(BUNDLE_NAME)/Contents/MacOS
+
+oxevst: bitmaps.h
+	@mkdir -p $(BUNDLE_FULL_PATH)
+	@g++ -shared -o $(BUNDLE_FULL_PATH)/oxefmsynth $(CFLAGS) $(SOURCES) $(INCLUDES) $(LIBS)
+
+bitmaps.h:
+	@$(CC) -o embedresources src/toolkits/embedresources.cpp
+	@./embedresources $@
+	@rm embedresources
+
+clean:
+	@rm -f $(BUNDLE_NAME) embedresources resources.h

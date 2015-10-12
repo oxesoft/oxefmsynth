@@ -56,6 +56,7 @@ typedef struct
 - (void) mouseUp:(NSEvent *)event;
 - (void) mouseMoved:(NSEvent *)event;
 - (void) mouseDragged:(NSEvent *)event;
+- (void) keyDown:(NSEvent *)event;
 - (BOOL) isOpaque;
 @end
 
@@ -84,7 +85,7 @@ typedef struct
 
 - (id)init:(void*)toolkitPtr withSize:(NSSize)size
 {
-    self = [super init];
+    self = [super initWithFrame:NSMakeRect(0, 0, size.width, size.height)];
     if (self)
     {
         toolkit = toolkitPtr;
@@ -117,6 +118,11 @@ typedef struct
 - (void) mouseUp:(NSEvent *)event
 {
     CppOnLButtonUp(toolkit);
+    if ([event clickCount] == 2)
+    {
+        NSPoint loc = [event locationInWindow];
+        CppOnDblClick(toolkit, (int)loc.x, GUI_HEIGHT - (int)loc.y);
+    }
 }
 
 - (void) mouseMoved:(NSEvent *)event
@@ -129,6 +135,12 @@ typedef struct
 {
     NSPoint loc = [event locationInWindow];
     CppOnMouseMove(toolkit, (int)loc.x, GUI_HEIGHT - (int)loc.y);
+}
+
+- (void) keyDown:(NSEvent *)event
+{
+    const char *c = [[event characters] UTF8String];
+    CppOnChar(toolkit, (int)c[0]);
 }
 
 @end
@@ -221,7 +233,6 @@ NSImage* LoadImageFromBuffer(const unsigned char *buffer)
     ];
     NSImage *image = [[NSImage alloc] initWithSize:NSMakeSize(header->v5.width, header->v5.height)];
     [image addRepresentation:bitmap];
-    //free(data);
     return image;
 }
 
@@ -276,14 +287,28 @@ NSImage* LoadImageFromFile(const char *path)
         {
             NSImageRep *rep = [[bmps[i] representations] objectAtIndex:0];
             bmps_height[i] = rep.pixelsHigh;
+            [rep release];
         }
     }
     return self;
 }
 
--(void)dealloc {
+-(void) dealloc {
     [timer invalidate];
-    [pool release];
+    [view release];
+    if (window)
+    {
+        [window release];
+    }
+    int i;
+    for (i = 0; i < BMP_COUNT; i++)
+    {
+        [bmps[i] release];
+    }
+    if (pool)
+    {
+        [pool release];
+    }
     [super dealloc];
 }
 
@@ -296,6 +321,8 @@ NSImage* LoadImageFromFile(const char *path)
     view = [[PluginView alloc] init:toolkit withSize:NSMakeSize(GUI_WIDTH, GUI_HEIGHT)];
     if (parent)
     {
+        [pool release];
+        pool = NULL;
         NSView* parentView = [(NSView*) parent retain];
         [parentView addSubview: view];
     }
@@ -310,7 +337,6 @@ NSImage* LoadImageFromFile(const char *path)
         ];
         [window setTitle:@TITLE_FULL];
         [window center];
-        [window setAutodisplay: YES];
         [window setContentView: view];
         [NSApp setDelegate:(id)self];
     }
@@ -318,7 +344,16 @@ NSImage* LoadImageFromFile(const char *path)
 
 - (void) showWindow
 {
-    [window makeKeyAndOrderFront:nil];
+    [[view window] setAutodisplay: YES];
+    if (window)
+    {
+        [window makeKeyAndOrderFront:nil];
+    }
+    else
+    {
+        [[view window] orderFront:nil];
+    }
+    [[view window] makeKeyAndOrderFront:nil];
     timer = [NSTimer scheduledTimerWithTimeInterval:(0.001 * TIMER_RESOLUTION_MS)
                                              target:self
                                            selector:@selector(update)

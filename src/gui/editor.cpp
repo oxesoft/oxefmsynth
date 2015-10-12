@@ -457,7 +457,7 @@ bool CEditor::OnChar(int cod)
         lcd->SetText(1,str1);
         synthesizer->SetProgName(str1, channel);
     }
-    else if (cod == 8)
+    else if (cod == 8 || cod == 127)
     {
         if (pos >= 0)
         {

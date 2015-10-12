@@ -65,9 +65,19 @@ void CppOnLButtonUp(void *toolkit)
     ((CCocoaToolkit*)toolkit)->editor->OnLButtonUp();
 }
 
+void CppOnDblClick(void *toolkit, int x, int y)
+{
+    ((CCocoaToolkit*)toolkit)->editor->OnLButtonDblClick(x, y);
+}
+
 void CppOnMouseMove(void *toolkit, int x, int y)
 {
     ((CCocoaToolkit*)toolkit)->editor->OnMouseMove(x, y);
+}
+
+void CppOnChar(void *toolkit, int c)
+{
+    ((CCocoaToolkit*)toolkit)->editor->OnChar(c);
 }
 
 void CppUpdate(void *toolkit)
