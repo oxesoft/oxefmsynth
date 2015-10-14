@@ -18,6 +18,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "editor.h"
 #include "ostoolkit.h"
+#include "nonguitoolkit.h"
+#include <stdio.h>
 
 #ifdef _WIN32
 void* hInstance;
@@ -62,7 +64,10 @@ int main(void)
     CSynthesizer s;
     CEditor e(&s);
     COSToolkit t(0, &e);
+    unsigned int time = GetTick();
     e.SetToolkit(&t);
+    time = GetTick() - time;
+    printf("full render time: %ums\n", time);
     CDummyHostInterface h(&s);
     e.SetHostInterface(&h);
     t.StartWindowProcesses();

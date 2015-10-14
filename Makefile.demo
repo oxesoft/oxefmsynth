@@ -16,11 +16,12 @@
 
 EXECUTABLE_NAME:=oxefmsynthdemo
 
-INCLUDES:=-Isrc/demo
+INCLUDES+=-Isrc/demo
 INCLUDES+=-Isrc/synth
 INCLUDES+=-Isrc/toolkits
 
-SOURCES:=src/demo/controller.cpp
+SOURCES+=src/toolkits/nonguitoolkit.cpp
+SOURCES+=src/demo/controller.cpp
 SOURCES+=src/demo/main.cpp
 SOURCES+=src/demo/tunereader.cpp
 SOURCES+=src/synth/buffers.cpp

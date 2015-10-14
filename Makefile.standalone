@@ -16,11 +16,12 @@
 
 EXECUTABLE_NAME:=oxefmsynth
 
-INCLUDES:=-Isrc/vst
+INCLUDES+=-Isrc/vst
 INCLUDES+=-Isrc/gui
 INCLUDES+=-Isrc/synth
 INCLUDES+=-Isrc/toolkits
 
+SOURCES+=src/toolkits/nonguitoolkit.cpp
 SOURCES+=src/standalone/main.cpp
 SOURCES+=src/gui/button.cpp
 SOURCES+=src/gui/channels.cpp
@@ -65,14 +66,13 @@ else
         EXECUTABLE_NAME:=$(EXECUTABLE_NAME).exe
         CC:=i686-w64-mingw32-g++
         RC:=i686-w64-mingw32-windres
-        LDFLAGS+=-static
         INCLUDES+=-Isrc/standalone
         SOURCES+=src/toolkits/windowstoolkit.cpp
         INCLUDES+=-Isrc/windows
         LDFLAGS+=-lgdi32
         LDFLAGS+=resources.o
         DEPS:=resources.o
-        LDFLAGS+=-s
+        LDFLAGS+=-static -s
     else
         CC:=g++
         INCLUDES+=-I.

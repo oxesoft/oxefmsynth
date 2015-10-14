@@ -23,32 +23,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "controller.h"
 #include <stdio.h>
 #include <string.h>
-
-#ifdef __APPLE__
-#include <mach/mach_time.h>
-#else
-#include <unistd.h>
-#include <time.h>
-#endif
-unsigned int GetTick()
-{
-#ifdef __APPLE__
-    mach_timebase_info_data_t info;
-    mach_timebase_info(&info);
-    uint64_t value = mach_absolute_time();
-    value *= info.numer;
-    value /= info.denom;
-    value /= 1000000;
-    return (unsigned int)value;
-#else
-    struct timespec ts;
-    unsigned int theTick = 0U;
-    clock_gettime(CLOCK_MONOTONIC, &ts);
-    theTick  = ts.tv_nsec / 1000000;
-    theTick += ts.tv_sec * 1000;
-    return theTick;
-#endif
-}
+#include "nonguitoolkit.h"
 
 int main(int argc, char* argv[])
 {
@@ -56,28 +31,28 @@ int main(int argc, char* argv[])
     printf(TITLE_FULL);
     printf("\n");
 #ifdef __RENDER_TO_MEMORY__ONLY__
-    unsigned int Temporizador = GetTick();
+    unsigned int time = GetTick();
     controller.RenderToProfiling();
-    Temporizador = GetTick() - Temporizador;
-    printf("Total time: %u\n", Temporizador);
+    time = GetTick() - time;
+    printf("Total time: %u\n", time);
 #else
     if (argc>1)
     {
         if (!strcmp(argv[1], "-f"))
         {
             printf("Writing the file...\n");
-            unsigned int Temporizador = GetTick();
+            unsigned int time = GetTick();
             controller.RenderToFile();
-            Temporizador = GetTick() - Temporizador;
-            printf("Total time: %u\n", Temporizador);
+            time = GetTick() - time;
+            printf("Total time: %u\n", time);
         }
         else if (!strcmp(argv[1], "-m"))
         {
             printf("Rendering to memory...\n");
-            unsigned int Temporizador = GetTick();
+            unsigned int time = GetTick();
             controller.RenderToProfiling();
-            Temporizador = GetTick() - Temporizador;
-            printf("Total time: %u\n", Temporizador);
+            time = GetTick() - time;
+            printf("Total time: %u\n", time);
         }
         else
         {
