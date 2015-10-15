@@ -90,7 +90,22 @@ typedef struct
     if (self)
     {
         toolkit = toolkitPtr;
-        [self setImage:[[NSImage alloc] initWithSize:size]];
+        NSBitmapImageRep *bitmap = [[NSBitmapImageRep alloc]
+            initWithBitmapDataPlanes:NULL
+            pixelsWide:size.width
+            pixelsHigh:size.height
+            bitsPerSample:8
+            samplesPerPixel:3
+            hasAlpha:NO
+            isPlanar:NO
+            colorSpaceName:NSDeviceRGBColorSpace
+            bitmapFormat:NSAlphaFirstBitmapFormat
+            bytesPerRow:size.width * 4
+            bitsPerPixel:32
+        ];
+        NSImage *image = [[NSImage alloc] initWithSize:size];
+        [image addRepresentation:bitmap];
+        [self setImage:image];
     }
     return self;
 }
@@ -194,7 +209,7 @@ NSImage* LoadImageFromBuffer(const unsigned char *buffer)
         return 0;
     }
     unsigned int bytesPerRow = (header->v5.imageSize / header->v5.height);
-    unsigned char *data = (unsigned char*)malloc(header->v5.imageSize);
+    unsigned char *data = (unsigned char*)malloc(header->v5.width * header->v5.height * 4);
     unsigned char* dest = data;
     int line;
     unsigned char r;
@@ -212,10 +227,6 @@ NSImage* LoadImageFromBuffer(const unsigned char *buffer)
             *(dest++) = r;
             *(dest++) = g;
             *(dest++) = b;
-        }
-        i = bytesPerRow - (header->v5.width * 3);
-        while (i--)
-        {
             *(dest++) = 0;
         }
     }
@@ -228,9 +239,9 @@ NSImage* LoadImageFromBuffer(const unsigned char *buffer)
         hasAlpha:NO
         isPlanar:NO
         colorSpaceName:NSDeviceRGBColorSpace
-        bitmapFormat:0
-        bytesPerRow:bytesPerRow
-        bitsPerPixel:24
+        bitmapFormat:NSAlphaFirstBitmapFormat
+        bytesPerRow:header->v5.width * 4
+        bitsPerPixel:32
     ];
     NSImage *image = [[NSImage alloc] initWithSize:NSMakeSize(header->v5.width, header->v5.height)];
     [image addRepresentation:bitmap];
