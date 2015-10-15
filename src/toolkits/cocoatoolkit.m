@@ -99,7 +99,6 @@ typedef struct
             hasAlpha:NO
             isPlanar:NO
             colorSpaceName:NSDeviceRGBColorSpace
-            bitmapFormat:NSAlphaFirstBitmapFormat
             bytesPerRow:size.width * 4
             bitsPerPixel:32
         ];
@@ -227,7 +226,7 @@ NSImage* LoadImageFromBuffer(const unsigned char *buffer)
             *(dest++) = r;
             *(dest++) = g;
             *(dest++) = b;
-            *(dest++) = 0;
+            *(dest++) = 0xFF;
         }
     }
     NSBitmapImageRep *bitmap = [[NSBitmapImageRep alloc]
@@ -239,7 +238,6 @@ NSImage* LoadImageFromBuffer(const unsigned char *buffer)
         hasAlpha:NO
         isPlanar:NO
         colorSpaceName:NSDeviceRGBColorSpace
-        bitmapFormat:NSAlphaFirstBitmapFormat
         bytesPerRow:header->v5.width * 4
         bitsPerPixel:32
     ];
