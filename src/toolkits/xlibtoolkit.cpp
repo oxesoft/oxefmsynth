@@ -65,7 +65,7 @@ void* eventProc(void* ptr)
         {
             continue;
         }
-        switch (event.type) 
+        switch (event.type)
         {
             case ButtonPress:
             {
@@ -179,23 +179,23 @@ CXlibToolkit::CXlibToolkit(void *parentWindow, CEditor *editor)
         return;
     }
     this->display = XOpenDisplay(displayName);
-    
+
     if (!parentWindow)
     {
         parentWindow = (void*)RootWindow(this->display, DefaultScreen(this->display));
     }
-    
+
     window = XCreateWindow(this->display, (Window)parentWindow, 0, 0, GUI_WIDTH, GUI_HEIGHT, 0, 24, InputOutput, CopyFromParent, 0, 0);
-    
+
     gc = XCreateGC(this->display, window, 0, 0);
     XSelectInput(this->display, window, ButtonPressMask | ButtonReleaseMask | PointerMotionMask | ExposureMask | KeyPressMask);
     XMapWindow(this->display, window);
     XFlush(this->display);
-        
-    this->WM_TIMER         = XInternAtom(this->display, "WM_TIMER"        , false); 
-    this->WM_DELETE_WINDOW = XInternAtom(this->display, "WM_DELETE_WINDOW", false); 
+
+    this->WM_TIMER         = XInternAtom(this->display, "WM_TIMER"        , false);
+    this->WM_DELETE_WINDOW = XInternAtom(this->display, "WM_DELETE_WINDOW", false);
     XSetWMProtocols(this->display, window, &WM_DELETE_WINDOW, 1);
-    
+
     offscreen = XCreatePixmap(this->display, window, GUI_WIDTH, GUI_HEIGHT, 24);
 
     memset(bmps, 0, sizeof(bmps));
@@ -292,6 +292,10 @@ Pixmap CXlibToolkit::LoadImageFromBuffer(const char *buffer)
     }
     char *data = (char*)malloc(header->v5.width * header->v5.height * 4);
     char* dest = data;
+    if (!header->v5.imageSize)
+    {
+        header->v5.imageSize = header->fh.fileSize - sizeof(BITMAPFILEHEADER) - header->v5.dibHeaderSize;
+    }
     for (int line = header->v5.height - 1; line >= 0; line--)
     {
         char* src  = (char*)buffer + header->fh.fileOffsetToPixelArray + (line * (header->v5.imageSize / header->v5.height));

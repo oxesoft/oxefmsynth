@@ -207,6 +207,10 @@ NSImage* LoadImageFromBuffer(const unsigned char *buffer)
     {
         return 0;
     }
+    if (!header->v5.imageSize)
+    {
+        header->v5.imageSize = header->fh.fileSize - sizeof(BITMAPFILEHEADER) - header->v5.dibHeaderSize;
+    }
     unsigned int bytesPerRow = (header->v5.imageSize / header->v5.height);
     unsigned char *data = (unsigned char*)malloc(header->v5.width * header->v5.height * 4);
     unsigned char* dest = data;
