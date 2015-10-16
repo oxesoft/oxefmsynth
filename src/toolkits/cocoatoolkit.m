@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #import "constants.h"
 #import "cocoawrapper.h"
 #import <Cocoa/Cocoa.h>
+#import <dlfcn.h>
 
 typedef struct __attribute__((packed))
 {
@@ -72,7 +73,7 @@ typedef struct
     int bmps_height[BMP_COUNT];
     NSTimer* timer;
 }
-- (id)   init:(void*)toolkitPtr;
+- (id)   initWithToolkit:(void*)toolkitPtr modulePath:(const char*)path;
 - (void) createWindow:(id)parent;
 - (void) showWindow;
 - (void) copyRectFromImageIndex:(int)index to:(NSPoint)point from:(NSRect)rect;
@@ -169,7 +170,11 @@ typedef struct
 **/
 void* CocoaToolkitCreate(void* toolkit)
 {
-    return [[CocoaToolkit alloc] init:toolkit];
+    Dl_info info;
+    dladdr(CocoaToolkitCreate, &info);
+    char* tmp = strrchr(info.dli_fname, '/');
+    *tmp = 0;
+    return [[CocoaToolkit alloc] initWithToolkit:toolkit modulePath:info.dli_fname];
 }
 
 void CocoaToolkitDestroy(void *self)
@@ -273,21 +278,30 @@ NSImage* LoadImageFromFile(const char *path)
     return result;
 }
 
-- (id) init:(void*)toolkitPtr
+- (id) initWithToolkit:(void*)toolkitPtr modulePath:(const char*)path
 {
     self = [super init];
     if (self)
     {
         pool = [[NSAutoreleasePool alloc] init];
         toolkit = toolkitPtr;
-        bmps[BMP_CHARS  ] = LoadImageFromFile((const char*)BMP_PATH"/chars.bmp"  );
-        bmps[BMP_KNOB   ] = LoadImageFromFile((const char*)BMP_PATH"/knob.bmp"   );
-        bmps[BMP_KNOB2  ] = LoadImageFromFile((const char*)BMP_PATH"/knob2.bmp"  );
-        bmps[BMP_KNOB3  ] = LoadImageFromFile((const char*)BMP_PATH"/knob3.bmp"  );
-        bmps[BMP_KEY    ] = LoadImageFromFile((const char*)BMP_PATH"/key.bmp"    );
-        bmps[BMP_BG     ] = LoadImageFromFile((const char*)BMP_PATH"/bg.bmp"     );
-        bmps[BMP_BUTTONS] = LoadImageFromFile((const char*)BMP_PATH"/buttons.bmp");
-        bmps[BMP_OPS    ] = LoadImageFromFile((const char*)BMP_PATH"/ops.bmp"    );
+        char absolutePath[PATH_MAX];
+        snprintf(absolutePath, PATH_MAX, "%s/../../../%s", path, BMP_PATH"/chars.bmp"  );
+        bmps[BMP_CHARS  ] = LoadImageFromFile((const char*)absolutePath);
+        snprintf(absolutePath, PATH_MAX, "%s/../../../%s", path, BMP_PATH"/knob.bmp"   );
+        bmps[BMP_KNOB   ] = LoadImageFromFile((const char*)absolutePath);
+        snprintf(absolutePath, PATH_MAX, "%s/../../../%s", path, BMP_PATH"/knob2.bmp"  );
+        bmps[BMP_KNOB2  ] = LoadImageFromFile((const char*)absolutePath);
+        snprintf(absolutePath, PATH_MAX, "%s/../../../%s", path, BMP_PATH"/knob3.bmp"  );
+        bmps[BMP_KNOB3  ] = LoadImageFromFile((const char*)absolutePath);
+        snprintf(absolutePath, PATH_MAX, "%s/../../../%s", path, BMP_PATH"/key.bmp"    );
+        bmps[BMP_KEY    ] = LoadImageFromFile((const char*)absolutePath);
+        snprintf(absolutePath, PATH_MAX, "%s/../../../%s", path, BMP_PATH"/bg.bmp"     );
+        bmps[BMP_BG     ] = LoadImageFromFile((const char*)absolutePath);
+        snprintf(absolutePath, PATH_MAX, "%s/../../../%s", path, BMP_PATH"/buttons.bmp");
+        bmps[BMP_BUTTONS] = LoadImageFromFile((const char*)absolutePath);
+        snprintf(absolutePath, PATH_MAX, "%s/../../../%s", path, BMP_PATH"/ops.bmp"    );
+        bmps[BMP_OPS    ] = LoadImageFromFile((const char*)absolutePath);
         if (!bmps[BMP_CHARS  ]) bmps[BMP_CHARS  ] = LoadImageFromBuffer((unsigned char*)chars_bmp   );
         if (!bmps[BMP_KNOB   ]) bmps[BMP_KNOB   ] = LoadImageFromBuffer((unsigned char*)knob_bmp    );
         if (!bmps[BMP_KNOB2  ]) bmps[BMP_KNOB2  ] = LoadImageFromBuffer((unsigned char*)knob2_bmp   );
