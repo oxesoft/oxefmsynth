@@ -85,7 +85,7 @@ typedef struct
 
 @implementation PluginView
 
-- (id)init:(void*)toolkitPtr withSize:(NSSize)size
+- (id) init:(void*)toolkitPtr withSize:(NSSize)size
 {
     self = [super initWithFrame:NSMakeRect(0, 0, size.width, size.height)];
     if (self)
@@ -119,7 +119,7 @@ typedef struct
     return YES;
 }
 
-- (void)mouseEntered:(NSEvent *)theEvent
+- (void) mouseEntered:(NSEvent *)theEvent
 {
     [[self window] setAcceptsMouseMovedEvents: YES];
     [[self window] makeFirstResponder:self];
@@ -205,7 +205,7 @@ void CocoaToolkitCopyRect(void *self, int destX, int destY, int width, int heigh
   * wrappers end
 **/
 
-NSImage* LoadImageFromBuffer(const unsigned char *buffer)
+NSImage* LoadImageFromBuffer(const unsigned char *buffer, int *height)
 {
     BITMAPHEADER *header = (BITMAPHEADER *)buffer;
     if (header->fh.signature[0] != 'B' || header->fh.signature[1] != 'M')
@@ -216,6 +216,7 @@ NSImage* LoadImageFromBuffer(const unsigned char *buffer)
     {
         header->v5.imageSize = header->fh.fileSize - sizeof(BITMAPFILEHEADER) - header->v5.dibHeaderSize;
     }
+    *height = header->v5.height;
     unsigned int bytesPerRow = (header->v5.imageSize / header->v5.height);
     unsigned char *data = (unsigned char*)malloc(header->v5.width * header->v5.height * 4);
     unsigned char* dest = data;
@@ -255,7 +256,7 @@ NSImage* LoadImageFromBuffer(const unsigned char *buffer)
     return image;
 }
 
-NSImage* LoadImageFromFile(const char *path)
+NSImage* LoadImageFromFile(const char *path, int *height)
 {
     FILE *f = fopen(path, "rb");
     if (!f)
@@ -273,7 +274,7 @@ NSImage* LoadImageFromFile(const char *path)
         return 0;
     }
     fclose(f);
-    NSImage* result = LoadImageFromBuffer((const unsigned char*)tmp);
+    NSImage* result = LoadImageFromBuffer((const unsigned char*)tmp, height);
     free(tmp);
     return result;
 }
@@ -287,41 +288,35 @@ NSImage* LoadImageFromFile(const char *path)
         toolkit = toolkitPtr;
         char absolutePath[PATH_MAX];
         snprintf(absolutePath, PATH_MAX, "%s/../../../%s", path, BMP_PATH"/chars.bmp"  );
-        bmps[BMP_CHARS  ] = LoadImageFromFile((const char*)absolutePath);
+        bmps[BMP_CHARS  ] = LoadImageFromFile((const char*)absolutePath, &bmps_height[BMP_CHARS  ]);
         snprintf(absolutePath, PATH_MAX, "%s/../../../%s", path, BMP_PATH"/knob.bmp"   );
-        bmps[BMP_KNOB   ] = LoadImageFromFile((const char*)absolutePath);
+        bmps[BMP_KNOB   ] = LoadImageFromFile((const char*)absolutePath, &bmps_height[BMP_KNOB   ]);
         snprintf(absolutePath, PATH_MAX, "%s/../../../%s", path, BMP_PATH"/knob2.bmp"  );
-        bmps[BMP_KNOB2  ] = LoadImageFromFile((const char*)absolutePath);
+        bmps[BMP_KNOB2  ] = LoadImageFromFile((const char*)absolutePath, &bmps_height[BMP_KNOB2  ]);
         snprintf(absolutePath, PATH_MAX, "%s/../../../%s", path, BMP_PATH"/knob3.bmp"  );
-        bmps[BMP_KNOB3  ] = LoadImageFromFile((const char*)absolutePath);
+        bmps[BMP_KNOB3  ] = LoadImageFromFile((const char*)absolutePath, &bmps_height[BMP_KNOB3  ]);
         snprintf(absolutePath, PATH_MAX, "%s/../../../%s", path, BMP_PATH"/key.bmp"    );
-        bmps[BMP_KEY    ] = LoadImageFromFile((const char*)absolutePath);
+        bmps[BMP_KEY    ] = LoadImageFromFile((const char*)absolutePath, &bmps_height[BMP_KEY    ]);
         snprintf(absolutePath, PATH_MAX, "%s/../../../%s", path, BMP_PATH"/bg.bmp"     );
-        bmps[BMP_BG     ] = LoadImageFromFile((const char*)absolutePath);
+        bmps[BMP_BG     ] = LoadImageFromFile((const char*)absolutePath, &bmps_height[BMP_BG     ]);
         snprintf(absolutePath, PATH_MAX, "%s/../../../%s", path, BMP_PATH"/buttons.bmp");
-        bmps[BMP_BUTTONS] = LoadImageFromFile((const char*)absolutePath);
+        bmps[BMP_BUTTONS] = LoadImageFromFile((const char*)absolutePath, &bmps_height[BMP_BUTTONS]);
         snprintf(absolutePath, PATH_MAX, "%s/../../../%s", path, BMP_PATH"/ops.bmp"    );
-        bmps[BMP_OPS    ] = LoadImageFromFile((const char*)absolutePath);
-        if (!bmps[BMP_CHARS  ]) bmps[BMP_CHARS  ] = LoadImageFromBuffer((unsigned char*)chars_bmp   );
-        if (!bmps[BMP_KNOB   ]) bmps[BMP_KNOB   ] = LoadImageFromBuffer((unsigned char*)knob_bmp    );
-        if (!bmps[BMP_KNOB2  ]) bmps[BMP_KNOB2  ] = LoadImageFromBuffer((unsigned char*)knob2_bmp   );
-        if (!bmps[BMP_KNOB3  ]) bmps[BMP_KNOB3  ] = LoadImageFromBuffer((unsigned char*)knob3_bmp   );
-        if (!bmps[BMP_KEY    ]) bmps[BMP_KEY    ] = LoadImageFromBuffer((unsigned char*)key_bmp     );
-        if (!bmps[BMP_BG     ]) bmps[BMP_BG     ] = LoadImageFromBuffer((unsigned char*)bg_bmp      );
-        if (!bmps[BMP_BUTTONS]) bmps[BMP_BUTTONS] = LoadImageFromBuffer((unsigned char*)buttons_bmp );
-        if (!bmps[BMP_OPS    ]) bmps[BMP_OPS    ] = LoadImageFromBuffer((unsigned char*)ops_bmp     );
-        int i;
-        for (i = 0; i < BMP_COUNT; i++)
-        {
-            NSImageRep *rep = [[bmps[i] representations] objectAtIndex:0];
-            bmps_height[i] = rep.pixelsHigh;
-            [rep release];
-        }
+        bmps[BMP_OPS    ] = LoadImageFromFile((const char*)absolutePath, &bmps_height[BMP_OPS    ]);
+        if (!bmps[BMP_CHARS  ]) bmps[BMP_CHARS  ] = LoadImageFromBuffer((unsigned char*)chars_bmp   , &bmps_height[BMP_CHARS  ]);
+        if (!bmps[BMP_KNOB   ]) bmps[BMP_KNOB   ] = LoadImageFromBuffer((unsigned char*)knob_bmp    , &bmps_height[BMP_KNOB   ]);
+        if (!bmps[BMP_KNOB2  ]) bmps[BMP_KNOB2  ] = LoadImageFromBuffer((unsigned char*)knob2_bmp   , &bmps_height[BMP_KNOB2  ]);
+        if (!bmps[BMP_KNOB3  ]) bmps[BMP_KNOB3  ] = LoadImageFromBuffer((unsigned char*)knob3_bmp   , &bmps_height[BMP_KNOB3  ]);
+        if (!bmps[BMP_KEY    ]) bmps[BMP_KEY    ] = LoadImageFromBuffer((unsigned char*)key_bmp     , &bmps_height[BMP_KEY    ]);
+        if (!bmps[BMP_BG     ]) bmps[BMP_BG     ] = LoadImageFromBuffer((unsigned char*)bg_bmp      , &bmps_height[BMP_BG     ]);
+        if (!bmps[BMP_BUTTONS]) bmps[BMP_BUTTONS] = LoadImageFromBuffer((unsigned char*)buttons_bmp , &bmps_height[BMP_BUTTONS]);
+        if (!bmps[BMP_OPS    ]) bmps[BMP_OPS    ] = LoadImageFromBuffer((unsigned char*)ops_bmp     , &bmps_height[BMP_OPS    ]);
     }
     return self;
 }
 
--(void) dealloc {
+- (void) dealloc
+{
     [timer invalidate];
     [view release];
     if (window)
