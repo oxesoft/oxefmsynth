@@ -83,7 +83,7 @@ else
             SOURCES+=src/toolkits/cocoatoolkit.m
         else ifeq ($(USE_GNUSTEP),YES)
             CFLAGS+=-D__APPLE__
-            LDFLAGS+=-lobjc -lgnustep-base -lgnustep-gui
+            LDFLAGS+=-lobjc -lgnustep-base -lgnustep-gui -ldl
             OBJCFLAGS+=`gnustep-config --objc-flags`
             OBJCSOURCES+=src/toolkits/cocoatoolkit.m
             SOURCES+=src/toolkits/cocoatoolkit.cpp

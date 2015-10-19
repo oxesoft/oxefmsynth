@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #import "constants.h"
 #import "cocoawrapper.h"
 #import <Cocoa/Cocoa.h>
+#define __USE_GNU
 #import <dlfcn.h>
 
 typedef struct __attribute__((packed))
@@ -172,9 +173,11 @@ void* CocoaToolkitCreate(void* toolkit)
 {
     Dl_info info;
     dladdr(CocoaToolkitCreate, &info);
-    char* tmp = strrchr(info.dli_fname, '/');
+    char path[PATH_MAX];
+    strncpy(path, info.dli_fname, PATH_MAX);
+    char* tmp = strrchr(path, '/');
     *tmp = 0;
-    return [[CocoaToolkit alloc] initWithToolkit:toolkit modulePath:info.dli_fname];
+    return [[CocoaToolkit alloc] initWithToolkit:toolkit modulePath:path];
 }
 
 void CocoaToolkitDestroy(void *self)
