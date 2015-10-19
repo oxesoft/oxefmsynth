@@ -93,7 +93,7 @@ else
         else
             LDFLAGS+=-s
             LDFLAGS+=-lX11
-            LDFLAGS+=-lpthread
+            LDFLAGS+=-lpthread -ldl
             SOURCES+=src/toolkits/xlibtoolkit.cpp
         endif
     endif
@@ -105,6 +105,10 @@ all: $(DEPS)
 ifeq ($(UNAME_S),Darwin)
 	@mkdir -p $(EXECUTABLE_NAME).app/Contents/MacOS
 	@mv $(EXECUTABLE_NAME) $(EXECUTABLE_NAME).app/Contents/MacOS/
+endif
+ifeq ($(USE_GNUSTEP),YES)
+	@mkdir -p $(EXECUTABLE_NAME).app/Contents/Linux
+	@mv $(EXECUTABLE_NAME) $(EXECUTABLE_NAME).app/Contents/Linux/
 endif
 
 bitmaps.h:

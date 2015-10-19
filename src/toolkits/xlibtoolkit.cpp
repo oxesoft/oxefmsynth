@@ -26,6 +26,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <dlfcn.h>
+#include <limits.h>
 
 struct BITMAPFILEHEADER
 {
@@ -163,6 +165,16 @@ void* updateProc(void* ptr)
     return NULL;
 }
 
+void GetResourcesPath(char *path, int size)
+{
+    Dl_info info;
+    dladdr((void*)eventProc, &info);
+    strncpy(path, info.dli_fname, PATH_MAX);
+    char* tmp = strrchr(path, '/');
+    *tmp = 0;
+    strcat(path, "/"BMP_PATH);
+}
+
 CXlibToolkit::CXlibToolkit(void *parentWindow, CEditor *editor)
 {
     this->parentWindow  = parentWindow;
@@ -199,14 +211,27 @@ CXlibToolkit::CXlibToolkit(void *parentWindow, CEditor *editor)
     offscreen = XCreatePixmap(this->display, window, GUI_WIDTH, GUI_HEIGHT, 24);
 
     memset(bmps, 0, sizeof(bmps));
-    bmps[BMP_CHARS  ] = LoadImageFromFile(BMP_PATH"/chars.bmp"  );
-    bmps[BMP_KNOB   ] = LoadImageFromFile(BMP_PATH"/knob.bmp"   );
-    bmps[BMP_KNOB2  ] = LoadImageFromFile(BMP_PATH"/knob2.bmp"  );
-    bmps[BMP_KNOB3  ] = LoadImageFromFile(BMP_PATH"/knob3.bmp"  );
-    bmps[BMP_KEY    ] = LoadImageFromFile(BMP_PATH"/key.bmp"    );
-    bmps[BMP_BG     ] = LoadImageFromFile(BMP_PATH"/bg.bmp"     );
-    bmps[BMP_BUTTONS] = LoadImageFromFile(BMP_PATH"/buttons.bmp");
-    bmps[BMP_OPS    ] = LoadImageFromFile(BMP_PATH"/ops.bmp"    );
+
+    char path[PATH_MAX];
+    GetResourcesPath(path, PATH_MAX);
+
+    char fullPath[PATH_MAX];
+    snprintf(fullPath, PATH_MAX, "%s/%s", path, "chars.bmp"  );
+    bmps[BMP_CHARS  ] = LoadImageFromFile(fullPath);
+    snprintf(fullPath, PATH_MAX, "%s/%s", path, "knob.bmp"   );
+    bmps[BMP_KNOB   ] = LoadImageFromFile(fullPath);
+    snprintf(fullPath, PATH_MAX, "%s/%s", path, "knob2.bmp"  );
+    bmps[BMP_KNOB2  ] = LoadImageFromFile(fullPath);
+    snprintf(fullPath, PATH_MAX, "%s/%s", path, "knob3.bmp"  );
+    bmps[BMP_KNOB3  ] = LoadImageFromFile(fullPath);
+    snprintf(fullPath, PATH_MAX, "%s/%s", path, "key.bmp"    );
+    bmps[BMP_KEY    ] = LoadImageFromFile(fullPath);
+    snprintf(fullPath, PATH_MAX, "%s/%s", path, "bg.bmp"     );
+    bmps[BMP_BG     ] = LoadImageFromFile(fullPath);
+    snprintf(fullPath, PATH_MAX, "%s/%s", path, "buttons.bmp");
+    bmps[BMP_BUTTONS] = LoadImageFromFile(fullPath);
+    snprintf(fullPath, PATH_MAX, "%s/%s", path, "ops.bmp"    );
+    bmps[BMP_OPS    ] = LoadImageFromFile(fullPath);
 
     if (!bmps[BMP_CHARS  ]) bmps[BMP_CHARS  ] = LoadImageFromBuffer(chars_bmp  );
     if (!bmps[BMP_KNOB   ]) bmps[BMP_KNOB   ] = LoadImageFromBuffer(knob_bmp   );

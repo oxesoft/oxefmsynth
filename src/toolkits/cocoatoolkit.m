@@ -74,7 +74,7 @@ typedef struct
     int bmps_height[BMP_COUNT];
     NSTimer* timer;
 }
-- (id)   initWithToolkit:(void*)toolkitPtr modulePath:(const char*)path;
+- (id)   initWithToolkit:(void*)toolkitPtr;
 - (void) createWindow:(id)parent;
 - (void) showWindow;
 - (void) copyRectFromImageIndex:(int)index to:(NSPoint)point from:(NSRect)rect;
@@ -164,6 +164,17 @@ typedef struct
 
 //----------------------------------------------------------------------
 
+void GetResourcesPath(char *path, int size)
+{
+    Dl_info info;
+    dladdr(CocoaToolkitCreate, &info);
+    strncpy(path, info.dli_fname, PATH_MAX);
+    char* tmp = strrchr(path, '/');
+    *tmp = 0;
+    strcat(path, "/../../../"BMP_PATH);
+    NSLog(@"%s", path);
+}
+
 @implementation CocoaToolkit
 
 /**
@@ -171,13 +182,7 @@ typedef struct
 **/
 void* CocoaToolkitCreate(void* toolkit)
 {
-    Dl_info info;
-    dladdr(CocoaToolkitCreate, &info);
-    char path[PATH_MAX];
-    strncpy(path, info.dli_fname, PATH_MAX);
-    char* tmp = strrchr(path, '/');
-    *tmp = 0;
-    return [[CocoaToolkit alloc] initWithToolkit:toolkit modulePath:path];
+    return [[CocoaToolkit alloc] initWithToolkit:toolkit];
 }
 
 void CocoaToolkitDestroy(void *self)
@@ -282,30 +287,35 @@ NSImage* LoadImageFromFile(const char *path, int *height)
     return result;
 }
 
-- (id) initWithToolkit:(void*)toolkitPtr modulePath:(const char*)path
+- (id) initWithToolkit:(void*)toolkitPtr
 {
     self = [super init];
     if (self)
     {
         pool = [[NSAutoreleasePool alloc] init];
         toolkit = toolkitPtr;
-        char absolutePath[PATH_MAX];
-        snprintf(absolutePath, PATH_MAX, "%s/../../../%s", path, BMP_PATH"/chars.bmp"  );
-        bmps[BMP_CHARS  ] = LoadImageFromFile((const char*)absolutePath, &bmps_height[BMP_CHARS  ]);
-        snprintf(absolutePath, PATH_MAX, "%s/../../../%s", path, BMP_PATH"/knob.bmp"   );
-        bmps[BMP_KNOB   ] = LoadImageFromFile((const char*)absolutePath, &bmps_height[BMP_KNOB   ]);
-        snprintf(absolutePath, PATH_MAX, "%s/../../../%s", path, BMP_PATH"/knob2.bmp"  );
-        bmps[BMP_KNOB2  ] = LoadImageFromFile((const char*)absolutePath, &bmps_height[BMP_KNOB2  ]);
-        snprintf(absolutePath, PATH_MAX, "%s/../../../%s", path, BMP_PATH"/knob3.bmp"  );
-        bmps[BMP_KNOB3  ] = LoadImageFromFile((const char*)absolutePath, &bmps_height[BMP_KNOB3  ]);
-        snprintf(absolutePath, PATH_MAX, "%s/../../../%s", path, BMP_PATH"/key.bmp"    );
-        bmps[BMP_KEY    ] = LoadImageFromFile((const char*)absolutePath, &bmps_height[BMP_KEY    ]);
-        snprintf(absolutePath, PATH_MAX, "%s/../../../%s", path, BMP_PATH"/bg.bmp"     );
-        bmps[BMP_BG     ] = LoadImageFromFile((const char*)absolutePath, &bmps_height[BMP_BG     ]);
-        snprintf(absolutePath, PATH_MAX, "%s/../../../%s", path, BMP_PATH"/buttons.bmp");
-        bmps[BMP_BUTTONS] = LoadImageFromFile((const char*)absolutePath, &bmps_height[BMP_BUTTONS]);
-        snprintf(absolutePath, PATH_MAX, "%s/../../../%s", path, BMP_PATH"/ops.bmp"    );
-        bmps[BMP_OPS    ] = LoadImageFromFile((const char*)absolutePath, &bmps_height[BMP_OPS    ]);
+
+        char path[PATH_MAX];
+        GetResourcesPath(path, PATH_MAX);
+
+        char fullPath[PATH_MAX];
+        snprintf(fullPath, PATH_MAX, "%s/%s", path, "chars.bmp"  );
+        bmps[BMP_CHARS  ] = LoadImageFromFile((const char*)fullPath, &bmps_height[BMP_CHARS  ]);
+        snprintf(fullPath, PATH_MAX, "%s/%s", path, "knob.bmp"   );
+        bmps[BMP_KNOB   ] = LoadImageFromFile((const char*)fullPath, &bmps_height[BMP_KNOB   ]);
+        snprintf(fullPath, PATH_MAX, "%s/%s", path, "knob2.bmp"  );
+        bmps[BMP_KNOB2  ] = LoadImageFromFile((const char*)fullPath, &bmps_height[BMP_KNOB2  ]);
+        snprintf(fullPath, PATH_MAX, "%s/%s", path, "knob3.bmp"  );
+        bmps[BMP_KNOB3  ] = LoadImageFromFile((const char*)fullPath, &bmps_height[BMP_KNOB3  ]);
+        snprintf(fullPath, PATH_MAX, "%s/%s", path, "key.bmp"    );
+        bmps[BMP_KEY    ] = LoadImageFromFile((const char*)fullPath, &bmps_height[BMP_KEY    ]);
+        snprintf(fullPath, PATH_MAX, "%s/%s", path, "bg.bmp"     );
+        bmps[BMP_BG     ] = LoadImageFromFile((const char*)fullPath, &bmps_height[BMP_BG     ]);
+        snprintf(fullPath, PATH_MAX, "%s/%s", path, "buttons.bmp");
+        bmps[BMP_BUTTONS] = LoadImageFromFile((const char*)fullPath, &bmps_height[BMP_BUTTONS]);
+        snprintf(fullPath, PATH_MAX, "%s/%s", path, "ops.bmp"    );
+        bmps[BMP_OPS    ] = LoadImageFromFile((const char*)fullPath, &bmps_height[BMP_OPS    ]);
+
         if (!bmps[BMP_CHARS  ]) bmps[BMP_CHARS  ] = LoadImageFromBuffer((unsigned char*)chars_bmp   , &bmps_height[BMP_CHARS  ]);
         if (!bmps[BMP_KNOB   ]) bmps[BMP_KNOB   ] = LoadImageFromBuffer((unsigned char*)knob_bmp    , &bmps_height[BMP_KNOB   ]);
         if (!bmps[BMP_KNOB2  ]) bmps[BMP_KNOB2  ] = LoadImageFromBuffer((unsigned char*)knob2_bmp   , &bmps_height[BMP_KNOB2  ]);

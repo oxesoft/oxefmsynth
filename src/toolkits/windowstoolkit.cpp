@@ -65,7 +65,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
         const UINT scanCode = MapVirtualKey ((UINT) wParam, 0);
         BYTE keyState[256];
         GetKeyboardState (keyState);
-        
+
         WCHAR text[16] = { 0 };
         if (ToUnicode ((UINT) wParam, scanCode, keyState, text, 8, 0) != 1)
             text[0] = 0;
@@ -85,9 +85,9 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
     {
         RECT rect;
         POINT point;
-        point.x = GET_X_LPARAM(lParam); 
+        point.x = GET_X_LPARAM(lParam);
         point.y = GET_Y_LPARAM(lParam);
-        
+
         GetWindowRect(hWnd, &rect);
         GetCursorPos(&point);
         if (PtInRect(&rect, point))
@@ -109,7 +109,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
         int w = rect->right  - rect->left;
         int h = rect->bottom - rect->top;
         BitBlt(dc, rect->left, rect->top, w, h, toolkit->hdcMem, rect->left, rect->top, SRCCOPY);
-        EndPaint(hWnd, &ps); 
+        EndPaint(hWnd, &ps);
         return 0;
     }
     case WM_TIMER:
@@ -150,6 +150,7 @@ void GetResourcesPath(char *path, int size)
             break;
         }
     }
+    StringCchCatA(path, MAX_PATH, "\\"BMP_PATH);
 }
 
 CWindowsToolkit::CWindowsToolkit(void *parentWindow, CEditor *editor)
@@ -185,7 +186,7 @@ CWindowsToolkit::CWindowsToolkit(void *parentWindow, CEditor *editor)
         rect.bottom += GetSystemMetrics(SM_CYCAPTION);
         rect.bottom += GetSystemMetrics(SM_CYFIXEDFRAME);
         rect.right  += GetSystemMetrics(SM_CXFIXEDFRAME);
-        
+
         this->hWnd = CreateWindowW
         (
             L"OxeVstEditorClass",
@@ -194,7 +195,7 @@ CWindowsToolkit::CWindowsToolkit(void *parentWindow, CEditor *editor)
             rect.left,
             rect.top,
             rect.right,
-            rect.bottom, 
+            rect.bottom,
             0,
             0,
             (HINSTANCE)hInstance,
@@ -212,7 +213,7 @@ CWindowsToolkit::CWindowsToolkit(void *parentWindow, CEditor *editor)
             0,
             0,
             GUI_WIDTH,
-            GUI_HEIGHT, 
+            GUI_HEIGHT,
             (HWND)parentWindow,
             NULL,
             (HINSTANCE)hInstance,
@@ -227,33 +228,27 @@ CWindowsToolkit::CWindowsToolkit(void *parentWindow, CEditor *editor)
 #endif
 
     // load resources
-    char dll_path[MAX_PATH];
-    char tmp_path[MAX_PATH];
-    GetResourcesPath(dll_path, MAX_PATH);
-    StringCchCopyA(tmp_path, MAX_PATH, dll_path);
-    StringCchCatA (tmp_path, MAX_PATH, BMP_PATH"\\chars.bmp");
-    bmps[BMP_CHARS]   = (HBITMAP)LoadImageA(NULL, tmp_path, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-    StringCchCopyA(tmp_path, MAX_PATH, dll_path);
-    StringCchCatA (tmp_path, MAX_PATH, BMP_PATH"\\knob.bmp");
-    bmps[BMP_KNOB]    = (HBITMAP)LoadImageA(NULL, tmp_path, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-    StringCchCopyA(tmp_path, MAX_PATH, dll_path);
-    StringCchCatA (tmp_path, MAX_PATH, BMP_PATH"\\knob2.bmp");
-    bmps[BMP_KNOB2]   = (HBITMAP)LoadImageA(NULL, tmp_path, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-    StringCchCopyA(tmp_path, MAX_PATH, dll_path);
-    StringCchCatA (tmp_path, MAX_PATH, BMP_PATH"\\knob3.bmp");
-    bmps[BMP_KNOB3]   = (HBITMAP)LoadImageA(NULL, tmp_path, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-    StringCchCopyA(tmp_path, MAX_PATH, dll_path);
-    StringCchCatA (tmp_path, MAX_PATH, BMP_PATH"\\key.bmp");
-    bmps[BMP_KEY]     = (HBITMAP)LoadImageA(NULL, tmp_path, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-    StringCchCopyA(tmp_path, MAX_PATH, dll_path);
-    StringCchCatA (tmp_path, MAX_PATH, BMP_PATH"\\bg.bmp");
-    bmps[BMP_BG]      = (HBITMAP)LoadImageA(NULL, tmp_path, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-    StringCchCopyA(tmp_path, MAX_PATH, dll_path);
-    StringCchCatA (tmp_path, MAX_PATH, BMP_PATH"\\buttons.bmp");
-    bmps[BMP_BUTTONS] = (HBITMAP)LoadImageA(NULL, tmp_path, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-    StringCchCopyA(tmp_path, MAX_PATH, dll_path);
-    StringCchCatA (tmp_path, MAX_PATH, BMP_PATH"\\ops.bmp");
-    bmps[BMP_OPS]     = (HBITMAP)LoadImageA(NULL, tmp_path, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+    char path[MAX_PATH];
+    GetResourcesPath(path, MAX_PATH);
+
+    char fullPath[MAX_PATH];
+    StringCchPrintf(fullPath, MAX_PATH, "%s\\%s", path, "chars.bmp");
+    bmps[BMP_CHARS]   = (HBITMAP)LoadImageA(NULL, fullPath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+    StringCchPrintf(fullPath, MAX_PATH, "%s\\%s", path, "knob.bmp");
+    bmps[BMP_KNOB]    = (HBITMAP)LoadImageA(NULL, fullPath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+    StringCchPrintf(fullPath, MAX_PATH, "%s\\%s", path, "knob2.bmp");
+    bmps[BMP_KNOB2]   = (HBITMAP)LoadImageA(NULL, fullPath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+    StringCchPrintf(fullPath, MAX_PATH, "%s\\%s", path, "knob3.bmp");
+    bmps[BMP_KNOB3]   = (HBITMAP)LoadImageA(NULL, fullPath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+    StringCchPrintf(fullPath, MAX_PATH, "%s\\%s", path, "key.bmp");
+    bmps[BMP_KEY]     = (HBITMAP)LoadImageA(NULL, fullPath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+    StringCchPrintf(fullPath, MAX_PATH, "%s\\%s", path, "bg.bmp");
+    bmps[BMP_BG]      = (HBITMAP)LoadImageA(NULL, fullPath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+    StringCchPrintf(fullPath, MAX_PATH, "%s\\%s", path, "buttons.bmp");
+    bmps[BMP_BUTTONS] = (HBITMAP)LoadImageA(NULL, fullPath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+    StringCchPrintf(fullPath, MAX_PATH, "%s\\%s", path, "ops.bmp");
+    bmps[BMP_OPS]     = (HBITMAP)LoadImageA(NULL, fullPath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+    
     if (!bmps[BMP_CHARS  ]) bmps[BMP_CHARS  ] = LoadBitmap((HINSTANCE)hInstance,MAKEINTRESOURCE(IDB_CHARS));
     if (!bmps[BMP_KNOB   ]) bmps[BMP_KNOB   ] = LoadBitmap((HINSTANCE)hInstance,MAKEINTRESOURCE(IDB_KNOB));
     if (!bmps[BMP_KNOB2  ]) bmps[BMP_KNOB2  ] = LoadBitmap((HINSTANCE)hInstance,MAKEINTRESOURCE(IDB_KNOB2));
@@ -263,7 +258,7 @@ CWindowsToolkit::CWindowsToolkit(void *parentWindow, CEditor *editor)
     if (!bmps[BMP_BUTTONS]) bmps[BMP_BUTTONS] = LoadBitmap((HINSTANCE)hInstance,MAKEINTRESOURCE(IDB_BUTTONS));
     if (!bmps[BMP_OPS    ]) bmps[BMP_OPS    ] = LoadBitmap((HINSTANCE)hInstance,MAKEINTRESOURCE(IDB_OPS));
     // create offscreen buffer
-    hdc = GetDC(hWnd); 
+    hdc = GetDC(hWnd);
     hdcMem = CreateCompatibleDC(hdc);
     hdcAux = CreateCompatibleDC(hdc);
     bitmap = CreateCompatibleBitmap(hdc, GUI_WIDTH, GUI_HEIGHT);
