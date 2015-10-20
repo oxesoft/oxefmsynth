@@ -62,10 +62,12 @@ else
 endif
 
 BUNDLE_NAME:=oxefmsynth.vst
-BUNDLE_FULL_PATH:=$(BUNDLE_NAME)/Contents/MacOS
+BUNDLE_CONTENTS:=$(BUNDLE_NAME)/Contents
+BUNDLE_FULL_PATH:=$(BUNDLE_CONTENTS)/MacOS
 
 oxevst: bitmaps.h
 	@mkdir -p $(BUNDLE_FULL_PATH)
+	@cp src/macosx/vst/* $(BUNDLE_CONTENTS)/
 	@g++ -shared -o $(BUNDLE_FULL_PATH)/oxefmsynth $(CFLAGS) $(SOURCES) $(INCLUDES) $(LIBS)
 
 bitmaps.h:

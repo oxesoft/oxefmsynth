@@ -104,6 +104,7 @@ all: $(DEPS)
 	@$(CMD)
 ifeq ($(UNAME_S),Darwin)
 	@mkdir -p $(EXECUTABLE_NAME).app/Contents/MacOS
+	@cp src/macosx/app/* $(EXECUTABLE_NAME).app/Contents/
 	@mv $(EXECUTABLE_NAME) $(EXECUTABLE_NAME).app/Contents/MacOS/
 endif
 ifeq ($(USE_GNUSTEP),YES)
