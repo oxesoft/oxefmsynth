@@ -27,6 +27,6 @@ public:
     ~CCocoaToolkit();
     void StartWindowProcesses();
     void CopyRect(int destX, int destY, int width, int height, int origBmp, int origX, int origY);
-    void OutputDebugString(char *text);
+    void Debug(char *text);
     int  WaitWindowClosed();
 };

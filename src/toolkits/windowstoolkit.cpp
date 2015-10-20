@@ -119,7 +119,10 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
     }
     case WM_DESTROY:
     {
-        PostQuitMessage(0);
+        if (!toolkit->parentWindow)
+        {
+            PostQuitMessage(0);
+        }
         return 0L;
     }
     default:
@@ -321,7 +324,7 @@ void CWindowsToolkit::StopMouseCapture()
     ReleaseCapture();
 }
 
-void CWindowsToolkit::OutputDebugString(char *text)
+void CWindowsToolkit::Debug(char *text)
 {
     OutputDebugStringA(text);
     printf("%s\n", text);

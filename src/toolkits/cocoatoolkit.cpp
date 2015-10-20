@@ -44,7 +44,7 @@ void CCocoaToolkit::CopyRect(int destX, int destY, int width, int height, int or
     CocoaToolkitCopyRect(this->objcInstance, destX, destY, width, height, origBmp, origX, origY);
 }
 
-void CCocoaToolkit::OutputDebugString(char *text)
+void CCocoaToolkit::Debug(char *text)
 {
     printf("%s\n", text);
 }

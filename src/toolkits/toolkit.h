@@ -26,7 +26,7 @@ public:
     virtual void StartMouseCapture() {}
     virtual void StopMouseCapture() {}
     virtual void StartWindowProcesses() {}
-    virtual void OutputDebugString(char *text) {} // for debug
+    virtual void Debug(char *text) {} // for debug
     virtual int  WaitWindowClosed() {return 0;}   // standalone only
 };
 

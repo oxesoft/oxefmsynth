@@ -22,8 +22,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #define OXFM_MAJOR_VERSION  1
 #define OXFM_MINOR_VERSION  3
-#define OXFM_PATCH_VERSION  2
-#define VERSION_STR         "1.3.2"
+#define OXFM_PATCH_VERSION  3
+#define VERSION_STR         "1.3.3 beta1"
 #define VERSION_INT         ((OXFM_MAJOR_VERSION * 100) + (OXFM_MINOR_VERSION * 10) + OXFM_PATCH_VERSION)
 #define TITLE_SMALL         "Oxe FM Synth "VERSION_STR
 #define TITLE_FULL          TITLE_SMALL" :: http://www.oxesoft.com"
@@ -159,7 +159,7 @@ enum
 #define MAX_PATH 256
 #endif
 
-#define OXEDEBUG(...) {char tmpb[128]; snprintf(tmpb, sizeof(tmpb), __VA_ARGS__); if (toolkit) toolkit->OutputDebugString(tmpb);}
+#define OXEDEBUG(...) {char tmpb[128]; snprintf(tmpb, sizeof(tmpb), __VA_ARGS__); if (toolkit) toolkit->Debug(tmpb);}
 
 #ifdef _WIN32
     #define snprintf _snprintf
