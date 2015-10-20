@@ -3,8 +3,10 @@
 *.dll
 *.so
 *.o
+bitmaps.h
 oxefmsynthdemo
 oxeconverter
 oxefmsynth
-bitmaps.h
+oxefmsynth.app
+oxefmsynth.vst
 .DS_Store
