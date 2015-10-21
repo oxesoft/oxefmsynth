@@ -16,22 +16,19 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#if defined(__APPLE__)
-    #include "cocoatoolkit.h"
-    #define COSToolkit CCocoaToolkit
-#elif defined(__linux)
-    #if defined(__GLUT__)
-        #define GL_GLEXT_PROTOTYPES
-        #include <GL/glut.h>  // GLUT, include glu.h and gl.h
-        #include "gluttoolkit.h"
-        #define COSToolkit CGlutToolkit
-    #else
-        #include <X11/Xlib.h>
-        #include "xlibtoolkit.h"
-        #define COSToolkit CXlibToolkit
-    #endif
-#else
-    #include <windows.h>
-    #include "windowstoolkit.h"
-    #define COSToolkit CWindowsToolkit
-#endif
+class CGlutToolkit : public CToolkit
+{
+private:
+    GLuint vertexBufferID;
+    GLuint textureBufferID;
+    GLuint loadTexture(const char *buffer);
+public:
+    void        *parentWindow;
+    CEditor     *editor;
+    CGlutToolkit(void *parentWindow, CEditor *editor);
+    ~CGlutToolkit();
+    void StartWindowProcesses();
+    void CopyRect(int destX, int destY, int width, int height, int origBmp, int origX, int origY);
+    void Debug(char *text);
+    int  WaitWindowClosed();
+};

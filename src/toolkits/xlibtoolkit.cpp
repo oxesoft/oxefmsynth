@@ -29,15 +29,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <dlfcn.h>
 #include <limits.h>
 
-struct BITMAPFILEHEADER
+typedef struct __attribute__((packed))
 {
     char         signature[2];
     unsigned int fileSize;
     short        reserved[2];
     unsigned int fileOffsetToPixelArray;
-} __attribute__((packed));
+} BITMAPFILEHEADER;
 
-struct BITMAPV5HEADER
+typedef struct __attribute__((packed))
 {
     unsigned int   dibHeaderSize;
     unsigned int   width;
@@ -46,13 +46,13 @@ struct BITMAPV5HEADER
     unsigned short bitsPerPixel;
     unsigned int   compression;
     unsigned int   imageSize;
-} __attribute__((packed));
+} BITMAPV5HEADER;
 
-struct BITMAPHEADER
+typedef struct
 {
     BITMAPFILEHEADER fh;
     BITMAPV5HEADER   v5;
-};
+} BITMAPHEADER;
 
 void* eventProc(void* ptr)
 {

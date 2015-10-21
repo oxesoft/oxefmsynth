@@ -82,7 +82,7 @@ else
             SOURCES+=src/toolkits/cocoatoolkit.cpp
             SOURCES+=src/toolkits/cocoatoolkit.m
         else ifeq ($(USE_GNUSTEP),YES)
-            CFLAGS+=-D__APPLE__
+            CFLAGS+=-D__GLUT__
             LDFLAGS+=-lobjc -lgnustep-base -lgnustep-gui -ldl
             OBJCFLAGS+=`gnustep-config --objc-flags`
             OBJCSOURCES+=src/toolkits/cocoatoolkit.m
@@ -90,6 +90,11 @@ else
             DEPS+=cocoatoolkit.o
             SOURCES+=$(DEPS)
             CMD:=rm cocoatoolkit.o
+        else ifeq ($(USE_GLUT),YES)
+            CFLAGS+=-D__GLUT__
+            LDFLAGS+=-s
+            LDFLAGS+=-lGL -lGLU -lglut
+            SOURCES+=src/toolkits/gluttoolkit.cpp
         else
             LDFLAGS+=-s
             LDFLAGS+=-lX11
