@@ -19,7 +19,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "nonguitoolkit.h"
 #include "bitmaps.h"
 #include "editor.h"
-#include <GL/freeglut.h>
+#if defined(__APPLE__)
+    #include <GLUT/glut.h>
+#elif defined(__linux)
+    #include <GL/freeglut.h>
+#endif
 #include "gluttoolkit.h"
 #include <string.h>
 #include <stdio.h>
@@ -142,7 +146,7 @@ CGlutToolkit::CGlutToolkit(void *parentWindow, CEditor *editor)
     this->editor        = editor;
 
     int argc = 1;
-    char *argv[1] = {0};
+    char *argv[1] = {""};
     glutInit(&argc, argv);
     glutInitWindowSize(GUI_WIDTH, GUI_HEIGHT);
     glutCreateWindow(TITLE_FULL);
@@ -150,8 +154,9 @@ CGlutToolkit::CGlutToolkit(void *parentWindow, CEditor *editor)
     glutMouseFunc(mouseClick);
     glutMotionFunc(mouseMove);
     glutPassiveMotionFunc(mouseMove);
+#if defined(__linux)
     glutCloseFunc(stopUpdateThread);
-
+#endif
     glEnable(GL_TEXTURE_2D);
     glEnableClientState(GL_VERTEX_ARRAY);
     glEnableClientState(GL_TEXTURE_COORD_ARRAY);

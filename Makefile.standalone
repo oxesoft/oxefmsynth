@@ -78,9 +78,17 @@ else
         INCLUDES+=-I.
         DEPS:=bitmaps.h
         ifeq ($(UNAME_S),Darwin)
-            LDFLAGS+=-framework Cocoa
-            SOURCES+=src/toolkits/cocoatoolkit.cpp
-            SOURCES+=src/toolkits/cocoatoolkit.m
+            ifeq ($(USE_GLUT),YES)
+                CFLAGS+=-D__GLUT__
+                CFLAGS+=-Wno-deprecated
+                LDFLAGS+=-framework OpenGL
+                LDFLAGS+=-framework GLUT
+                SOURCES+=src/toolkits/gluttoolkit.cpp
+            else
+                LDFLAGS+=-framework Cocoa
+                SOURCES+=src/toolkits/cocoatoolkit.cpp
+                SOURCES+=src/toolkits/cocoatoolkit.m
+            endif
         else ifeq ($(USE_GNUSTEP),YES)
             CFLAGS+=-D__APPLE__
             LDFLAGS+=-lobjc -lgnustep-base -lgnustep-gui -ldl

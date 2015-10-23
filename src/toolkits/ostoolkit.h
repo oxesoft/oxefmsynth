@@ -17,12 +17,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #if defined(__APPLE__)
-    #include "cocoatoolkit.h"
-    #define COSToolkit CCocoaToolkit
+    #if defined(__GLUT__)
+        #include <GLUT/glut.h>
+        #include "gluttoolkit.h"
+        #define COSToolkit CGlutToolkit
+    #else
+        #include "cocoatoolkit.h"
+        #define COSToolkit CCocoaToolkit
+    #endif
 #elif defined(__linux)
     #if defined(__GLUT__)
         #define GL_GLEXT_PROTOTYPES
-        #include <GL/glut.h>  // GLUT, include glu.h and gl.h
+        #include <GL/glut.h>
         #include "gluttoolkit.h"
         #define COSToolkit CGlutToolkit
     #else
