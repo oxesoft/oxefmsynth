@@ -19,10 +19,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 class CGlutToolkit : public CToolkit
 {
 private:
-    GLuint vertexBufferID;
-    GLuint textureBufferID;
-    GLuint loadTexture(const char *buffer);
+    GLuint loadTextureFromBuffer(const char *buffer);
 public:
+    bool        stopUpdate;
+    bool        updateStopped;
+    GLuint      bmps[BMP_COUNT];
     void        *parentWindow;
     CEditor     *editor;
     CGlutToolkit(void *parentWindow, CEditor *editor);

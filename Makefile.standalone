@@ -93,7 +93,7 @@ else
         else ifeq ($(USE_GLUT),YES)
             CFLAGS+=-D__GLUT__
             LDFLAGS+=-s
-            LDFLAGS+=-lGL -lGLU -lglut
+            LDFLAGS+=-lGL -lGLU -lglut -lpthread
             SOURCES+=src/toolkits/gluttoolkit.cpp
         else
             LDFLAGS+=-s
