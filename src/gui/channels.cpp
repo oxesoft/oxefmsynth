@@ -47,17 +47,48 @@ void CChannels::OnClick(int x, int y)
     Repaint();
 }
 
-void CChannels::Repaint()
+int CChannels::GetCoordinates (oxeCoords *coords)
 {
     char i;
+    for (i=0;i< 8;i++)
+    {
+        coords->destX   = this->left +  i    * KEY_WIDTH;
+        coords->destY   = this->top;
+        coords->width   = KEY_WIDTH;
+        coords->height  = KEY_HEIGHT;
+        coords->origBmp = this->bmp;
+        coords->origX   = (*channel==i)?KEY_WIDTH:0;
+        coords->origY   = 0;
+        coords++;
+    }
+    for (i=8;i<16;i++)
+    {
+        coords->destX   = this->left + (i-8) * KEY_WIDTH;
+        coords->destY   = this->top + KEY_HEIGHT;
+        coords->width   = KEY_WIDTH;
+        coords->height  = KEY_HEIGHT;
+        coords->origBmp = this->bmp;
+        coords->origX   = (*channel==i)?KEY_WIDTH:0;
+        coords->origY   = 0;
+        coords++;
+    }
+    return MIDICHANNELS;
+}
+
+void CChannels::Repaint()
+{
     if (!toolkit)
     {
         return;
     }
-    for (i=0;i< 8;i++)
-        toolkit->CopyRect(this->left +  i    * KEY_WIDTH, this->top             , KEY_WIDTH, KEY_HEIGHT, this->bmp, (*channel==i)?KEY_WIDTH:0, 0);
-    for (i=8;i<16;i++)
-        toolkit->CopyRect(this->left + (i-8) * KEY_WIDTH, this->top + KEY_HEIGHT, KEY_WIDTH, KEY_HEIGHT, this->bmp, (*channel==i)?KEY_WIDTH:0, 0);
+    oxeCoords coords[MIDICHANNELS];
+    oxeCoords *c = coords;
+    int count = GetCoordinates(c);
+    while (count--)
+    {
+        toolkit->CopyRect(c->destX, c->destY, c->width, c->height, c->origBmp, c->origX, c->origY);
+        c++;
+    }
 }
 
 int CChannels::GetType()

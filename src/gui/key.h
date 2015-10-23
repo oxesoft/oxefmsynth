@@ -35,4 +35,5 @@ public:
     int   GetType        (void);
     bool  SetValue       (char channel, char value);
     float GetValue       (char channel);
+    int   GetCoordinates (oxeCoords *coords);
 };

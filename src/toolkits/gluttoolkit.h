@@ -19,17 +19,20 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 class CGlutToolkit : public CToolkit
 {
 private:
-    GLuint loadTextureFromBuffer(const char *buffer);
+    GLuint loadTextureFromBuffer(const char *buffer, int *w, int *h);
 public:
     bool        stopUpdate;
     bool        updateStopped;
     GLuint      bmps[BMP_COUNT];
+    int         bmps_width[BMP_COUNT];
+    int         bmps_height[BMP_COUNT];
+    oxeCoords   coords[COORDS_COUNT];
     void        *parentWindow;
     CEditor     *editor;
     CGlutToolkit(void *parentWindow, CEditor *editor);
     ~CGlutToolkit();
+    void drawBitmap(int destX, int destY, int width, int height, int origBmp, int origX, int origY);
     void StartWindowProcesses();
-    void CopyRect(int destX, int destY, int width, int height, int origBmp, int origX, int origY);
     void Debug(char *text);
     int  WaitWindowClosed();
 };

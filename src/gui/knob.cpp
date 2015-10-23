@@ -43,7 +43,7 @@ CKnob::CKnob(int bmp, int knobSize, const char *name, CSynthesizer *synthesizer,
     this->fvalue      = 999.f;
 }
 
-void CKnob::Repaint()
+int CKnob::GetCoordinates (oxeCoords *coords)
 {
     char valtemp = value;
     switch (type)
@@ -63,10 +63,25 @@ void CKnob::Repaint()
     }
     if (valtemp > 99)
         valtemp = 99;
-    if (toolkit)
+    coords->destX   = this->left;
+    coords->destY   = this->top;
+    coords->width   = this->right - this->left;
+    coords->height  = this->bottom - this->top;
+    coords->origBmp = this->bmp;
+    coords->origX   = (valtemp - (abs(valtemp/10) * 10)) * this->knobSize;
+    coords->origY   = abs(valtemp/10) * this->knobSize;
+    return 1;
+}
+
+void CKnob::Repaint()
+{
+    if (!toolkit)
     {
-        toolkit->CopyRect(this->left, this->top, this->right - this->left, this->bottom - this->top, this->bmp, (valtemp - (abs(valtemp/10) * 10)) * this->knobSize, abs(valtemp/10) * this->knobSize);
+        return;
     }
+    oxeCoords coords;
+    GetCoordinates(&coords);
+    toolkit->CopyRect(coords.destX, coords.destY, coords.width, coords.height, coords.origBmp, coords.origX, coords.origY);
 }
 
 bool CKnob::Update(void)

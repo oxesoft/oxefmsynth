@@ -155,12 +155,27 @@ void CButton::OnClick(int x, int y)
     }
 }
 
+int CButton::GetCoordinates (oxeCoords *coords)
+{
+    coords->destX   = this->left;
+    coords->destY   = this->top;
+    coords->width   = this->right - this->left;
+    coords->height  = this->bottom - this->top;
+    coords->origBmp = this->bmp;
+    coords->origX   = 0;
+    coords->origY   = index * BUTTON_HEIGHT;
+    return 1;
+}
+
 void CButton::Repaint()
 {
-    if (toolkit)
+    if (!toolkit)
     {
-        toolkit->CopyRect(this->left, this->top, this->right - this->left, this->bottom - this->top, this->bmp, 0, index * BUTTON_HEIGHT);
+        return;
     }
+    oxeCoords coords;
+    GetCoordinates(&coords);
+    toolkit->CopyRect(coords.destX, coords.destY, coords.width, coords.height, coords.origBmp, coords.origX, coords.origY);
 }
 
 bool CButton::GetName(char* str)

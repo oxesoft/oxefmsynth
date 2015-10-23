@@ -67,7 +67,7 @@ int main(void)
     unsigned int time = GetTick();
     e.SetToolkit(&t);
     time = GetTick() - time;
-    printf("full render time: %ums\n", time);
+    printf("full blitting time: %ums\n", time);
     CDummyHostInterface h(&s);
     e.SetHostInterface(&h);
     t.StartWindowProcesses();

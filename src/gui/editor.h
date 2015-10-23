@@ -24,6 +24,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "key.h"
 #include "channels.h"
 
+#define COORDS_COUNT (LCD_COORDS + MIDICHANNELS + GUI_CONTROLS - 1)
+
 class CEditor
 {
 private:
@@ -58,6 +60,7 @@ public:
     void  GetParDisplay    (int index, char* text);
     void  GetParName       (int index, char* text);
     void  Update           ();
+    void  GetCoordinates   (oxeCoords *coords);
     void  SetToolkit       (CToolkit *toolkit);
     void  SetHostInterface (CHostInterface *hostinterface);
 };

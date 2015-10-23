@@ -21,7 +21,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "control.h"
 #include "lcd.h"
 
-#define LCD_LINES   2  // lines
 #define LCD_SEP_H   1  // horizontal space between the LCD characters
 #define LCD_SEP_V   1  // vertical space between the LCD characters
 #define LCD_CHAR_H  7  // char height in pixels
@@ -46,17 +45,48 @@ CLcd::CLcd(int bmp, int x, int y)
     this->toolkit  = NULL;
 }
 
-void CLcd::Repaint()
+int CLcd::GetCoordinates (oxeCoords *coords)
 {
     int i;
+    for (i=0;i<LCD_COLS;i++)
+    {
+        coords->destX   = lcdx + LCD_X + LCD_SEP_H + ((LCD_SEP_H + LCD_CHAR_W) * i);
+        coords->destY   = lcdy + LCD_Y + LCD_SEP_V;
+        coords->width   = LCD_CHAR_W;
+        coords->height  = LCD_CHAR_H;
+        coords->origBmp = this->bmp;
+        coords->origX   = (0xF & (text0[i] - ' ')) * LCD_CHAR_W;
+        coords->origY   = ((0xF0 & (text0[i] - ' ')) / 0x10) * LCD_CHAR_H;
+        coords++;
+    }
+    for (i=0;i<LCD_COLS;i++)
+    {
+        coords->destX   = lcdx + LCD_X + LCD_SEP_H + ((LCD_SEP_H + LCD_CHAR_W) * i);
+        coords->destY   = lcdy + LCD_Y + LCD_SEP_V + LCD_CHAR_H + LCD_SEP_V;
+        coords->width   = LCD_CHAR_W;
+        coords->height  = LCD_CHAR_H;
+        coords->origBmp = this->bmp;
+        coords->origX   = (0xF & (text1[i] - ' ')) * LCD_CHAR_W;
+        coords->origY   = ((0xF0 & (text1[i] - ' ')) / 0x10) * LCD_CHAR_H;
+        coords++;
+	}
+    return LCD_COORDS;
+}
+
+void CLcd::Repaint()
+{
     if (!toolkit)
     {
         return;
     }
-    for (i=0;i<LCD_COLS;i++)
-        toolkit->CopyRect(lcdx + LCD_X + LCD_SEP_H + ((LCD_SEP_H + LCD_CHAR_W) * i), lcdy + LCD_Y + LCD_SEP_V,                          LCD_CHAR_W, LCD_CHAR_H, this->bmp, (0xF & (text0[i] - ' ')) * LCD_CHAR_W, ((0xF0 & (text0[i] - ' ')) / 0x10) * LCD_CHAR_H);
-    for (i=0;i<LCD_COLS;i++)
-        toolkit->CopyRect(lcdx + LCD_X + LCD_SEP_H + ((LCD_SEP_H + LCD_CHAR_W) * i), lcdy + LCD_Y + LCD_SEP_V + LCD_CHAR_H + LCD_SEP_V, LCD_CHAR_W, LCD_CHAR_H, this->bmp, (0xF & (text1[i] - ' ')) * LCD_CHAR_W, ((0xF0 & (text1[i] - ' ')) / 0x10) * LCD_CHAR_H);
+    oxeCoords coords[LCD_COLS * LCD_LINES];
+    oxeCoords *c = coords;
+    int count = GetCoordinates(c);
+    while (count--)
+    {
+        toolkit->CopyRect(c->destX, c->destY, c->width, c->height, c->origBmp, c->origX, c->origY);
+        c++;
+    }
 }
 
 bool CLcd::SetText(char lineIndex, const char* text)

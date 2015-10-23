@@ -16,6 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "nonguitoolkit.h"
 #include "bitmaps.h"
 #include "editor.h"
 #include <GL/freeglut.h>
@@ -52,36 +53,57 @@ typedef struct
 
 CGlutToolkit *toolkit = NULL;
 
-void drawBitmap(int imageW, int imageH, int destX, int destY, int width, int height, int origBmp, int origX, int origY)
-{
-    origY   = imageH     - origY - height;
-    destY   = GUI_HEIGHT - destY - height;
-    glMatrixMode(GL_TEXTURE);
-    glLoadIdentity();
-    glScalef(1.f / (float)imageW, 1.f / (float)imageH, 1.f);
-    glBindTexture(GL_TEXTURE_2D, toolkit->bmps[origBmp]);
-    glBegin(GL_QUADS);
-    glTexCoord2s(origX        , origY + height);
-    glVertex2s  (destX        , destY + height);
-    glTexCoord2s(origX + width, origY + height);
-    glVertex2s  (destX + width, destY + height);
-    glTexCoord2s(origX + width, origY         );
-    glVertex2s  (destX + width, destY         );
-    glTexCoord2s(origX        , origY         );
-    glVertex2s  (destX        , destY         );
-    glEnd();
-}
-
 void display()
 {
     if (!toolkit)
     {
         return;
     }
-    glClear(GL_COLOR_BUFFER_BIT);
-    drawBitmap(633, 437,  0,  0, 633, 437, BMP_BG  , 0, 0);
-    drawBitmap(250, 250, 33, 80,  25,  25, BMP_KNOB, 0, 0);
+    unsigned int time = GetTick();
+    toolkit->drawBitmap(0, 0, GUI_WIDTH, GUI_HEIGHT, BMP_BG, 0, 0);
+    toolkit->editor->GetCoordinates(toolkit->coords);
+    oxeCoords *c = toolkit->coords;
+    int i = COORDS_COUNT;
+    while (i--)
+    {
+        toolkit->drawBitmap(c->destX, c->destY, c->width, c->height, c->origBmp, c->origX, c->origY);
+        c++;
+    }
     glFlush();
+    printf("opengl draw time: %ums\n", GetTick() - time);
+}
+
+void mouseClick(int button, int state, int x, int y)
+{
+    if (!toolkit)
+    {
+        return;
+    }
+    if (state == GLUT_DOWN)
+    {
+        int w = glutGet(GLUT_WINDOW_WIDTH);
+        int h = glutGet(GLUT_WINDOW_HEIGHT);
+        x = GUI_WIDTH * x / w;
+        y = GUI_HEIGHT * y / h;
+        toolkit->editor->OnLButtonDown(x, y);
+    }
+    else if (state == GLUT_UP)
+    {
+        toolkit->editor->OnLButtonUp();
+    }
+}
+
+void mouseMove(int x, int y)
+{
+    if (!toolkit)
+    {
+        return;
+    }
+    int w = glutGet(GLUT_WINDOW_WIDTH);
+    int h = glutGet(GLUT_WINDOW_HEIGHT);
+    x = GUI_WIDTH * x / w;
+    y = GUI_HEIGHT * y / h;
+    toolkit->editor->OnMouseMove(x, y);
 }
 
 void* updateProc(void* ptr)
@@ -125,23 +147,28 @@ CGlutToolkit::CGlutToolkit(void *parentWindow, CEditor *editor)
     glutInitWindowSize(GUI_WIDTH, GUI_HEIGHT);
     glutCreateWindow(TITLE_FULL);
     glutDisplayFunc(display);
+    glutMouseFunc(mouseClick);
+    glutMotionFunc(mouseMove);
+    glutPassiveMotionFunc(mouseMove);
     glutCloseFunc(stopUpdateThread);
 
     glEnable(GL_TEXTURE_2D);
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     gluOrtho2D(0, GUI_WIDTH, 0, GUI_HEIGHT);
 
     memset(bmps, 0, sizeof(bmps));
-    if (!bmps[BMP_CHARS  ]) bmps[BMP_CHARS  ] = loadTextureFromBuffer(chars_bmp  );
-    if (!bmps[BMP_KNOB   ]) bmps[BMP_KNOB   ] = loadTextureFromBuffer(knob_bmp   );
-    if (!bmps[BMP_KNOB2  ]) bmps[BMP_KNOB2  ] = loadTextureFromBuffer(knob2_bmp  );
-    if (!bmps[BMP_KNOB3  ]) bmps[BMP_KNOB3  ] = loadTextureFromBuffer(knob3_bmp  );
-    if (!bmps[BMP_KEY    ]) bmps[BMP_KEY    ] = loadTextureFromBuffer(key_bmp    );
-    if (!bmps[BMP_BG     ]) bmps[BMP_BG     ] = loadTextureFromBuffer(bg_bmp     );
-    if (!bmps[BMP_BUTTONS]) bmps[BMP_BUTTONS] = loadTextureFromBuffer(buttons_bmp);
-    if (!bmps[BMP_OPS    ]) bmps[BMP_OPS    ] = loadTextureFromBuffer(ops_bmp    );
+    if (!bmps[BMP_CHARS  ]) bmps[BMP_CHARS  ] = loadTextureFromBuffer(chars_bmp  , &bmps_width[BMP_CHARS  ], &bmps_height[BMP_CHARS  ]);
+    if (!bmps[BMP_KNOB   ]) bmps[BMP_KNOB   ] = loadTextureFromBuffer(knob_bmp   , &bmps_width[BMP_KNOB   ], &bmps_height[BMP_KNOB   ]);
+    if (!bmps[BMP_KNOB2  ]) bmps[BMP_KNOB2  ] = loadTextureFromBuffer(knob2_bmp  , &bmps_width[BMP_KNOB2  ], &bmps_height[BMP_KNOB2  ]);
+    if (!bmps[BMP_KNOB3  ]) bmps[BMP_KNOB3  ] = loadTextureFromBuffer(knob3_bmp  , &bmps_width[BMP_KNOB3  ], &bmps_height[BMP_KNOB3  ]);
+    if (!bmps[BMP_KEY    ]) bmps[BMP_KEY    ] = loadTextureFromBuffer(key_bmp    , &bmps_width[BMP_KEY    ], &bmps_height[BMP_KEY    ]);
+    if (!bmps[BMP_BG     ]) bmps[BMP_BG     ] = loadTextureFromBuffer(bg_bmp     , &bmps_width[BMP_BG     ], &bmps_height[BMP_BG     ]);
+    if (!bmps[BMP_BUTTONS]) bmps[BMP_BUTTONS] = loadTextureFromBuffer(buttons_bmp, &bmps_width[BMP_BUTTONS], &bmps_height[BMP_BUTTONS]);
+    if (!bmps[BMP_OPS    ]) bmps[BMP_OPS    ] = loadTextureFromBuffer(ops_bmp    , &bmps_width[BMP_OPS    ], &bmps_height[BMP_OPS    ]);
 }
 
 CGlutToolkit::~CGlutToolkit()
@@ -155,7 +182,7 @@ CGlutToolkit::~CGlutToolkit()
     }
 }
 
-GLuint CGlutToolkit::loadTextureFromBuffer(const char *buffer)
+GLuint CGlutToolkit::loadTextureFromBuffer(const char *buffer, int *w, int *h)
 {
     BITMAPHEADER *header = (BITMAPHEADER *)buffer;
     if (header->fh.signature[0] != 'B' || header->fh.signature[1] != 'M')
@@ -163,6 +190,8 @@ GLuint CGlutToolkit::loadTextureFromBuffer(const char *buffer)
         return 0;
     }
     unsigned char *data = (unsigned char *)buffer + header->fh.fileOffsetToPixelArray;
+    *w = header->v5.width;
+    *h = header->v5.height;
     //--------------------------------------------------------------------------
     GLuint textureBufferID;
     glGenTextures(1, &textureBufferID);
@@ -175,16 +204,39 @@ GLuint CGlutToolkit::loadTextureFromBuffer(const char *buffer)
     return textureBufferID;
 }
 
+void CGlutToolkit::drawBitmap(int destX, int destY, int width, int height, int origBmp, int origX, int origY)
+{
+    int imageW = bmps_width[origBmp];
+    int imageH = bmps_height[origBmp];
+    origY   = imageH     - origY - height;
+    destY   = GUI_HEIGHT - destY - height;
+    glMatrixMode(GL_TEXTURE);
+    glLoadIdentity();
+    glScalef(1.f / (float)imageW, 1.f / (float)imageH, 1.f);
+    glBindTexture(GL_TEXTURE_2D, bmps[origBmp]);
+    GLshort vertices[] = {
+        destX        , destY + height,
+        destX + width, destY + height,
+        destX + width, destY         ,
+        destX        , destY
+    };
+    GLshort texVertices[] = {
+        origX        , origY + height,
+        origX + width, origY + height,
+        origX + width, origY         ,
+        origX        , origY
+    };
+    glVertexPointer  (2, GL_SHORT, 0, vertices   );
+    glTexCoordPointer(2, GL_SHORT, 0, texVertices);
+    glDrawArrays(GL_QUADS, 0, 4);
+}
+
 void CGlutToolkit::StartWindowProcesses()
 {
     toolkit->stopUpdate    = false;
     toolkit->updateStopped = false;
     pthread_t thread;
     pthread_create(&thread, NULL, &updateProc, (void*)this);
-}
-
-void CGlutToolkit::CopyRect(int destX, int destY, int width, int height, int origBmp, int origX, int origY)
-{
 }
 
 void CGlutToolkit::Debug(char *text)

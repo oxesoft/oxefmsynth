@@ -17,6 +17,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #define LCD_COLS    16 // columns
+#define LCD_LINES   2  // lines
+#define LCD_COORDS  (LCD_COLS * LCD_LINES)
 
 class CLcd : public CControl
 {
@@ -29,4 +31,5 @@ private:
 public:
     CLcd(int bmpchars, int x, int y);
     bool SetText(char lineIndex, const char *text);
+    int  GetCoordinates(oxeCoords *coords);
 };

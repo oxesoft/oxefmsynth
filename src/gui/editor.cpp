@@ -651,6 +651,16 @@ void CEditor::Update()
     }
 }
 
+void CEditor::GetCoordinates(oxeCoords *coords)
+{
+    Update();
+    coords += lcd->GetCoordinates(coords);
+    for (int i = 0; i < GUI_CONTROLS; i++)
+    {
+        coords += ctl[i]->GetCoordinates(coords);
+    }
+}
+
 void CEditor::SetPar(int index, float value)
 {
     const char CHANNEL = 0;

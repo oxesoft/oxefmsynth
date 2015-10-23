@@ -47,12 +47,27 @@ void CKey::OnClick(int x, int y)
     Repaint();
 }
 
+int CKey::GetCoordinates (oxeCoords *coords)
+{
+    coords->destX   = this->left;
+    coords->destY   = this->top;
+    coords->width   = this->right - this->left;
+    coords->height  = this->bottom - this->top;
+    coords->origBmp = this->bmp;
+    coords->origX   = value ? this->w : 0;
+    coords->origY   = this->h * this->index;
+    return 1;
+}
+
 void CKey::Repaint()
 {
-    if (toolkit)
+    if (!toolkit)
     {
-        toolkit->CopyRect(this->left, this->top, this->right - this->left, this->bottom - this->top, this->bmp, value?this->w:0, this->h * this->index);
+        return;
     }
+    oxeCoords coords;
+    GetCoordinates(&coords);
+    toolkit->CopyRect(coords.destX, coords.destY, coords.width, coords.height, coords.origBmp, coords.origX, coords.origY);
 }
 
 bool CKey::Update(void)

@@ -16,6 +16,17 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+typedef struct
+{
+    int destX;
+    int destY;
+    int width;
+    int height;
+    int origBmp;
+    int origX;
+    int origY;
+} oxeCoords;
+
 class CControl
 {
 protected:
@@ -37,6 +48,7 @@ public:
     virtual bool  IncreaseValue  (int delta)             {return false;}
     virtual int   GetIndex       (void)                  {return -1   ;}
     virtual int   GetType        (void)                  {return -1   ;}
+    virtual int   GetCoordinates (oxeCoords *coords)     {return  0   ;}
     void SetToolkit(CToolkit *toolkit)
     {
         this->toolkit = toolkit;

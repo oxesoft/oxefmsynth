@@ -27,4 +27,5 @@ public:
     void OnClick(int x, int y);
     bool GetName(char* str);
     int  GetType(void);
+    int  GetCoordinates(oxeCoords *coords);
 };
