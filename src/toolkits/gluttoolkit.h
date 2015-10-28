@@ -16,6 +16,13 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#define VERTEX_SIZE      3
+#define TEXVER_SIZE      2
+#define VERTEX_STRIDE    (VERTEX_SIZE * 6)
+#define TEXVER_STRIDE    (TEXVER_SIZE * 6)
+#define TOTAL_VALUES_VER (VERTEX_STRIDE * (1 /*<- bg */ + COORDS_COUNT))
+#define TOTAL_VALUES_TEX (TEXVER_STRIDE * (1 /*<- bg */ + COORDS_COUNT))
+
 class CGlutToolkit : public CToolkit
 {
 private:
@@ -27,12 +34,15 @@ public:
     int         bmps_width[BMP_COUNT];
     int         bmps_height[BMP_COUNT];
     oxeCoords   coords[COORDS_COUNT];
+    GLfloat     vertices   [TOTAL_VALUES_VER];
+    GLfloat     texVertices[TOTAL_VALUES_TEX];
     void        *parentWindow;
     CEditor     *editor;
     CGlutToolkit(void *parentWindow, CEditor *editor);
     ~CGlutToolkit();
-    void drawBitmap(int destX, int destY, int width, int height, int origBmp, int origX, int origY);
-    void StartWindowProcesses();
-    void Debug(char *text);
-    int  WaitWindowClosed();
+    GLfloat* updateVerticesXYZ(GLfloat x, GLfloat y, GLfloat w, GLfloat h, GLfloat iW, GLfloat iH, GLfloat *v);
+    GLfloat* updateVerticesUV (GLfloat x, GLfloat y, GLfloat w, GLfloat h, GLfloat iW, GLfloat iH, GLfloat *v);
+    void     StartWindowProcesses();
+    void     Debug(char *text);
+    int      WaitWindowClosed();
 };

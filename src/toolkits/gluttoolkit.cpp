@@ -57,23 +57,94 @@ typedef struct
 
 CGlutToolkit *toolkit = NULL;
 
-void display()
+void checkError(int line)
+{
+    GLenum err = GL_NO_ERROR;
+    while((err = glGetError()) != GL_NO_ERROR)
+    {
+        switch (err)
+        {
+            case GL_INVALID_ENUM:
+                printf("GL_INVALID_ENUM");
+                break;
+            case GL_INVALID_VALUE:
+                printf("GL_INVALID_VALUE");
+                break;
+            case GL_INVALID_OPERATION:
+                printf("GL_INVALID_OPERATION");
+                break;
+            case GL_STACK_OVERFLOW:
+                printf("GL_STACK_OVERFLOW");
+                break;
+            case GL_STACK_UNDERFLOW:
+                printf("GL_STACK_UNDERFLOW");
+                break;
+            case GL_OUT_OF_MEMORY:
+                printf("GL_OUT_OF_MEMORY");
+                break;
+            case GL_INVALID_FRAMEBUFFER_OPERATION:
+                printf("GL_INVALID_FRAMEBUFFER_OPERATION");
+                break;
+            case GL_CONTEXT_LOST:
+                printf("GL_CONTEXT_LOST");
+                break;
+            case GL_TABLE_TOO_LARGE:
+                printf("GL_TABLE_TOO_LARGE");
+                break;
+            default:
+                printf("error %d", (int)err);
+                break;
+        }
+        printf(" on line %d\n", line);
+    }
+}
+
+void draw()
 {
     if (!toolkit)
     {
         return;
     }
-    unsigned int time = GetTick();
-    toolkit->drawBitmap(0, 0, GUI_WIDTH, GUI_HEIGHT, BMP_BG, 0, 0);
+    GLfloat *v = toolkit->vertices;
+    GLfloat *t = toolkit->texVertices;
+    //--------------------------------------------------------
+    glBindTexture(GL_TEXTURE_2D, toolkit->bmps[BMP_BG]);
+    checkError(__LINE__);
+    //--------------------------------------------------------
+    glVertexPointer  (3, GL_FLOAT, 0, v);
+    checkError(__LINE__);
+    glTexCoordPointer(2, GL_FLOAT, 0, t);
+    checkError(__LINE__);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+    checkError(__LINE__);
+    //--------------------------------------------------------
+    v += VERTEX_STRIDE;
+    t += TEXVER_STRIDE;
     toolkit->editor->GetCoordinates(toolkit->coords);
     oxeCoords *c = toolkit->coords;
     int i = COORDS_COUNT;
     while (i--)
     {
-        toolkit->drawBitmap(c->destX, c->destY, c->width, c->height, c->origBmp, c->origX, c->origY);
+        //--------------------------------------------------------
+        glBindTexture(GL_TEXTURE_2D, toolkit->bmps[c->origBmp]);
+        //--------------------------------------------------------
+        toolkit->updateVerticesUV(c->origX, c->origY, c->width, c->height, toolkit->bmps_width[c->origBmp], toolkit->bmps_height[c->origBmp], t);
+        //--------------------------------------------------------
+        glVertexPointer  (3, GL_FLOAT, 0, v);
+        glTexCoordPointer(2, GL_FLOAT, 0, t);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+        //--------------------------------------------------------
+        v += VERTEX_STRIDE;
+        t += TEXVER_STRIDE;
         c++;
     }
     glFlush();
+}
+
+void display()
+{
+    unsigned int time = GetTick();
+    draw();
     printf("opengl draw time: %ums\n", GetTick() - time);
 }
 
@@ -146,7 +217,7 @@ CGlutToolkit::CGlutToolkit(void *parentWindow, CEditor *editor)
     this->editor        = editor;
 
     int argc = 1;
-    char *argv[1] = {""};
+    char *argv[1] = {(char*)""};
     glutInit(&argc, argv);
     glutInitWindowSize(GUI_WIDTH, GUI_HEIGHT);
     glutCreateWindow(TITLE_FULL);
@@ -174,6 +245,32 @@ CGlutToolkit::CGlutToolkit(void *parentWindow, CEditor *editor)
     if (!bmps[BMP_BG     ]) bmps[BMP_BG     ] = loadTextureFromBuffer(bg_bmp     , &bmps_width[BMP_BG     ], &bmps_height[BMP_BG     ]);
     if (!bmps[BMP_BUTTONS]) bmps[BMP_BUTTONS] = loadTextureFromBuffer(buttons_bmp, &bmps_width[BMP_BUTTONS], &bmps_height[BMP_BUTTONS]);
     if (!bmps[BMP_OPS    ]) bmps[BMP_OPS    ] = loadTextureFromBuffer(ops_bmp    , &bmps_width[BMP_OPS    ], &bmps_height[BMP_OPS    ]);
+
+    editor->GetCoordinates(this->coords);
+
+    oxeCoords *c;
+    GLfloat *v;
+    int i;
+
+    c = toolkit->coords;
+    v = toolkit->vertices;
+    i = COORDS_COUNT;
+    v = updateVerticesXYZ(0, 0, GUI_WIDTH, GUI_HEIGHT, GUI_WIDTH, GUI_HEIGHT, v); // bg
+    while (i--)
+    {
+        v = updateVerticesXYZ(c->destX, c->destY, c->width, c->height, GUI_WIDTH, GUI_HEIGHT, v);
+        c++;
+    }
+
+    c = toolkit->coords;
+    v = toolkit->texVertices;
+    i = COORDS_COUNT;
+    v = updateVerticesUV(0, 0, GUI_WIDTH, GUI_HEIGHT, GUI_WIDTH, GUI_HEIGHT, v); // bg
+    while (i--)
+    {
+        v = updateVerticesUV(c->origX, c->origY, c->width, c->height, bmps_width[c->origBmp], bmps_height[c->origBmp], v);
+        c++;
+    }
 }
 
 CGlutToolkit::~CGlutToolkit()
@@ -209,31 +306,37 @@ GLuint CGlutToolkit::loadTextureFromBuffer(const char *buffer, int *w, int *h)
     return textureBufferID;
 }
 
-void CGlutToolkit::drawBitmap(int destX, int destY, int width, int height, int origBmp, int origX, int origY)
+GLfloat* CGlutToolkit::updateVerticesXYZ(GLfloat x, GLfloat y, GLfloat w, GLfloat h, GLfloat iW, GLfloat iH, GLfloat *v)
 {
-    int imageW = bmps_width[origBmp];
-    int imageH = bmps_height[origBmp];
-    origY   = imageH     - origY - height;
-    destY   = GUI_HEIGHT - destY - height;
-    glMatrixMode(GL_TEXTURE);
-    glLoadIdentity();
-    glScalef(1.f / (float)imageW, 1.f / (float)imageH, 1.f);
-    glBindTexture(GL_TEXTURE_2D, bmps[origBmp]);
-    GLshort vertices[] = {
-        destX        , destY + height,
-        destX + width, destY + height,
-        destX + width, destY         ,
-        destX        , destY
-    };
-    GLshort texVertices[] = {
-        origX        , origY + height,
-        origX + width, origY + height,
-        origX + width, origY         ,
-        origX        , origY
-    };
-    glVertexPointer  (2, GL_SHORT, 0, vertices   );
-    glTexCoordPointer(2, GL_SHORT, 0, texVertices);
-    glDrawArrays(GL_QUADS, 0, 4);
+    y = iH - y - h;
+    // triangle 1
+    *(v++) = x    ; *(v++) = y + h; *(v++) = 0;
+    *(v++) = x + w; *(v++) = y + h; *(v++) = 0;
+    *(v++) = x + w; *(v++) = y    ; *(v++) = 0;
+    // triangle 2
+    *(v++) = x + w; *(v++) = y    ; *(v++) = 0;
+    *(v++) = x    ; *(v++) = y    ; *(v++) = 0;
+    *(v++) = x    ; *(v++) = y + h; *(v++) = 0;
+    return v;
+}
+
+GLfloat* CGlutToolkit::updateVerticesUV(GLfloat x, GLfloat y, GLfloat w, GLfloat h, GLfloat iW, GLfloat iH, GLfloat *v)
+{
+
+    y = iH - y - h;
+    x /= iW;
+    y /= iH;
+    w /= iW;
+    h /= iH;
+    // triangle 1
+    *(v++) = x    ; *(v++) = y + h;
+    *(v++) = x + w; *(v++) = y + h;
+    *(v++) = x + w; *(v++) = y    ;
+    // triangle 2
+    *(v++) = x + w; *(v++) = y    ;
+    *(v++) = x    ; *(v++) = y    ;
+    *(v++) = x    ; *(v++) = y + h;
+    return v;
 }
 
 void CGlutToolkit::StartWindowProcesses()
@@ -251,6 +354,17 @@ void CGlutToolkit::Debug(char *text)
 
 int CGlutToolkit::WaitWindowClosed()
 {
+#ifdef PROFILING
+    unsigned int time = GetTick();
+    int i = 0;
+    while (GetTick() - time < 5000)
+    {
+        draw();
+        i++;
+    }
+    printf("%u fps\n", i / 5);
+#else
     glutMainLoop();
+#endif
     return 0;
 }
