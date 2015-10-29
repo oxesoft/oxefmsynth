@@ -27,6 +27,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #endif
 #include "gluttoolkit.h"
 #include <string.h>
+#include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <pthread.h>
@@ -74,48 +75,6 @@ typedef struct
 } BITMAPHEADER;
 
 CGlutToolkit *toolkit = NULL;
-
-void checkError(int line)
-{
-    GLenum err = GL_NO_ERROR;
-    while((err = glGetError()) != GL_NO_ERROR)
-    {
-        switch (err)
-        {
-            case GL_INVALID_ENUM:
-                printf("GL_INVALID_ENUM");
-                break;
-            case GL_INVALID_VALUE:
-                printf("GL_INVALID_VALUE");
-                break;
-            case GL_INVALID_OPERATION:
-                printf("GL_INVALID_OPERATION");
-                break;
-            case GL_STACK_OVERFLOW:
-                printf("GL_STACK_OVERFLOW");
-                break;
-            case GL_STACK_UNDERFLOW:
-                printf("GL_STACK_UNDERFLOW");
-                break;
-            case GL_OUT_OF_MEMORY:
-                printf("GL_OUT_OF_MEMORY");
-                break;
-            case GL_INVALID_FRAMEBUFFER_OPERATION:
-                printf("GL_INVALID_FRAMEBUFFER_OPERATION");
-                break;
-            case GL_CONTEXT_LOST:
-                printf("GL_CONTEXT_LOST");
-                break;
-            case GL_TABLE_TOO_LARGE:
-                printf("GL_TABLE_TOO_LARGE");
-                break;
-            default:
-                printf("error %d", (int)err);
-                break;
-        }
-        printf(" on line %d\n", line);
-    }
-}
 
 void draw()
 {
