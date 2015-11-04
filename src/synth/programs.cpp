@@ -45,6 +45,7 @@ void CPrograms::Init()
         iCurrentBank = 0;
         currentbank  = (SBank*)persist.GetSoundBank(iCurrentBank);
     }
+    this->hostinterface = NULL;
 #else
     currentbank = (SBank*)soundbank;
 #endif
