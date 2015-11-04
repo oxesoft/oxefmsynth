@@ -689,12 +689,7 @@ void CPrograms::GetProgName(char* str, char channel)
 
 void CPrograms::SetProgName(char* str, char channel)
 {
-    memcpy(currentbank->prg[numprg[channel]].PNAME, str, PG_NAME_SIZE);
-    haschanges = true;
-    if (hostinterface)
-    {
-        hostinterface->ReceiveMessageFromPlugin(UPDATE_DISPLAY, 0, 0);
-    }
+    SetProgName(str, numprg[channel]);
 }
 
 void CPrograms::GetProgName(char* str, int numpg)
@@ -705,14 +700,8 @@ void CPrograms::GetProgName(char* str, int numpg)
 
 void CPrograms::SetProgName(char* str, int numpg)
 {
+    memset(currentbank->prg[numpg].PNAME, 0, PG_NAME_SIZE);
     memcpy(currentbank->prg[numpg].PNAME, str, min(strlen(str), PG_NAME_SIZE));
-    for (int i=0;i<MIDICHANNELS;i++)
-    {
-        if (numprg[i] == numpg)
-        {
-            memcpy(currentbank->prg[numpg].PNAME, str, min(strlen(str), PG_NAME_SIZE));
-        }
-    }
     haschanges = true;
     if (hostinterface)
     {
