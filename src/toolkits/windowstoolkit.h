@@ -34,6 +34,5 @@ public:
     void CopyRect(int destX, int destY, int width, int height, int origBmp, int origX, int origY);
     void StartMouseCapture();
     void StopMouseCapture();
-    void Debug(char *text);
     int  WaitWindowClosed();
 };

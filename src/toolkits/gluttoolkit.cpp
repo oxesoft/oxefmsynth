@@ -145,11 +145,6 @@ void CGlutToolkit::StartWindowProcesses()
     pthread_create(&thread, NULL, &updateProc, (void*)this);
 }
 
-void CGlutToolkit::Debug(char *text)
-{
-    printf("%s\n", text);
-}
-
 int CGlutToolkit::WaitWindowClosed()
 {
 #ifdef PROFILING

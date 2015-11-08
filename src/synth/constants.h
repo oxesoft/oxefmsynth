@@ -159,8 +159,6 @@ enum
 #define MAX_PATH 256
 #endif
 
-#define OXEDEBUG(...) {char tmpb[128]; snprintf(tmpb, sizeof(tmpb), __VA_ARGS__); if (toolkit) toolkit->Debug(tmpb);}
-
 #ifdef _WIN32
     #define snprintf _snprintf
 #endif

@@ -364,11 +364,6 @@ CEditor::CEditor(CSynthesizer *synthesizer)
     // HQ
     ctl[ctlcount++] = new CKey     (BMP_KEY,0,10,10,"High Quality",      synthesizer, channel,                   HQ   , hX         , hY      );
 
-    if (ctlcount != GUI_CONTROLS)
-    {
-        OXEDEBUG("Error creating controls");
-    }
-
     changingControl = false;
     this->currentX  = -1;
     this->currentY  = -1;

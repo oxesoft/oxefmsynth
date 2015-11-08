@@ -251,7 +251,7 @@ CWindowsToolkit::CWindowsToolkit(void *parentWindow, CEditor *editor)
     bmps[BMP_BUTTONS] = (HBITMAP)LoadImageA(NULL, fullPath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
     StringCchPrintf(fullPath, MAX_PATH, "%s\\%s", path, "ops.bmp");
     bmps[BMP_OPS]     = (HBITMAP)LoadImageA(NULL, fullPath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-    
+
     if (!bmps[BMP_CHARS  ]) bmps[BMP_CHARS  ] = LoadBitmap((HINSTANCE)hInstance,MAKEINTRESOURCE(IDB_CHARS));
     if (!bmps[BMP_KNOB   ]) bmps[BMP_KNOB   ] = LoadBitmap((HINSTANCE)hInstance,MAKEINTRESOURCE(IDB_KNOB));
     if (!bmps[BMP_KNOB2  ]) bmps[BMP_KNOB2  ] = LoadBitmap((HINSTANCE)hInstance,MAKEINTRESOURCE(IDB_KNOB2));
@@ -322,12 +322,6 @@ void CWindowsToolkit::StartMouseCapture()
 void CWindowsToolkit::StopMouseCapture()
 {
     ReleaseCapture();
-}
-
-void CWindowsToolkit::Debug(char *text)
-{
-    OutputDebugStringA(text);
-    printf("%s\n", text);
 }
 
 int CWindowsToolkit::WaitWindowClosed()

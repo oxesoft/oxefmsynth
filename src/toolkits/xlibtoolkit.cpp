@@ -357,11 +357,6 @@ void CXlibToolkit::CopyRect(int destX, int destY, int width, int height, int ori
     XCopyArea(display, bmps[origBmp], offscreen, gc, origX, origY, width, height, destX, destY);
 }
 
-void CXlibToolkit::Debug(char *text)
-{
-    printf("%s\n", text);
-}
-
 int CXlibToolkit::WaitWindowClosed()
 {
     while (!thread1Finished || !thread2Finished)

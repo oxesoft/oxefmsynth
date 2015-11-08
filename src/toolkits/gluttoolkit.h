@@ -26,6 +26,5 @@ public:
     CGlutToolkit(void *parentWindow, CEditor *editor);
     ~CGlutToolkit();
     void     StartWindowProcesses();
-    void     Debug(char *text);
     int      WaitWindowClosed();
 };

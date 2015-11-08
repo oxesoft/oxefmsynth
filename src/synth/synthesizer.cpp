@@ -329,12 +329,10 @@ void CSynthesizer::SendEvent(unsigned char bS,unsigned char bD1,unsigned char bD
                     hld[channel] = bD2;
                     break;
                 case 0: // Bank Select (msb)
-                    //OXEDEBUG("Bank Select (msb) = %d", bD2);
                     break;
                 case 32: // Bank Select (lsb)
                     programs.SetBankIndex(bD2);
                     UpdateGlobalEffects();
-                    //OXEDEBUG("Bank Select (lsb) = %d", bD2);
                     break;
                 default:
                     break;
@@ -428,7 +426,7 @@ void CSynthesizer::Process(int *b, int size, int position)
             SumStereoStereo(buffers.bNoteOut, b, 1.f-rev[channels[i]], size);
         }
     }
-    
+
     if (revrbON)
     {
         reverb.Process(buffers.bREV,size);
