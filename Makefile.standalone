@@ -83,6 +83,7 @@ else
                 CFLAGS+=-Wno-deprecated
                 LDFLAGS+=-framework OpenGL
                 LDFLAGS+=-framework GLUT
+                SOURCES+=src/toolkits/opengltoolkit.cpp
                 SOURCES+=src/toolkits/gluttoolkit.cpp
             else
                 LDFLAGS+=-framework Cocoa
@@ -102,6 +103,7 @@ else
             CFLAGS+=-D__GLUT__
             LDFLAGS+=-s
             LDFLAGS+=-lGL -lGLU -lglut -lpthread
+            SOURCES+=src/toolkits/opengltoolkit.cpp
             SOURCES+=src/toolkits/gluttoolkit.cpp
         else
             LDFLAGS+=-s

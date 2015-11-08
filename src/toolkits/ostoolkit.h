@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #if defined(__APPLE__)
     #if defined(__GLUT__)
         #include <GLUT/glut.h>
+        #include "opengltoolkit.h"
         #include "gluttoolkit.h"
         #define COSToolkit CGlutToolkit
     #else
@@ -29,6 +30,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     #if defined(__GLUT__)
         #define GL_GLEXT_PROTOTYPES
         #include <GL/glut.h>
+        #include "opengltoolkit.h"
         #include "gluttoolkit.h"
         #define COSToolkit CGlutToolkit
     #else
