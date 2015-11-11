@@ -37,4 +37,4 @@ ifeq ($(UNAME_S),Darwin)
 endif
 
 clean:
-	@rm -rf oxeconverter oxefmsynthdemo oxefmsynthdemo.exe oxefmsynthdemo.wav oxefmsynth oxefmsynth.exe oxevst*.dll oxevst*.so embedresources bitmaps.h *.o *.d oxefmsynth.app oxefmsynth.vst
+	@rm -rf oxeconverter oxefmsynthdemo oxefmsynthdemo.exe oxefmsynthdemo.wav oxefmsynth oxefmsynth.exe oxevst*.dll oxevst*.so embedresources bitmaps.cpp *.o *.d oxefmsynth.app oxefmsynth.vst

@@ -1,16 +1,16 @@
 # Oxe FM Synth: a software synthesizer
 # Copyright (C) 2015  Daniel Moura <oxe@oxesoft.com>
-# 
+#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
@@ -51,9 +51,10 @@ SOURCES+=src/synth/synthesizer.cpp
 SOURCES+=$(VSTSDK_PATH)/public.sdk/source/vst2.x/audioeffect.cpp
 SOURCES+=$(VSTSDK_PATH)/public.sdk/source/vst2.x/audioeffectx.cpp
 SOURCES+=$(VSTSDK_PATH)/public.sdk/source/vst2.x/vstplugmain.cpp
+SOURCES+=bitmaps.cpp
 
 LIBS:=-lX11
-CFLAGS+=-fPIC 
+CFLAGS+=-fPIC
 
 ifeq ($(DEBUG),YES)
 	CFLAGS+=-g -O0
@@ -65,13 +66,13 @@ ARCH := $(shell getconf LONG_BIT)
 
 all: oxevst$(ARCH)
 
-oxevst32: bitmaps.h
+oxevst32: bitmaps.cpp
 	@g++ -shared -m32 -o oxevst32.so $(CFLAGS) $(SOURCES) $(INCLUDES) $(LIBS)
 
-oxevst64: bitmaps.h
+oxevst64: bitmaps.cpp
 	@g++ -shared -m64 -o oxevst64.so $(CFLAGS) $(SOURCES) $(INCLUDES) $(LIBS)
 
-bitmaps.h:
+bitmaps.cpp:
 	@$(CC) -o embedresources src/toolkits/embedresources.cpp
 	@./embedresources $@
 	@rm embedresources

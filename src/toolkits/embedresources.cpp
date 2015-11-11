@@ -25,13 +25,14 @@ void append_file(FILE *fout, const char *path, const char *name)
     FILE *f = fopen(path, "rb");
     unsigned char c;
     unsigned int i = 0;
-    fprintf(fout, "const char %s[] = {\n", name);
+    fprintf(fout, "const char _%s[] = {\n", name);
     while (!feof(f))
     {
         fread(&c, 1, 1, f);
         fprintf(fout, "0x%02X%s%s", c, !feof(f) ? "," : "", ++i % 16 ? "" : "\n");
     }
     fprintf(fout, "};\n");
+    fprintf(fout, "const char *%s = _%s;\n", name, name);
     fclose(f);
 }
 

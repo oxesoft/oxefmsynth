@@ -19,6 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "bitmaps.h"
 #include "editor.h"
 #include <X11/Xlib.h>
+#include <GL/glx.h>
+#include "opengltoolkit.h"
 #include "xlibtoolkit.h"
 #include <X11/Xutil.h>
 #include <pthread.h>
@@ -122,8 +124,15 @@ void* eventProc(void* ptr)
             }
             case Expose:
             {
-                XGraphicsExposeEvent *e = (XGraphicsExposeEvent*)&event;
-                XCopyArea(toolkit->display, toolkit->offscreen, toolkit->window, toolkit->gc, e->x, e->y, e->width, e->height, e->x, e->y);
+                if (toolkit->openGLmode)
+                {
+                    toolkit->Draw();
+                }
+                else
+                {
+                    XGraphicsExposeEvent *e = (XGraphicsExposeEvent*)&event;
+                    XCopyArea(toolkit->display, toolkit->offscreen, toolkit->window, toolkit->gc, e->x, e->y, e->width, e->height, e->x, e->y);
+                }
                 break;
             }
             case ClientMessage:
@@ -136,7 +145,14 @@ void* eventProc(void* ptr)
                 }
                 else if (message->data.l[0] == toolkit->WM_TIMER)
                 {
-                    toolkit->editor->Update();
+                    if (toolkit->openGLmode)
+                    {
+                        toolkit->Draw();
+                    }
+                    else
+                    {
+                        toolkit->editor->Update();
+                    }
                 }
             }
         }
@@ -179,6 +195,14 @@ CXlibToolkit::CXlibToolkit(void *parentWindow, CEditor *editor)
 {
     this->parentWindow  = parentWindow;
     this->editor        = editor;
+    this->display       = NULL;
+    this->window        = 0;
+    this->offscreen     = 0;
+    this->gc            = NULL;
+    this->glxContext    = NULL;
+    thread1Finished     = true;
+    thread2Finished     = true;
+    memset(bmps, 0, sizeof(bmps));
 
     char *displayName = getenv("DISPLAY");
     if (!displayName || !strlen(displayName))
@@ -187,63 +211,126 @@ CXlibToolkit::CXlibToolkit(void *parentWindow, CEditor *editor)
     }
     if (!XInitThreads())
     {
-        fprintf(stderr, "Xlib threads support unavailable");
+        fprintf(stderr, "Xlib threads support unavailable\n");
         return;
     }
     this->display = XOpenDisplay(displayName);
+    int screen = DefaultScreen(this->display);
 
+    bool isStandAlone = false;
     if (!parentWindow)
     {
-        parentWindow = (void*)RootWindow(this->display, DefaultScreen(this->display));
+        isStandAlone = true;
+        parentWindow = (void*)RootWindow(this->display, screen);
     }
 
-    window = XCreateWindow(this->display, (Window)parentWindow, 0, 0, GUI_WIDTH, GUI_HEIGHT, 0, 24, InputOutput, CopyFromParent, 0, 0);
+    XVisualInfo vinfo = {0};
+    openGLmode = glXQueryExtension(this->display, NULL, NULL);
+    openGLmode = false;
 
-    gc = XCreateGC(this->display, window, 0, 0);
-    XSelectInput(this->display, window, ButtonPressMask | ButtonReleaseMask | PointerMotionMask | ExposureMask | KeyPressMask);
-    XMapWindow(this->display, window);
-    XFlush(this->display);
+    if (openGLmode)
+    {
+        XVisualInfo *vi = NULL;
+        int attrs[] =
+        {
+            GLX_RGBA,
+            None
+        };
+        vi = glXChooseVisual(this->display, screen, attrs);
+        if (vi)
+        {
+            vinfo = *vi;
+            this->glxContext = glXCreateContext(this->display, vi, 0, GL_TRUE);
+            XFree(vi);
+        }
+    }
+
+    if (!this->glxContext)
+    {
+        openGLmode = false;
+        if (!XMatchVisualInfo(this->display, screen, 32, TrueColor, &vinfo))
+        {
+            fprintf(stderr, "True color screen required\n");
+            return;
+        }
+    }
+
+    if (isStandAlone)
+    {
+        if (openGLmode)
+        {
+            printf("%s\n", "OpenGL mode");
+        }
+        else
+        {
+            printf("%s\n", "bliting mode");
+        }
+    }
+
+    XSetWindowAttributes wattrs;
+    wattrs.colormap         = XCreateColormap(this->display, (Window)parentWindow, vinfo.visual, AllocNone);
+    wattrs.background_pixel = BlackPixel(this->display, screen);
+    wattrs.border_pixel     = BlackPixel(this->display, screen);
+    wattrs.event_mask       = ButtonPressMask | ButtonReleaseMask | PointerMotionMask | ExposureMask | KeyPressMask;
+    window = XCreateWindow(this->display, (Window)parentWindow, 0, 0, GUI_WIDTH, GUI_HEIGHT, 0, vinfo.depth, InputOutput, vinfo.visual, CWBackPixel | CWColormap | CWBorderPixel | CWEventMask, &wattrs);
+
+    XStoreName(this->display, this->window, TITLE_FULL);
+
+    XSizeHints sizeHints;
+    memset(&sizeHints, 0, sizeof(sizeHints));
+    sizeHints.flags      = PMinSize | PMaxSize;
+    sizeHints.min_width  = GUI_WIDTH;
+    sizeHints.min_height = GUI_HEIGHT;
+    sizeHints.max_width  = GUI_WIDTH;
+    sizeHints.max_height = GUI_HEIGHT;
+    XSetNormalHints(this->display, this->window, &sizeHints);
 
     this->WM_TIMER         = XInternAtom(this->display, "WM_TIMER"        , false);
     this->WM_DELETE_WINDOW = XInternAtom(this->display, "WM_DELETE_WINDOW", false);
-    XSetWMProtocols(this->display, window, &WM_DELETE_WINDOW, 1);
+    XSetWMProtocols(this->display, this->window, &WM_DELETE_WINDOW, 1);
 
-    offscreen = XCreatePixmap(this->display, window, GUI_WIDTH, GUI_HEIGHT, 24);
+    if (openGLmode)
+    {
+        glXMakeCurrent(this->display, this->window, this->glxContext);
+        Init(this->editor);
+    }
+    else
+    {
+        gc = XCreateGC(this->display, this->window, 0, 0);
+        offscreen = XCreatePixmap(this->display, this->window, GUI_WIDTH, GUI_HEIGHT, vinfo.depth);
 
-    memset(bmps, 0, sizeof(bmps));
+        char path[PATH_MAX];
+        GetResourcesPath(path, PATH_MAX);
 
-    char path[PATH_MAX];
-    GetResourcesPath(path, PATH_MAX);
+        char fullPath[PATH_MAX];
+        snprintf(fullPath, PATH_MAX, "%s/%s", path, "chars.bmp"  );
+        bmps[BMP_CHARS  ] = LoadImageFromFile(fullPath, vinfo.depth);
+        snprintf(fullPath, PATH_MAX, "%s/%s", path, "knob.bmp"   );
+        bmps[BMP_KNOB   ] = LoadImageFromFile(fullPath, vinfo.depth);
+        snprintf(fullPath, PATH_MAX, "%s/%s", path, "knob2.bmp"  );
+        bmps[BMP_KNOB2  ] = LoadImageFromFile(fullPath, vinfo.depth);
+        snprintf(fullPath, PATH_MAX, "%s/%s", path, "knob3.bmp"  );
+        bmps[BMP_KNOB3  ] = LoadImageFromFile(fullPath, vinfo.depth);
+        snprintf(fullPath, PATH_MAX, "%s/%s", path, "key.bmp"    );
+        bmps[BMP_KEY    ] = LoadImageFromFile(fullPath, vinfo.depth);
+        snprintf(fullPath, PATH_MAX, "%s/%s", path, "bg.bmp"     );
+        bmps[BMP_BG     ] = LoadImageFromFile(fullPath, vinfo.depth);
+        snprintf(fullPath, PATH_MAX, "%s/%s", path, "buttons.bmp");
+        bmps[BMP_BUTTONS] = LoadImageFromFile(fullPath, vinfo.depth);
+        snprintf(fullPath, PATH_MAX, "%s/%s", path, "ops.bmp"    );
+        bmps[BMP_OPS    ] = LoadImageFromFile(fullPath, vinfo.depth);
 
-    char fullPath[PATH_MAX];
-    snprintf(fullPath, PATH_MAX, "%s/%s", path, "chars.bmp"  );
-    bmps[BMP_CHARS  ] = LoadImageFromFile(fullPath);
-    snprintf(fullPath, PATH_MAX, "%s/%s", path, "knob.bmp"   );
-    bmps[BMP_KNOB   ] = LoadImageFromFile(fullPath);
-    snprintf(fullPath, PATH_MAX, "%s/%s", path, "knob2.bmp"  );
-    bmps[BMP_KNOB2  ] = LoadImageFromFile(fullPath);
-    snprintf(fullPath, PATH_MAX, "%s/%s", path, "knob3.bmp"  );
-    bmps[BMP_KNOB3  ] = LoadImageFromFile(fullPath);
-    snprintf(fullPath, PATH_MAX, "%s/%s", path, "key.bmp"    );
-    bmps[BMP_KEY    ] = LoadImageFromFile(fullPath);
-    snprintf(fullPath, PATH_MAX, "%s/%s", path, "bg.bmp"     );
-    bmps[BMP_BG     ] = LoadImageFromFile(fullPath);
-    snprintf(fullPath, PATH_MAX, "%s/%s", path, "buttons.bmp");
-    bmps[BMP_BUTTONS] = LoadImageFromFile(fullPath);
-    snprintf(fullPath, PATH_MAX, "%s/%s", path, "ops.bmp"    );
-    bmps[BMP_OPS    ] = LoadImageFromFile(fullPath);
+        if (!bmps[BMP_CHARS  ]) bmps[BMP_CHARS  ] = LoadImageFromBuffer(chars_bmp  , vinfo.depth);
+        if (!bmps[BMP_KNOB   ]) bmps[BMP_KNOB   ] = LoadImageFromBuffer(knob_bmp   , vinfo.depth);
+        if (!bmps[BMP_KNOB2  ]) bmps[BMP_KNOB2  ] = LoadImageFromBuffer(knob2_bmp  , vinfo.depth);
+        if (!bmps[BMP_KNOB3  ]) bmps[BMP_KNOB3  ] = LoadImageFromBuffer(knob3_bmp  , vinfo.depth);
+        if (!bmps[BMP_KEY    ]) bmps[BMP_KEY    ] = LoadImageFromBuffer(key_bmp    , vinfo.depth);
+        if (!bmps[BMP_BG     ]) bmps[BMP_BG     ] = LoadImageFromBuffer(bg_bmp     , vinfo.depth);
+        if (!bmps[BMP_BUTTONS]) bmps[BMP_BUTTONS] = LoadImageFromBuffer(buttons_bmp, vinfo.depth);
+        if (!bmps[BMP_OPS    ]) bmps[BMP_OPS    ] = LoadImageFromBuffer(ops_bmp    , vinfo.depth);
+    }
 
-    if (!bmps[BMP_CHARS  ]) bmps[BMP_CHARS  ] = LoadImageFromBuffer(chars_bmp  );
-    if (!bmps[BMP_KNOB   ]) bmps[BMP_KNOB   ] = LoadImageFromBuffer(knob_bmp   );
-    if (!bmps[BMP_KNOB2  ]) bmps[BMP_KNOB2  ] = LoadImageFromBuffer(knob2_bmp  );
-    if (!bmps[BMP_KNOB3  ]) bmps[BMP_KNOB3  ] = LoadImageFromBuffer(knob3_bmp  );
-    if (!bmps[BMP_KEY    ]) bmps[BMP_KEY    ] = LoadImageFromBuffer(key_bmp    );
-    if (!bmps[BMP_BG     ]) bmps[BMP_BG     ] = LoadImageFromBuffer(bg_bmp     );
-    if (!bmps[BMP_BUTTONS]) bmps[BMP_BUTTONS] = LoadImageFromBuffer(buttons_bmp);
-    if (!bmps[BMP_OPS    ]) bmps[BMP_OPS    ] = LoadImageFromBuffer(ops_bmp    );
-
-    thread1Finished = true;
-    thread2Finished = true;
+    XMapWindow(this->display, this->window);
 }
 
 CXlibToolkit::~CXlibToolkit()
@@ -261,22 +348,46 @@ CXlibToolkit::~CXlibToolkit()
     {
         usleep(1000 * 1);
     }
-    XFreeGC(display, gc);
-    XDestroyWindow(display, window);
-    XSync(display, false);
-    XFreePixmap(display, offscreen);
-    for (int i = 0; i < BMP_COUNT; i++)
+    if (glxContext)
     {
-        if (bmps[i])
+        Deinit();
+        glXDestroyContext(this->display, glxContext);
+    }
+    else
+    {
+        if (gc)
         {
-            XFreePixmap(display, bmps[i]);
+            XFreeGC(display, gc);
+        }
+        if (offscreen)
+        {
+            XFreePixmap(display, offscreen);
+        }
+        for (int i = 0; i < BMP_COUNT; i++)
+        {
+            if (bmps[i])
+            {
+                XFreePixmap(display, bmps[i]);
+            }
         }
     }
-    XCloseDisplay(display);
+    if (window)
+    {
+        XDestroyWindow(display, window);
+    }
+    if (display)
+    {
+        XSync(display, false);
+        XCloseDisplay(display);
+    }
 }
 
 void CXlibToolkit::StartWindowProcesses()
 {
+    if (!this->window)
+    {
+        return;
+    }
     thread1Finished = false;
     thread2Finished = false;
     pthread_t thread1;
@@ -285,7 +396,7 @@ void CXlibToolkit::StartWindowProcesses()
     pthread_create(&thread2, NULL, &updateProc, (void*)this);
 }
 
-Pixmap CXlibToolkit::LoadImageFromFile(const char *path)
+Pixmap CXlibToolkit::LoadImageFromFile(const char *path, int depth)
 {
     FILE *f = fopen(path, "rb");
     if (!f)
@@ -303,12 +414,12 @@ Pixmap CXlibToolkit::LoadImageFromFile(const char *path)
         return 0;
     }
     fclose(f);
-    Pixmap result = LoadImageFromBuffer(tmp);
+    Pixmap result = LoadImageFromBuffer(tmp, depth);
     free(tmp);
     return result;
 }
 
-Pixmap CXlibToolkit::LoadImageFromBuffer(const char *buffer)
+Pixmap CXlibToolkit::LoadImageFromBuffer(const char *buffer, int depth)
 {
     BITMAPHEADER *header = (BITMAPHEADER *)buffer;
     if (header->fh.signature[0] != 'B' || header->fh.signature[1] != 'M')
@@ -330,16 +441,16 @@ Pixmap CXlibToolkit::LoadImageFromBuffer(const char *buffer)
             *(dest++) = *(src++);
             *(dest++) = *(src++);
             *(dest++) = *(src++);
-            *(dest++) = 0;
+            *(dest++) = 0xFF;
         }
     }
-    XImage *image = XCreateImage(this->display, CopyFromParent, header->v5.bitsPerPixel, ZPixmap, 0, data, header->v5.width, header->v5.height, 32, 0);
+    XImage *image = XCreateImage(this->display, CopyFromParent, depth, ZPixmap, 0, data, header->v5.width, header->v5.height, 32, 0);
     if (!image)
     {
         free(data);
         return 0;
     }
-    Pixmap pixmap = XCreatePixmap(this->display, window, header->v5.width, header->v5.height, 24);
+    Pixmap pixmap = XCreatePixmap(this->display, window, header->v5.width, header->v5.height, depth);
     GC gc = XCreateGC(display, pixmap, 0, 0);
     XPutImage(display, pixmap, gc, image, 0, 0, 0, 0, header->v5.width, header->v5.height);
     XFreeGC(display, gc);

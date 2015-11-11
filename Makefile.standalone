@@ -42,13 +42,16 @@ SOURCES+=src/synth/programs.cpp
 SOURCES+=src/synth/reverb.cpp
 SOURCES+=src/synth/synthesizer.cpp
 
+UNAME_S:=$(shell uname -s)
+
 ifeq ($(DEBUG),YES)
     CFLAGS+=-g -O0
 else
     CFLAGS+=-O3
+    ifneq ($(UNAME_S),Darwin)
+        LDFLAGS+=-s
+    endif
 endif
-
-UNAME_S:=$(shell uname -s)
 
 ifeq ($(OS),Windows_NT)
     EXECUTABLE_NAME:=$(EXECUTABLE_NAME).exe
@@ -60,7 +63,6 @@ ifeq ($(OS),Windows_NT)
     LDFLAGS+=-lgdi32
     LDFLAGS+=resources.o
     DEPS:=resources.o
-    LDFLAGS+=-s
 else
     ifeq ($(TARGET),WIN32)
         EXECUTABLE_NAME:=$(EXECUTABLE_NAME).exe
@@ -72,11 +74,12 @@ else
         LDFLAGS+=-lgdi32
         LDFLAGS+=resources.o
         DEPS:=resources.o
-        LDFLAGS+=-static -s
+        LDFLAGS+=-static
     else
         CC:=g++
         INCLUDES+=-I.
-        DEPS:=bitmaps.h
+        DEPS:=bitmaps.cpp
+        SOURCES+=bitmaps.cpp
         ifeq ($(UNAME_S),Darwin)
             ifeq ($(USE_GLUT),YES)
                 CFLAGS+=-D__GLUT__
@@ -101,14 +104,19 @@ else
             CMD:=rm cocoatoolkit.o
         else ifeq ($(USE_GLUT),YES)
             CFLAGS+=-D__GLUT__
-            LDFLAGS+=-s
-            LDFLAGS+=-lGL -lGLU -lglut -lpthread
+            LDFLAGS+=-lGL
+            LDFLAGS+=-lGLU
+            LDFLAGS+=-lglut
+            LDFLAGS+=-lpthread
             SOURCES+=src/toolkits/opengltoolkit.cpp
             SOURCES+=src/toolkits/gluttoolkit.cpp
         else
-            LDFLAGS+=-s
             LDFLAGS+=-lX11
-            LDFLAGS+=-lpthread -ldl
+            LDFLAGS+=-lGL
+            LDFLAGS+=-lGLU
+            LDFLAGS+=-lpthread
+            LDFLAGS+=-ldl
+            SOURCES+=src/toolkits/opengltoolkit.cpp
             SOURCES+=src/toolkits/xlibtoolkit.cpp
         endif
     endif
@@ -127,7 +135,7 @@ ifeq ($(USE_GNUSTEP),YES)
 	@mv $(EXECUTABLE_NAME) $(EXECUTABLE_NAME).app/Contents/Linux/
 endif
 
-bitmaps.h:
+bitmaps.cpp:
 	@$(CC) -o embedresources src/toolkits/embedresources.cpp
 	@./embedresources $@
 	@rm embedresources
@@ -139,4 +147,4 @@ resources.o:
 	@$(RC) -Isrc/synth -Iskins/default src/windows/resources.rc resources.o
 
 clean:
-	@rm -rf $(EXECUTABLE_NAME).app $(EXECUTABLE_NAME) embedresources bitmaps.h *.o *.d
+	@rm -rf $(EXECUTABLE_NAME).app $(EXECUTABLE_NAME) embedresources bitmaps.cpp *.o *.d

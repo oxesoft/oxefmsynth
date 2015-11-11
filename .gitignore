@@ -3,7 +3,7 @@
 *.dll
 *.so
 *.o
-bitmaps.h
+bitmaps.cpp
 oxefmsynthdemo
 oxeconverter
 oxefmsynth

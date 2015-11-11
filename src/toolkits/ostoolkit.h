@@ -35,6 +35,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         #define COSToolkit CGlutToolkit
     #else
         #include <X11/Xlib.h>
+        #include <GL/glx.h>
+        #include "opengltoolkit.h"
         #include "xlibtoolkit.h"
         #define COSToolkit CXlibToolkit
     #endif
