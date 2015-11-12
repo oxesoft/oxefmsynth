@@ -62,6 +62,10 @@ void* eventProc(void* ptr)
     CXlibToolkit *toolkit = (CXlibToolkit*)ptr;
     bool stopThread = false;
     unsigned int time = 0;
+    if (toolkit->openGLmode)
+    {
+        glXMakeCurrent(toolkit->display, toolkit->window, toolkit->glxContext);
+    }
     while (!stopThread)
     {
         XNextEvent(toolkit->display, &event);
@@ -127,6 +131,7 @@ void* eventProc(void* ptr)
                 if (toolkit->openGLmode)
                 {
                     toolkit->Draw();
+                    glXSwapBuffers(toolkit->display, toolkit->window);
                 }
                 else
                 {
@@ -148,6 +153,7 @@ void* eventProc(void* ptr)
                     if (toolkit->openGLmode)
                     {
                         toolkit->Draw();
+                        glXSwapBuffers(toolkit->display, toolkit->window);
                     }
                     else
                     {
@@ -215,6 +221,11 @@ CXlibToolkit::CXlibToolkit(void *parentWindow, CEditor *editor)
         return;
     }
     this->display = XOpenDisplay(displayName);
+    if (!this->display)
+    {
+        printf("Cannot open display\n");
+        return;
+    }
     int screen = DefaultScreen(this->display);
 
     bool isStandAlone = false;
@@ -226,7 +237,6 @@ CXlibToolkit::CXlibToolkit(void *parentWindow, CEditor *editor)
 
     XVisualInfo vinfo = {0};
     openGLmode = glXQueryExtension(this->display, NULL, NULL);
-    openGLmode = false;
 
     if (openGLmode)
     {
@@ -234,6 +244,7 @@ CXlibToolkit::CXlibToolkit(void *parentWindow, CEditor *editor)
         int attrs[] =
         {
             GLX_RGBA,
+            GLX_DOUBLEBUFFER,
             None
         };
         vi = glXChooseVisual(this->display, screen, attrs);
@@ -269,10 +280,8 @@ CXlibToolkit::CXlibToolkit(void *parentWindow, CEditor *editor)
 
     XSetWindowAttributes wattrs;
     wattrs.colormap         = XCreateColormap(this->display, (Window)parentWindow, vinfo.visual, AllocNone);
-    wattrs.background_pixel = BlackPixel(this->display, screen);
-    wattrs.border_pixel     = BlackPixel(this->display, screen);
     wattrs.event_mask       = ButtonPressMask | ButtonReleaseMask | PointerMotionMask | ExposureMask | KeyPressMask;
-    window = XCreateWindow(this->display, (Window)parentWindow, 0, 0, GUI_WIDTH, GUI_HEIGHT, 0, vinfo.depth, InputOutput, vinfo.visual, CWBackPixel | CWColormap | CWBorderPixel | CWEventMask, &wattrs);
+    window = XCreateWindow(this->display, (Window)parentWindow, 0, 0, GUI_WIDTH, GUI_HEIGHT, 0, vinfo.depth, InputOutput, vinfo.visual, CWColormap | CWEventMask, &wattrs);
 
     XStoreName(this->display, this->window, TITLE_FULL);
 
@@ -348,7 +357,7 @@ CXlibToolkit::~CXlibToolkit()
     {
         usleep(1000 * 1);
     }
-    if (glxContext)
+    if (openGLmode)
     {
         Deinit();
         glXDestroyContext(this->display, glxContext);

@@ -105,7 +105,6 @@ else
         else ifeq ($(USE_GLUT),YES)
             CFLAGS+=-D__GLUT__
             LDFLAGS+=-lGL
-            LDFLAGS+=-lGLU
             LDFLAGS+=-lglut
             LDFLAGS+=-lpthread
             SOURCES+=src/toolkits/opengltoolkit.cpp
@@ -113,7 +112,6 @@ else
         else
             LDFLAGS+=-lX11
             LDFLAGS+=-lGL
-            LDFLAGS+=-lGLU
             LDFLAGS+=-lpthread
             LDFLAGS+=-ldl
             SOURCES+=src/toolkits/opengltoolkit.cpp

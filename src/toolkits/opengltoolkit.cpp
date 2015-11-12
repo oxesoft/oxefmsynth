@@ -20,11 +20,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "editor.h"
 #if defined(__APPLE__)
     #include <OpenGL/gl.h>
-    #include <OpenGL/glu.h>
 #elif defined(__linux)
     #define GL_GLEXT_PROTOTYPES
     #include <GL/gl.h>
-    #include <GL/glu.h>
 #endif
 #include "opengltoolkit.h"
 #include <stdlib.h>
@@ -75,11 +73,6 @@ void COpenGLToolkit::Init(CEditor *editor)
 {
     this->editor = editor;
 
-    glEnable(GL_TEXTURE_2D);
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    gluOrtho2D(0, GUI_WIDTH, 0, GUI_HEIGHT);
-
     unsigned char *rawBigTexture = (unsigned char*)malloc(TEX_WIDTH * TEX_HEIGHT * PIXEL_BYTES);
     loadImageToBuffer(rawBigTexture, texCoods[BMP_CHARS  ][0], texCoods[BMP_CHARS  ][1], (unsigned char *)chars_bmp  );
     loadImageToBuffer(rawBigTexture, texCoods[BMP_KNOB   ][0], texCoods[BMP_KNOB   ][1], (unsigned char *)knob_bmp   );
@@ -89,21 +82,13 @@ void COpenGLToolkit::Init(CEditor *editor)
     loadImageToBuffer(rawBigTexture, texCoods[BMP_BG     ][0], texCoods[BMP_BG     ][1], (unsigned char *)bg_bmp     );
     loadImageToBuffer(rawBigTexture, texCoods[BMP_BUTTONS][0], texCoods[BMP_BUTTONS][1], (unsigned char *)buttons_bmp);
     loadImageToBuffer(rawBigTexture, texCoods[BMP_OPS    ][0], texCoods[BMP_OPS    ][1], (unsigned char *)ops_bmp    );
-#if DUMP_BIG_TEXTURE_TO_FILE
-    FILE *f = fopen("out.rgba", "wb");
-    fwrite(rawBigTexture, TEX_WIDTH * TEX_HEIGHT * PIXEL_BYTES, 1, f);
-    fclose(f);
-    /*
-     * view the image using the command line "display -size 888x656 -depth 8 -flip out.rgba"
-     */
-#endif
+
+    glEnable(GL_TEXTURE_2D);
     glGenTextures(1, &texture);
     glBindTexture(GL_TEXTURE_2D, texture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, TEX_WIDTH, TEX_HEIGHT, 0, GL_RGBA, GL_UNSIGNED_BYTE, rawBigTexture);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, TEX_WIDTH, TEX_HEIGHT, 0, GL_RGBA, GL_UNSIGNED_BYTE, rawBigTexture);
     free(rawBigTexture);
 
     editor->GetCoordinates(this->coords);
@@ -136,7 +121,7 @@ void COpenGLToolkit::Init(CEditor *editor)
     glGenBuffers(1, &vertexBuffer);
     glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-    glVertexPointer  (3, GL_FLOAT, 0, 0);
+    glVertexPointer(3, GL_FLOAT, 0, 0);
 
     glEnableClientState(GL_TEXTURE_COORD_ARRAY);
     glGenBuffers(1, &coordsBuffer);
@@ -188,6 +173,13 @@ GLfloat* COpenGLToolkit::updateVerticesXYZ(GLfloat x, GLfloat y, GLfloat w, GLfl
 {
     // flipping
     y = iH - y - h;
+    // ajusts to range -1.0 to 1.0
+    x /= GUI_WIDTH  / 2.f;
+    y /= GUI_HEIGHT / 2.f;
+    w /= GUI_WIDTH  / 2.f;
+    h /= GUI_HEIGHT / 2.f;
+    x -= 1.f;
+    y -= 1.f;
     // triangle 1
     *(v++) = x    ; *(v++) = y + h; *(v++) = 0;
     *(v++) = x + w; *(v++) = y + h; *(v++) = 0;
@@ -233,6 +225,7 @@ void COpenGLToolkit::Draw()
         v = this->updateVerticesUV(c->origX, c->origY, c->width, c->height, c->origBmp, v);
         c++;
     }
+    glClear(GL_COLOR_BUFFER_BIT);
     glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(this->texCoords), this->texCoords);
     glDrawArrays(GL_TRIANGLES, 0, TOTAL_INDICES);
     glFlush();

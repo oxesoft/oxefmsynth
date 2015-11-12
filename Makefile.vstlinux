@@ -29,6 +29,7 @@ SOURCES:=src/vst/oxevst.cpp
 SOURCES+=src/vst/oxevstmain.cpp
 SOURCES+=src/vst/oxevsteditor.cpp
 SOURCES+=src/vst/vsthostinterface.cpp
+SOURCES+=src/toolkits/opengltoolkit.cpp
 SOURCES+=src/toolkits/xlibtoolkit.cpp
 SOURCES+=src/gui/button.cpp
 SOURCES+=src/gui/channels.cpp
