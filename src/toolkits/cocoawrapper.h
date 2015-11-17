@@ -26,7 +26,6 @@ void  CocoaToolkitDestroy(void *self);
 void  CocoaToolkitCreateWindow(void *self, void *parent);
 void  CocoaToolkitShowWindow(void *self);
 void  CocoaToolkitWaitWindowClosed(void *self);
-void  CocoaToolkitCopyRect(void *self, int destX, int destY, int width, int height, int origBmp, int origX, int origY);
 
 void  CppOnLButtonDown(void *toolkit, int x, int y);
 void  CppOnLButtonUp(void *toolkit);
@@ -34,6 +33,9 @@ void  CppOnDblClick(void *toolkit, int x, int y);
 void  CppOnMouseMove(void *toolkit, int x, int y);
 void  CppOnChar(void *toolkit, int c);
 void  CppUpdate(void *toolkit);
+void  CppOpenGLInit(void *toolkit);
+void  CppOpenGLDeinit(void *toolkit);
+void  CppOpenGLDraw(void *toolkit);
 
 #ifdef __cplusplus
 }

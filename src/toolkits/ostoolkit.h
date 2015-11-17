@@ -23,6 +23,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         #include "gluttoolkit.h"
         #define COSToolkit CGlutToolkit
     #else
+        #if defined(__linux)
+            #include <GL/gl.h>
+        #else
+            #include <OpenGL/gl.h>
+        #endif
+        #include "opengltoolkit.h"
         #include "cocoatoolkit.h"
         #define COSToolkit CCocoaToolkit
     #endif

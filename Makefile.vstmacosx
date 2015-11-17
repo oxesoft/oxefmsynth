@@ -29,6 +29,7 @@ SOURCES:=src/vst/oxevst.cpp
 SOURCES+=src/vst/oxevstmain.cpp
 SOURCES+=src/vst/oxevsteditor.cpp
 SOURCES+=src/vst/vsthostinterface.cpp
+SOURCES+=src/toolkits/opengltoolkit.cpp
 SOURCES+=src/toolkits/cocoatoolkit.cpp
 SOURCES+=src/toolkits/cocoatoolkit.m
 SOURCES+=src/gui/button.cpp
@@ -55,6 +56,7 @@ SOURCES+=$(VSTSDK_PATH)/public.sdk/source/vst2.x/vstplugmain.cpp
 SOURCES+=bitmaps.cpp
 
 CFLAGS+=-framework Cocoa
+CFLAGS+=-framework OpenGL
 
 ifeq ($(DEBUG),YES)
 	CFLAGS+=-g -O0

@@ -18,13 +18,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "bitmaps.h"
 #include "editor.h"
-#if defined(__APPLE__)
-    #include <OpenGL/gl.h>
-#elif defined(__linux)
+#if defined(__linux)
     #define GL_GLEXT_PROTOTYPES
     #include <GL/gl.h>
+#elif defined(__APPLE__)
+    #include <OpenGL/gl.h>
 #endif
 #include "opengltoolkit.h"
+#include <stdio.h>
 #include <stdlib.h>
 
 #define TEX_WIDTH     (633 + 250       + 5 /* to align */)
@@ -69,19 +70,19 @@ typedef struct
     BITMAPV5HEADER   v5;
 } BITMAPHEADER;
 
-void COpenGLToolkit::Init(CEditor *editor)
+void COpenGLToolkit::Init(CEditor *editor, char *skinPath)
 {
     this->editor = editor;
 
     unsigned char *rawBigTexture = (unsigned char*)malloc(TEX_WIDTH * TEX_HEIGHT * PIXEL_BYTES);
-    loadImageToBuffer(rawBigTexture, texCoods[BMP_CHARS  ][0], texCoods[BMP_CHARS  ][1], (unsigned char *)chars_bmp  );
-    loadImageToBuffer(rawBigTexture, texCoods[BMP_KNOB   ][0], texCoods[BMP_KNOB   ][1], (unsigned char *)knob_bmp   );
-    loadImageToBuffer(rawBigTexture, texCoods[BMP_KNOB2  ][0], texCoods[BMP_KNOB2  ][1], (unsigned char *)knob2_bmp  );
-    loadImageToBuffer(rawBigTexture, texCoods[BMP_KNOB3  ][0], texCoods[BMP_KNOB3  ][1], (unsigned char *)knob3_bmp  );
-    loadImageToBuffer(rawBigTexture, texCoods[BMP_KEY    ][0], texCoods[BMP_KEY    ][1], (unsigned char *)key_bmp    );
-    loadImageToBuffer(rawBigTexture, texCoods[BMP_BG     ][0], texCoods[BMP_BG     ][1], (unsigned char *)bg_bmp     );
-    loadImageToBuffer(rawBigTexture, texCoods[BMP_BUTTONS][0], texCoods[BMP_BUTTONS][1], (unsigned char *)buttons_bmp);
-    loadImageToBuffer(rawBigTexture, texCoods[BMP_OPS    ][0], texCoods[BMP_OPS    ][1], (unsigned char *)ops_bmp    );
+    loadImageToBuffer(rawBigTexture, texCoods[BMP_CHARS  ][0], texCoods[BMP_CHARS  ][1], (unsigned char *)chars_bmp  , skinPath, "chars.bmp"  );
+    loadImageToBuffer(rawBigTexture, texCoods[BMP_KNOB   ][0], texCoods[BMP_KNOB   ][1], (unsigned char *)knob_bmp   , skinPath, "knob.bmp"   );
+    loadImageToBuffer(rawBigTexture, texCoods[BMP_KNOB2  ][0], texCoods[BMP_KNOB2  ][1], (unsigned char *)knob2_bmp  , skinPath, "knob2.bmp"  );
+    loadImageToBuffer(rawBigTexture, texCoods[BMP_KNOB3  ][0], texCoods[BMP_KNOB3  ][1], (unsigned char *)knob3_bmp  , skinPath, "knob3.bmp"  );
+    loadImageToBuffer(rawBigTexture, texCoods[BMP_KEY    ][0], texCoods[BMP_KEY    ][1], (unsigned char *)key_bmp    , skinPath, "key.bmp"    );
+    loadImageToBuffer(rawBigTexture, texCoods[BMP_BG     ][0], texCoods[BMP_BG     ][1], (unsigned char *)bg_bmp     , skinPath, "bg.bmp"     );
+    loadImageToBuffer(rawBigTexture, texCoods[BMP_BUTTONS][0], texCoods[BMP_BUTTONS][1], (unsigned char *)buttons_bmp, skinPath, "buttons.bmp");
+    loadImageToBuffer(rawBigTexture, texCoods[BMP_OPS    ][0], texCoods[BMP_OPS    ][1], (unsigned char *)ops_bmp    , skinPath, "ops.bmp"    );
 
     glEnable(GL_TEXTURE_2D);
     glGenTextures(1, &texture);
@@ -137,12 +138,41 @@ void COpenGLToolkit::Deinit()
     glDeleteBuffers(1, &coordsBuffer);
 }
 
-void COpenGLToolkit::loadImageToBuffer(unsigned char *destB, int destX, int destY, unsigned char *buffer)
+void COpenGLToolkit::loadImageToBuffer(unsigned char *destB, int destX, int destY, unsigned char *buffer, char *skinPath, const char *filename)
 {
+    unsigned char *tmp = NULL;
+    char path[512];
+    snprintf(path, sizeof(path), "%s%s", skinPath, filename);
+    FILE *f = fopen(path, "rb");
+    if (f)
+    {
+        fseek(f, 0, SEEK_END);
+        int size = ftell(f);
+        fseek(f, 0, SEEK_SET);
+        tmp = (unsigned char*)malloc(size);
+        if (!fread(tmp, size, 1, f))
+        {
+            free(tmp);
+            tmp = NULL;
+        }
+        else
+        {
+            buffer = tmp;
+        }
+        fclose(f);
+    }
     BITMAPHEADER *header = (BITMAPHEADER *)buffer;
     if (header->fh.signature[0] != 'B' || header->fh.signature[1] != 'M')
     {
+        if (tmp)
+        {
+            free(tmp);
+        }
         return;
+    }
+    if (!header->v5.imageSize)
+    {
+        header->v5.imageSize = header->fh.fileSize - sizeof(BITMAPFILEHEADER) - header->v5.dibHeaderSize;
     }
     unsigned char *data = (unsigned char *)buffer + header->fh.fileOffsetToPixelArray;
     unsigned int bytesPerLine = header->v5.imageSize / header->v5.height;
@@ -166,6 +196,10 @@ void COpenGLToolkit::loadImageToBuffer(unsigned char *destB, int destX, int dest
             *(d++) = b;
             *(d++) = 0xFF;
         }
+    }
+    if (tmp)
+    {
+        free(tmp);
     }
 }
 

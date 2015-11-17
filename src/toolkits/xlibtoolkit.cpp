@@ -190,11 +190,11 @@ void* updateProc(void* ptr)
 void GetResourcesPath(char *path, int size)
 {
     Dl_info info;
-    dladdr((void*)eventProc, &info);
+    dladdr((void*)GetResourcesPath, &info);
     strncpy(path, info.dli_fname, PATH_MAX);
     char* tmp = strrchr(path, '/');
     *tmp = 0;
-    strcat(path, "/"BMP_PATH);
+    strcat(path, "/"BMP_PATH"/");
 }
 
 CXlibToolkit::CXlibToolkit(void *parentWindow, CEditor *editor)
@@ -298,18 +298,18 @@ CXlibToolkit::CXlibToolkit(void *parentWindow, CEditor *editor)
     this->WM_DELETE_WINDOW = XInternAtom(this->display, "WM_DELETE_WINDOW", false);
     XSetWMProtocols(this->display, this->window, &WM_DELETE_WINDOW, 1);
 
+    char path[PATH_MAX];
+    GetResourcesPath(path, PATH_MAX);
+
     if (openGLmode)
     {
         glXMakeCurrent(this->display, this->window, this->glxContext);
-        Init(this->editor);
+        Init(this->editor, path);
     }
     else
     {
         gc = XCreateGC(this->display, this->window, 0, 0);
         offscreen = XCreatePixmap(this->display, this->window, GUI_WIDTH, GUI_HEIGHT, vinfo.depth);
-
-        char path[PATH_MAX];
-        GetResourcesPath(path, PATH_MAX);
 
         char fullPath[PATH_MAX];
         snprintf(fullPath, PATH_MAX, "%s/%s", path, "chars.bmp"  );

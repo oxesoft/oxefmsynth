@@ -34,11 +34,11 @@ private:
     GLfloat   vertices [TOTAL_VALUES_VER];
     GLfloat   texCoords[TOTAL_VALUES_TEX];
     CEditor   *editor;
-    void      loadImageToBuffer(unsigned char *destB, int destX, int destY, unsigned char *buffer);
+    void      loadImageToBuffer(unsigned char *destB, int destX, int destY, unsigned char *buffer, char *skinPath, const char *filename);
     GLfloat*  updateVerticesXYZ(GLfloat x, GLfloat y, GLfloat w, GLfloat h, GLfloat iW, GLfloat iH, GLfloat *v);
     GLfloat*  updateVerticesUV(GLfloat x, GLfloat y, GLfloat w, GLfloat h, int origBmp, GLfloat *v);
 public:
-    void Init(CEditor *editor);
+    void Init(CEditor *editor, char *skinPath);
     void Draw();
     void Deinit();
 };

@@ -16,7 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-class CCocoaToolkit : public CToolkit
+class CCocoaToolkit : public COpenGLToolkit
 {
 private:
     void *objcInstance;
@@ -26,6 +26,5 @@ public:
     CCocoaToolkit(void *parentWindow, CEditor *editor);
     ~CCocoaToolkit();
     void StartWindowProcesses();
-    void CopyRect(int destX, int destY, int width, int height, int origBmp, int origX, int origY);
     int  WaitWindowClosed();
 };

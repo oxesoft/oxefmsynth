@@ -18,8 +18,30 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "editor.h"
 #include "cocoawrapper.h"
+#if defined(__linux)
+    #include <GL/gl.h>
+#else
+    #include <OpenGL/gl.h>
+#endif
+#include "opengltoolkit.h"
 #include "cocoatoolkit.h"
 #include <stdio.h>
+#include <string.h>
+#ifndef __USE_GNU
+#define __USE_GNU
+#endif
+#include <dlfcn.h>
+#define PATH_MAX 512
+
+void GetResourcesPath(char *path, int size)
+{
+    Dl_info info;
+    dladdr((void*)GetResourcesPath, &info);
+    strncpy(path, info.dli_fname, PATH_MAX);
+    char* tmp = strrchr(path, '/');
+    *tmp = 0;
+    strcat(path, "/../../../"BMP_PATH"/");
+}
 
 CCocoaToolkit::CCocoaToolkit(void *parentWindow, CEditor *editor)
 {
@@ -37,11 +59,6 @@ CCocoaToolkit::~CCocoaToolkit()
 void CCocoaToolkit::StartWindowProcesses()
 {
     CocoaToolkitShowWindow(this->objcInstance);
-}
-
-void CCocoaToolkit::CopyRect(int destX, int destY, int width, int height, int origBmp, int origX, int origY)
-{
-    CocoaToolkitCopyRect(this->objcInstance, destX, destY, width, height, origBmp, origX, origY);
 }
 
 int CCocoaToolkit::WaitWindowClosed()
@@ -75,7 +92,20 @@ void CppOnChar(void *toolkit, int c)
     ((CCocoaToolkit*)toolkit)->editor->OnChar(c);
 }
 
-void CppUpdate(void *toolkit)
+void CppOpenGLInit(void *toolkit)
 {
-    ((CCocoaToolkit*)toolkit)->editor->Update();
+    CCocoaToolkit *t = (CCocoaToolkit*)toolkit;
+    char path[PATH_MAX];
+    GetResourcesPath(path, sizeof(path));
+    t->Init(t->editor, path);
+}
+
+void CppOpenGLDeinit(void *toolkit)
+{
+    ((CCocoaToolkit*)toolkit)->Deinit();
+}
+
+void CppOpenGLDraw(void *toolkit)
+{
+    ((CCocoaToolkit*)toolkit)->Draw();
 }
