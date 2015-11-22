@@ -55,6 +55,10 @@ SOURCES+=$(VSTSDK_PATH)/public.sdk/source/vst2.x/vstplugmain.cpp
 SOURCES+=bitmaps.cpp
 
 LIBS:=-lX11
+LIBS+=-lGL
+LIBS+=-lpthread
+LIBS+=-ldl
+
 CFLAGS+=-fPIC
 
 ifeq ($(DEBUG),YES)
