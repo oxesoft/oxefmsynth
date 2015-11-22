@@ -259,7 +259,7 @@ CXlibToolkit::CXlibToolkit(void *parentWindow, CEditor *editor)
     if (!this->glxContext)
     {
         openGLmode = false;
-        if (!XMatchVisualInfo(this->display, screen, 32, TrueColor, &vinfo))
+        if (!XMatchVisualInfo(this->display, screen, 24, TrueColor, &vinfo))
         {
             fprintf(stderr, "True color screen required\n");
             return;
@@ -274,7 +274,7 @@ CXlibToolkit::CXlibToolkit(void *parentWindow, CEditor *editor)
         }
         else
         {
-            printf("%s\n", "bliting mode");
+            printf("%s\n", "blitting mode");
         }
     }
 
