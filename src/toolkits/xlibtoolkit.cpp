@@ -256,12 +256,19 @@ CXlibToolkit::CXlibToolkit(void *parentWindow, CEditor *editor)
         }
     }
 
+    int depth = DefaultDepth(display, screen);
+
+    if (isStandAlone)
+    {
+        printf("default depth=%d\n", depth);
+    }
+
     if (!this->glxContext)
     {
         openGLmode = false;
-        if (!XMatchVisualInfo(this->display, screen, 24, TrueColor, &vinfo))
+        if (!XMatchVisualInfo(this->display, screen, depth, TrueColor, &vinfo))
         {
-            fprintf(stderr, "True color screen required\n");
+            fprintf(stderr, "No visual available\n");
             return;
         }
     }
@@ -276,6 +283,11 @@ CXlibToolkit::CXlibToolkit(void *parentWindow, CEditor *editor)
         {
             printf("%s\n", "blitting mode");
         }
+        printf("visual info values:\n");
+        printf("    depth       : %d\n", vinfo.depth);
+        printf("    red_mask    : %08X\n", (int)vinfo.red_mask);
+        printf("    green_mask  : %08X\n", (int)vinfo.green_mask);
+        printf("    blue_mask   : %08X\n", (int)vinfo.blue_mask);
     }
 
     XSetWindowAttributes wattrs;
@@ -313,30 +325,30 @@ CXlibToolkit::CXlibToolkit(void *parentWindow, CEditor *editor)
 
         char fullPath[PATH_MAX];
         snprintf(fullPath, PATH_MAX, "%s/%s", path, "chars.bmp"  );
-        bmps[BMP_CHARS  ] = LoadImageFromFile(fullPath, vinfo.depth);
+        bmps[BMP_CHARS  ] = LoadImageFromFile(fullPath, &vinfo);
         snprintf(fullPath, PATH_MAX, "%s/%s", path, "knob.bmp"   );
-        bmps[BMP_KNOB   ] = LoadImageFromFile(fullPath, vinfo.depth);
+        bmps[BMP_KNOB   ] = LoadImageFromFile(fullPath, &vinfo);
         snprintf(fullPath, PATH_MAX, "%s/%s", path, "knob2.bmp"  );
-        bmps[BMP_KNOB2  ] = LoadImageFromFile(fullPath, vinfo.depth);
+        bmps[BMP_KNOB2  ] = LoadImageFromFile(fullPath, &vinfo);
         snprintf(fullPath, PATH_MAX, "%s/%s", path, "knob3.bmp"  );
-        bmps[BMP_KNOB3  ] = LoadImageFromFile(fullPath, vinfo.depth);
+        bmps[BMP_KNOB3  ] = LoadImageFromFile(fullPath, &vinfo);
         snprintf(fullPath, PATH_MAX, "%s/%s", path, "key.bmp"    );
-        bmps[BMP_KEY    ] = LoadImageFromFile(fullPath, vinfo.depth);
+        bmps[BMP_KEY    ] = LoadImageFromFile(fullPath, &vinfo);
         snprintf(fullPath, PATH_MAX, "%s/%s", path, "bg.bmp"     );
-        bmps[BMP_BG     ] = LoadImageFromFile(fullPath, vinfo.depth);
+        bmps[BMP_BG     ] = LoadImageFromFile(fullPath, &vinfo);
         snprintf(fullPath, PATH_MAX, "%s/%s", path, "buttons.bmp");
-        bmps[BMP_BUTTONS] = LoadImageFromFile(fullPath, vinfo.depth);
+        bmps[BMP_BUTTONS] = LoadImageFromFile(fullPath, &vinfo);
         snprintf(fullPath, PATH_MAX, "%s/%s", path, "ops.bmp"    );
-        bmps[BMP_OPS    ] = LoadImageFromFile(fullPath, vinfo.depth);
+        bmps[BMP_OPS    ] = LoadImageFromFile(fullPath, &vinfo);
 
-        if (!bmps[BMP_CHARS  ]) bmps[BMP_CHARS  ] = LoadImageFromBuffer(chars_bmp  , vinfo.depth);
-        if (!bmps[BMP_KNOB   ]) bmps[BMP_KNOB   ] = LoadImageFromBuffer(knob_bmp   , vinfo.depth);
-        if (!bmps[BMP_KNOB2  ]) bmps[BMP_KNOB2  ] = LoadImageFromBuffer(knob2_bmp  , vinfo.depth);
-        if (!bmps[BMP_KNOB3  ]) bmps[BMP_KNOB3  ] = LoadImageFromBuffer(knob3_bmp  , vinfo.depth);
-        if (!bmps[BMP_KEY    ]) bmps[BMP_KEY    ] = LoadImageFromBuffer(key_bmp    , vinfo.depth);
-        if (!bmps[BMP_BG     ]) bmps[BMP_BG     ] = LoadImageFromBuffer(bg_bmp     , vinfo.depth);
-        if (!bmps[BMP_BUTTONS]) bmps[BMP_BUTTONS] = LoadImageFromBuffer(buttons_bmp, vinfo.depth);
-        if (!bmps[BMP_OPS    ]) bmps[BMP_OPS    ] = LoadImageFromBuffer(ops_bmp    , vinfo.depth);
+        if (!bmps[BMP_CHARS  ]) bmps[BMP_CHARS  ] = LoadImageFromBuffer(chars_bmp  , &vinfo);
+        if (!bmps[BMP_KNOB   ]) bmps[BMP_KNOB   ] = LoadImageFromBuffer(knob_bmp   , &vinfo);
+        if (!bmps[BMP_KNOB2  ]) bmps[BMP_KNOB2  ] = LoadImageFromBuffer(knob2_bmp  , &vinfo);
+        if (!bmps[BMP_KNOB3  ]) bmps[BMP_KNOB3  ] = LoadImageFromBuffer(knob3_bmp  , &vinfo);
+        if (!bmps[BMP_KEY    ]) bmps[BMP_KEY    ] = LoadImageFromBuffer(key_bmp    , &vinfo);
+        if (!bmps[BMP_BG     ]) bmps[BMP_BG     ] = LoadImageFromBuffer(bg_bmp     , &vinfo);
+        if (!bmps[BMP_BUTTONS]) bmps[BMP_BUTTONS] = LoadImageFromBuffer(buttons_bmp, &vinfo);
+        if (!bmps[BMP_OPS    ]) bmps[BMP_OPS    ] = LoadImageFromBuffer(ops_bmp    , &vinfo);
     }
 
     XMapWindow(this->display, this->window);
@@ -405,7 +417,7 @@ void CXlibToolkit::StartWindowProcesses()
     pthread_create(&thread2, NULL, &updateProc, (void*)this);
 }
 
-Pixmap CXlibToolkit::LoadImageFromFile(const char *path, int depth)
+Pixmap CXlibToolkit::LoadImageFromFile(const char *path, XVisualInfo *v)
 {
     FILE *f = fopen(path, "rb");
     if (!f)
@@ -423,43 +435,92 @@ Pixmap CXlibToolkit::LoadImageFromFile(const char *path, int depth)
         return 0;
     }
     fclose(f);
-    Pixmap result = LoadImageFromBuffer(tmp, depth);
+    Pixmap result = LoadImageFromBuffer(tmp, v);
     free(tmp);
     return result;
 }
 
-Pixmap CXlibToolkit::LoadImageFromBuffer(const char *buffer, int depth)
+Pixmap CXlibToolkit::LoadImageFromBuffer(const char *buffer, XVisualInfo *v)
 {
     BITMAPHEADER *header = (BITMAPHEADER *)buffer;
     if (header->fh.signature[0] != 'B' || header->fh.signature[1] != 'M')
     {
         return 0;
     }
-    char *data = (char*)malloc(header->v5.width * header->v5.height * 4);
-    char* dest = data;
+    char  *data = (char*)malloc(header->v5.width * header->v5.height * 4);
+    char  *dest      = data;
+    short *destInt16 = (short*)data;
     if (!header->v5.imageSize)
     {
         header->v5.imageSize = header->fh.fileSize - sizeof(BITMAPFILEHEADER) - header->v5.dibHeaderSize;
     }
+    int rMask = v->red_mask;
+    int gMask = v->green_mask;
+    int bMask = v->blue_mask;
+    int rBitCount = __builtin_popcount(rMask);
+    int gBitCount = __builtin_popcount(gMask);
+    int bBitCount = __builtin_popcount(bMask);
+    int r2Right = 8 - rBitCount;
+    int g2Right = 8 - gBitCount;
+    int b2Right = 8 - bBitCount;
+    int r2Left  = 16 - rBitCount;
+    int g2Left  = 16 - gBitCount;
+    int b2Left  = 16 - bBitCount;
+	while (!(rMask & 1))
+	{
+		rMask >>= 1;
+		r2Left--;
+	}
+	while (!(gMask & 1))
+	{
+		gMask >>= 1;
+		g2Left--;
+	}
+	while (!(bMask & 1))
+	{
+		bMask >>= 1;
+		b2Left--;
+	}
+    int r;
+    int g;
+    int b;
+    int i;
+    int bitmapPad = v->depth == 16 ? 16 : 32;
     for (int line = header->v5.height - 1; line >= 0; line--)
     {
         char* src  = (char*)buffer + header->fh.fileOffsetToPixelArray + (line * (header->v5.imageSize / header->v5.height));
-        int i = header->v5.width;
-        while (i--)
+        i = header->v5.width;
+        if (v->depth == 24 || v->depth == 32)
         {
-            *(dest++) = *(src++);
-            *(dest++) = *(src++);
-            *(dest++) = *(src++);
-            *(dest++) = 0xFF;
-        }
+			while (i--)
+			{
+				r = *(src++);
+				g = *(src++);
+				b = *(src++);
+				*(dest++) = r;
+				*(dest++) = g;
+				*(dest++) = b;
+				*(dest++) = 0xFF;
+			}
+		}
+		else if (v->depth == 16)
+		{
+			while (i--)
+			{
+				r = *(src++);
+				g = *(src++);
+				b = *(src++);
+				*(destInt16++) = ((r >> r2Right) << r2Left) | ((g >> g2Right) << g2Left) | ((b >> b2Right) << b2Left);
+			}
+		}
     }
-    XImage *image = XCreateImage(this->display, CopyFromParent, depth, ZPixmap, 0, data, header->v5.width, header->v5.height, 32, 0);
+    XImage *image = XCreateImage(this->display, CopyFromParent, v->depth, ZPixmap, 0, data, header->v5.width, header->v5.height, bitmapPad, 0);
     if (!image)
     {
         free(data);
         return 0;
     }
-    Pixmap pixmap = XCreatePixmap(this->display, window, header->v5.width, header->v5.height, depth);
+    Pixmap pixmap = XCreatePixmap(this->display, window, header->v5.width, header->v5.height, v->depth);
     GC gc = XCreateGC(display, pixmap, 0, 0);
     XPutImage(display, pixmap, gc, image, 0, 0, 0, 0, header->v5.width, header->v5.height);
     XFreeGC(display, gc);

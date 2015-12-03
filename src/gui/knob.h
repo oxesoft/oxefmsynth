@@ -19,7 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 class CKnob : public CControl
 {
 private:
-    char  value;           // integer value
+    signed char value;     // integer value
     float fvalue;          // float value
     char  name[TEXT_SIZE]; // knob name
     int   knobSize;        // size in pixels

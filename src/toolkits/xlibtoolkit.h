@@ -20,8 +20,8 @@ class CXlibToolkit : public COpenGLToolkit
 {
 private:
     Pixmap bmps[BMP_COUNT];
-    Pixmap LoadImageFromFile(const char *path, int depth);
-    Pixmap LoadImageFromBuffer(const char *buffer, int depth);
+    Pixmap LoadImageFromFile(const char *path, XVisualInfo *v);
+    Pixmap LoadImageFromBuffer(const char *buffer, XVisualInfo *v);
 public:
     void        *parentWindow;
     CEditor     *editor;

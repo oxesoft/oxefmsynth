@@ -68,14 +68,17 @@ else
 endif
 
 ARCH := $(shell getconf LONG_BIT)
+ifneq ($(ARCH),32)
+    BITS:=-m32
+endif
 
 all: oxevst$(ARCH)
 
 oxevst32: bitmaps.cpp
-	@g++ -shared -m32 -o oxevst32.so $(CFLAGS) $(SOURCES) $(INCLUDES) $(LIBS)
+	@g++ -shared $(BITS) -o oxevst32.so $(CFLAGS) $(SOURCES) $(INCLUDES) $(LIBS)
 
 oxevst64: bitmaps.cpp
-	@g++ -shared -m64 -o oxevst64.so $(CFLAGS) $(SOURCES) $(INCLUDES) $(LIBS)
+	@g++ -shared -m64    -o oxevst64.so $(CFLAGS) $(SOURCES) $(INCLUDES) $(LIBS)
 
 bitmaps.cpp:
 	@$(CC) -o embedresources src/toolkits/embedresources.cpp
