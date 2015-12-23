@@ -16,7 +16,12 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-class CXlibToolkit : public COpenGLToolkit
+class CXlibToolkit
+#ifdef USE_OPENGL
+: public COpenGLToolkit
+#else
+: public CToolkit
+#endif
 {
 private:
     Pixmap bmps[BMP_COUNT];
@@ -33,7 +38,9 @@ public:
     Pixmap       offscreen;
     bool         thread1Finished;
     bool         thread2Finished;
+#ifdef USE_OPENGL
     GLXContext   glxContext;
+#endif
     bool         openGLmode;
     CXlibToolkit(void *parentWindow, CEditor *editor);
     ~CXlibToolkit();

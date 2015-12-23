@@ -29,7 +29,6 @@ SOURCES:=src/vst/oxevst.cpp
 SOURCES+=src/vst/oxevstmain.cpp
 SOURCES+=src/vst/oxevsteditor.cpp
 SOURCES+=src/vst/vsthostinterface.cpp
-SOURCES+=src/toolkits/opengltoolkit.cpp
 SOURCES+=src/toolkits/xlibtoolkit.cpp
 SOURCES+=src/gui/button.cpp
 SOURCES+=src/gui/channels.cpp
@@ -55,7 +54,6 @@ SOURCES+=$(VSTSDK_PATH)/public.sdk/source/vst2.x/vstplugmain.cpp
 SOURCES+=bitmaps.cpp
 
 LIBS:=-lX11
-LIBS+=-lGL
 LIBS+=-lpthread
 LIBS+=-ldl
 

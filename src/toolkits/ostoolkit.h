@@ -17,35 +17,19 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #if defined(__APPLE__)
-    #if defined(__GLUT__)
-        #include <GLUT/glut.h>
-        #include "opengltoolkit.h"
-        #include "gluttoolkit.h"
-        #define COSToolkit CGlutToolkit
-    #else
-        #if defined(__linux)
-            #include <GL/gl.h>
-        #else
-            #include <OpenGL/gl.h>
-        #endif
-        #include "opengltoolkit.h"
-        #include "cocoatoolkit.h"
-        #define COSToolkit CCocoaToolkit
-    #endif
+    #include <OpenGL/gl.h>
+    #include "opengltoolkit.h"
+    #include "cocoatoolkit.h"
+    #define COSToolkit CCocoaToolkit
 #elif defined(__linux)
-    #if defined(__GLUT__)
-        #define GL_GLEXT_PROTOTYPES
-        #include <GL/glut.h>
-        #include "opengltoolkit.h"
-        #include "gluttoolkit.h"
-        #define COSToolkit CGlutToolkit
-    #else
-        #include <X11/Xlib.h>
+    #include <X11/Xlib.h>
+    #include <X11/Xutil.h>
+    #ifdef USE_OPENGL
         #include <GL/glx.h>
         #include "opengltoolkit.h"
-        #include "xlibtoolkit.h"
-        #define COSToolkit CXlibToolkit
     #endif
+    #include "xlibtoolkit.h"
+    #define COSToolkit CXlibToolkit
 #else
     #include <windows.h>
     #include "windowstoolkit.h"

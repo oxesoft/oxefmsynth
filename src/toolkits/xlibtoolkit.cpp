@@ -19,10 +19,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "bitmaps.h"
 #include "editor.h"
 #include <X11/Xlib.h>
-#include <GL/glx.h>
-#include "opengltoolkit.h"
-#include "xlibtoolkit.h"
 #include <X11/Xutil.h>
+#ifdef USE_OPENGL
+    #include <GL/glx.h>
+    #include "opengltoolkit.h"
+#endif
+#include "xlibtoolkit.h"
 #include <pthread.h>
 #include <string.h>
 #include <stdlib.h>
@@ -62,10 +64,12 @@ void* eventProc(void* ptr)
     CXlibToolkit *toolkit = (CXlibToolkit*)ptr;
     bool stopThread = false;
     unsigned int time = 0;
+#ifdef USE_OPENGL
     if (toolkit->openGLmode)
     {
         glXMakeCurrent(toolkit->display, toolkit->window, toolkit->glxContext);
     }
+#endif
     while (!stopThread)
     {
         XNextEvent(toolkit->display, &event);
@@ -128,12 +132,14 @@ void* eventProc(void* ptr)
             }
             case Expose:
             {
+#ifdef USE_OPENGL
                 if (toolkit->openGLmode)
                 {
                     toolkit->Draw();
                     glXSwapBuffers(toolkit->display, toolkit->window);
                 }
                 else
+#endif
                 {
                     XGraphicsExposeEvent *e = (XGraphicsExposeEvent*)&event;
                     XCopyArea(toolkit->display, toolkit->offscreen, toolkit->window, toolkit->gc, e->x, e->y, e->width, e->height, e->x, e->y);
@@ -150,12 +156,14 @@ void* eventProc(void* ptr)
                 }
                 else if (message->data.l[0] == toolkit->WM_TIMER)
                 {
+#ifdef USE_OPENGL
                     if (toolkit->openGLmode)
                     {
                         toolkit->Draw();
                         glXSwapBuffers(toolkit->display, toolkit->window);
                     }
                     else
+#endif
                     {
                         toolkit->editor->Update();
                     }
@@ -205,7 +213,6 @@ CXlibToolkit::CXlibToolkit(void *parentWindow, CEditor *editor)
     this->window        = 0;
     this->offscreen     = 0;
     this->gc            = NULL;
-    this->glxContext    = NULL;
     thread1Finished     = true;
     thread2Finished     = true;
     memset(bmps, 0, sizeof(bmps));
@@ -236,6 +243,8 @@ CXlibToolkit::CXlibToolkit(void *parentWindow, CEditor *editor)
     }
 
     XVisualInfo vinfo = {0};
+#ifdef USE_OPENGL
+    this->glxContext = NULL;
     openGLmode = glXQueryExtension(this->display, NULL, NULL);
 
     if (openGLmode)
@@ -255,7 +264,9 @@ CXlibToolkit::CXlibToolkit(void *parentWindow, CEditor *editor)
             XFree(vi);
         }
     }
-
+#else
+    openGLmode = false;
+#endif
     int depth = DefaultDepth(display, screen);
 
     if (isStandAlone)
@@ -263,7 +274,9 @@ CXlibToolkit::CXlibToolkit(void *parentWindow, CEditor *editor)
         printf("default depth=%d\n", depth);
     }
 
+#ifdef USE_OPENGL
     if (!this->glxContext)
+#endif
     {
         openGLmode = false;
         if (!XMatchVisualInfo(this->display, screen, depth, TrueColor, &vinfo))
@@ -313,12 +326,14 @@ CXlibToolkit::CXlibToolkit(void *parentWindow, CEditor *editor)
     char path[PATH_MAX];
     GetResourcesPath(path, PATH_MAX);
 
+#ifdef USE_OPENGL
     if (openGLmode)
     {
         glXMakeCurrent(this->display, this->window, this->glxContext);
         Init(this->editor, path);
     }
     else
+#endif
     {
         gc = XCreateGC(this->display, this->window, 0, 0);
         offscreen = XCreatePixmap(this->display, this->window, GUI_WIDTH, GUI_HEIGHT, vinfo.depth);
@@ -369,12 +384,14 @@ CXlibToolkit::~CXlibToolkit()
     {
         usleep(1000 * 1);
     }
+#ifdef USE_OPENGL
     if (openGLmode)
     {
         Deinit();
         glXDestroyContext(this->display, glxContext);
     }
     else
+#endif
     {
         if (gc)
         {

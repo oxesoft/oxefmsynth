@@ -81,47 +81,20 @@ else
         DEPS:=bitmaps.cpp
         SOURCES+=bitmaps.cpp
         ifeq ($(UNAME_S),Darwin)
-            ifeq ($(USE_GLUT),YES)
-                CFLAGS+=-D__GLUT__
-                CFLAGS+=-Wno-deprecated
-                LDFLAGS+=-framework OpenGL
-                LDFLAGS+=-framework GLUT
-                SOURCES+=src/toolkits/opengltoolkit.cpp
-                SOURCES+=src/toolkits/gluttoolkit.cpp
-            else
-                LDFLAGS+=-framework Cocoa
-                LDFLAGS+=-framework OpenGL
-                SOURCES+=src/toolkits/opengltoolkit.cpp
-                SOURCES+=src/toolkits/cocoatoolkit.cpp
-                SOURCES+=src/toolkits/cocoatoolkit.m
-            endif
-        else ifeq ($(USE_GNUSTEP),YES)
-            CFLAGS+=-D__APPLE__
-            LDFLAGS+=-lobjc
-            LDFLAGS+=-lgnustep-base
-            LDFLAGS+=-lgnustep-gui
-            LDFLAGS+=-ldl
-            LDFLAGS+=-lGL
-            OBJCFLAGS+=`gnustep-config --objc-flags`
-            OBJCSOURCES+=src/toolkits/cocoatoolkit.m
+            LDFLAGS+=-framework Cocoa
+            LDFLAGS+=-framework OpenGL
             SOURCES+=src/toolkits/opengltoolkit.cpp
             SOURCES+=src/toolkits/cocoatoolkit.cpp
-            DEPS+=cocoatoolkit.o
-            SOURCES+=cocoatoolkit.o
-            CMD:=rm cocoatoolkit.o
-        else ifeq ($(USE_GLUT),YES)
-            CFLAGS+=-D__GLUT__
-            LDFLAGS+=-lGL
-            LDFLAGS+=-lglut
-            LDFLAGS+=-lpthread
-            SOURCES+=src/toolkits/opengltoolkit.cpp
-            SOURCES+=src/toolkits/gluttoolkit.cpp
+            SOURCES+=src/toolkits/cocoatoolkit.m
         else
             LDFLAGS+=-lX11
-            LDFLAGS+=-lGL
             LDFLAGS+=-lpthread
             LDFLAGS+=-ldl
-            SOURCES+=src/toolkits/opengltoolkit.cpp
+            ifeq ($(USE_OPENGL),YES)
+                CFLAGS+=-DUSE_OPENGL
+                LDFLAGS+=-lGL
+                SOURCES+=src/toolkits/opengltoolkit.cpp
+            endif
             SOURCES+=src/toolkits/xlibtoolkit.cpp
         endif
     endif
@@ -134,10 +107,6 @@ ifeq ($(UNAME_S),Darwin)
 	@mkdir -p $(EXECUTABLE_NAME).app/Contents/MacOS
 	@cp src/macosx/app/* $(EXECUTABLE_NAME).app/Contents/
 	@mv $(EXECUTABLE_NAME) $(EXECUTABLE_NAME).app/Contents/MacOS/
-endif
-ifeq ($(USE_GNUSTEP),YES)
-	@mkdir -p $(EXECUTABLE_NAME).app/Contents/Linux
-	@mv $(EXECUTABLE_NAME) $(EXECUTABLE_NAME).app/Contents/Linux/
 endif
 
 bitmaps.cpp:
