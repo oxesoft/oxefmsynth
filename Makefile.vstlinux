@@ -57,7 +57,7 @@ LIBS:=-lX11
 LIBS+=-lpthread
 LIBS+=-ldl
 
-CFLAGS+=-fPIC
+CFLAGS+=-fPIC -D__cdecl=
 
 ifeq ($(DEBUG),YES)
 	CFLAGS+=-g -O0
