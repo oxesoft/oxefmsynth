@@ -15,9 +15,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 ifeq ($(OS),Windows_NT)
-	CC:=i686-w64-mingw32-gcc.exe
-else
-	CC:=gcc
+    CC:=i686-w64-mingw32-gcc.exe
 endif
 
 all:

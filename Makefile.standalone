@@ -55,7 +55,7 @@ endif
 
 ifeq ($(OS),Windows_NT)
     EXECUTABLE_NAME:=$(EXECUTABLE_NAME).exe
-    CC:=g++.exe
+    CXX:=g++.exe
     RC:=windres.exe
     INCLUDES+=-Isrc/standalone
     SOURCES+=src/toolkits/windowstoolkit.cpp
@@ -66,7 +66,7 @@ ifeq ($(OS),Windows_NT)
 else
     ifeq ($(TARGET),WIN32)
         EXECUTABLE_NAME:=$(EXECUTABLE_NAME).exe
-        CC:=i686-w64-mingw32-g++
+        CXX:=i686-w64-mingw32-g++
         RC:=i686-w64-mingw32-windres
         INCLUDES+=-Isrc/standalone
         SOURCES+=src/toolkits/windowstoolkit.cpp
@@ -76,7 +76,6 @@ else
         DEPS:=resources.o
         LDFLAGS+=-static
     else
-        CC:=g++
         INCLUDES+=-I.
         DEPS:=bitmaps.cpp
         SOURCES+=bitmaps.cpp
@@ -101,7 +100,7 @@ else
 endif
 
 all: $(DEPS)
-	@$(CC) -o $(EXECUTABLE_NAME) -DEXECUTABLE_NAME=\"$(EXECUTABLE_NAME)\" $(CFLAGS) $(SOURCES) $(INCLUDES) $(LDFLAGS)
+	@$(CXX) -o $(EXECUTABLE_NAME) -DEXECUTABLE_NAME=\"$(EXECUTABLE_NAME)\" $(CFLAGS) $(SOURCES) $(INCLUDES) $(LDFLAGS)
 	@$(CMD)
 ifeq ($(UNAME_S),Darwin)
 	@mkdir -p $(EXECUTABLE_NAME).app/Contents/MacOS
@@ -110,7 +109,7 @@ ifeq ($(UNAME_S),Darwin)
 endif
 
 bitmaps.cpp:
-	@$(CC) -o embedresources src/toolkits/embedresources.cpp
+	@$(CXX) -o embedresources src/toolkits/embedresources.cpp
 	@./embedresources $@
 	@rm embedresources
 

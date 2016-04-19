@@ -36,41 +36,40 @@ SOURCES+=src/synth/noise.cpp
 SOURCES+=src/synth/synthesizer.cpp
 
 ifeq ($(DEBUG),YES)
-	CFLAGS+=-g -O0
+    CFLAGS+=-g -O0
 else
-	CFLAGS+=-O3
+    CFLAGS+=-O3
 endif
 
 ifeq ($(PROFILING),YES)
-	CFLAGS+=-D__RENDER_TO_MEMORY__ONLY__
-	#CFLAGS+=-nostdlib
+    CFLAGS+=-D__RENDER_TO_MEMORY__ONLY__
+    #CFLAGS+=-nostdlib
 endif
 
 ifeq ($(WITH_DSOUND),YES)
-	CFLAGS+=-D__WITH_DSOUND__
-	LDFLAGS+=-ldsound
+    CFLAGS+=-D__WITH_DSOUND__
+    LDFLAGS+=-ldsound
 endif
 
 ifeq ($(OS),Windows_NT)
-	EXECUTABLE_NAME:=$(EXECUTABLE_NAME).exe
-	CC:=g++.exe
+    EXECUTABLE_NAME:=$(EXECUTABLE_NAME).exe
+    CXX:=g++.exe
     LDFLAGS+=-s
 else
-	ifeq ($(TARGET),WIN32)
-		EXECUTABLE_NAME:=$(EXECUTABLE_NAME).exe
-		CC:=i686-w64-mingw32-g++
-		LDFLAGS+=-static -s
-	else
-		CC:=g++
-		UNAME_S:=$(shell uname -s)
-		ifneq ($(UNAME_S),Darwin)
-			LDFLAGS+=-s
-		endif
-	endif
+    ifeq ($(TARGET),WIN32)
+        EXECUTABLE_NAME:=$(EXECUTABLE_NAME).exe
+        CXX:=i686-w64-mingw32-g++
+        LDFLAGS+=-static -s
+    else
+        UNAME_S:=$(shell uname -s)
+        ifneq ($(UNAME_S),Darwin)
+            LDFLAGS+=-s
+        endif
+    endif
 endif
 
 all:
-	@$(CC) -o $(EXECUTABLE_NAME) -DEXECUTABLE_NAME=\"$(EXECUTABLE_NAME)\" -D__OXEDMO__ $(CFLAGS) $(SOURCES) $(INCLUDES) $(LDFLAGS)
+	@$(CXX) -o $(EXECUTABLE_NAME) -DEXECUTABLE_NAME=\"$(EXECUTABLE_NAME)\" -D__OXEDMO__ $(CFLAGS) $(SOURCES) $(INCLUDES) $(LDFLAGS)
 
 clean:
 	@rm -f $(EXECUTABLE_NAME) *.wav
