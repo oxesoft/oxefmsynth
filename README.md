@@ -54,3 +54,5 @@ To use a ready skin or test a new one, just put the images in a "skin" dir in th
 ![skin4](http://www.oxesoft.com/wordpress/wp-content/uploads/2015/05/tx802.png)
 
 ![skin5](http://www.oxesoft.com/wordpress/wp-content/uploads/2015/10/dx7.png)
+
+![skin6](http://www.oxesoft.com/wordpress/wp-content/uploads/2016/05/fm8like.png)
