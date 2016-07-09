@@ -334,6 +334,14 @@ void CSynthesizer::SendEvent(unsigned char bS,unsigned char bD1,unsigned char bD
                     programs.SetBankIndex(bD2);
                     UpdateGlobalEffects();
                     break;
+                case 120: // All Sound Off
+                case 123: // All Notes Off
+                case 124: // Omni Mode Off
+                case 125: // Omni Mode On
+                case 126: // Mono Mode On
+                case 127: // Poly Mode On
+                    KillNotes();
+                    break;
                 default:
                     break;
             }
