@@ -69,6 +69,7 @@ public:
     void          Process         (int *b, int size, int position /* the start sample number */);
     void          SendEvent       (unsigned char bS, unsigned char bD1,unsigned char bD2,int position /* the start position */);
     void          KillNotes       (void);
+    void          AllNotesOff     (int position);
     char          GetState        ();
 #ifndef __OXEDMO__
     float         SetDefault      (char channel, int par           );

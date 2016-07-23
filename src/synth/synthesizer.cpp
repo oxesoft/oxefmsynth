@@ -91,7 +91,7 @@ void CSynthesizer::SendEvent(unsigned char bS,unsigned char bD1,unsigned char bD
             }
             else
             {
-                // verifies if the node was released (improbable)
+                // verifies if the note was released (improbable)
                 for (i=0; i<POLIPHONY; i++)
                 {
                     if (state[i] == ACTIVE)
@@ -335,12 +335,14 @@ void CSynthesizer::SendEvent(unsigned char bS,unsigned char bD1,unsigned char bD
                     UpdateGlobalEffects();
                     break;
                 case 120: // All Sound Off
+                    KillNotes();
+                    break;
                 case 123: // All Notes Off
                 case 124: // Omni Mode Off
                 case 125: // Omni Mode On
                 case 126: // Mono Mode On
                 case 127: // Poly Mode On
-                    KillNotes();
+                    AllNotesOff(position);
                     break;
                 default:
                     break;
@@ -486,6 +488,18 @@ void CSynthesizer::KillNotes()
             heldkeys[i] = 0;
             activeNotesCount--;
             //---------------------
+        }
+    }
+}
+
+void CSynthesizer::AllNotesOff(int position)
+{
+    for (char i=0; i<POLIPHONY; i++)
+    {
+        if (state[i] == ACTIVE)
+        {
+            notes[i].SendEvent(NOTEOFF,0,position);
+            state[i] = ENDED;
         }
     }
 }
