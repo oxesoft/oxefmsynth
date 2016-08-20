@@ -35,7 +35,6 @@ public:
     CEditor*        getEditor()       { return oxeeditor;          }
 private:
     AudioEffectX*      effectx;
-    CSynthesizer*      synth;
     CEditor*           oxeeditor;
     CToolkit*          toolkit;
     CVstHostInterface* hostinterface;

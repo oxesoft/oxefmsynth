@@ -25,37 +25,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 void* hInstance;
 #endif
 
-class CDummyHostInterface : public CHostInterface
-{
-private:
-    CSynthesizer *synth;
-public:
-    CDummyHostInterface(CSynthesizer *synth)
-    {
-        this->synth = synth;
-    }
-    void ReceiveMessageFromPlugin(unsigned int messageID, unsigned int par1, unsigned int par2)
-    {
-        switch (messageID)
-        {
-            case UPDATE_DISPLAY:
-                break;
-            case SET_PROGRAM:
-            {
-                char channel = (char)par1;
-                unsigned char numprog = (unsigned char)par2;
-                if (synth)
-                {
-                    synth->SendEvent(0xC0 + channel, numprog, 0, 0);
-                }
-                break;
-            }
-            case SET_PARAMETER:
-                break;
-        }
-    }
-};
-
 int main(void)
 {
 #ifdef _WIN32
@@ -68,8 +37,6 @@ int main(void)
     e.SetToolkit(&t);
     time = GetTick() - time;
     printf("full blitting time: %ums\n", time);
-    CDummyHostInterface h(&s);
-    e.SetHostInterface(&h);
     t.StartWindowProcesses();
     return t.WaitWindowClosed();
 }

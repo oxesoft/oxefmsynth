@@ -61,10 +61,7 @@ void CButton::OnClick(int x, int y)
                 numprog -= 10;
                 if (numprog > 127)
                     numprog = 127;
-                if (hostinterface)
-                {
-                    hostinterface->ReceiveMessageFromPlugin(SET_PROGRAM, *channel, numprog);
-                }
+                synthesizer->SendEvent(0xC0 + *channel, numprog, 0, 0);
             }
             break;
         case BT_MINUS_1:
@@ -87,10 +84,7 @@ void CButton::OnClick(int x, int y)
                 numprog -= 1;
                 if (numprog > 127)
                     numprog = 127;
-                if (hostinterface)
-                {
-                    hostinterface->ReceiveMessageFromPlugin(SET_PROGRAM, *channel, numprog);
-                }
+                synthesizer->SendEvent(0xC0 + *channel, numprog, 0, 0);
             }
             break;
         case BT_PLUS_1:
@@ -111,10 +105,7 @@ void CButton::OnClick(int x, int y)
                 numprog += 1;
                 if (numprog > 127)
                     numprog = 0;
-                if (hostinterface)
-                {
-                    hostinterface->ReceiveMessageFromPlugin(SET_PROGRAM, *channel, numprog);
-                }
+                synthesizer->SendEvent(0xC0 + *channel, numprog, 0, 0);
             }
             break;
         case BT_PLUS_10:
@@ -135,10 +126,7 @@ void CButton::OnClick(int x, int y)
                 numprog += 10;
                 if (numprog > 127)
                     numprog = 0;
-                if (hostinterface)
-                {
-                    hostinterface->ReceiveMessageFromPlugin(SET_PROGRAM, *channel, numprog);
-                }
+                synthesizer->SendEvent(0xC0 + *channel, numprog, 0, 0);
             }
             break;
         case BT_STORE:

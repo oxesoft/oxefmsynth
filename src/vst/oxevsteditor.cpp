@@ -25,8 +25,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 COxeVstEditor::COxeVstEditor (AudioEffectX *effectx, CSynthesizer *synth)
     :
     AEffEditor(effectx),
-    effectx(effectx),
-    synth(synth)
+    effectx(effectx)
 {
     oxeeditor = new CEditor(synth);
     effect->setEditor(this);
@@ -57,7 +56,7 @@ bool COxeVstEditor::open (void *ptr)
     // Remember the parent window
     systemWindow = ptr;
 
-    hostinterface = new CVstHostInterface(effectx, synth);
+    hostinterface = new CVstHostInterface(effectx);
     toolkit = new COSToolkit(ptr, oxeeditor);
     oxeeditor->SetToolkit(toolkit);
     oxeeditor->SetHostInterface(hostinterface);

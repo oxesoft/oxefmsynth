@@ -36,6 +36,7 @@ void CPrograms::Init()
         isWaiting[i] = false;
     }
 #ifndef __OXEDMO__
+    hostinterface = NULL;
     iCurrentBank  = 0;
     isEditingName = false;
     bankMode      = false;
@@ -77,6 +78,10 @@ void CPrograms::SetNumProgr(char channel, unsigned char numprog)
     }
 #ifndef __OXEDMO__
     haschanges = true;
+    if (hostinterface && channel == 0)
+    {
+        hostinterface->ReceiveMessageFromPlugin(SET_PROGRAM, channel, numprog);
+    }
 #endif
 }
 

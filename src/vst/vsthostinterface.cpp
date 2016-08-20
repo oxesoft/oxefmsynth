@@ -19,11 +19,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "public.sdk/source/vst2.x/audioeffectx.h"
 #include "synthesizer.h"
 #include "vsthostinterface.h"
+#include "oxevst.h"
 
-CVstHostInterface::CVstHostInterface(AudioEffectX *effectx, CSynthesizer *synth)
+CVstHostInterface::CVstHostInterface(AudioEffectX *effectx)
 {
     this->effectx = effectx;
-    this->synth = synth;
 }
 
 void CVstHostInterface::ReceiveMessageFromPlugin(unsigned int messageID, unsigned int par1, unsigned int par2)
@@ -40,17 +40,9 @@ void CVstHostInterface::ReceiveMessageFromPlugin(unsigned int messageID, unsigne
         }
         case SET_PROGRAM:
         {
-            char channel = (char)par1;
             unsigned char numprog = (unsigned char)par2;
-            if (channel == 0 && effectx)
-            {
-                effectx->setProgram(numprog);
-                effectx->updateDisplay();
-            }
-            else if (synth)
-            {
-                synth->SendEvent(0xC0 + channel, numprog, 0, 0);
-            }
+            ((COxeVst*)effectx)->setProgramOnly(numprog);
+            effectx->updateDisplay();
             break;
         }
         case SET_PARAMETER:

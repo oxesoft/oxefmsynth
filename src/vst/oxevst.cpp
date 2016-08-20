@@ -54,6 +54,11 @@ void COxeVst::setProgram(VstInt32 program)
     synthesizer.SendEvent(0xC0, getProgram(), 0, 0);
 }
 
+void COxeVst::setProgramOnly(VstInt32 program)
+{
+    AudioEffectX::setProgram(program);
+}
+
 void COxeVst::getProgramName(char *name) // kVstMaxProgNameLen
 {
     synthesizer.GetProgName(name, getProgram());

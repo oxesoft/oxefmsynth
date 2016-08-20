@@ -90,7 +90,6 @@ public:
     int           GetBankCount    ();
     int           GetBankIndex    ();
     void          SetBankIndex    (int nbank);
-    void          SetNumProgr     (char channel, unsigned char numprog);
     void          StoreProgram    (char channel);
     SBank*        GetBank         (void);
     void          CopyProgram     (int destination, int source);

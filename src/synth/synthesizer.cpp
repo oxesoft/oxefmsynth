@@ -694,21 +694,6 @@ void CSynthesizer::SetBankIndex(int nbank)
     UpdateGlobalEffects();
 }
 
-void CSynthesizer::SetNumProgr(char channel, unsigned char numprog)
-{
-    programs.SetNumProgr(channel,numprog);
-    for (char i=0; i<POLIPHONY; i++)
-    {
-        if (state[i] == ACTIVE)
-        {
-            if (this->channels[i] == channel)
-            {
-                notes[i].UpdateProgram();
-            }
-        }
-    }
-}
-
 void CSynthesizer::StoreProgram(char channel)
 {
     programs.StoreProgram(channel);

@@ -20,8 +20,7 @@ class CVstHostInterface : public CHostInterface
 {
 private:
     AudioEffectX *effectx;
-    CSynthesizer *synth;
 public:
-    CVstHostInterface(AudioEffectX *effectx, CSynthesizer *synth);
+    CVstHostInterface(AudioEffectX *effectx);
     void ReceiveMessageFromPlugin(unsigned int messageID, unsigned int par1, unsigned int par2);
 };

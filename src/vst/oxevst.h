@@ -44,6 +44,7 @@ public:
     virtual void processReplacing(float **inputs, float **outputs, VstInt32 sampleframes);
     virtual VstInt32 processEvents(VstEvents* events);
     virtual void setProgram(VstInt32 program);
+    void setProgramOnly(VstInt32 program);
     virtual void setProgramName (char *name);
     virtual void getProgramName(char *name);
     virtual bool getProgramNameIndexed (VstInt32 category, VstInt32 index, char* text);
