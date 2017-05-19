@@ -47,7 +47,7 @@ To use a ready skin or test a new one, just put the images in a "skin" dir in th
 
 ![skin1](https://oxesoft.files.wordpress.com/2015/04/layzer.png)
 
-![skin2](https://oxesoft.files.wordpress.com/2015/05/snow.png)
+![skin2](https://oxesoft.files.wordpress.com/2017/05/snow1.png)
 
 ![skin3](https://oxesoft.files.wordpress.com/2015/08/totolitoto.png)
 
@@ -55,4 +55,4 @@ To use a ready skin or test a new one, just put the images in a "skin" dir in th
 
 ![skin5](https://oxesoft.files.wordpress.com/2015/10/dx7.png)
 
-![skin6](https://oxesoft.files.wordpress.com/2016/05/fm8like.png)
+![skin6](https://oxesoft.files.wordpress.com/2017/05/fm8like1.png)
