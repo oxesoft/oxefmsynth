@@ -1,7 +1,7 @@
 # Oxe FM Synth
-Welcome to the [Oxe FM Synth](http://www.oxesoft.com/) official repository.
+Welcome to the [Oxe FM Synth](https://oxesoft.wordpress.com/) official repository.
 
-![defaultskin](http://www.oxesoft.com/images/screenshot_full.png)
+![defaultskin](https://oxesoft.files.wordpress.com/2007/12/screenshot_full.png)
 
 This repository contains the synth core and three different ways to use it:
 
@@ -45,14 +45,14 @@ To build a native version, just type ``make -f Makefile.demo``.
 ## Skins
 To use a ready skin or test a new one, just put the images in a "skin" dir in the same dir as the plugin/standalone executable.
 
-![skin1](http://www.oxesoft.com/wordpress/wp-content/uploads/2015/04/layzer.png)
+![skin1](https://oxesoft.files.wordpress.com/2015/04/layzer.png)
 
-![skin2](http://www.oxesoft.com/wordpress/wp-content/uploads/2015/05/snow.png)
+![skin2](https://oxesoft.files.wordpress.com/2015/05/snow.png)
 
-![skin3](http://www.oxesoft.com/wordpress/wp-content/uploads/2015/08/totolitoto.png)
+![skin3](https://oxesoft.files.wordpress.com/2015/08/totolitoto.png)
 
-![skin4](http://www.oxesoft.com/wordpress/wp-content/uploads/2015/05/tx802.png)
+![skin4](https://oxesoft.files.wordpress.com/2015/05/tx802.png)
 
-![skin5](http://www.oxesoft.com/wordpress/wp-content/uploads/2015/10/dx7.png)
+![skin5](https://oxesoft.files.wordpress.com/2015/10/dx7.png)
 
-![skin6](http://www.oxesoft.com/wordpress/wp-content/uploads/2016/05/fm8like.png)
+![skin6](https://oxesoft.files.wordpress.com/2016/05/fm8like.png)
