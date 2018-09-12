@@ -57,12 +57,12 @@ LIBS:=-lX11
 LIBS+=-lpthread
 LIBS+=-ldl
 
-CFLAGS+=-fPIC -D__cdecl=
+CXXFLAGS+=-fPIC -D__cdecl=
 
 ifeq ($(DEBUG),YES)
-    CFLAGS+=-g -O0
+    CXXFLAGS+=-g -O0
 else
-    CFLAGS+=-s -O3
+    CXXFLAGS+=-s -O3
 endif
 
 ARCH := $(shell getconf LONG_BIT)
@@ -73,13 +73,13 @@ endif
 all: oxevst$(ARCH)
 
 oxevst32: bitmaps.cpp
-	@$(CXX) -shared $(BITS) -o oxevst32.so $(CFLAGS) $(SOURCES) $(INCLUDES) $(LIBS)
+	@$(CXX) -shared $(BITS) -o oxevst32.so $(CXXFLAGS) $(SOURCES) $(INCLUDES) $(LIBS) $(LDFLAGS)
 
 oxevst64: bitmaps.cpp
-	@$(CXX) -shared -m64    -o oxevst64.so $(CFLAGS) $(SOURCES) $(INCLUDES) $(LIBS)
+	@$(CXX) -shared -m64    -o oxevst64.so $(CXXFLAGS) $(SOURCES) $(INCLUDES) $(LIBS) $(LDFLAGS)
 
 bitmaps.cpp:
-	@$(CXX) -o embedresources src/toolkits/embedresources.cpp
+	@$(CXX) -o embedresources src/toolkits/embedresources.cpp $(CXXFLAGS)
 	@./embedresources $@
 	@rm embedresources
 

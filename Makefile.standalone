@@ -45,9 +45,9 @@ SOURCES+=src/synth/synthesizer.cpp
 UNAME_S:=$(shell uname -s)
 
 ifeq ($(DEBUG),YES)
-    CFLAGS+=-g -O0
+    CXXFLAGS+=-g -O0
 else
-    CFLAGS+=-O3
+    CXXFLAGS+=-O3
     ifneq ($(UNAME_S),Darwin)
         LDFLAGS+=-s
     endif
@@ -90,7 +90,7 @@ else
             LDFLAGS+=-lpthread
             LDFLAGS+=-ldl
             ifeq ($(USE_OPENGL),YES)
-                CFLAGS+=-DUSE_OPENGL
+                CXXFLAGS+=-DUSE_OPENGL
                 LDFLAGS+=-lGL
                 SOURCES+=src/toolkits/opengltoolkit.cpp
             endif
@@ -100,7 +100,7 @@ else
 endif
 
 all: $(DEPS)
-	@$(CXX) -o $(EXECUTABLE_NAME) -DEXECUTABLE_NAME=\"$(EXECUTABLE_NAME)\" $(CFLAGS) $(SOURCES) $(INCLUDES) $(LDFLAGS)
+	@$(CXX) -o $(EXECUTABLE_NAME) -DEXECUTABLE_NAME=\"$(EXECUTABLE_NAME)\" $(CXXFLAGS) $(SOURCES) $(INCLUDES) $(LDFLAGS)
 	@$(CMD)
 ifeq ($(UNAME_S),Darwin)
 	@mkdir -p $(EXECUTABLE_NAME).app/Contents/MacOS
@@ -109,12 +109,12 @@ ifeq ($(UNAME_S),Darwin)
 endif
 
 bitmaps.cpp:
-	@$(CXX) -o embedresources src/toolkits/embedresources.cpp
+	@$(CXX) -o embedresources $(CXXFLAGS) src/toolkits/embedresources.cpp
 	@./embedresources $@
 	@rm embedresources
 
 cocoatoolkit.o:
-	@gcc -c -o $@ $(OBJCSOURCES) $(INCLUDES) $(OBJCFLAGS)
+	@gcc -c -o $@ $(OBJCSOURCES) $(INCLUDES) $(OBJCXXFLAGS)
 
 resources.o:
 	@$(RC) -Isrc/synth -Iskins/default src/windows/resources.rc resources.o
