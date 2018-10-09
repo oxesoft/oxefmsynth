@@ -225,8 +225,8 @@ CEditor::CEditor(CSynthesizer *synthesizer)
     ctl[ctlcount++] = new CKnob    (BMP_KNOB,   25,   "OPZ Resonance",   synthesizer, channel, VL_ZERO_TO_ONE,   OPZRS, aX+sX+sX2  , aY      );
     ctl[ctlcount++] = new CKnob    (BMP_KNOB,   25,   "OPZ Type",        synthesizer, channel, VL_FILTER,        OPZTY, aX+sX*2+sX2, aY      );
     ctl[ctlcount++] = new CKey     (BMP_KEY,  0,10,10,"OPZ Keyb Track",  synthesizer, channel,                   OPZKT, aX+sX*3+sX2, aY      );
-    ctl[ctlcount++] = new CKnob    (BMP_KNOB,   25,   "OPX VlSensivity", synthesizer, channel, VL_ZERO_TO_ONE,   OPZVS, aX+sX*4    , aY      );
-    ctl[ctlcount++] = new CKnob    (BMP_KNOB,   25,   "OPX KeybScaling", synthesizer, channel, VL_MINUS1_2_PLUS1,OPZKS, aX+sX*5    , aY      );
+    ctl[ctlcount++] = new CKnob    (BMP_KNOB,   25,   "OPZ VlSensivity", synthesizer, channel, VL_ZERO_TO_ONE,   OPZVS, aX+sX*4    , aY      );
+    ctl[ctlcount++] = new CKnob    (BMP_KNOB,   25,   "OPZ KeybScaling", synthesizer, channel, VL_MINUS1_2_PLUS1,OPZKS, aX+sX*5    , aY      );
     ctl[ctlcount++] = new CKnob    (BMP_KNOB,   25,   "OPZ Delay Time",  synthesizer, channel, VL_PORTAMENTO,    OPZDL, aX         , aY+sY   );
     ctl[ctlcount++] = new CKnob    (BMP_KNOB,   25,   "OPZ Attack Time", synthesizer, channel, VL_TEMPO,         OPZAT, aX+sX      , aY+sY   );
     ctl[ctlcount++] = new CKnob    (BMP_KNOB,   25,   "OPZ Decay Time",  synthesizer, channel, VL_TEMPO,         OPZDE, aX+sX*2    , aY+sY   );
