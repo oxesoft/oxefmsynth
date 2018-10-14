@@ -202,7 +202,7 @@ void GetResourcesPath(char *path, int size)
     strncpy(path, info.dli_fname, PATH_MAX);
     char* tmp = strrchr(path, '/');
     *tmp = 0;
-    strcat(path, "/"BMP_PATH"/");
+    strcat(path, "/" BMP_PATH "/");
 }
 
 CXlibToolkit::CXlibToolkit(void *parentWindow, CEditor *editor)
