@@ -25,8 +25,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define OXFM_PATCH_VERSION  5
 #define VERSION_STR         "1.3.6"
 #define VERSION_INT         ((OXFM_MAJOR_VERSION * 100) + (OXFM_MINOR_VERSION * 10) + OXFM_PATCH_VERSION)
-#define TITLE_SMALL         "Oxe FM Synth "VERSION_STR
-#define TITLE_FULL          TITLE_SMALL" :: http://www.oxesoft.com"
+#define TITLE_SMALL         "Oxe FM Synth " VERSION_STR
+#define TITLE_FULL          TITLE_SMALL " :: http://www.oxesoft.com"
 #define SAMPLES_PER_PROCESS 128      // the synth process buffer size
 #define WAVEFORM_BIT_DEPTH  11
 #define WAVEFORM_BSIZE      (1<<WAVEFORM_BIT_DEPTH) // waveform size
