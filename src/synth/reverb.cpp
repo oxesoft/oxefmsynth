@@ -48,7 +48,7 @@ void CReverb::Init()
     b1   = 0;
 }
 
-void CReverb::SetPar(char param, float value)
+void CReverb::SetPar(char param, double value)
 {
     switch (param)
     {
@@ -64,20 +64,21 @@ void CReverb::SetPar(char param, float value)
     }
 }
 
-void CReverb::CalcCoefLowPass(float frequencia)
+void CReverb::CalcCoefLowPass(double frequencia)
 {
-    float w     = 2.0f * sr; 
-    float fCut  = 2.0f * PI * Key2Frequency(frequencia * MAXFREQFLT);
-    float Norm  = 1.0f / (fCut + w); 
+    double w     = 2.0f * sr; 
+    double fCut  = 2.0f * PI * Key2Frequency(frequencia * MAXFREQFLT);
+    double Norm  = 1.0f / (fCut + w); 
     b1          = lrintf((w - fCut) * Norm * 32768.f);
     a0 = a1     = lrintf(     fCut  * Norm * 32768.f);
 }
 
 void CReverb::Process(int *b, int size)
 {
-    int i        = 0;
-    int ent      = 0;
-    int aux      = 0;
+    int i         = 0;
+    long ent      = 0;
+    long aux      = 0;
+	long smp      = 0;
     int retorno  = (int)(ti * 127.f);
     if (REVDAant != da) 
     {
@@ -87,46 +88,53 @@ void CReverb::Process(int *b, int size)
     for (i=0;i<size;i++)
     {
         ent  = b[i];
-        b[i] = 0;
+        smp = 0;
         // comb 1
-        b[i] += bcomb1[icomb1];
+        smp += bcomb1[icomb1];
         bcomb1[icomb1] = ent + ((bcomb1[icomb1] * retorno)/128);
         if (++icomb1>=TAMCOMB1) icomb1 = 0;
         // comb 2
-        b[i] += bcomb2[icomb2];
+        smp += bcomb2[icomb2];
         bcomb2[icomb2] = ent + ((bcomb2[icomb2] * retorno)/128);
         if (++icomb2>=TAMCOMB2) icomb2 = 0;
         // comb 3
-        b[i] += bcomb3[icomb3];
+        smp += bcomb3[icomb3];
         bcomb3[icomb3] = ent + ((bcomb3[icomb3] * retorno)/128);
         if (++icomb3>=TAMCOMB3) icomb3 = 0;
         // comb 4
-        b[i] += bcomb4[icomb4];
+        smp += bcomb4[icomb4];
         bcomb4[icomb4] = ent + ((bcomb4[icomb4] * retorno)/128);
         if (++icomb4>=TAMCOMB4) icomb4 = 0;
         // allpass 1
         aux = ballp1[iallp1];
-        ballp1[iallp1] = ((aux * retorno)/128) + b[i];
-        b[i]           = aux - ((ballp1[iallp1] * retorno)/128);
+        ballp1[iallp1] = ((aux * retorno)/128) + smp;
+        smp           = aux - ((ballp1[iallp1] * retorno)/128);
         if (++iallp1>=TAMALLP1) iallp1 = 0;
         // allpass 2
         aux = ballp2[iallp2];
-        ballp2[iallp2] = ((aux * retorno)/128) + b[i];
+        ballp2[iallp2] = ((aux * retorno)/128) + smp;
         b[i]           = aux - ((ballp2[iallp2] * retorno)/128);
         if (++iallp2>=TAMALLP2) iallp2 = 0;
         // DC filter
-        ou0  = b[i] - in1 + ((ou0*32674)/32768);
-        in1  = b[i];
-        b[i] = ou0>>2;
+        ou0  = smp - in1 + ((ou0*32674)/32768);
+        in1  = smp;
+        smp = ou0>>2;
+		
+        b[i] = (smp > INT_MAX) ? INT_MAX :
+               (smp < INT_MIN) ? INT_MIN :
+               smp;
     }
     if (REVDAant < 1.f)
     {
         for (i=0;i<size;i++)
         {
+			smp = b[i];
             // low pass filter
-            ou0l = ((b[i] * a0)/32768) + ((in1l * a1)/32768) + ((ou0l * b1)/32768);
-            in1l = b[i];
-            b[i] = ou0l;
+            ou0l = ((smp * a0)/32768) + ((in1l * a1)/32768) + ((ou0l * b1)/32768);
+            in1l = smp;
+            b[i] = (ou0l > INT_MAX) ? INT_MAX :
+                   (ou0l < INT_MIN) ? INT_MIN :
+                   ou0l;
         }
     }
     state = ACTIVE;
@@ -139,7 +147,7 @@ char CReverb::GetState()
     return state;
 }
 
-inline float CReverb::Key2Frequency(float valor)
+inline double CReverb::Key2Frequency(double valor)
 {
     return C0 * powf(2.0f, valor / 12.0f);
 }
