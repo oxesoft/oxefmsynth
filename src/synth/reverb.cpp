@@ -116,7 +116,7 @@ void CReverb::Process(int *b, int size)
         b[i]           = aux - ((ballp2[iallp2] * retorno)/128);
         if (++iallp2>=TAMALLP2) iallp2 = 0;
         // DC filter
-        ou0  = smp - in1 + ((ou0*32674)/32768);
+        ou0  = smp - in1 + (((double)ou0*32674)/32768);
         in1  = smp;
         smp = ou0>>2;
 		
