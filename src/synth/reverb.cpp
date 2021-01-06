@@ -18,8 +18,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "constants.h"
 #include "reverb.h"
-#include <math.h>
-#include <string.h>
+#include <cmath>
+#include <cstring>
+#include <climits>
 
 void CReverb::Init()
 {
