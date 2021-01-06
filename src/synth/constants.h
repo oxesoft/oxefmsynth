@@ -160,5 +160,5 @@ enum
 #endif
 
 #ifdef _WIN32
-    #define snprintf _snprintf
+    //#define snprintf _snprintf
 #endif
