@@ -1,0 +1,144 @@
+# Oxe FM Synth: a software synthesizer
+# Copyright (C) 2004-2026  Daniel Moura <oxe@oxesoft.com>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+BUNDLE_NAME:=oxefmsynth.clap
+
+ifeq ($(CLAPSDK_PATH),)
+    ifneq ($(wildcard clap/include/clap/clap.h),)
+        CLAPSDK_PATH:=clap
+    else ifneq ($(wildcard .deps/clap/include/clap/clap.h),)
+        CLAPSDK_PATH:=.deps/clap
+    else
+        CLAPSDK_PATH:=.deps/clap
+    endif
+endif
+
+INCLUDES:=-Isrc/synth -Isrc/gui -Isrc/toolkits -Isrc/clap -I. -isystem $(CLAPSDK_PATH)/include
+
+SOURCES:=src/synth/buffers.cpp \
+         src/synth/delay.cpp \
+         src/synth/envelop.cpp \
+         src/synth/filter.cpp \
+         src/synth/noise.cpp \
+         src/synth/note.cpp \
+         src/synth/oscillator.cpp \
+         src/synth/persist.cpp \
+         src/synth/programs.cpp \
+         src/synth/reverb.cpp \
+         src/synth/synthesizer.cpp \
+         src/gui/button.cpp \
+         src/gui/channels.cpp \
+         src/gui/editor.cpp \
+         src/gui/key.cpp \
+         src/gui/knob.cpp \
+         src/gui/lcd.cpp \
+         src/gui/mapper.cpp \
+         src/clap/oxeclap.cpp \
+         src/clap/oxeclapentry.cpp \
+         src/clap/claphostinterface.cpp
+
+CXXFLAGS+=-std=c++17
+
+ifeq ($(DEBUG),YES)
+    CXXFLAGS+=-g -O0
+else
+    CXXFLAGS+=-O3
+endif
+
+UNAME_S:=$(shell uname -s)
+
+ifeq ($(OS),Windows_NT)
+    CXX:=g++.exe
+    RC:=windres.exe
+    INCLUDES+=-Isrc/windows
+    SOURCES+=src/toolkits/windowstoolkit.cpp
+    LIBS+=-lgdi32
+    LDFLAGS+=-static -s
+    TARGET_FILE:=$(BUNDLE_NAME)
+    BUNDLE_BINARY:=$(TARGET_FILE)
+    USER_CLAP_DIR?=$(if $(LOCALAPPDATA),$(LOCALAPPDATA)/Programs/Common/CLAP,$(COMMONPROGRAMFILES)/CLAP)
+    DEPS:=resources.o
+    SOURCES+=resources.o
+    INSTALL_CMD=cp -f "$(TARGET_FILE)" "$(USER_CLAP_DIR)/"
+else
+    ifeq ($(TARGET),WIN32)
+        CXX:=x86_64-w64-mingw32-g++
+        RC:=x86_64-w64-mingw32-windres
+        INCLUDES+=-Isrc/windows
+        SOURCES+=src/toolkits/windowstoolkit.cpp
+        LIBS+=-lgdi32
+        LDFLAGS+=-static -s
+        TARGET_FILE:=$(BUNDLE_NAME)
+        BUNDLE_BINARY:=$(TARGET_FILE)
+        USER_CLAP_DIR?=$(if $(LOCALAPPDATA),$(LOCALAPPDATA)/Programs/Common/CLAP,$(COMMONPROGRAMFILES)/CLAP)
+        DEPS:=resources.o
+        SOURCES+=resources.o
+        INSTALL_CMD=cp -f "$(TARGET_FILE)" "$(USER_CLAP_DIR)/"
+    else
+        DEPS:=bitmaps.cpp
+        SOURCES+=bitmaps.cpp
+        ifeq ($(UNAME_S),Darwin)
+            LDFLAGS+=-framework Cocoa
+            SOURCES+=src/toolkits/cocoatoolkit.mm
+            BUNDLE_DIR:=$(BUNDLE_NAME)/Contents/MacOS
+            BUNDLE_BINARY:=$(BUNDLE_DIR)/oxefmsynth
+            BUNDLE_SETUP:=@mkdir -p $(BUNDLE_DIR) && cp src/macosx/clap/* $(BUNDLE_NAME)/Contents/
+            TARGET_FILE:=$(BUNDLE_NAME)
+            USER_CLAP_DIR?=$(HOME)/Library/Audio/Plug-Ins/CLAP
+            INSTALL_CMD=rm -rf "$(USER_CLAP_DIR)/$(BUNDLE_NAME)" && cp -R "$(BUNDLE_NAME)" "$(USER_CLAP_DIR)/"
+        else
+            LIBS+=-lX11 -lpthread -ldl
+            CXXFLAGS+=-fPIC
+            LDFLAGS+=-s
+            SOURCES+=src/toolkits/xlibtoolkit.cpp
+            TARGET_FILE:=$(BUNDLE_NAME)
+            BUNDLE_BINARY:=$(TARGET_FILE)
+            USER_CLAP_DIR?=$(HOME)/.clap
+            INSTALL_CMD=cp -f "$(TARGET_FILE)" "$(USER_CLAP_DIR)/"
+        endif
+    endif
+endif
+
+all: $(CLAPSDK_PATH)/include/clap/clap.h $(DEPS)
+	$(BUNDLE_SETUP)
+	@$(CXX) -shared -o $(BUNDLE_BINARY) $(CXXFLAGS) $(SOURCES) $(INCLUDES) $(LIBS) $(LDFLAGS)
+
+install:
+	@if [ -e "$(BUNDLE_BINARY)" ]; then \
+		echo "Installing $(TARGET_FILE) to $(USER_CLAP_DIR)"; \
+		mkdir -p "$(USER_CLAP_DIR)"; \
+		$(INSTALL_CMD); \
+	else \
+		echo "$(TARGET_FILE) is not built. Build it first with 'make clap' (or 'make -f Makefile.clap')."; \
+	fi
+
+$(CLAPSDK_PATH)/include/clap/clap.h:
+	@echo "Downloading CLAP SDK..."
+	@mkdir -p .deps
+	@git clone --depth 1 --branch 1.2.10 https://github.com/free-audio/clap.git .deps/clap
+
+bitmaps.cpp:
+	@$(CXX) -o embedresources $(CXXFLAGS) src/toolkits/embedresources.cpp
+	@./embedresources $@
+	@rm embedresources
+
+resources.o:
+	@$(RC) -Isrc/synth -Iskins/default src/windows/resources.rc resources.o
+
+clean:
+	@rm -rf $(BUNDLE_NAME) embedresources bitmaps.cpp *.o *.d
+
+.PHONY: all clean install

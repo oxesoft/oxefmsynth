@@ -3,39 +3,53 @@ Welcome to the [Oxe FM Synth](https://oxesoft.wordpress.com/) official repositor
 
 ![defaultskin](https://oxesoft.files.wordpress.com/2007/12/screenshot_full.png)
 
-This repository contains the synth core and three different ways to use it:
+This repository contains the synth core and four different ways to use it:
 
 - as a [demo](https://en.wikipedia.org/wiki/Demoscene) (for testing synth engine, for profiling or just for fun)
 - as a standalone application (for testing GUI)
-- as a **VST3 plugin** for Windows, Linux, and macOS
+- as a [CLAP plugin](https://github.com/free-audio/clap) (CLever Audio Plug-in) for Windows, Linux, and macOS
+- as an optional **VST3 plugin** for Windows, Linux, and macOS
 
 ## Building
 
-### VST3 Plugin
-To build the VST3 plugin (the VST3 SDK is automatically downloaded at build time if not present):
+Typing `make` builds the demo, converter, standalone application, and the **CLAP plugin** (`oxefmsynth.clap`).
 
+### CLAP Plugin (Recommended)
+CLAP is a completely open, free, and modern plugin standard. It is prioritized and built by default:
 ```bash
-make vst3
+make clap
 ```
-(or `make -f Makefile.vst3`). The resulting `oxefmsynth.vst3` bundle will be created in the current directory.
+(or simply `make`, or `make -f Makefile.clap`). The CLAP SDK is automatically downloaded at build time if not present. The resulting `oxefmsynth.clap` is created in the current directory.
 
-To install the plugin (if it was built) to the default VST3 user directory (`~/Library/Audio/Plug-Ins/VST3` on macOS, `~/.vst3` on Linux, `%LOCALAPPDATA%\Programs\Common\VST3` on Windows):
-
+To install the CLAP plugin to the default user directory (`~/Library/Audio/Plug-Ins/CLAP` on macOS, `~/.clap` on Linux, `%LOCALAPPDATA%\Programs\Common\CLAP` on Windows):
 ```bash
 make install
 ```
 
+### VST3 Plugin (Optional)
+VST3 support is optional. To build the VST3 plugin (the VST3 SDK is automatically downloaded at build time if not present):
+```bash
+make vst3
+```
+(or `make -f Makefile.vst3`). The resulting `oxefmsynth.vst3` is created in the current directory.
 
-### Windows
+To install the VST3 plugin to the default VST3 user directory (`~/Library/Audio/Plug-Ins/VST3` on macOS, `~/.vst3` on Linux, `%LOCALAPPDATA%\Programs\Common\VST3` on Windows):
+```bash
+make install-vst3
+```
+
+### Platform Requirements
+
+#### Windows
 Requirements: [mingw-w64](http://mingw-w64.org/) and [msys](https://msysgit.github.io/).
 Install both 32 and 64bit (run the installer twice).
 On the msys shell just type ``mingw32-make``.
 
-### Linux
+#### Linux
 To build native executables just type ``make`` (requirement: g++).
 To build Windows executables on Ubuntu, type ``sudo apt-get install mingw-w64`` to install the required tools.
 
-### Mac OS X
+#### macOS
 On Xcode, install the "Command Line Tools" and type ``make`` on terminal. The Xcode IDE itself is not used.
 
 All the code is always compiled by once on purpose, to make sure everything is fine (because it is a tiny project).

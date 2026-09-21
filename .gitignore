@@ -9,5 +9,6 @@ oxeconverter
 oxefmsynth
 oxefmsynth.app
 oxefmsynth.vst3
+oxefmsynth.clap
 .deps/
 .DS_Store
