@@ -8,5 +8,6 @@ oxefmsynthdemo
 oxeconverter
 oxefmsynth
 oxefmsynth.app
-oxefmsynth.vst
+oxefmsynth.vst3
+.deps/
 .DS_Store

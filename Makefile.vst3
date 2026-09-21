@@ -1,0 +1,171 @@
+# Oxe FM Synth: a software synthesizer
+# Copyright (C) 2004-2026  Daniel Moura <oxe@oxesoft.com>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+BUNDLE_NAME:=oxefmsynth.vst3
+
+ifeq ($(VST3SDK_PATH),)
+    ifneq ($(wildcard vst3sdk/pluginterfaces/base/funknown.h),)
+        VST3SDK_PATH:=vst3sdk
+    else ifneq ($(wildcard .deps/vst3sdk/pluginterfaces/base/funknown.h),)
+        VST3SDK_PATH:=.deps/vst3sdk
+    else
+        VST3SDK_PATH:=.deps/vst3sdk
+    endif
+endif
+
+INCLUDES:=-Isrc/synth -Isrc/gui -Isrc/toolkits -Isrc/vst3 -I. -isystem $(VST3SDK_PATH)
+
+SOURCES:=src/synth/buffers.cpp \
+         src/synth/delay.cpp \
+         src/synth/envelop.cpp \
+         src/synth/filter.cpp \
+         src/synth/noise.cpp \
+         src/synth/note.cpp \
+         src/synth/oscillator.cpp \
+         src/synth/persist.cpp \
+         src/synth/programs.cpp \
+         src/synth/reverb.cpp \
+         src/synth/synthesizer.cpp \
+         src/gui/button.cpp \
+         src/gui/channels.cpp \
+         src/gui/editor.cpp \
+         src/gui/key.cpp \
+         src/gui/knob.cpp \
+         src/gui/lcd.cpp \
+         src/gui/mapper.cpp \
+         src/vst3/oxevst3.cpp \
+         src/vst3/oxevst3editor.cpp \
+         src/vst3/vst3hostinterface.cpp \
+         src/vst3/oxevst3entry.cpp \
+         $(VST3SDK_PATH)/public.sdk/source/vst/vstsinglecomponenteffect.cpp \
+         $(VST3SDK_PATH)/public.sdk/source/vst/vstcomponentbase.cpp \
+         $(VST3SDK_PATH)/public.sdk/source/vst/vstbus.cpp \
+         $(VST3SDK_PATH)/public.sdk/source/vst/vstparameters.cpp \
+         $(VST3SDK_PATH)/public.sdk/source/vst/vstinitiids.cpp \
+         $(VST3SDK_PATH)/public.sdk/source/main/pluginfactory.cpp \
+         $(VST3SDK_PATH)/public.sdk/source/main/moduleinit.cpp \
+         $(VST3SDK_PATH)/public.sdk/source/common/commoniids.cpp \
+         $(VST3SDK_PATH)/public.sdk/source/common/pluginview.cpp \
+         $(VST3SDK_PATH)/base/source/baseiids.cpp \
+         $(VST3SDK_PATH)/base/source/fbuffer.cpp \
+         $(VST3SDK_PATH)/base/source/fdebug.cpp \
+         $(VST3SDK_PATH)/base/source/fobject.cpp \
+         $(VST3SDK_PATH)/base/source/fstreamer.cpp \
+         $(VST3SDK_PATH)/base/source/fstring.cpp \
+         $(VST3SDK_PATH)/base/source/updatehandler.cpp \
+         $(VST3SDK_PATH)/base/thread/source/flock.cpp \
+         $(VST3SDK_PATH)/pluginterfaces/base/coreiids.cpp \
+         $(VST3SDK_PATH)/pluginterfaces/base/funknown.cpp \
+         $(VST3SDK_PATH)/pluginterfaces/base/ustring.cpp
+
+CXXFLAGS+=-std=c++17 -DSMTG_RENAME_ASSERT=1 -DNDEBUG=1
+
+ifeq ($(DEBUG),YES)
+    CXXFLAGS+=-g -O0
+else
+    CXXFLAGS+=-O3
+endif
+
+UNAME_S:=$(shell uname -s)
+
+ifeq ($(OS),Windows_NT)
+    CXX:=g++.exe
+    RC:=windres.exe
+    INCLUDES+=-Isrc/windows
+    SOURCES+=src/toolkits/windowstoolkit.cpp \
+             $(VST3SDK_PATH)/public.sdk/source/main/dllmain.cpp
+    LIBS+=-lgdi32
+    LDFLAGS+=-static -s
+    BUNDLE_DIR:=$(BUNDLE_NAME)/Contents/x86_64-win
+    BUNDLE_BINARY:=$(BUNDLE_DIR)/oxefmsynth.vst3
+    BUNDLE_SETUP:=@mkdir -p $(BUNDLE_DIR)
+    USER_VST3_DIR?=$(if $(LOCALAPPDATA),$(LOCALAPPDATA)/Programs/Common/VST3,$(COMMONPROGRAMFILES)/VST3)
+    DEPS:=resources.o bitmaps.cpp
+    SOURCES+=resources.o bitmaps.cpp
+else
+    ifeq ($(TARGET),WIN32)
+        CXX:=x86_64-w64-mingw32-g++
+        RC:=x86_64-w64-mingw32-windres
+        INCLUDES+=-Isrc/windows
+        SOURCES+=src/toolkits/windowstoolkit.cpp \
+                 $(VST3SDK_PATH)/public.sdk/source/main/dllmain.cpp
+        LIBS+=-lgdi32
+        LDFLAGS+=-static -s
+        BUNDLE_DIR:=$(BUNDLE_NAME)/Contents/x86_64-win
+        BUNDLE_BINARY:=$(BUNDLE_DIR)/oxefmsynth.vst3
+        BUNDLE_SETUP:=@mkdir -p $(BUNDLE_DIR)
+        USER_VST3_DIR?=$(if $(LOCALAPPDATA),$(LOCALAPPDATA)/Programs/Common/VST3,$(COMMONPROGRAMFILES)/VST3)
+        DEPS:=resources.o bitmaps.cpp
+        SOURCES+=resources.o bitmaps.cpp
+    else
+        DEPS:=bitmaps.cpp
+        SOURCES+=bitmaps.cpp
+        ifeq ($(UNAME_S),Darwin)
+            LDFLAGS+=-framework Cocoa
+            SOURCES+=src/toolkits/cocoatoolkit.mm \
+                     $(VST3SDK_PATH)/public.sdk/source/main/macmain.cpp
+            BUNDLE_DIR:=$(BUNDLE_NAME)/Contents/MacOS
+            BUNDLE_BINARY:=$(BUNDLE_DIR)/oxefmsynth
+            BUNDLE_SETUP:=@mkdir -p $(BUNDLE_DIR) && cp src/macosx/vst3/* $(BUNDLE_NAME)/Contents/
+            USER_VST3_DIR?=$(HOME)/Library/Audio/Plug-Ins/VST3
+        else
+            LIBS+=-lX11 -lpthread -ldl
+            CXXFLAGS+=-fPIC
+            LDFLAGS+=-s
+            SOURCES+=src/toolkits/xlibtoolkit.cpp \
+                     $(VST3SDK_PATH)/public.sdk/source/main/linuxmain.cpp
+            ARCH:=$(shell uname -m)
+            BUNDLE_DIR:=$(BUNDLE_NAME)/Contents/$(ARCH)-linux
+            BUNDLE_BINARY:=$(BUNDLE_DIR)/oxefmsynth.so
+            BUNDLE_SETUP:=@mkdir -p $(BUNDLE_DIR)
+            USER_VST3_DIR?=$(HOME)/.vst3
+        endif
+    endif
+endif
+
+all: $(VST3SDK_PATH)/pluginterfaces/base/funknown.h $(DEPS)
+	$(BUNDLE_SETUP)
+	@$(CXX) -shared -o $(BUNDLE_BINARY) $(CXXFLAGS) $(SOURCES) $(INCLUDES) $(LIBS) $(LDFLAGS)
+
+install:
+	@if [ -d "$(BUNDLE_NAME)" ] && [ -f "$(BUNDLE_BINARY)" ]; then \
+		echo "Installing $(BUNDLE_NAME) to $(USER_VST3_DIR)"; \
+		mkdir -p "$(USER_VST3_DIR)"; \
+		rm -rf "$(USER_VST3_DIR)/$(BUNDLE_NAME)"; \
+		cp -R "$(BUNDLE_NAME)" "$(USER_VST3_DIR)/"; \
+	else \
+		echo "$(BUNDLE_NAME) is not built. Build it first with 'make vst3' (or 'make -f Makefile.vst3')."; \
+	fi
+
+$(VST3SDK_PATH)/pluginterfaces/base/funknown.h:
+	@echo "Downloading VST3 SDK..."
+	@mkdir -p .deps
+	@git clone --depth 1 --branch v3.7.14_build_55 https://github.com/steinbergmedia/vst3sdk.git .deps/vst3sdk
+	@cd .deps/vst3sdk && git submodule update --init --depth 1 base cmake pluginterfaces public.sdk
+
+bitmaps.cpp:
+	@$(CXX) -o embedresources $(CXXFLAGS) src/toolkits/embedresources.cpp
+	@./embedresources $@
+	@rm embedresources
+
+resources.o:
+	@$(RC) -Isrc/synth -Iskins/default src/windows/resources.rc resources.o
+
+clean:
+	@rm -rf $(BUNDLE_NAME) embedresources bitmaps.cpp *.o *.d
+
+.PHONY: all clean install
+

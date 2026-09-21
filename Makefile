@@ -16,6 +16,8 @@
 
 UNAME_S:=$(shell uname -s)
 
+.PHONY: all clean vst3 install
+
 all:
 	@echo "Building converter"
 	@$(MAKE) -s -f Makefile.converter
@@ -36,5 +38,14 @@ ifeq ($(UNAME_S),Darwin)
 	@$(MAKE) -s -f Makefile.vstmacosx
 endif
 
+vst3:
+	@echo "Building VST3 plugin"
+	@$(MAKE) -s -f Makefile.vst3
+
+install:
+	@$(MAKE) -s -f Makefile.vst3 install
+
+
 clean:
-	@rm -rf oxeconverter oxefmsynthdemo oxefmsynthdemo.exe oxefmsynthdemo.wav oxefmsynth oxefmsynth.exe oxevst*.dll oxevst*.so embedresources bitmaps.cpp *.o *.d oxefmsynth.app oxefmsynth.vst
+	@rm -rf oxeconverter oxefmsynthdemo oxefmsynthdemo.exe oxefmsynthdemo.wav oxefmsynth oxefmsynth.exe oxevst*.dll oxevst*.so embedresources bitmaps.cpp *.o *.d oxefmsynth.app oxefmsynth.vst oxefmsynth.vst3
+

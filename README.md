@@ -7,9 +7,24 @@ This repository contains the synth core and three different ways to use it:
 
 - as a [demo](https://en.wikipedia.org/wiki/Demoscene) (for testing synth engine, for profiling or just for fun)
 - as a standalone application (for testing GUI)
-- as a [VST plugin](https://pt.wikipedia.org/wiki/Virtual_Studio_Technology) for Windows (32/64bit), Linux 32/64bit and Mac OS X (64bit)
+- as a **VST3 plugin** for Windows, Linux, and macOS
 
 ## Building
+
+### VST3 Plugin
+To build the VST3 plugin (the VST3 SDK is automatically downloaded at build time if not present):
+
+```bash
+make vst3
+```
+(or `make -f Makefile.vst3`). The resulting `oxefmsynth.vst3` bundle will be created in the current directory.
+
+To install the plugin (if it was built) to the default VST3 user directory (`~/Library/Audio/Plug-Ins/VST3` on macOS, `~/.vst3` on Linux, `%LOCALAPPDATA%\Programs\Common\VST3` on Windows):
+
+```bash
+make install
+```
+
 
 ### Windows
 Requirements: [mingw-w64](http://mingw-w64.org/) and [msys](https://msysgit.github.io/).
