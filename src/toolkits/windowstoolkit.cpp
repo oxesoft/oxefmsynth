@@ -174,7 +174,7 @@ CWindowsToolkit::CWindowsToolkit(void *parentWindow, CEditor *editor)
         windowClass.hCursor       = LoadCursor( NULL, IDC_ARROW );
         windowClass.hbrBackground = NULL;
         windowClass.lpszMenuName  = 0;
-        windowClass.lpszClassName = L"OxeVstEditorClass";
+        windowClass.lpszClassName = L"OxeEditorClass";
         RegisterClassW(&windowClass);
     }
 
@@ -192,7 +192,7 @@ CWindowsToolkit::CWindowsToolkit(void *parentWindow, CEditor *editor)
 
         this->hWnd = CreateWindowW
         (
-            L"OxeVstEditorClass",
+            L"OxeEditorClass",
             L"",
             WS_SYSMENU | WS_CAPTION | WS_MINIMIZEBOX,
             rect.left,
@@ -210,7 +210,7 @@ CWindowsToolkit::CWindowsToolkit(void *parentWindow, CEditor *editor)
         this->hWnd = CreateWindowExW
         (
             0,
-            L"OxeVstEditorClass",
+            L"OxeEditorClass",
             L"",
             WS_CHILD | WS_VISIBLE,
             0,
@@ -275,7 +275,7 @@ CWindowsToolkit::~CWindowsToolkit()
     g_useCount--;
     if (g_useCount == 0)
     {
-        UnregisterClassW(L"OxeVstEditorClass", (HINSTANCE)hInstance);
+        UnregisterClassW(L"OxeEditorClass", (HINSTANCE)hInstance);
     }
     DeleteDC(hdcAux);
     DeleteDC(hdcMem);

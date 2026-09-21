@@ -16,7 +16,6 @@
 
 EXECUTABLE_NAME:=oxefmsynth
 
-INCLUDES+=-Isrc/vst
 INCLUDES+=-Isrc/gui
 INCLUDES+=-Isrc/synth
 INCLUDES+=-Isrc/toolkits

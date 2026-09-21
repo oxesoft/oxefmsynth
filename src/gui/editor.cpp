@@ -680,8 +680,8 @@ float CEditor::GetPar(int index)
         {
             int type = ctl[i]->GetType();
             float fvalue = synthesizer->GetPar(CHANNEL, index);
-            float vstvalue = (float)CMapper::FloatValueToIntValue(this->synthesizer, CHANNEL, index, type, fvalue);
-            return vstvalue / MAXPARVALUE;
+            float normValue = (float)CMapper::FloatValueToIntValue(this->synthesizer, CHANNEL, index, type, fvalue);
+            return normValue / MAXPARVALUE;
         }
     }
     return 0.f;

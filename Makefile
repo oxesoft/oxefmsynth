@@ -25,18 +25,7 @@ all:
 	@$(MAKE) -s -f Makefile.demo
 	@echo "Building standalone"
 	@$(MAKE) -s -f Makefile.standalone
-ifeq ($(OS),Windows_NT)
-	@echo "Building Windows VST plugin (32 and 64 bit)"
-	@$(MAKE) -s -f Makefile.vstwindows
-endif
-ifeq ($(UNAME_S),Linux)
-	@echo "Building Linux VST plugin"
-	@$(MAKE) -s -f Makefile.vstlinux
-endif
-ifeq ($(UNAME_S),Darwin)
-	@echo "Building OSX VST plugin"
-	@$(MAKE) -s -f Makefile.vstmacosx
-endif
+	@$(MAKE) -s vst3
 
 vst3:
 	@echo "Building VST3 plugin"
@@ -47,5 +36,5 @@ install:
 
 
 clean:
-	@rm -rf oxeconverter oxefmsynthdemo oxefmsynthdemo.exe oxefmsynthdemo.wav oxefmsynth oxefmsynth.exe oxevst*.dll oxevst*.so embedresources bitmaps.cpp *.o *.d oxefmsynth.app oxefmsynth.vst oxefmsynth.vst3
+	@rm -rf oxeconverter oxefmsynthdemo oxefmsynthdemo.exe oxefmsynthdemo.wav oxefmsynth oxefmsynth.exe oxevst*.dll oxevst*.so embedresources bitmaps.cpp *.o *.d oxefmsynth.app oxefmsynth.vst3
 

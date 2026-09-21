@@ -27,11 +27,11 @@ BEGIN
         BEGIN
             VALUE "Comments", "http://www.oxesoft.com"
             VALUE "CompanyName", "Oxe Music Software"
-            VALUE "FileDescription", "Oxe FM Synth VSTi"
+            VALUE "FileDescription", "Oxe FM Synth"
             VALUE "FileVersion", VERSION_STR
-            VALUE "InternalName", "oxevst"
+            VALUE "InternalName", "oxefmsynth"
             VALUE "LegalCopyright", "Copyright Daniel Moura, GNU GPL"
-            VALUE "OriginalFilename", "oxevst.dll"
+            VALUE "OriginalFilename", "oxefmsynth.dll"
             VALUE "ProductName", "Oxe FM Synth"
             VALUE "ProductVersion", VERSION_STR
         END
