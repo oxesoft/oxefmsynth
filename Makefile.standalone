@@ -81,8 +81,7 @@ else
         SOURCES+=bitmaps.cpp
         ifeq ($(UNAME_S),Darwin)
             LDFLAGS+=-framework Cocoa
-            SOURCES+=src/toolkits/cocoatoolkit.cpp
-            SOURCES+=src/toolkits/cocoatoolkit.m
+            SOURCES+=src/toolkits/cocoatoolkit.mm
         else
             LDFLAGS+=-lX11
             LDFLAGS+=-lpthread
@@ -110,9 +109,6 @@ bitmaps.cpp:
 	@$(CXX) -o embedresources $(CXXFLAGS) src/toolkits/embedresources.cpp
 	@./embedresources $@
 	@rm embedresources
-
-cocoatoolkit.o:
-	@gcc -c -o $@ $(OBJCSOURCES) $(INCLUDES) $(OBJCXXFLAGS)
 
 resources.o:
 	@$(RC) -Isrc/synth -Iskins/default src/windows/resources.rc resources.o
