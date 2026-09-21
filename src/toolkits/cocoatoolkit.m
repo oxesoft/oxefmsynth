@@ -1,6 +1,6 @@
 /*
 Oxe FM Synth: a software synthesizer
-Copyright (C) 2004-2015  Daniel Moura <oxe@oxesoft.com>
+Copyright (C) 2004-2026  Daniel Moura <oxe@oxesoft.com>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -20,9 +20,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #import "cocoawrapper.h"
 #import <Cocoa/Cocoa.h>
 
-@interface PluginView : NSOpenGLView
+@interface PluginView : NSView
 {
-    void* toolkit;
+    void*           toolkit;
+    CGContextRef    bitmapContext;
+    CGColorSpaceRef colorSpace;
 }
 - (id)   init:(void*)toolkitPtr withSize:(NSSize)size;
 - (void) viewDidMoveToWindow;
@@ -30,27 +32,29 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 - (void) mouseUp:(NSEvent *)event;
 - (void) mouseMoved:(NSEvent *)event;
 - (void) mouseDragged:(NSEvent *)event;
+- (void) scrollWheel:(NSEvent *)event;
 - (void) keyDown:(NSEvent *)event;
+- (BOOL) acceptsFirstResponder;
 - (BOOL) isOpaque;
 @end
 
 @interface CocoaToolkit : NSObject
 {
-    void* toolkit;
-    NSView* parentView;
+    void*              toolkit;
+    NSView*            parentView;
     NSAutoreleasePool* pool;
-    NSApplication* app;
-    NSWindow* window;
-    PluginView* view;
-    NSImage* bmps[BMP_COUNT];
-    int bmps_height[BMP_COUNT];
-    NSTimer* timer;
+    NSApplication*     app;
+    NSWindow*          window;
+    PluginView*        view;
+    NSTimer*           timer;
 }
 - (id)   initWithToolkit:(void*)toolkitPtr;
 - (void) createWindow:(id)parent;
 - (void) showWindow;
 - (void) waitWindowClosed;
 - (void) update;
+- (void) invalidateRect:(NSRect)rect;
+- (void) invalidateAll;
 @end
 
 //----------------------------------------------------------------------
@@ -59,50 +63,62 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 - (id) init:(void*)toolkitPtr withSize:(NSSize)size
 {
-    toolkit = toolkitPtr;
-
     NSRect frame = NSMakeRect(0, 0, size.width, size.height);
-
-    NSOpenGLPixelFormatAttribute pixelAttribs[16] =
-    {
-        NSOpenGLPFADoubleBuffer,
-        NSOpenGLPFAAccelerated,
-        NSOpenGLPFAColorSize, 32,
-        NSOpenGLPFADepthSize, 32,
-        0
-    };
-
-    NSOpenGLPixelFormat* pixelFormat = [[NSOpenGLPixelFormat alloc] initWithAttributes:pixelAttribs];
-    if (pixelFormat)
-    {
-        self = [super initWithFrame:frame pixelFormat:pixelFormat];
-        [pixelFormat release];
-    }
-    else
-    {
-        self = [super initWithFrame:frame];
-    }
+    self = [super initWithFrame:frame];
     if (self)
     {
-        [[self openGLContext] makeCurrentContext];
-        CppOpenGLInit(toolkit);
+        toolkit = toolkitPtr;
+        [self setWantsLayer:YES];
+        [self setLayerContentsRedrawPolicy:NSViewLayerContentsRedrawOnSetNeedsDisplay];
+
+        colorSpace = CGColorSpaceCreateDeviceRGB();
+        uint32_t *pixels = (uint32_t*)CppGetScreenPixels(toolkit);
+        bitmapContext = CGBitmapContextCreate(
+            pixels,
+            GUI_WIDTH,
+            GUI_HEIGHT,
+            8,
+            GUI_WIDTH * sizeof(uint32_t),
+            colorSpace,
+            kCGImageAlphaNoneSkipLast | kCGBitmapByteOrder32Big
+        );
     }
     return self;
 }
 
 - (void) dealloc
 {
-    CppOpenGLDeinit(toolkit);
+    if (bitmapContext)
+    {
+        CGContextRelease(bitmapContext);
+        bitmapContext = NULL;
+    }
+    if (colorSpace)
+    {
+        CGColorSpaceRelease(colorSpace);
+        colorSpace = NULL;
+    }
     [super dealloc];
 }
 
-- (void) drawRect:(NSRect)rect
+- (void) drawRect:(NSRect)dirtyRect
 {
-    CppOpenGLDraw(toolkit);
-    [[self openGLContext] flushBuffer];
+    if (!bitmapContext)
+    {
+        return;
+    }
+    CGImageRef image = CGBitmapContextCreateImage(bitmapContext);
+    if (image)
+    {
+        CGContextRef context = [[NSGraphicsContext currentContext] CGContext];
+        CGContextSetInterpolationQuality(context, kCGInterpolationNone);
+        CGContextDrawImage(context, CGRectMake(0, 0, GUI_WIDTH, GUI_HEIGHT), image);
+        CGImageRelease(image);
+    }
 }
 
-- (void)viewDidMoveToWindow {
+- (void) viewDidMoveToWindow
+{
     [self addTrackingRect:NSMakeRect(0, 0, GUI_WIDTH, GUI_HEIGHT) owner:self userData:NULL assumeInside:NO];
 }
 
@@ -111,9 +127,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     return YES;
 }
 
+- (BOOL) acceptsFirstResponder
+{
+    return YES;
+}
+
 - (void) mouseEntered:(NSEvent *)theEvent
 {
-    [[self window] setAcceptsMouseMovedEvents: YES];
+    [[self window] setAcceptsMouseMovedEvents:YES];
     [[self window] makeFirstResponder:self];
 }
 
@@ -139,16 +160,29 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     CppOnMouseMove(toolkit, (int)loc.x, GUI_HEIGHT - (int)loc.y);
 }
 
-- (void) mouseDragged:(NSEvent *)event;
+- (void) mouseDragged:(NSEvent *)event
 {
     NSPoint loc = [self convertPoint:[event locationInWindow] fromView:nil];
     CppOnMouseMove(toolkit, (int)loc.x, GUI_HEIGHT - (int)loc.y);
 }
 
+- (void) scrollWheel:(NSEvent *)event
+{
+    NSPoint loc = [self convertPoint:[event locationInWindow] fromView:nil];
+    CGFloat delta = [event deltaY];
+    if (delta != 0.0)
+    {
+        CppOnMouseWheel(toolkit, (int)loc.x, GUI_HEIGHT - (int)loc.y, delta > 0.0 ? 1 : -1);
+    }
+}
+
 - (void) keyDown:(NSEvent *)event
 {
     const char *c = [[event characters] UTF8String];
-    CppOnChar(toolkit, (int)c[0]);
+    if (c && c[0])
+    {
+        CppOnChar(toolkit, (int)c[0]);
+    }
 }
 
 @end
@@ -184,6 +218,16 @@ void CocoaToolkitWaitWindowClosed(void *self)
 {
     [(id)self waitWindowClosed];
 }
+
+void CocoaToolkitInvalidateRect(void *self, int x, int y, int w, int h)
+{
+    [(CocoaToolkit*)self invalidateRect:NSMakeRect(x, GUI_HEIGHT - y - h, w, h)];
+}
+
+void CocoaToolkitInvalidate(void *self)
+{
+    [(CocoaToolkit*)self invalidateAll];
+}
 /**
   * wrappers end
 **/
@@ -201,19 +245,31 @@ void CocoaToolkitWaitWindowClosed(void *self)
 
 - (void) dealloc
 {
-    [timer invalidate];
-    [view release];
+    if (timer)
+    {
+        [timer invalidate];
+        timer = nil;
+    }
+    if (view)
+    {
+        [view removeFromSuperview];
+        [view release];
+        view = nil;
+    }
     if (window)
     {
         [window release];
-    }
-    if (pool)
-    {
-        [pool release];
+        window = nil;
     }
     if (parentView)
     {
         [parentView release];
+        parentView = nil;
+    }
+    if (pool)
+    {
+        [pool release];
+        pool = nil;
     }
     [super dealloc];
 }
@@ -227,8 +283,11 @@ void CocoaToolkitWaitWindowClosed(void *self)
     view = [[PluginView alloc] init:toolkit withSize:NSMakeSize(GUI_WIDTH, GUI_HEIGHT)];
     if (parent)
     {
-        [pool release];
-        pool = NULL;
+        if (pool)
+        {
+            [pool release];
+            pool = nil;
+        }
         parentView = [(NSView*) parent retain];
         [parentView addSubview: view];
     }
@@ -237,9 +296,9 @@ void CocoaToolkitWaitWindowClosed(void *self)
         NSRect rect = NSMakeRect(0, 0, GUI_WIDTH, GUI_HEIGHT);
         window = [[NSWindow alloc]
             initWithContentRect: rect
-            styleMask: NSClosableWindowMask | NSTitledWindowMask
+            styleMask: NSWindowStyleMaskClosable | NSWindowStyleMaskTitled
             backing: NSBackingStoreBuffered
-            defer:NO
+            defer: NO
         ];
         [window setTitle:@TITLE_FULL];
         [window center];
@@ -250,7 +309,6 @@ void CocoaToolkitWaitWindowClosed(void *self)
 
 - (void) showWindow
 {
-    [[view window] setAutodisplay: YES];
     if (window)
     {
         [window makeKeyAndOrderFront:nil];
@@ -260,11 +318,14 @@ void CocoaToolkitWaitWindowClosed(void *self)
         [[view window] orderFront:nil];
     }
     [[view window] makeKeyAndOrderFront:nil];
-    timer = [NSTimer scheduledTimerWithTimeInterval:(0.001 * TIMER_RESOLUTION_MS)
-                                             target:self
-                                           selector:@selector(update)
-                                           userInfo:nil
-                                            repeats:YES];
+    if (!timer)
+    {
+        timer = [NSTimer scheduledTimerWithTimeInterval:(0.001 * TIMER_RESOLUTION_MS)
+                                                 target:self
+                                               selector:@selector(update)
+                                               userInfo:nil
+                                                repeats:YES];
+    }
 }
 
 - (void) waitWindowClosed
@@ -279,7 +340,17 @@ void CocoaToolkitWaitWindowClosed(void *self)
 
 - (void) update
 {
-    [view setNeedsDisplay: YES];
+    CppUpdate(toolkit);
+}
+
+- (void) invalidateRect:(NSRect)rect
+{
+    [view setNeedsDisplayInRect:rect];
+}
+
+- (void) invalidateAll
+{
+    [view setNeedsDisplay:YES];
 }
 
 @end

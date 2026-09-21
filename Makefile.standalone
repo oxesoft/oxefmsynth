@@ -81,8 +81,6 @@ else
         SOURCES+=bitmaps.cpp
         ifeq ($(UNAME_S),Darwin)
             LDFLAGS+=-framework Cocoa
-            LDFLAGS+=-framework OpenGL
-            SOURCES+=src/toolkits/opengltoolkit.cpp
             SOURCES+=src/toolkits/cocoatoolkit.cpp
             SOURCES+=src/toolkits/cocoatoolkit.m
         else

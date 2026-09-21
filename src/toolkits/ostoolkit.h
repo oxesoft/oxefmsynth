@@ -17,8 +17,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #if defined(__APPLE__)
-    #include <OpenGL/gl.h>
-    #include "opengltoolkit.h"
     #include "cocoatoolkit.h"
     #define COSToolkit CCocoaToolkit
 #elif defined(__linux)

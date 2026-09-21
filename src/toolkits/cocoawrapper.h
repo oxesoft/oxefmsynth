@@ -26,16 +26,17 @@ void  CocoaToolkitDestroy(void *self);
 void  CocoaToolkitCreateWindow(void *self, void *parent);
 void  CocoaToolkitShowWindow(void *self);
 void  CocoaToolkitWaitWindowClosed(void *self);
+void  CocoaToolkitInvalidateRect(void *self, int x, int y, int w, int h);
+void  CocoaToolkitInvalidate(void *self);
 
+void* CppGetScreenPixels(void *toolkit);
 void  CppOnLButtonDown(void *toolkit, int x, int y);
 void  CppOnLButtonUp(void *toolkit);
 void  CppOnDblClick(void *toolkit, int x, int y);
 void  CppOnMouseMove(void *toolkit, int x, int y);
+void  CppOnMouseWheel(void *toolkit, int x, int y, int delta);
 void  CppOnChar(void *toolkit, int c);
 void  CppUpdate(void *toolkit);
-void  CppOpenGLInit(void *toolkit);
-void  CppOpenGLDeinit(void *toolkit);
-void  CppOpenGLDraw(void *toolkit);
 
 #ifdef __cplusplus
 }

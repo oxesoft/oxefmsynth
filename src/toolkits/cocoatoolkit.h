@@ -16,15 +16,26 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-class CCocoaToolkit : public COpenGLToolkit
+#pragma once
+
+#include "toolkit.h"
+
+class CEditor;
+
+class CCocoaToolkit : public CToolkit
 {
 private:
     void *objcInstance;
+    void *impl;
 public:
     void        *parentWindow;
     CEditor     *editor;
     CCocoaToolkit(void *parentWindow, CEditor *editor);
-    ~CCocoaToolkit();
-    void StartWindowProcesses();
-    int  WaitWindowClosed();
+    virtual ~CCocoaToolkit();
+    virtual void CopyRect(int destX, int destY, int width, int height, int origBmp, int origX, int origY);
+    virtual void StartMouseCapture();
+    virtual void StopMouseCapture();
+    virtual void StartWindowProcesses();
+    virtual int  WaitWindowClosed();
+    void*        GetScreenPixels();
 };
