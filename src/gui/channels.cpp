@@ -22,8 +22,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "control.h"
 #include "channels.h"
 
-#define KEY_WIDTH   10
-#define KEY_HEIGHT  10
+#define KEY_WIDTH   10*GUI_SCALE
+#define KEY_HEIGHT  10*GUI_SCALE
 
 CChannels::CChannels(int bmp, CSynthesizer *synthesizer, char &channel, int x, int y)
 {

@@ -21,10 +21,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "control.h"
 #include "lcd.h"
 
-#define LCD_SEP_H   1  // horizontal space between the LCD characters
-#define LCD_SEP_V   1  // vertical space between the LCD characters
-#define LCD_CHAR_H  7  // char height in pixels
-#define LCD_CHAR_W  5  // char width in pixels
+#define LCD_SEP_H   1*GUI_SCALE  // horizontal space between the LCD characters
+#define LCD_SEP_V   1*GUI_SCALE  // vertical space between the LCD characters
+#define LCD_CHAR_H  7*GUI_SCALE  // char height in pixels
+#define LCD_CHAR_W  5*GUI_SCALE  // char width in pixels
 #define LCD_X       0  // bg left
 #define LCD_Y       0  // bg top
 
