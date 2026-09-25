@@ -1053,10 +1053,31 @@ void CEditor::DrawMatrixDecorations(BLContext &ctx, const BLFont &fontSmall, con
     float outY = mY + fY * 9.0f + 18.0f;
     float panY = mY + fY * 10.0f + 18.0f;
 
+    BLRgba32 outColor(0xff, 0x90, 0x00);
+    BLRgba32 panColor(0x00, 0xe5, 0xff);
+
+    float arrowX = mX + fX * 8.0f + 4.0f;
+    float textX  = arrowX + 13.0f;
+
+    auto drawArrow = [&](float x, float y, const BLRgba32 &color) {
+        ctx.set_stroke_width(1.2);
+        ctx.set_stroke_caps(BL_STROKE_CAP_ROUND);
+        ctx.set_stroke_join(BL_STROKE_JOIN_ROUND);
+        ctx.stroke_line(x, y, x + 7.0f, y, color);
+        BLPath head;
+        head.move_to(x + 4.5f, y - 3.0f);
+        head.line_to(x + 7.5f, y);
+        head.line_to(x + 4.5f, y + 3.0f);
+        ctx.stroke_path(head, color);
+    };
+
+    drawArrow(arrowX, outY - 3.2f, outColor);
+    drawArrow(arrowX, panY - 3.2f, panColor);
+
     if (fontSmall.is_valid())
     {
-        ctx.fill_utf8_text(BLPoint(mX + fX * 8.0f + 6.0f, outY), fontSmall, "OUTPUT", SIZE_MAX, BLRgba32(0xff, 0x90, 0x00));
-        ctx.fill_utf8_text(BLPoint(mX + fX * 8.0f + 6.0f, panY), fontSmall, "PAN", SIZE_MAX, BLRgba32(0x00, 0xe5, 0xff));
+        ctx.fill_utf8_text(BLPoint(textX, outY), fontSmall, "OUT", SIZE_MAX, outColor);
+        ctx.fill_utf8_text(BLPoint(textX, panY), fontSmall, "PAN", SIZE_MAX, panColor);
     }
 
     ctx.set_stroke_width(0.7);
