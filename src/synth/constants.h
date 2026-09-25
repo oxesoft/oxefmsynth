@@ -1,6 +1,6 @@
 /*
 Oxe FM Synth: a software synthesizer
-Copyright (C) 2004-2015  Daniel Moura <oxe@oxesoft.com>
+Copyright (C) 2004-2015  Daniel Moura <oxesoft@gmail.com>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define VERSION_STR         "2.0.0 beta 1"
 #define VERSION_INT         ((OXFM_MAJOR_VERSION * 100) + (OXFM_MINOR_VERSION * 10) + OXFM_PATCH_VERSION)
 #define TITLE_SMALL         "Oxe FM Synth " VERSION_STR
-#define TITLE_FULL          TITLE_SMALL " :: http://www.oxesoft.com"
+#define TITLE_FULL          TITLE_SMALL " :: https://github.com/oxesoft/oxefmsynth"
 #define SAMPLES_PER_PROCESS 128      // the synth process buffer size
 #define WAVEFORM_BIT_DEPTH  11
 #define WAVEFORM_BSIZE      (1<<WAVEFORM_BIT_DEPTH) // waveform size

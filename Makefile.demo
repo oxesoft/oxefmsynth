@@ -1,5 +1,5 @@
 # Oxe FM Synth: a software synthesizer
-# Copyright (C) 2015  Daniel Moura <oxe@oxesoft.com>
+# Copyright (C) 2015  Daniel Moura <oxesoft@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -14,6 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+BIN_DIR:=bin
 EXECUTABLE_NAME:=oxefmsynthdemo
 
 INCLUDES+=-Isrc/demo
@@ -68,8 +69,11 @@ else
     endif
 endif
 
+TARGET:=$(BIN_DIR)/$(EXECUTABLE_NAME)
+
 all:
-	@$(CXX) -o $(EXECUTABLE_NAME) -DEXECUTABLE_NAME=\"$(EXECUTABLE_NAME)\" -D__OXEDMO__ $(CXXFLAGS) $(SOURCES) $(INCLUDES) $(LDFLAGS)
+	@mkdir -p $(BIN_DIR)
+	@$(CXX) -o $(TARGET) -DEXECUTABLE_NAME=\"$(EXECUTABLE_NAME)\" -D__OXEDMO__ $(CXXFLAGS) $(SOURCES) $(INCLUDES) $(LDFLAGS)
 
 clean:
-	@rm -f $(EXECUTABLE_NAME) *.wav
+	@rm -f $(TARGET) $(EXECUTABLE_NAME) $(EXECUTABLE_NAME).exe *.wav

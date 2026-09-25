@@ -1,5 +1,5 @@
 # Oxe FM Synth: a software synthesizer
-# Copyright (C) 2015  Daniel Moura <oxe@oxesoft.com>
+# Copyright (C) 2015  Daniel Moura <oxesoft@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -48,4 +48,4 @@ install-clap:
 install: install-clap
 
 clean:
-	@rm -rf oxeconverter oxefmsynthdemo oxefmsynthdemo.exe oxefmsynthdemo.wav oxefmsynth oxefmsynth.exe *.o *.d oxefmsynth.app oxefmsynth.vst3 oxefmsynth.clap
+	@rm -rf bin oxeconverter oxefmsynthdemo oxefmsynthdemo.exe oxefmsynthdemo.wav oxefmsynth oxefmsynth.exe *.o *.d oxefmsynth.app oxefmsynth.vst3 oxefmsynth.clap

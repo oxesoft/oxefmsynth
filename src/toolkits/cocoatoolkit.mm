@@ -1,6 +1,6 @@
 /*
 Oxe FM Synth: a software synthesizer
-Copyright (C) 2004-2026  Daniel Moura <oxe@oxesoft.com>
+Copyright (C) 2004-2026  Daniel Moura <oxesoft@gmail.com>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -42,8 +42,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 - (BOOL) isOpaque;
 - (NSMenu *) menuForEvent:(NSEvent *)event;
 - (void) scale100:(id)sender;
+- (void) scale125:(id)sender;
 - (void) scale150:(id)sender;
+- (void) scale175:(id)sender;
 - (void) scale200:(id)sender;
+- (void) scale250:(id)sender;
+- (BOOL) performKeyEquivalent:(NSEvent *)event;
 @end
 
 @interface CocoaWindowController : NSObject <NSApplicationDelegate, NSWindowDelegate>
@@ -65,8 +69,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 - (void) invalidateRect:(NSRect)rect;
 - (void) resizeToWidth:(int)w height:(int)h;
 - (void) scale100:(id)sender;
+- (void) scale125:(id)sender;
 - (void) scale150:(id)sender;
+- (void) scale175:(id)sender;
 - (void) scale200:(id)sender;
+- (void) scale250:(id)sender;
 @end
 
 struct CCocoaToolkitImpl
@@ -284,13 +291,34 @@ struct CCocoaToolkitImpl
         NSMenu *menu = [[[NSMenu alloc] initWithTitle:@"Zoom"] autorelease];
         NSMenuItem *i100 = [menu addItemWithTitle:@"Scale 100% (950 × 656)" action:@selector(scale100:) keyEquivalent:@"1"];
         [i100 setTarget:self];
-        NSMenuItem *i150 = [menu addItemWithTitle:@"Scale 150% (1425 × 984)" action:@selector(scale150:) keyEquivalent:@"2"];
+        NSMenuItem *i125 = [menu addItemWithTitle:@"Scale 125% (1188 × 820)" action:@selector(scale125:) keyEquivalent:@"2"];
+        [i125 setTarget:self];
+        NSMenuItem *i150 = [menu addItemWithTitle:@"Scale 150% (1425 × 984)" action:@selector(scale150:) keyEquivalent:@"3"];
         [i150 setTarget:self];
-        NSMenuItem *i200 = [menu addItemWithTitle:@"Scale 200% (1900 × 1312)" action:@selector(scale200:) keyEquivalent:@"3"];
+        NSMenuItem *i175 = [menu addItemWithTitle:@"Scale 175% (1663 × 1148)" action:@selector(scale175:) keyEquivalent:@"4"];
+        [i175 setTarget:self];
+        NSMenuItem *i200 = [menu addItemWithTitle:@"Scale 200% (1900 × 1312)" action:@selector(scale200:) keyEquivalent:@"5"];
         [i200 setTarget:self];
+        NSMenuItem *i250 = [menu addItemWithTitle:@"Scale 250% (2375 × 1640)" action:@selector(scale250:) keyEquivalent:@"6"];
+        [i250 setTarget:self];
         return menu;
     }
     return [super menuForEvent:event];
+}
+
+- (BOOL) performKeyEquivalent:(NSEvent *)event
+{
+    if ([event modifierFlags] & NSEventModifierFlagCommand)
+    {
+        NSString *chars = [event charactersIgnoringModifiers];
+        if ([chars isEqualToString:@"1"]) { [self scale100:nil]; return YES; }
+        if ([chars isEqualToString:@"2"]) { [self scale125:nil]; return YES; }
+        if ([chars isEqualToString:@"3"]) { [self scale150:nil]; return YES; }
+        if ([chars isEqualToString:@"4"]) { [self scale175:nil]; return YES; }
+        if ([chars isEqualToString:@"5"]) { [self scale200:nil]; return YES; }
+        if ([chars isEqualToString:@"6"]) { [self scale250:nil]; return YES; }
+    }
+    return [super performKeyEquivalent:event];
 }
 
 - (void) scale100:(id)sender
@@ -298,14 +326,29 @@ struct CCocoaToolkitImpl
     if (toolkit) toolkit->Resize(GUI_WIDTH, GUI_HEIGHT);
 }
 
+- (void) scale125:(id)sender
+{
+    if (toolkit) toolkit->Resize((int)round(GUI_WIDTH * 1.25), (int)round(GUI_HEIGHT * 1.25));
+}
+
 - (void) scale150:(id)sender
 {
-    if (toolkit) toolkit->Resize((int)(GUI_WIDTH * 1.5), (int)(GUI_HEIGHT * 1.5));
+    if (toolkit) toolkit->Resize((int)round(GUI_WIDTH * 1.5), (int)round(GUI_HEIGHT * 1.5));
+}
+
+- (void) scale175:(id)sender
+{
+    if (toolkit) toolkit->Resize((int)round(GUI_WIDTH * 1.75), (int)round(GUI_HEIGHT * 1.75));
 }
 
 - (void) scale200:(id)sender
 {
     if (toolkit) toolkit->Resize(GUI_WIDTH * 2, GUI_HEIGHT * 2);
+}
+
+- (void) scale250:(id)sender
+{
+    if (toolkit) toolkit->Resize((int)round(GUI_WIDTH * 2.5), (int)round(GUI_HEIGHT * 2.5));
 }
 
 @end
@@ -353,10 +396,16 @@ struct CCocoaToolkitImpl
             NSMenu *viewMenu = [[[NSMenu alloc] initWithTitle:@"View"] autorelease];
             NSMenuItem *mi100 = [viewMenu addItemWithTitle:@"Scale 100% (950 × 656)" action:@selector(scale100:) keyEquivalent:@"1"];
             [mi100 setTarget:self];
-            NSMenuItem *mi150 = [viewMenu addItemWithTitle:@"Scale 150% (1425 × 984)" action:@selector(scale150:) keyEquivalent:@"2"];
+            NSMenuItem *mi125 = [viewMenu addItemWithTitle:@"Scale 125% (1188 × 820)" action:@selector(scale125:) keyEquivalent:@"2"];
+            [mi125 setTarget:self];
+            NSMenuItem *mi150 = [viewMenu addItemWithTitle:@"Scale 150% (1425 × 984)" action:@selector(scale150:) keyEquivalent:@"3"];
             [mi150 setTarget:self];
-            NSMenuItem *mi200 = [viewMenu addItemWithTitle:@"Scale 200% (1900 × 1312)" action:@selector(scale200:) keyEquivalent:@"3"];
+            NSMenuItem *mi175 = [viewMenu addItemWithTitle:@"Scale 175% (1663 × 1148)" action:@selector(scale175:) keyEquivalent:@"4"];
+            [mi175 setTarget:self];
+            NSMenuItem *mi200 = [viewMenu addItemWithTitle:@"Scale 200% (1900 × 1312)" action:@selector(scale200:) keyEquivalent:@"5"];
             [mi200 setTarget:self];
+            NSMenuItem *mi250 = [viewMenu addItemWithTitle:@"Scale 250% (2375 × 1640)" action:@selector(scale250:) keyEquivalent:@"6"];
+            [mi250 setTarget:self];
             [viewMenuItem setSubmenu:viewMenu];
 
             [NSApp setMainMenu:mainMenu];
@@ -504,14 +553,29 @@ struct CCocoaToolkitImpl
     [self resizeToWidth:GUI_WIDTH height:GUI_HEIGHT];
 }
 
+- (void) scale125:(id)sender
+{
+    [self resizeToWidth:(int)round(GUI_WIDTH * 1.25) height:(int)round(GUI_HEIGHT * 1.25)];
+}
+
 - (void) scale150:(id)sender
 {
-    [self resizeToWidth:(int)(GUI_WIDTH * 1.5) height:(int)(GUI_HEIGHT * 1.5)];
+    [self resizeToWidth:(int)round(GUI_WIDTH * 1.5) height:(int)round(GUI_HEIGHT * 1.5)];
+}
+
+- (void) scale175:(id)sender
+{
+    [self resizeToWidth:(int)round(GUI_WIDTH * 1.75) height:(int)round(GUI_HEIGHT * 1.75)];
 }
 
 - (void) scale200:(id)sender
 {
     [self resizeToWidth:(GUI_WIDTH * 2) height:(GUI_HEIGHT * 2)];
+}
+
+- (void) scale250:(id)sender
+{
+    [self resizeToWidth:(int)round(GUI_WIDTH * 2.5) height:(int)round(GUI_HEIGHT * 2.5)];
 }
 
 @end

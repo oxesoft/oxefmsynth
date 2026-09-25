@@ -1,5 +1,5 @@
 # Oxe FM Synth: a software synthesizer
-# Copyright (C) 2004-2026  Daniel Moura <oxe@oxesoft.com>
+# Copyright (C) 2004-2026  Daniel Moura <oxesoft@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -14,6 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+BIN_DIR:=bin
 BUNDLE_NAME:=oxefmsynth.vst3
 VERSION_STR:=$(shell grep '\#define VERSION_STR' src/synth/constants.h | awk -F '"' '{print $$2}')
 
@@ -92,12 +93,14 @@ ifeq ($(OS),Windows_NT)
              $(VST3SDK_PATH)/public.sdk/source/main/dllmain.cpp
     LIBS+=-lgdi32
     LDFLAGS+=-static -s
-    BUNDLE_DIR:=$(BUNDLE_NAME)/Contents/x86_64-win
+    BUNDLE_DIR:=$(BIN_DIR)/$(BUNDLE_NAME)/Contents/x86_64-win
     BUNDLE_BINARY:=$(BUNDLE_DIR)/oxefmsynth.vst3
     BUNDLE_SETUP:=@mkdir -p $(BUNDLE_DIR)
+    TARGET_FILE:=$(BIN_DIR)/$(BUNDLE_NAME)
     USER_VST3_DIR?=$(if $(LOCALAPPDATA),$(LOCALAPPDATA)/Programs/Common/VST3,$(COMMONPROGRAMFILES)/VST3)
     DEPS:=resources.o
     SOURCES+=resources.o
+    INSTALL_CMD=rm -rf "$(USER_VST3_DIR)/$(BUNDLE_NAME)" && cp -R "$(TARGET_FILE)" "$(USER_VST3_DIR)/"
 else
     ifeq ($(TARGET),WIN32)
         CXX:=x86_64-w64-mingw32-g++
@@ -107,21 +110,25 @@ else
                  $(VST3SDK_PATH)/public.sdk/source/main/dllmain.cpp
         LIBS+=-lgdi32
         LDFLAGS+=-static -s
-        BUNDLE_DIR:=$(BUNDLE_NAME)/Contents/x86_64-win
+        BUNDLE_DIR:=$(BIN_DIR)/$(BUNDLE_NAME)/Contents/x86_64-win
         BUNDLE_BINARY:=$(BUNDLE_DIR)/oxefmsynth.vst3
         BUNDLE_SETUP:=@mkdir -p $(BUNDLE_DIR)
+        TARGET_FILE:=$(BIN_DIR)/$(BUNDLE_NAME)
         USER_VST3_DIR?=$(if $(LOCALAPPDATA),$(LOCALAPPDATA)/Programs/Common/VST3,$(COMMONPROGRAMFILES)/VST3)
         DEPS:=resources.o
         SOURCES+=resources.o
+        INSTALL_CMD=rm -rf "$(USER_VST3_DIR)/$(BUNDLE_NAME)" && cp -R "$(TARGET_FILE)" "$(USER_VST3_DIR)/"
     else
         ifeq ($(UNAME_S),Darwin)
             LDFLAGS+=-framework Cocoa
             SOURCES+=src/toolkits/cocoatoolkit.mm \
                      $(VST3SDK_PATH)/public.sdk/source/main/macmain.cpp
-            BUNDLE_DIR:=$(BUNDLE_NAME)/Contents/MacOS
+            BUNDLE_DIR:=$(BIN_DIR)/$(BUNDLE_NAME)/Contents/MacOS
             BUNDLE_BINARY:=$(BUNDLE_DIR)/oxefmsynth
-            BUNDLE_SETUP:=@mkdir -p $(BUNDLE_DIR) && cp src/macosx/vst3/PkgInfo $(BUNDLE_NAME)/Contents/ 2>/dev/null || true && sed 's/__VERSION__/$(VERSION_STR)/g' src/macosx/vst3/Info.plist.in > $(BUNDLE_NAME)/Contents/Info.plist
+            BUNDLE_SETUP:=@mkdir -p $(BUNDLE_DIR) && cp src/macosx/vst3/PkgInfo $(BIN_DIR)/$(BUNDLE_NAME)/Contents/ 2>/dev/null || true && sed 's/__VERSION__/$(VERSION_STR)/g' src/macosx/vst3/Info.plist.in > $(BIN_DIR)/$(BUNDLE_NAME)/Contents/Info.plist
+            TARGET_FILE:=$(BIN_DIR)/$(BUNDLE_NAME)
             USER_VST3_DIR?=$(HOME)/Library/Audio/Plug-Ins/VST3
+            INSTALL_CMD=rm -rf "$(USER_VST3_DIR)/$(BUNDLE_NAME)" && cp -R "$(TARGET_FILE)" "$(USER_VST3_DIR)/"
         else
             SOURCES+=src/toolkits/xlibtoolkit.cpp \
                      $(VST3SDK_PATH)/public.sdk/source/main/linuxmain.cpp
@@ -129,10 +136,12 @@ else
             CXXFLAGS+=-fPIC
             LDFLAGS+=-s
             ARCH:=$(shell uname -m)
-            BUNDLE_DIR:=$(BUNDLE_NAME)/Contents/$(ARCH)-linux
+            BUNDLE_DIR:=$(BIN_DIR)/$(BUNDLE_NAME)/Contents/$(ARCH)-linux
             BUNDLE_BINARY:=$(BUNDLE_DIR)/oxefmsynth.so
             BUNDLE_SETUP:=@mkdir -p $(BUNDLE_DIR)
+            TARGET_FILE:=$(BIN_DIR)/$(BUNDLE_NAME)
             USER_VST3_DIR?=$(HOME)/.vst3
+            INSTALL_CMD=rm -rf "$(USER_VST3_DIR)/$(BUNDLE_NAME)" && cp -R "$(TARGET_FILE)" "$(USER_VST3_DIR)/"
         endif
     endif
 endif
@@ -142,13 +151,12 @@ all: $(VST3SDK_PATH)/pluginterfaces/base/funknown.h $(DEPS)
 	@$(CXX) -shared -o $(BUNDLE_BINARY) $(CXXFLAGS) $(SOURCES) $(INCLUDES) $(LIBS) $(LDFLAGS)
 
 install:
-	@if [ -d "$(BUNDLE_NAME)" ] && [ -f "$(BUNDLE_BINARY)" ]; then \
-		echo "Installing $(BUNDLE_NAME) to $(USER_VST3_DIR)"; \
+	@if [ -d "$(TARGET_FILE)" ] && [ -f "$(BUNDLE_BINARY)" ]; then \
+		echo "Installing $(TARGET_FILE) to $(USER_VST3_DIR)"; \
 		mkdir -p "$(USER_VST3_DIR)"; \
-		rm -rf "$(USER_VST3_DIR)/$(BUNDLE_NAME)"; \
-		cp -R "$(BUNDLE_NAME)" "$(USER_VST3_DIR)/"; \
+		$(INSTALL_CMD); \
 	else \
-		echo "$(BUNDLE_NAME) is not built. Build it first with 'make vst3' (or 'make -f Makefile.vst3')."; \
+		echo "$(TARGET_FILE) is not built. Build it first with 'make vst3' (or 'make -f Makefile.vst3')."; \
 	fi
 
 $(VST3SDK_PATH)/pluginterfaces/base/funknown.h:
@@ -161,7 +169,7 @@ resources.o:
 	@$(RC) -Isrc/synth src/windows/resources.rc resources.o
 
 clean:
-	@rm -rf $(BUNDLE_NAME) *.o *.d
+	@rm -rf $(TARGET_FILE) $(BUNDLE_NAME) *.o *.d
 
 .PHONY: all clean install
 

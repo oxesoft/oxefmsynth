@@ -4,6 +4,7 @@
 *.so
 *.o
 bitmaps.cpp
+bin/
 oxefmsynthdemo
 oxeconverter
 oxefmsynth

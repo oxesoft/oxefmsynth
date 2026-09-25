@@ -1,7 +1,7 @@
 # Oxe FM Synth
-Welcome to the [Oxe FM Synth](https://oxesoft.wordpress.com/) official repository.
+Welcome to the [Oxe FM Synth](https://github.com/oxesoft/oxefmsynth/) official repository.
 
-![defaultskin](https://oxesoft.files.wordpress.com/2007/12/screenshot_full.png)
+![Oxe FM Synth](other/screenshot.png)
 
 This repository contains the synth core and four different ways to use it:
 
@@ -12,14 +12,14 @@ This repository contains the synth core and four different ways to use it:
 
 ## Building
 
-Typing `make` builds the demo, converter, standalone application, and the **CLAP plugin** (`oxefmsynth.clap`).
+Typing `make` builds the demo, converter, standalone application, and the **CLAP plugin** (`oxefmsynth.clap`) into the `bin/` directory.
 
 ### CLAP Plugin (Recommended)
 CLAP is a completely open, free, and modern plugin standard. It is prioritized and built by default:
 ```bash
 make clap
 ```
-(or simply `make`, or `make -f Makefile.clap`). The CLAP SDK is automatically downloaded at build time if not present. The resulting `oxefmsynth.clap` is created in the current directory.
+(or simply `make`, or `make -f Makefile.clap`). The CLAP SDK is automatically downloaded at build time if not present. The resulting `oxefmsynth.clap` is created in the `bin/` directory.
 
 To install the CLAP plugin to the default user directory (`~/Library/Audio/Plug-Ins/CLAP` on macOS, `~/.clap` on Linux, `%LOCALAPPDATA%\Programs\Common\CLAP` on Windows):
 ```bash
@@ -31,7 +31,7 @@ VST3 support is optional. To build the VST3 plugin (the VST3 SDK is automaticall
 ```bash
 make vst3
 ```
-(or `make -f Makefile.vst3`). The resulting `oxefmsynth.vst3` is created in the current directory.
+(or `make -f Makefile.vst3`). The resulting `oxefmsynth.vst3` is created in the `bin/` directory.
 
 To install the VST3 plugin to the default VST3 user directory (`~/Library/Audio/Plug-Ins/VST3` on macOS, `~/.vst3` on Linux, `%LOCALAPPDATA%\Programs\Common\VST3` on Windows):
 ```bash
@@ -70,18 +70,3 @@ You can enable this building it with ``make -f Makefile.demo WITH_DSOUND=YES``. 
 line parameters ``-f`` (to file) and ``-m`` (to memory) still works if used.
 To cross-compile it for Windows, from Linux, run ``make -f Makefile.demo TARGET=WIN32``.
 To build a native version, just type ``make -f Makefile.demo``.
-
-## Skins
-To use a ready skin or test a new one, just put the images in a "skin" dir in the same dir as the plugin/standalone executable.
-
-![skin1](https://oxesoft.files.wordpress.com/2015/04/layzer.png)
-
-![skin2](https://oxesoft.files.wordpress.com/2017/05/snow1.png)
-
-![skin3](https://oxesoft.files.wordpress.com/2015/08/totolitoto.png)
-
-![skin4](https://oxesoft.files.wordpress.com/2015/05/tx802.png)
-
-![skin5](https://oxesoft.files.wordpress.com/2015/10/dx7.png)
-
-![skin6](https://oxesoft.files.wordpress.com/2017/05/fm8like1.png)

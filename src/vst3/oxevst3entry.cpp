@@ -1,6 +1,6 @@
 /*
 Oxe FM Synth: a software synthesizer
-Copyright (C) 2004-2026  Daniel Moura <oxe@oxesoft.com>
+Copyright (C) 2004-2026  Daniel Moura <oxesoft@gmail.com>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using namespace Steinberg::Vst;
 
-BEGIN_FACTORY_DEF ("Oxe Music Software", "http://www.oxesoft.com", "oxe@oxesoft.com")
+BEGIN_FACTORY_DEF ("Oxe Music Software", "https://github.com/oxesoft/oxefmsynth", "oxesoft@gmail.com")
 
     DEF_CLASS2 (INLINE_UID (0x6F786566, 0x6D73796E, 0x74687673, 0x74333031),
                 PClassInfo::kManyInstances,

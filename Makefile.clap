@@ -1,5 +1,5 @@
 # Oxe FM Synth: a software synthesizer
-# Copyright (C) 2004-2026  Daniel Moura <oxe@oxesoft.com>
+# Copyright (C) 2004-2026  Daniel Moura <oxesoft@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -14,6 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+BIN_DIR:=bin
 BUNDLE_NAME:=oxefmsynth.clap
 VERSION_STR:=$(shell grep '\#define VERSION_STR' src/synth/constants.h | awk -F '"' '{print $$2}')
 
@@ -70,8 +71,9 @@ ifeq ($(OS),Windows_NT)
     SOURCES+=src/toolkits/windowstoolkit.cpp
     LIBS+=-lgdi32
     LDFLAGS+=-static -s
-    TARGET_FILE:=$(BUNDLE_NAME)
+    TARGET_FILE:=$(BIN_DIR)/$(BUNDLE_NAME)
     BUNDLE_BINARY:=$(TARGET_FILE)
+    BUNDLE_SETUP:=@mkdir -p $(BIN_DIR)
     USER_CLAP_DIR?=$(if $(LOCALAPPDATA),$(LOCALAPPDATA)/Programs/Common/CLAP,$(COMMONPROGRAMFILES)/CLAP)
     DEPS:=resources.o
     SOURCES+=resources.o
@@ -84,8 +86,9 @@ else
         SOURCES+=src/toolkits/windowstoolkit.cpp
         LIBS+=-lgdi32
         LDFLAGS+=-static -s
-        TARGET_FILE:=$(BUNDLE_NAME)
+        TARGET_FILE:=$(BIN_DIR)/$(BUNDLE_NAME)
         BUNDLE_BINARY:=$(TARGET_FILE)
+        BUNDLE_SETUP:=@mkdir -p $(BIN_DIR)
         USER_CLAP_DIR?=$(if $(LOCALAPPDATA),$(LOCALAPPDATA)/Programs/Common/CLAP,$(COMMONPROGRAMFILES)/CLAP)
         DEPS:=resources.o
         SOURCES+=resources.o
@@ -94,19 +97,20 @@ else
         ifeq ($(UNAME_S),Darwin)
             LDFLAGS+=-framework Cocoa
             SOURCES+=src/toolkits/cocoatoolkit.mm
-            BUNDLE_DIR:=$(BUNDLE_NAME)/Contents/MacOS
+            BUNDLE_DIR:=$(BIN_DIR)/$(BUNDLE_NAME)/Contents/MacOS
             BUNDLE_BINARY:=$(BUNDLE_DIR)/oxefmsynth
-            BUNDLE_SETUP:=@mkdir -p $(BUNDLE_DIR) && cp src/macosx/clap/PkgInfo $(BUNDLE_NAME)/Contents/ 2>/dev/null || true && sed 's/__VERSION__/$(VERSION_STR)/g' src/macosx/clap/Info.plist.in > $(BUNDLE_NAME)/Contents/Info.plist
-            TARGET_FILE:=$(BUNDLE_NAME)
+            BUNDLE_SETUP:=@mkdir -p $(BUNDLE_DIR) && cp src/macosx/clap/PkgInfo $(BIN_DIR)/$(BUNDLE_NAME)/Contents/ 2>/dev/null || true && sed 's/__VERSION__/$(VERSION_STR)/g' src/macosx/clap/Info.plist.in > $(BIN_DIR)/$(BUNDLE_NAME)/Contents/Info.plist
+            TARGET_FILE:=$(BIN_DIR)/$(BUNDLE_NAME)
             USER_CLAP_DIR?=$(HOME)/Library/Audio/Plug-Ins/CLAP
-            INSTALL_CMD=rm -rf "$(USER_CLAP_DIR)/$(BUNDLE_NAME)" && cp -R "$(BUNDLE_NAME)" "$(USER_CLAP_DIR)/"
+            INSTALL_CMD=rm -rf "$(USER_CLAP_DIR)/$(BUNDLE_NAME)" && cp -R "$(TARGET_FILE)" "$(USER_CLAP_DIR)/"
         else
             LIBS+=-lX11 -lpthread -ldl
             CXXFLAGS+=-fPIC
             LDFLAGS+=-s
             SOURCES+=src/toolkits/xlibtoolkit.cpp
-            TARGET_FILE:=$(BUNDLE_NAME)
+            TARGET_FILE:=$(BIN_DIR)/$(BUNDLE_NAME)
             BUNDLE_BINARY:=$(TARGET_FILE)
+            BUNDLE_SETUP:=@mkdir -p $(BIN_DIR)
             USER_CLAP_DIR?=$(HOME)/.clap
             INSTALL_CMD=cp -f "$(TARGET_FILE)" "$(USER_CLAP_DIR)/"
         endif
@@ -135,6 +139,6 @@ resources.o:
 	@$(RC) -Isrc/synth src/windows/resources.rc resources.o
 
 clean:
-	@rm -rf $(BUNDLE_NAME) *.o *.d
+	@rm -rf $(TARGET_FILE) $(BUNDLE_NAME) *.o *.d
 
 .PHONY: all clean install

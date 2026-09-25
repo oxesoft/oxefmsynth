@@ -1,5 +1,5 @@
 # Oxe FM Synth: a software synthesizer
-# Copyright (C) 2015  Daniel Moura <oxe@oxesoft.com>
+# Copyright (C) 2015  Daniel Moura <oxesoft@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -14,6 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+BIN_DIR:=bin
 EXECUTABLE_NAME:=oxefmsynth
 VERSION_STR:=$(shell grep '\#define VERSION_STR' src/synth/constants.h | awk -F '"' '{print $$2}')
 
@@ -68,6 +69,7 @@ ifeq ($(OS),Windows_NT)
     LDFLAGS+=-lgdi32
     LDFLAGS+=resources.o
     DEPS:=resources.o
+    TARGET_FILE:=$(BIN_DIR)/$(EXECUTABLE_NAME)
 else
     ifeq ($(TARGET),WIN32)
         EXECUTABLE_NAME:=$(EXECUTABLE_NAME).exe
@@ -80,32 +82,38 @@ else
         LDFLAGS+=resources.o
         DEPS:=resources.o
         LDFLAGS+=-static
+        TARGET_FILE:=$(BIN_DIR)/$(EXECUTABLE_NAME)
     else
         INCLUDES+=-I.
         ifeq ($(UNAME_S),Darwin)
             LDFLAGS+=-framework Cocoa
             SOURCES+=src/toolkits/cocoatoolkit.mm
+            TARGET_APP:=$(BIN_DIR)/$(EXECUTABLE_NAME).app
+            TARGET_FILE:=$(TARGET_APP)/Contents/MacOS/$(EXECUTABLE_NAME)
         else
             LDFLAGS+=-lX11
             LDFLAGS+=-lpthread
             LDFLAGS+=-ldl
             SOURCES+=src/toolkits/xlibtoolkit.cpp
+            TARGET_FILE:=$(BIN_DIR)/$(EXECUTABLE_NAME)
         endif
     endif
 endif
 
 all: $(DEPS)
-	@$(CXX) -o $(EXECUTABLE_NAME) -DEXECUTABLE_NAME=\"$(EXECUTABLE_NAME)\" $(CXXFLAGS) $(SOURCES) $(INCLUDES) $(LDFLAGS)
-	@$(CMD)
 ifeq ($(UNAME_S),Darwin)
-	@mkdir -p $(EXECUTABLE_NAME).app/Contents/MacOS
-	@cp src/macosx/app/PkgInfo $(EXECUTABLE_NAME).app/Contents/ 2>/dev/null || true
-	@sed 's/__VERSION__/$(VERSION_STR)/g' src/macosx/app/Info.plist.in > $(EXECUTABLE_NAME).app/Contents/Info.plist
-	@mv $(EXECUTABLE_NAME) $(EXECUTABLE_NAME).app/Contents/MacOS/
+	@mkdir -p $(TARGET_APP)/Contents/MacOS
+	@$(CXX) -o $(TARGET_FILE) -DEXECUTABLE_NAME=\"$(EXECUTABLE_NAME)\" $(CXXFLAGS) $(SOURCES) $(INCLUDES) $(LDFLAGS)
+	@cp src/macosx/app/PkgInfo $(TARGET_APP)/Contents/ 2>/dev/null || true
+	@sed 's/__VERSION__/$(VERSION_STR)/g' src/macosx/app/Info.plist.in > $(TARGET_APP)/Contents/Info.plist
+else
+	@mkdir -p $(BIN_DIR)
+	@$(CXX) -o $(TARGET_FILE) -DEXECUTABLE_NAME=\"$(EXECUTABLE_NAME)\" $(CXXFLAGS) $(SOURCES) $(INCLUDES) $(LDFLAGS)
 endif
+	@$(CMD)
 
 resources.o:
 	@$(RC) -Isrc/synth src/windows/resources.rc resources.o
 
 clean:
-	@rm -rf $(EXECUTABLE_NAME).app $(EXECUTABLE_NAME) *.o *.d
+	@rm -rf $(BIN_DIR)/$(EXECUTABLE_NAME).app $(BIN_DIR)/$(EXECUTABLE_NAME) $(BIN_DIR)/$(EXECUTABLE_NAME).exe $(EXECUTABLE_NAME).app $(EXECUTABLE_NAME) *.o *.d

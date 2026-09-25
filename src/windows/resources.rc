@@ -17,7 +17,7 @@ BEGIN
     BEGIN
         BLOCK "040904E4"
         BEGIN
-            VALUE "Comments", "http://www.oxesoft.com"
+            VALUE "Comments", "https://github.com/oxesoft/oxefmsynth"
             VALUE "CompanyName", "Oxe Music Software"
             VALUE "FileDescription", "Oxe FM Synth"
             VALUE "FileVersion", VERSION_STR

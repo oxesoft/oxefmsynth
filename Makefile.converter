@@ -1,5 +1,5 @@
 # Oxe FM Synth: a software synthesizer
-# Copyright (C) 2015  Daniel Moura <oxe@oxesoft.com>
+# Copyright (C) 2015  Daniel Moura <oxesoft@gmail.com>
 # 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -14,12 +14,19 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+BIN_DIR:=bin
+EXECUTABLE_NAME:=oxeconverter
+
 ifeq ($(OS),Windows_NT)
     CC:=i686-w64-mingw32-gcc.exe
+    EXECUTABLE_NAME:=$(EXECUTABLE_NAME).exe
 endif
 
+TARGET:=$(BIN_DIR)/$(EXECUTABLE_NAME)
+
 all:
-	@$(CC) $(CFLAGS) -o oxeconverter src/converter/converter.c
+	@mkdir -p $(BIN_DIR)
+	@$(CC) $(CFLAGS) -o $(TARGET) src/converter/converter.c
 
 clean:
-	@rm -f oxeconverter
+	@rm -f $(TARGET) oxeconverter
