@@ -45,7 +45,7 @@ static const char* GetShortLabel(const char* fullName)
     if (strstr(fullName, "Reverb Damp")) return "DAMP";
     if (strstr(fullName, "Reverb Time")) return "TIME";
     if (strstr(fullName, "Delay Level")) return "DELAY";
-    if (strstr(fullName, "Reverb Level")) return "REVRS";
+    if (strstr(fullName, "Reverb Level")) return "REVERB";
     if (strstr(fullName, "Portamento")) return "PORTA";
     if (strstr(fullName, "Pitch Curve")) return "CURVE";
     if (strstr(fullName, "PitchCurveTime")) return "TIME";

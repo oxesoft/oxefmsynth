@@ -46,8 +46,8 @@ CEditor::CEditor(CSynthesizer *synthesizer)
     int oY   = 141;
 
     // separation between the half matrix controls
-    int fX   = 30;
-    int fY   = 30;
+    int fX   = 33;
+    int fY   = 33;
 
     // separation between the buttons
     int tX   = 66;
@@ -58,24 +58,24 @@ CEditor::CEditor(CSynthesizer *synthesizer)
     int cY   = 115;
 
     // half-matrix coordinates
-    int mX   = 628;
-    int mY   = 115;
+    int mX   = 622;
+    int mY   = 116;
 
     // LFO section coordinates
     int lX   = 632;
-    int lY   = 497;
+    int lY   = 513;
 
     // pitch section coordinates
     int pX   = 632;
-    int pY   = 595;
+    int pY   = 593;
 
     // effects section coordinates
     int zX   = 790;
-    int zY   = 595;
+    int zY   = 593;
 
     // modulation control coordinates
     int dX   = 886;
-    int dY   = 497;
+    int dY   = 513;
 
     // channels control coordinates
     int gX   = 490;
@@ -95,7 +95,7 @@ CEditor::CEditor(CSynthesizer *synthesizer)
 
     // hq control coordinates
     int hX   = 905;
-    int hY   = 602;
+    int hY   = 603;
 
     // display
     lcd      = new CLcd (BMP_CHARS, 38, 22);
@@ -832,32 +832,32 @@ void CEditor::DrawPanelCards(BLContext &ctx, const BLFont &fontSmall, const BLFo
     }
 
     // 3. Matrix Card
-    ctx.fill_round_rect(BLRoundRect(612.0, 86.0, 326.0, 370.0, 6.0), BLRgba32(0x13, 0x18, 0x22));
+    ctx.fill_round_rect(BLRoundRect(612.0, 86.0, 326.0, 399.0, 6.0), BLRgba32(0x13, 0x18, 0x22));
     ctx.set_stroke_width(1.0);
-    ctx.stroke_round_rect(BLRoundRect(612.0, 86.0, 326.0, 370.0, 6.0), BLRgba32(0x22, 0x2a, 0x39));
+    ctx.stroke_round_rect(BLRoundRect(612.0, 86.0, 326.0, 399.0, 6.0), BLRgba32(0x22, 0x2a, 0x39));
 
     // 4. LFO Card
-    ctx.fill_round_rect(BLRoundRect(612.0, 464.0, 326.0, 84.0, 6.0), BLRgba32(0x13, 0x18, 0x22));
+    ctx.fill_round_rect(BLRoundRect(612.0, 493.0, 326.0, 72.0, 6.0), BLRgba32(0x13, 0x18, 0x22));
     ctx.set_stroke_width(1.0);
-    ctx.stroke_round_rect(BLRoundRect(612.0, 464.0, 326.0, 84.0, 6.0), BLRgba32(0x22, 0x2a, 0x39));
-    ctx.stroke_line(872.0, 470.0, 872.0, 542.0, BLRgba32(0x1e, 0x27, 0x35));
+    ctx.stroke_round_rect(BLRoundRect(612.0, 493.0, 326.0, 72.0, 6.0), BLRgba32(0x22, 0x2a, 0x39));
+    ctx.stroke_line(872.0, 499.0, 872.0, 559.0, BLRgba32(0x1e, 0x27, 0x35));
     if (fontSmall.is_valid())
     {
-        ctx.fill_utf8_text(BLPoint(626.0, 480.0), fontSmall, "LFO", SIZE_MAX, BLRgba32(0x60, 0x72, 0x88));
-        ctx.fill_utf8_text(BLPoint(882.0, 480.0), fontSmall, "MOD", SIZE_MAX, BLRgba32(0x60, 0x72, 0x88));
+        ctx.fill_utf8_text(BLPoint(626.0, 507.0), fontSmall, "LFO", SIZE_MAX, BLRgba32(0x60, 0x72, 0x88));
+        ctx.fill_utf8_text(BLPoint(882.0, 507.0), fontSmall, "MOD", SIZE_MAX, BLRgba32(0x60, 0x72, 0x88));
     }
 
     // 5. Pitch & Effects Card
-    ctx.fill_round_rect(BLRoundRect(612.0, 556.0, 326.0, 89.0, 6.0), BLRgba32(0x13, 0x18, 0x22));
+    ctx.fill_round_rect(BLRoundRect(612.0, 573.0, 326.0, 72.0, 6.0), BLRgba32(0x13, 0x18, 0x22));
     ctx.set_stroke_width(1.0);
-    ctx.stroke_round_rect(BLRoundRect(612.0, 556.0, 326.0, 89.0, 6.0), BLRgba32(0x22, 0x2a, 0x39));
-    ctx.stroke_line(776.0, 562.0, 776.0, 638.0, BLRgba32(0x1e, 0x27, 0x35));
-    ctx.stroke_line(886.0, 562.0, 886.0, 638.0, BLRgba32(0x1e, 0x27, 0x35));
+    ctx.stroke_round_rect(BLRoundRect(612.0, 573.0, 326.0, 72.0, 6.0), BLRgba32(0x22, 0x2a, 0x39));
+    ctx.stroke_line(776.0, 579.0, 776.0, 639.0, BLRgba32(0x1e, 0x27, 0x35));
+    ctx.stroke_line(886.0, 579.0, 886.0, 639.0, BLRgba32(0x1e, 0x27, 0x35));
     if (fontSmall.is_valid())
     {
-        ctx.fill_utf8_text(BLPoint(626.0, 572.0), fontSmall, "PITCH", SIZE_MAX, BLRgba32(0x60, 0x72, 0x88));
-        ctx.fill_utf8_text(BLPoint(788.0, 572.0), fontSmall, "EFFECTS", SIZE_MAX, BLRgba32(0x60, 0x72, 0x88));
-        ctx.fill_utf8_text(BLPoint(898.0, 572.0), fontSmall, "HQ", SIZE_MAX, BLRgba32(0x60, 0x72, 0x88));
+        ctx.fill_utf8_text(BLPoint(626.0, 587.0), fontSmall, "PITCH", SIZE_MAX, BLRgba32(0x60, 0x72, 0x88));
+        ctx.fill_utf8_text(BLPoint(788.0, 587.0), fontSmall, "EFFECTS", SIZE_MAX, BLRgba32(0x60, 0x72, 0x88));
+        ctx.fill_utf8_text(BLPoint(898.0, 587.0), fontSmall, "HQ", SIZE_MAX, BLRgba32(0x60, 0x72, 0x88));
     }
 }
 
@@ -1008,10 +1008,10 @@ void CEditor::DrawFilterCurve(BLContext &ctx, float x, float y, float w, float h
 
 void CEditor::DrawMatrixDecorations(BLContext &ctx, const BLFont &fontSmall, const BLFont &fontNormal)
 {
-    float mX = 628.0f;
-    float mY = 115.0f;
-    float fX = 30.0f;
-    float fY = 30.0f;
+    float mX = 622.0f;
+    float mY = 116.0f;
+    float fX = 33.0f;
+    float fY = 33.0f;
 
     // Diagonal "Modulation half-Matrix" aligned with the angle of self-modulation knobs
     if (fontSmall.is_valid())
@@ -1023,8 +1023,8 @@ void CEditor::DrawMatrixDecorations(BLContext &ctx, const BLFont &fontSmall, con
         double nX =  std::sin(angle);
         double nY = -std::cos(angle);
 
-        double cX = mX + 80.0;
-        double cY = mY + 80.0;
+        double cX = mX + 85.0;
+        double cY = mY + 85.0;
         double t = 10.0;
         double d = 24.0;
         double posX = cX + t * uX + d * nX;
