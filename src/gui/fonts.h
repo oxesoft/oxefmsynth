@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 #include <blend2d/blend2d.h>
+#include "font_data.h"
 
 class CFontManager
 {
@@ -29,34 +30,12 @@ public:
         static bool loaded = false;
         if (!loaded)
         {
-            const char* paths[] = {
-#if defined(__APPLE__)
-                "/System/Library/Fonts/SFNS.ttf",
-                "/System/Library/Fonts/Helvetica.ttc",
-                "/System/Library/Fonts/Supplemental/Arial.ttf",
-                "/Library/Fonts/Arial.ttf"
-#elif defined(_WIN32)
-                "C:\\Windows\\Fonts\\segoeui.ttf",
-                "C:\\Windows\\Fonts\\arial.ttf"
-#else
-                "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
-                "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
-                "/usr/share/fonts/truetype/freefont/FreeSans.ttf",
-                "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf"
-#endif
-            };
-            for (const char* p : paths)
+            BLFontData fontData;
+            if (fontData.create_from_data(kFontRegularData, kFontRegularSize) == BL_SUCCESS)
             {
-                if (face.create_from_file(p) == BL_SUCCESS)
-                {
-                    loaded = true;
-                    break;
-                }
+                face.create_from_data(fontData, 0);
             }
-            if (!loaded)
-            {
-                loaded = true;
-            }
+            loaded = true;
         }
         return face;
     }
@@ -67,36 +46,16 @@ public:
         static bool loaded = false;
         if (!loaded)
         {
-            const char* paths[] = {
-#if defined(__APPLE__)
-                "/System/Library/Fonts/Supplemental/Trebuchet MS Bold.ttf",
-                "/System/Library/Fonts/Supplemental/Arial Bold.ttf",
-                "/System/Library/Fonts/Supplemental/Tahoma Bold.ttf",
-                "/Library/Fonts/Arial Bold.ttf"
-#elif defined(_WIN32)
-                "C:\\Windows\\Fonts\\trebucbd.ttf",
-                "C:\\Windows\\Fonts\\arialbd.ttf",
-                "C:\\Windows\\Fonts\\tahomabd.ttf",
-                "C:\\Windows\\Fonts\\segoeuib.ttf"
-#else
-                "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
-                "/usr/share/fonts/truetype/freefont/FreeSansBold.ttf",
-                "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf"
-#endif
-            };
-            for (const char* p : paths)
+            BLFontData fontData;
+            if (fontData.create_from_data(kFontBoldData, kFontBoldSize) == BL_SUCCESS)
             {
-                if (face.create_from_file(p) == BL_SUCCESS)
-                {
-                    loaded = true;
-                    break;
-                }
+                face.create_from_data(fontData, 0);
             }
-            if (!loaded)
+            if (!face.is_valid())
             {
                 face = GetFace();
-                loaded = true;
             }
+            loaded = true;
         }
         return face;
     }
@@ -105,10 +64,7 @@ public:
     {
         BLFont font;
         BLFontFace& face = GetFace();
-        if (face.is_valid())
-        {
-            font.create_from_face(face, size);
-        }
+        font.create_from_face(face, size);
         return font;
     }
 
@@ -116,10 +72,7 @@ public:
     {
         BLFont font;
         BLFontFace& face = GetBoldFace();
-        if (face.is_valid())
-        {
-            font.create_from_face(face, size);
-        }
+        font.create_from_face(face, size);
         return font;
     }
 };

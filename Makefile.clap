@@ -47,6 +47,7 @@ SOURCES:=src/synth/buffers.cpp \
          src/gui/knob.cpp \
          src/gui/lcd.cpp \
          src/gui/mapper.cpp \
+         src/gui/font_data.cpp \
          src/clap/oxeclap.cpp \
          src/clap/oxeclapentry.cpp \
          src/clap/claphostinterface.cpp

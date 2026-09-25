@@ -47,6 +47,7 @@ SOURCES:=src/synth/buffers.cpp \
          src/gui/knob.cpp \
          src/gui/lcd.cpp \
          src/gui/mapper.cpp \
+         src/gui/font_data.cpp \
          src/vst3/oxevst3.cpp \
          src/vst3/oxevst3editor.cpp \
          src/vst3/vst3hostinterface.cpp \

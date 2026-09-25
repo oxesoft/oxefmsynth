@@ -34,6 +34,7 @@ SOURCES+=src/gui/key.cpp
 SOURCES+=src/gui/knob.cpp
 SOURCES+=src/gui/lcd.cpp
 SOURCES+=src/gui/mapper.cpp
+SOURCES+=src/gui/font_data.cpp
 SOURCES+=src/synth/buffers.cpp
 SOURCES+=src/synth/delay.cpp
 SOURCES+=src/synth/envelop.cpp

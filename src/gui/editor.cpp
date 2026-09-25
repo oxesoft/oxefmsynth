@@ -1201,34 +1201,24 @@ void CEditor::DrawOxeLogo(BLContext &ctx, float x, float y, float scale)
     // FM Synth
     // ------------------------------------------------------------------------
     BLFont fontLogo = CFontManager::GetFontBold(20.0f);
-    if (!fontLogo.is_valid())
-    {
-        fontLogo = CFontManager::GetFont(20.0f);
-    }
-    if (fontLogo.is_valid())
-    {
-        ctx.fill_utf8_text(BLPoint(58.0f, 95.0f), fontLogo, "FM Synth", SIZE_MAX, BLRgba32(0xbe, 0xe4, 0x00));
+    ctx.fill_utf8_text(BLPoint(58.0f, 95.0f), fontLogo, "FM Synth", SIZE_MAX, BLRgba32(0xbe, 0xe4, 0x00));
 
-        // Version label below "FM Synth", right-justified
-        BLFont fontVer = CFontManager::GetFont(8.0f);
-        if (fontVer.is_valid())
-        {
-            BLGlyphBuffer gbFm;
-            gbFm.set_utf8_text("FM Synth");
-            BLTextMetrics tmFm;
-            fontLogo.get_text_metrics(gbFm, tmFm);
+    // Version label below "FM Synth", right-justified
+    BLFont fontVer = CFontManager::GetFont(8.0f);
+    BLGlyphBuffer gbFm;
+    gbFm.set_utf8_text("FM Synth");
+    BLTextMetrics tmFm;
+    fontLogo.get_text_metrics(gbFm, tmFm);
 
-            const char* vLabel = "v" VERSION_STR;
-            BLGlyphBuffer gbVer;
-            gbVer.set_utf8_text(vLabel);
-            BLTextMetrics tmVer;
-            fontVer.get_text_metrics(gbVer, tmVer);
+    const char* vLabel = "v" VERSION_STR;
+    BLGlyphBuffer gbVer;
+    gbVer.set_utf8_text(vLabel);
+    BLTextMetrics tmVer;
+    fontVer.get_text_metrics(gbVer, tmVer);
 
-            float vx = 58.0f + (float)tmFm.advance.x - (float)tmVer.advance.x;
-            float vy = 106.5f;
-            ctx.fill_utf8_text(BLPoint(vx, vy), fontVer, vLabel, SIZE_MAX, BLRgba32(0x8a, 0x9b, 0xaf));
-        }
-    }
+    float vx = 58.0f + (float)tmFm.advance.x - (float)tmVer.advance.x;
+    float vy = 106.5f;
+    ctx.fill_utf8_text(BLPoint(vx, vy), fontVer, vLabel, SIZE_MAX, BLRgba32(0x8a, 0x9b, 0xaf));
 
     ctx.restore();
 }

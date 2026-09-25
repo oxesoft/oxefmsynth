@@ -2182,14 +2182,7 @@ static void ApplyBlur(BLImage &img, float radius)
   code += `    // FM Synth\n`;
   code += `    // ------------------------------------------------------------------------\n`;
   code += `    BLFont fontLogo = CFontManager::GetFontBold(20.0f);\n`;
-  code += `    if (!fontLogo.is_valid())\n`;
-  code += `    {\n`;
-  code += `        fontLogo = CFontManager::GetFont(20.0f);\n`;
-  code += `    }\n`;
-  code += `    if (fontLogo.is_valid())\n`;
-  code += `    {\n`;
-  code += `        ctx.fill_utf8_text(BLPoint(58.0f, 103.0f), fontLogo, "FM Synth", SIZE_MAX, BLRgba32(0xbe, 0xe4, 0x00));\n`;
-  code += `    }\n\n`;
+  code += `    ctx.fill_utf8_text(BLPoint(58.0f, 95.0f), fontLogo, "FM Synth", SIZE_MAX, BLRgba32(0xbe, 0xe4, 0x00));\n\n`;
   code += `    ctx.restore();\n}\n`;
   return code;
 }
