@@ -35,9 +35,15 @@ CLcd::CLcd(int bmp, int x, int y)
     memset(text1, ' ', LCD_COLS);
     const char* def0 = "  Oxe FM Synth  ";
     char def1[32];
-    snprintf(def1, sizeof(def1), "     v%s", VERSION_STR);
-    int vlen = (int)strlen(def1);
-    while (vlen < LCD_COLS) def1[vlen++] = ' ';
+    char vstr[32];
+    snprintf(vstr, sizeof(vstr), "v%s", VERSION_STR);
+    int vlen = (int)strlen(vstr);
+    int pad = (LCD_COLS - vlen) / 2;
+    if (pad < 0) pad = 0;
+    int pos = 0;
+    for (int p = 0; p < pad && pos < LCD_COLS; p++) def1[pos++] = ' ';
+    for (int i = 0; i < vlen && pos < LCD_COLS; i++) def1[pos++] = vstr[i];
+    while (pos < LCD_COLS) def1[pos++] = ' ';
     def1[LCD_COLS] = 0;
     memcpy(text0, def0, strlen(def0) > LCD_COLS ? LCD_COLS : strlen(def0));
     memcpy(text1, def1, LCD_COLS);

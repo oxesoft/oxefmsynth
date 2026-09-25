@@ -25,7 +25,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define OXFM_MAJOR_VERSION  2
 #define OXFM_MINOR_VERSION  0
 #define OXFM_PATCH_VERSION  0
-#define VERSION_STR         "2.0.0"
+#define VERSION_STR         "2.0.0 beta 1"
 #define VERSION_INT         ((OXFM_MAJOR_VERSION * 100) + (OXFM_MINOR_VERSION * 10) + OXFM_PATCH_VERSION)
 #define TITLE_SMALL         "Oxe FM Synth " VERSION_STR
 #define TITLE_FULL          TITLE_SMALL " :: http://www.oxesoft.com"

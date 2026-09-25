@@ -395,9 +395,16 @@ void CEditor::SetToolkit(CToolkit *toolkit)
     {
         // show version
         char version_info[LCD_COLS + 1];
-        int centeredPos = (LCD_COLS / 2) - (strlen(VERSION_STR) / 2);
-        strncpy(version_info, "                ", LCD_COLS);
-        strncpy(version_info + centeredPos, VERSION_STR, LCD_COLS - centeredPos);
+        char vstr[32];
+        snprintf(vstr, sizeof(vstr), "v%s", VERSION_STR);
+        int vlen = (int)strlen(vstr);
+        int pad = (LCD_COLS - vlen) / 2;
+        if (pad < 0) pad = 0;
+        int pos = 0;
+        for (int p = 0; p < pad && pos < LCD_COLS; p++) version_info[pos++] = ' ';
+        for (int i = 0; i < vlen && pos < LCD_COLS; i++) version_info[pos++] = vstr[i];
+        while (pos < LCD_COLS) version_info[pos++] = ' ';
+        version_info[LCD_COLS] = 0;
         lcd->SetText(0, "  Oxe FM Synth  ");
         lcd->SetText(1, version_info);
     }
@@ -1180,6 +1187,26 @@ void CEditor::DrawOxeLogo(BLContext &ctx, float x, float y, float scale)
     if (fontLogo.is_valid())
     {
         ctx.fill_utf8_text(BLPoint(58.0f, 95.0f), fontLogo, "FM Synth", SIZE_MAX, BLRgba32(0xbe, 0xe4, 0x00));
+
+        // Version label below "FM Synth", right-justified
+        BLFont fontVer = CFontManager::GetFont(8.0f);
+        if (fontVer.is_valid())
+        {
+            BLGlyphBuffer gbFm;
+            gbFm.set_utf8_text("FM Synth");
+            BLTextMetrics tmFm;
+            fontLogo.get_text_metrics(gbFm, tmFm);
+
+            const char* vLabel = "v" VERSION_STR;
+            BLGlyphBuffer gbVer;
+            gbVer.set_utf8_text(vLabel);
+            BLTextMetrics tmVer;
+            fontVer.get_text_metrics(gbVer, tmVer);
+
+            float vx = 58.0f + (float)tmFm.advance.x - (float)tmVer.advance.x;
+            float vy = 106.5f;
+            ctx.fill_utf8_text(BLPoint(vx, vy), fontVer, vLabel, SIZE_MAX, BLRgba32(0x8a, 0x9b, 0xaf));
+        }
     }
 
     ctx.restore();
