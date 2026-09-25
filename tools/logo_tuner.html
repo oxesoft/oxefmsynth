@@ -1,0 +1,3388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Oxe FM Synth - 2004 Logo Vector Tuner (bg.bmp)</title>
+<style>
+  :root {
+    --bg-dark: #07090e;
+    --card-bg: #111622;
+    --card-border: #1e2838;
+    --accent-cyan: #00f0ff;
+    --accent-green: #00e676;
+    --accent-lime: #76ff03;
+    --accent-amber: #ffd600;
+    --text-primary: #e6edf3;
+    --text-muted: #8a9baf;
+    --text-dim: #4b5d73;
+    --input-bg: #090c12;
+    --input-border: #243042;
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background-color: var(--bg-dark);
+    color: var(--text-primary);
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+    user-select: none;
+  }
+
+  /* Header */
+  header {
+    background: var(--card-bg);
+    border-bottom: 1px solid var(--card-border);
+    padding: 8px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+    z-index: 10;
+  }
+
+  .header-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .badge {
+    background: rgba(0, 240, 255, 0.15);
+    border: 1px solid var(--accent-cyan);
+    color: var(--accent-cyan);
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 4px;
+    letter-spacing: 0.5px;
+  }
+
+  h1 {
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+
+  .header-actions {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+
+  button.btn {
+    background: #18202c;
+    border: 1px solid var(--input-border);
+    color: var(--text-primary);
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  button.btn:hover {
+    background: #222d3e;
+    border-color: var(--accent-cyan);
+    color: #fff;
+  }
+
+  button.btn-primary {
+    background: rgba(0, 240, 255, 0.15);
+    border-color: var(--accent-cyan);
+    color: var(--accent-cyan);
+  }
+
+  button.btn-primary:hover {
+    background: rgba(0, 240, 255, 0.28);
+    color: #fff;
+  }
+
+  button.btn-active {
+    background: var(--accent-cyan);
+    color: #000;
+    border-color: var(--accent-cyan);
+    font-weight: 700;
+  }
+
+  /* Main Workspace */
+  .workspace {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+    position: relative;
+  }
+
+  /* Center Viewport */
+  .viewport-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    background: #06080c;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .toolbar {
+    background: #0d121a;
+    border-bottom: 1px solid var(--card-border);
+    padding: 6px 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 11px;
+    flex-shrink: 0;
+    flex-wrap: wrap;
+    z-index: 5;
+  }
+
+  .tool-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .tool-label {
+    color: var(--text-muted);
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  select, input[type="text"], input[type="number"] {
+    background: var(--input-bg);
+    border: 1px solid var(--input-border);
+    color: var(--text-primary);
+    padding: 3px 6px;
+    border-radius: 4px;
+    font-size: 11px;
+  }
+
+  select:focus, input:focus {
+    outline: none;
+    border-color: var(--accent-cyan);
+  }
+
+  .zoom-indicator {
+    font-family: monospace;
+    font-size: 11px;
+    color: var(--accent-cyan);
+    font-weight: 700;
+    padding: 2px 6px;
+    background: rgba(0, 240, 255, 0.1);
+    border-radius: 3px;
+    min-width: 48px;
+    text-align: center;
+  }
+
+  .btn-group {
+    display: inline-flex;
+    border-radius: 4px;
+    overflow: hidden;
+    border: 1px solid var(--input-border);
+  }
+  .btn-group .btn {
+    border-radius: 0;
+    margin: 0;
+    border: none;
+  }
+  .btn-group .btn:not(:last-child) {
+    border-right: 1px solid var(--input-border);
+  }
+  .btn-group .btn.btn-active {
+    background: var(--accent-cyan);
+    color: #000;
+    font-weight: 700;
+  }
+
+  .vertex-row {
+    cursor: pointer;
+    transition: background 0.1s ease;
+  }
+  .vertex-row:hover {
+    background: rgba(255, 255, 255, 0.05);
+  }
+  .vertex-row.active {
+    background: rgba(0, 240, 255, 0.2) !important;
+  }
+
+  /* Maximized Canvas Stage */
+  .canvas-stage {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+    padding: 12px;
+  }
+
+  .stage-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-size: 20px 20px;
+    background-image: 
+      linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+    pointer-events: none;
+  }
+
+  .canvas-container-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transform-origin: center center;
+    transition: transform 0.05s ease-out;
+    max-width: 100%;
+    max-height: 100%;
+  }
+
+  .canvas-labels {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    margin-bottom: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-muted);
+    letter-spacing: 0.5px;
+  }
+
+  .canvases-wrapper {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .canvas-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+  }
+
+  canvas {
+    border-radius: 4px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.08);
+    cursor: crosshair;
+  }
+
+  /* Floating Control Trigger (when sidebar is collapsed) */
+  .btn-open-sidebar {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: #182230;
+    border: 1px solid var(--accent-cyan);
+    color: var(--accent-cyan);
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+    z-index: 20;
+    display: none;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .btn-open-sidebar:hover {
+    background: rgba(0, 240, 255, 0.2);
+    color: #fff;
+  }
+
+  /* Side Drawer: Controls */
+  .sidebar {
+    width: 440px;
+    background: var(--card-bg);
+    border-left: 1px solid var(--card-border);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    overflow: hidden;
+    transition: width 0.25s cubic-bezier(0.16, 1, 0.3, 1), transform 0.25s ease;
+    z-index: 15;
+  }
+
+  .sidebar.collapsed {
+    width: 0 !important;
+    border-left: none;
+  }
+
+  .sidebar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #0d121a;
+    border-bottom: 1px solid var(--card-border);
+    padding: 4px 8px 4px 12px;
+  }
+
+  .tabs {
+    display: flex;
+    flex: 1;
+  }
+
+  .tab-btn {
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--text-muted);
+    padding: 8px 8px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.15s ease;
+  }
+
+  .tab-btn:hover {
+    color: var(--text-primary);
+  }
+
+  .tab-btn.active {
+    color: var(--accent-cyan);
+    border-bottom-color: var(--accent-cyan);
+    background: rgba(0, 240, 255, 0.05);
+  }
+
+  .panel-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 14px;
+    display: none;
+  }
+
+  .panel-content.active {
+    display: block;
+  }
+
+  /* Parameter Controls */
+  .control-section {
+    margin-bottom: 16px;
+    background: #090d14;
+    border: 1px solid #1a2332;
+    border-radius: 6px;
+    padding: 10px 12px;
+  }
+
+  .section-title {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: var(--accent-cyan);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .control-row {
+    display: grid;
+    grid-template-columns: 105px 1fr 48px;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    font-size: 11px;
+  }
+
+  .control-row:last-child {
+    margin-bottom: 0;
+  }
+
+  .control-row label {
+    color: var(--text-muted);
+  }
+
+  input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    height: 4px;
+    background: #1c2635;
+    border-radius: 2px;
+    outline: none;
+  }
+
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 13px;
+    height: 13px;
+    border-radius: 50%;
+    background: var(--accent-cyan);
+    cursor: pointer;
+    box-shadow: 0 0 6px rgba(0, 240, 255, 0.5);
+  }
+
+  input[type="number"].num-input {
+    width: 48px;
+    padding: 2px 4px;
+    text-align: right;
+    font-size: 11px;
+    font-family: monospace;
+  }
+
+  .color-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 6px;
+    font-size: 11px;
+  }
+
+  .color-input-wrap {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  input[type="color"] {
+    -webkit-appearance: none;
+    border: none;
+    width: 22px;
+    height: 22px;
+    border-radius: 4px;
+    cursor: pointer;
+    background: transparent;
+  }
+
+  input[type="color"]::-webkit-color-swatch-wrapper {
+    padding: 0;
+  }
+
+  input[type="color"]::-webkit-color-swatch {
+    border: 1px solid var(--input-border);
+    border-radius: 4px;
+  }
+
+  /* Code Panel */
+  .code-panel {
+    background: #05070a;
+    border: 1px solid #161e2a;
+    border-radius: 6px;
+    padding: 10px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 11px;
+    line-height: 1.45;
+    color: #a5d6ff;
+    overflow-x: auto;
+    white-space: pre;
+    max-height: calc(100vh - 150px);
+  }
+
+  /* Toast Notification */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: #00e676;
+    color: #000;
+    font-weight: 700;
+    font-size: 12px;
+    padding: 8px 16px;
+    border-radius: 4px;
+    box-shadow: 0 4px 16px rgba(0, 230, 118, 0.4);
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.25s ease;
+    pointer-events: none;
+    z-index: 1000;
+  }
+
+  .toast.show {
+    opacity: 1;
+    transform: translateY(0);
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-title">
+    <h1>Oxe FM Synth</h1>
+    <span class="badge">2004 LOGO TUNER</span>
+    <span style="font-size: 11px; color: var(--text-muted); font-weight: 500;">Source: bg.bmp (148 × 110)</span>
+  </div>
+  <div class="header-actions">
+    <button class="btn" id="btnUndo" title="Undo (Ctrl+Z)" style="opacity: 0.4; cursor: not-allowed;">↺ Undo</button>
+    <button class="btn" id="btnRedo" title="Redo (Ctrl+Y / Ctrl+Shift+Z)" style="opacity: 0.4; cursor: not-allowed;">↻ Redo</button>
+    <button class="btn" id="btnExportJSON">⬇ Export JSON</button>
+    <button class="btn" id="btnImportJSON">⬆ Import JSON</button>
+    <button class="btn btn-primary" id="btnCopyCanvas" style="background: rgba(0, 230, 118, 0.15); border-color: var(--accent-green); color: var(--accent-green);">📋 Copy Canvas 2D</button>
+    <button class="btn btn-primary" id="btnCopyCPP">📋 Copy Blend2D C++</button>
+    <button class="btn" id="btnFullscreen" title="Toggle Fullscreen">⛶ Fullscreen</button>
+  </div>
+</header>
+
+<div class="workspace">
+  <!-- Viewport Area -->
+  <div class="viewport-area">
+    <div class="toolbar">
+      <div class="tool-group">
+        <span class="badge" style="background: rgba(0, 240, 255, 0.15); color: var(--accent-cyan); border: 1px solid rgba(0, 240, 255, 0.3); font-size: 11px; padding: 4px 8px; font-weight: 700;">✏️ Pen & Arc Vector Studio</span>
+      </div>
+
+      <div class="tool-group">
+        <span class="tool-label">View</span>
+        <select id="selViewMode">
+          <option value="overlay" selected>Overlay Crossfade (Maximized)</option>
+          <option value="sideBySide">Side-by-Side (Original vs Vector)</option>
+          <option value="difference">Difference Map (Match = Black)</option>
+          <option value="synthPreview">Modern Synth GUI Context</option>
+          <option value="vectorOnly">Vector Only</option>
+        </select>
+      </div>
+
+      <div class="tool-group" id="groupOverlaySlider" style="display: flex;">
+        <span class="tool-label">Blend</span>
+        <span style="font-size: 10px; color: var(--text-dim);">Original</span>
+        <input type="range" id="rngOverlayOpacity" min="0" max="100" value="50" style="width: 80px;">
+        <span style="font-size: 10px; color: var(--text-dim);">Vector</span>
+      </div>
+
+      <div class="tool-group">
+        <span class="tool-label">Zoom</span>
+        <select id="selZoom">
+          <option value="fit" selected>🎯 Auto-Fit (Maximized)</option>
+          <option value="1">1x (100% Native 148×110)</option>
+          <option value="2">2x (200%)</option>
+          <option value="3">3x (300%)</option>
+          <option value="4">4x (400%)</option>
+          <option value="6">6x (600%)</option>
+          <option value="8">8x (800%)</option>
+          <option value="10">10x (1000%)</option>
+          <option value="12">12x (1200%)</option>
+        </select>
+        <span class="zoom-indicator" id="zoomDisplay">Fit</span>
+      </div>
+
+      <div class="tool-group">
+        <span class="tool-label">Render</span>
+        <select id="selRenderMode">
+          <option value="crisp" selected>Smooth Vector (Hi-DPI)</option>
+          <option value="pixelated">Pixelated (1:1 Grid)</option>
+        </select>
+      </div>
+
+      <div class="tool-group">
+        <span class="tool-label">BG</span>
+        <select id="selBg">
+          <option value="dark">Synth Dark (#0b0e14)</option>
+          <option value="gray">Original Gray (#9c9c9c)</option>
+          <option value="black">Pitch Black (#000000)</option>
+          <option value="white">Pure White (#ffffff)</option>
+        </select>
+      </div>
+
+      <div class="tool-group">
+        <label style="display: flex; align-items: center; gap: 4px; font-size: 11px; cursor: pointer;">
+          <input type="checkbox" id="chkHandles" checked>
+          <span>Handles</span>
+        </label>
+      </div>
+
+      <div class="tool-group">
+        <label style="display: flex; align-items: center; gap: 4px; font-size: 11px; cursor: pointer;">
+          <input type="checkbox" id="chkGrid">
+          <span>Pixel Grid</span>
+        </label>
+      </div>
+
+      <div class="tool-group" style="margin-left: auto;">
+        <button class="btn" id="btnToggleFlicker" title="Toggle rapid A/B flicker">⚡ A/B Flicker</button>
+        <button class="btn" id="btnResetView" title="Reset view center and fit">↺ Fit View</button>
+        <button class="btn" id="btnToggleSidebar" title="Toggle sidebar panel">◀ Hide Panel</button>
+      </div>
+    </div>
+
+    <!-- Maximized Canvas Stage -->
+    <div class="canvas-stage" id="canvasStage">
+      <div class="stage-background"></div>
+
+      <!-- Floating reopen button when sidebar is collapsed -->
+      <button class="btn-open-sidebar" id="btnOpenSidebar">⚙ Show Controls</button>
+
+      <div class="canvas-container-wrap" id="canvasContainerWrap">
+        <div class="canvas-labels" id="canvasLabels">
+          <span id="lblLeft" style="display: none;">ORIGINAL BG.BMP (148×110)</span>
+          <span id="lblRight">PROCEDURAL BLEND2D VECTOR</span>
+        </div>
+        <div class="canvases-wrapper" id="canvasesWrapper">
+          <div class="canvas-box" id="boxLeft" style="display: none;">
+            <canvas id="canvasLeft" width="148" height="110"></canvas>
+          </div>
+          <div class="canvas-box" id="boxRight">
+            <canvas id="canvasRight" width="148" height="110"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sidebar Tuning Panels -->
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="tabPen" id="tabBtnPen" style="color: var(--accent-cyan); font-weight: 700;">✏️ Shapes & Pen</button>
+        <button class="tab-btn" data-tab="tabCanvasCode" style="color: var(--accent-green); font-weight: 700;">Canvas 2D</button>
+        <button class="tab-btn" data-tab="tabCode">Blend2D C++</button>
+      </div>
+      <button class="btn" id="btnCloseSidebar" style="padding: 2px 6px;" title="Collapse controls">◀</button>
+    </div>
+
+    <!-- Tab Shapes & Pen (Interactive Polygon & Arc Studio) -->
+    <div class="panel-content active" id="tabPen">
+      <div class="control-section">
+        <div class="section-title">Shape Manager</div>
+        <div class="control-row">
+          <label>Active Shape</label>
+          <select id="selActivePolygon" style="flex: 1; padding: 4px; background: var(--input-bg); color: var(--text-primary); border: 1px solid var(--input-border); border-radius: 4px; font-size: 11px;">
+            <!-- Populated dynamically -->
+          </select>
+        </div>
+        <div style="display: flex; gap: 6px; margin-top: 8px;">
+          <button class="btn btn-primary" id="btnNewPolygon" style="flex: 1;">+ Polygon</button>
+          <button class="btn" id="btnDeletePolygon" style="flex: 1; color: #ff5252;">🗑 Delete</button>
+        </div>
+        <div style="display: flex; gap: 6px; margin-top: 6px;">
+          <button class="btn" id="btnUndoInside" style="flex: 1; opacity: 0.4; cursor: not-allowed;">↺ Undo</button>
+          <button class="btn" id="btnRedoInside" style="flex: 1; opacity: 0.4; cursor: not-allowed;">↻ Redo</button>
+          <button class="btn" id="btnResetToCalibrated" style="flex: 1;">↺ Reset Defaults</button>
+        </div>
+      </div>
+
+      <div class="control-section">
+        <div class="section-title">Shape Properties</div>
+
+        <div class="control-row">
+          <label>Shape Name</label>
+          <input type="text" id="txtPolyName" style="flex: 1; padding: 4px; background: var(--input-bg); color: var(--text-primary); border: 1px solid var(--input-border); border-radius: 4px; font-size: 11px;">
+        </div>
+        <div class="control-row">
+          <label>Fill Type</label>
+          <select id="selPolyFillType" style="flex: 1; padding: 4px; background: var(--input-bg); color: var(--text-primary); border: 1px solid var(--input-border); border-radius: 4px; font-size: 11px;">
+            <option value="linearGradient" selected>Linear Gradient (2004 Style)</option>
+            <option value="solid">Solid Color</option>
+          </select>
+        </div>
+        <div class="color-row" id="rowSolidColor" style="display: none;">
+          <label>Solid Fill Color</label>
+          <div class="color-input-wrap">
+            <input type="color" id="polyColor" value="#00aa48">
+            <span id="polyColor_hex" style="font-family: monospace; font-size: 11px;">#00aa48</span>
+          </div>
+        </div>
+        <div id="sectionGradient" style="background: rgba(255, 64, 129, 0.05); border: 1px solid rgba(255, 64, 129, 0.2); border-radius: 4px; padding: 6px 8px; margin: 6px 0 8px 0;">
+          <div style="font-size: 10px; font-weight: 700; color: #ff4081; text-transform: uppercase; margin-bottom: 4px; letter-spacing: 0.5px;">Gradient Properties (Drag G1 &amp; G2 Pins)</div>
+          <div class="control-row" style="margin-bottom: 4px;">
+            <label>Direction</label>
+            <select id="selGradDirection" style="flex: 1; padding: 3px; background: var(--input-bg); color: var(--text-primary); border: 1px solid var(--input-border); border-radius: 4px; font-size: 11px;">
+              <option value="topDown" selected>Top &darr; Bottom</option>
+              <option value="bottomUp">Bottom &uarr; Top</option>
+              <option value="leftRight">Left &rarr; Right</option>
+              <option value="rightLeft">Right &larr; Left</option>
+              <option value="diagTLBR">Diagonal &searr; (TL &rarr; BR)</option>
+              <option value="diagBLTR">Diagonal &nearr; (BL &rarr; TR)</option>
+              <option value="custom">Custom (Drag Pins G1/G2)</option>
+            </select>
+          </div>
+          <div class="color-row" style="margin-bottom: 4px;">
+            <label style="color: #ff4081; font-weight: 600;">G1 Start (0%)</label>
+            <div class="color-input-wrap">
+              <input type="color" id="polyGradColor1" value="#00dd55">
+              <span id="polyGradColor1_hex" style="font-family: monospace; font-size: 11px;">#00dd55</span>
+            </div>
+          </div>
+          <div class="color-row" style="margin-bottom: 4px; align-items: center;">
+            <label style="display: flex; align-items: center; gap: 4px; cursor: pointer;">
+              <input type="checkbox" id="chkGradUseMid" style="margin: 0;">
+              <span>Mid Stop (50%)</span>
+            </label>
+            <div class="color-input-wrap" id="wrapGradColorMid" style="opacity: 0.4; pointer-events: none;">
+              <input type="color" id="polyGradColorMid" value="#00993a">
+              <span id="polyGradColorMid_hex" style="font-family: monospace; font-size: 11px;">#00993a</span>
+            </div>
+          </div>
+          <div class="color-row" style="margin-bottom: 4px;">
+            <label style="color: #7c4dff; font-weight: 600;">G2 End (100%)</label>
+            <div class="color-input-wrap">
+              <input type="color" id="polyGradColor2" value="#00451a">
+              <span id="polyGradColor2_hex" style="font-family: monospace; font-size: 11px;">#00451a</span>
+            </div>
+          </div>
+          <div class="control-row" style="margin-top: 4px; font-size: 10px; color: var(--text-dim); justify-content: space-between; align-items: center;">
+            <span>Pins: <strong id="lblGradG1" style="color: #ff4081;">0,0</strong> &rarr; <strong id="lblGradG2" style="color: #7c4dff;">0,0</strong></span>
+            <button class="btn" id="btnFitGradToShape" style="padding: 2px 6px; font-size: 10px;">Fit Bounds</button>
+          </div>
+        </div>
+        <div class="control-row">
+          <label>Fill Opacity</label>
+          <input type="range" id="rngPolyAlpha" min="0" max="1" step="0.05" value="0.95">
+          <input type="number" id="numPolyAlpha" class="num-input" step="0.05" value="0.95">
+        </div>
+        <div class="control-row">
+          <label>Blur (px)</label>
+          <input type="range" id="rngPolyBlur" min="0" max="25" step="0.5" value="0">
+          <input type="number" id="numPolyBlur" class="num-input" min="0" max="50" step="0.5" value="0">
+        </div>
+        <div class="color-row">
+          <label>Stroke Color</label>
+          <div class="color-input-wrap">
+            <input type="color" id="polyStrokeColor" value="#00f0ff">
+            <span id="polyStrokeColor_hex" style="font-family: monospace; font-size: 11px;">#00f0ff</span>
+          </div>
+        </div>
+        <div class="control-row">
+          <label>Stroke Width</label>
+          <input type="range" id="rngPolyStrokeWidth" min="0" max="4" step="0.5" value="1.0">
+          <input type="number" id="numPolyStrokeWidth" class="num-input" step="0.5" value="1.0">
+        </div>
+        <div class="control-row" id="rowPolyClosed">
+          <label>Closed Shape</label>
+          <input type="checkbox" id="chkPolyClosed" checked style="margin-left: 0;">
+          <span style="font-size: 11px; color: var(--text-muted);">Auto-close path</span>
+        </div>
+        <div class="control-row">
+          <label>Coordinate Snap</label>
+          <select id="selPolySnap" style="flex: 1; padding: 4px; background: var(--input-bg); color: var(--text-primary); border: 1px solid var(--input-border); border-radius: 4px; font-size: 11px;">
+            <option value="0.5" selected>0.5 px Grid Snap (Subpixel)</option>
+            <option value="1.0">1.0 px Full Pixel Snap</option>
+            <option value="0">None (Free Floating-Point)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Geometry Panel for Regular Polygons & Holes -->
+      <div class="control-section" id="panelPolygon">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <div class="section-title" style="margin-bottom: 0;">Vertices &amp; Contours</div>
+          <span style="font-size: 10px; color: var(--text-dim);">Click canvas to add</span>
+        </div>
+        <div class="control-row" style="margin-top: 6px; margin-bottom: 4px; gap: 4px;">
+          <label style="width: 50px;">Contour</label>
+          <select id="selActiveContour" style="flex: 1; padding: 3px; background: var(--input-bg); color: var(--text-primary); border: 1px solid var(--input-border); border-radius: 4px; font-size: 11px;">
+            <option value="outer">Outer Boundary</option>
+          </select>
+          <button class="btn btn-primary" id="btnAddHole" style="padding: 2px 6px; font-size: 10px;" title="Add a hollow inner boundary / hole">+ Hole</button>
+          <button class="btn" id="btnDeleteHole" style="padding: 2px 6px; font-size: 10px; color: #ff5252; display: none;" title="Delete current hole">✕</button>
+        </div>
+        <div style="background: #090c12; border: 1px solid var(--input-border); border-radius: 4px; max-height: 160px; overflow-y: auto; margin-top: 6px;">
+          <table style="width: 100%; border-collapse: collapse; font-size: 11px; font-family: monospace;">
+            <thead>
+              <tr style="background: #141b26; color: var(--text-dim); text-align: left;">
+                <th style="padding: 3px 6px;">#</th>
+                <th style="padding: 3px 6px;">X</th>
+                <th style="padding: 3px 6px;">Y</th>
+                <th style="padding: 3px 6px;" title="Arc curvature / sagitta height to next point">Arc Curve</th>
+                <th style="padding: 3px 6px; text-align: center;">✕</th>
+              </tr>
+            </thead>
+            <tbody id="tblVerticesBody">
+              <!-- Populated dynamically via JS -->
+            </tbody>
+          </table>
+        </div>
+        <div class="control-row" style="margin-top: 8px;" id="rowVertexCurve">
+          <label title="Bend the segment after the selected vertex into a circular arc">Arc Sagitta</label>
+          <input type="range" id="rngVertexCurve" min="-25" max="25" step="0.5" value="0">
+          <input type="number" id="numVertexCurve" class="num-input" min="-50" max="50" step="0.5" value="0">
+        </div>
+        <div style="display: flex; gap: 6px; margin-top: 8px;">
+          <button class="btn" id="btnClearPoints" style="flex: 1;">Clear Points</button>
+        </div>
+      </div>
+
+      <div style="background: rgba(0, 240, 255, 0.05); border: 1px solid rgba(0, 240, 255, 0.2); border-radius: 4px; padding: 8px; margin-top: 10px; font-size: 11px; color: var(--text-muted); line-height: 1.4;">
+        <strong style="color: var(--accent-cyan);">💡 Polygon & Curve Shortcuts:</strong><br>
+        • <strong>Add Points:</strong> Click empty canvas to add vertices to active shape<br>
+        • <strong>Move Vertices:</strong> Drag any vertex handle to reposition (snaps to grid)<br>
+        • <strong>Bend Segments:</strong> Drag orange diamond apex handle or use Arc Sagitta to bend into true circular arcs<br>
+        • <strong>Close Shape:</strong> Click green first vertex or toggle Closed Shape checkbox<br>
+        • <strong>Delete Vertex:</strong> Alt/Option + Click or Delete/Backspace key<br>
+        • <strong>Undo / Redo:</strong> Ctrl/Cmd + Z to Undo, Ctrl/Cmd + Y (or Shift+Cmd+Z) to Redo any action<br>
+        • <strong>Blur:</strong> Use Blur slider for ambient glows and soft shadows
+      </div>
+    </div>
+
+    <!-- Tab HTML5 Canvas 2D Code -->
+    <div class="panel-content" id="tabCanvasCode">
+      <div style="margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
+        <span style="font-size: 11px; color: var(--text-muted); font-weight: 700;">HTML5 CANVAS 2D API CODE</span>
+        <button class="btn btn-primary" id="btnCopyCanvasInside" style="padding: 3px 8px; font-size: 11px; background: rgba(0, 230, 118, 0.15); border-color: var(--accent-green); color: var(--accent-green);">📋 Copy</button>
+      </div>
+      <div class="code-panel" id="canvasCodeOutput">// HTML5 Canvas 2D Code will be generated here...</div>
+    </div>
+
+    <!-- Tab C++ Code -->
+    <div class="panel-content" id="tabCode">
+      <div style="margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; gap: 8px;">
+        <div style="display: flex; align-items: center; gap: 6px;">
+          <span style="font-size: 11px; color: var(--text-muted); font-weight: 700;">BLEND2D C++ CODE</span>
+        </div>
+        <button class="btn btn-primary" id="btnCopyCPPInside" style="padding: 3px 8px; font-size: 11px;">📋 Copy</button>
+      </div>
+      <div class="code-panel" id="codeOutput">// Code will be generated here...</div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast">Copied to Clipboard!</div>
+
+<!-- Hidden file input for JSON import -->
+<input type="file" id="fileInputJSON" accept=".json" style="display: none;">
+
+<script>
+// Embedded original user bitmap data URI (148 x 110)
+const ORIG_B64 = "data:image/png;base64,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";
+const origImg = new Image();
+origImg.src = ORIG_B64;
+
+// Helper to generate ring polygon vertices (subpixel 0.5 rounded)
+function generateRingPoints(cx, cy, rOut, rIn, halfGap, upper, steps = 10) {
+  if (halfGap >= rIn) halfGap = rIn - 0.5;
+  const sinOut = halfGap / rOut;
+  const aOut = Math.asin(sinOut);
+  const sinIn = halfGap / rIn;
+  const aIn = Math.asin(sinIn);
+  const points = [];
+
+  if (upper) {
+    const aStart = Math.PI + aOut;
+    const aEnd = 2 * Math.PI - aOut;
+    for (let i = 0; i <= steps; i++) {
+      const theta = aStart + (aEnd - aStart) * (i / steps);
+      points.push({
+        x: Math.round((cx + rOut * Math.cos(theta)) * 2) / 2,
+        y: Math.round((cy + rOut * Math.sin(theta)) * 2) / 2
+      });
+    }
+    const iStart = 2 * Math.PI - aIn;
+    const iEnd = Math.PI + aIn;
+    for (let i = 0; i <= steps; i++) {
+      const theta = iStart + (iEnd - iStart) * (i / steps);
+      points.push({
+        x: Math.round((cx + rIn * Math.cos(theta)) * 2) / 2,
+        y: Math.round((cy + rIn * Math.sin(theta)) * 2) / 2
+      });
+    }
+  } else {
+    const aStart = aOut;
+    const aEnd = Math.PI - aOut;
+    for (let i = 0; i <= steps; i++) {
+      const theta = aStart + (aEnd - aStart) * (i / steps);
+      points.push({
+        x: Math.round((cx + rOut * Math.cos(theta)) * 2) / 2,
+        y: Math.round((cy + rOut * Math.sin(theta)) * 2) / 2
+      });
+    }
+    const iStart = Math.PI - aIn;
+    const iEnd = aIn;
+    for (let i = 0; i <= steps; i++) {
+      const theta = iStart + (iEnd - iStart) * (i / steps);
+      points.push({
+        x: Math.round((cx + rIn * Math.cos(theta)) * 2) / 2,
+        y: Math.round((cy + rIn * Math.sin(theta)) * 2) / 2
+      });
+    }
+  }
+  return points;
+}
+
+// Compute exact circular arc between p1 and p2 with a given sagitta / curve bulge
+function getArcForSegment(p1, p2, curve) {
+  if (!curve || Math.abs(curve) < 0.05) return null;
+  const dx = p2.x - p1.x;
+  const dy = p2.y - p1.y;
+  const len = Math.hypot(dx, dy);
+  if (len < 0.1) return null;
+
+  // Normal vector pointing left relative to p1 -> p2
+  const nx = -dy / len;
+  const ny = dx / len;
+
+  // Midpoint apex
+  const mx = (p1.x + p2.x) / 2 + nx * curve;
+  const my = (p1.y + p2.y) / 2 + ny * curve;
+
+  // Unique circle through p1, (mx, my), p2
+  const D = 2 * (p1.x * (my - p2.y) + mx * (p2.y - p1.y) + p2.x * (p1.y - my));
+  if (Math.abs(D) < 1e-5) return null;
+
+  const x1sq = p1.x * p1.x + p1.y * p1.y;
+  const x2sq = mx * mx + my * my;
+  const x3sq = p2.x * p2.x + p2.y * p2.y;
+
+  const cx = (x1sq * (my - p2.y) + x2sq * (p2.y - p1.y) + x3sq * (p1.y - my)) / D;
+  const cy = (x1sq * (p2.x - mx) + x2sq * (p1.x - p2.x) + x3sq * (mx - p1.x)) / D;
+  const r = Math.hypot(p1.x - cx, p1.y - cy);
+
+  const a1 = Math.atan2(p1.y - cy, p1.x - cx);
+  const a3 = Math.atan2(p2.y - cy, p2.x - cx);
+
+  const cross = (mx - p1.x) * (p2.y - p1.y) - (my - p1.y) * (p2.x - p1.x);
+  const anticlockwise = (cross < 0);
+
+  let sweep = a3 - a1;
+  if (anticlockwise) {
+    while (sweep > 0) sweep -= 2 * Math.PI;
+  } else {
+    while (sweep < 0) sweep += 2 * Math.PI;
+  }
+
+  return { cx, cy, r, startAngle: a1, endAngle: a3, anticlockwise, sweep, apex: { x: mx, y: my } };
+}
+
+// Calibrated 2004 default shapes (Pure Polygons with Curved Segments)
+function computePolygonBounds(poly) {
+  if (!poly.points || poly.points.length === 0) {
+    return { minX: 0, maxX: 148, minY: 0, maxY: 110, midX: 74, midY: 55 };
+  }
+  let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+  poly.points.forEach(pt => {
+    if (pt.x < minX) minX = pt.x;
+    if (pt.x > maxX) maxX = pt.x;
+    if (pt.y < minY) minY = pt.y;
+    if (pt.y > maxY) maxY = pt.y;
+  });
+  return {
+    minX, maxX, minY, maxY,
+    midX: (minX + maxX) / 2,
+    midY: (minY + maxY) / 2
+  };
+}
+
+function applyGradDirectionPreset(preset, poly) {
+  const b = computePolygonBounds(poly);
+  if (preset === 'topDown') {
+    poly.gradStart = { x: snapCoord(b.midX), y: snapCoord(b.minY) };
+    poly.gradEnd   = { x: snapCoord(b.midX), y: snapCoord(b.maxY) };
+  } else if (preset === 'bottomUp') {
+    poly.gradStart = { x: snapCoord(b.midX), y: snapCoord(b.maxY) };
+    poly.gradEnd   = { x: snapCoord(b.midX), y: snapCoord(b.minY) };
+  } else if (preset === 'leftRight') {
+    poly.gradStart = { x: snapCoord(b.minX), y: snapCoord(b.midY) };
+    poly.gradEnd   = { x: snapCoord(b.maxX), y: snapCoord(b.midY) };
+  } else if (preset === 'rightLeft') {
+    poly.gradStart = { x: snapCoord(b.maxX), y: snapCoord(b.midY) };
+    poly.gradEnd   = { x: snapCoord(b.minX), y: snapCoord(b.midY) };
+  } else if (preset === 'diagTLBR') {
+    poly.gradStart = { x: snapCoord(b.minX), y: snapCoord(b.minY) };
+    poly.gradEnd   = { x: snapCoord(b.maxX), y: snapCoord(b.maxY) };
+  } else if (preset === 'diagBLTR') {
+    poly.gradStart = { x: snapCoord(b.minX), y: snapCoord(b.maxY) };
+    poly.gradEnd   = { x: snapCoord(b.maxX), y: snapCoord(b.minY) };
+  }
+}
+
+function detectGradDirectionPreset(poly) {
+  if (!poly.gradStart || !poly.gradEnd) return 'custom';
+  const b = computePolygonBounds(poly);
+  const eps = 1.0;
+  function match(s, e) {
+    return Math.abs(poly.gradStart.x - s.x) < eps && Math.abs(poly.gradStart.y - s.y) < eps &&
+           Math.abs(poly.gradEnd.x - e.x) < eps && Math.abs(poly.gradEnd.y - e.y) < eps;
+  }
+  if (match({x: b.midX, y: b.minY}, {x: b.midX, y: b.maxY})) return 'topDown';
+  if (match({x: b.midX, y: b.maxY}, {x: b.midX, y: b.minY})) return 'bottomUp';
+  if (match({x: b.minX, y: b.midY}, {x: b.maxX, y: b.midY})) return 'leftRight';
+  if (match({x: b.maxX, y: b.midY}, {x: b.minX, y: b.midY})) return 'rightLeft';
+  if (match({x: b.minX, y: b.minY}, {x: b.maxX, y: b.maxY})) return 'diagTLBR';
+  if (match({x: b.minX, y: b.maxY}, {x: b.maxX, y: b.minY})) return 'diagBLTR';
+  return 'custom';
+}
+
+function normalizePolygon(poly) {
+  if (!poly) return poly;
+  if (!poly.fillType) poly.fillType = 'linearGradient';
+  if (!poly.gradColor1) poly.gradColor1 = poly.color || '#00aa48';
+  if (!poly.gradColor2) poly.gradColor2 = '#00220a';
+  if (poly.gradUseMid === undefined) poly.gradUseMid = false;
+  if (!poly.gradColorMid) poly.gradColorMid = '#005525';
+  if (!poly.gradStart || !poly.gradEnd) {
+    const b = computePolygonBounds(poly);
+    poly.gradStart = { x: snapCoord(b.midX), y: snapCoord(b.minY) };
+    poly.gradEnd = { x: snapCoord(b.midX), y: snapCoord(b.maxY) };
+  }
+  return poly;
+}
+
+function getDefaultPolygons() {
+  return [
+    {
+      name: "Ô Circumflex Hat",
+      fillType: "linearGradient",
+      color: "#005525",
+      gradColor1: "#006a2e",
+      gradColor2: "#00280d",
+      gradUseMid: false,
+      gradColorMid: "#005525",
+      gradStart: { x: 34.0, y: 8.0 },
+      gradEnd: { x: 34.0, y: 15.5 },
+      alpha: 0.95,
+      strokeColor: "#a0ffb8",
+      strokeWidth: 1.0,
+      blur: 0,
+      closed: true,
+      points: [
+        { x: 19.5, y: 15.5, curve: 0 },
+        { x: 34.0, y: 8.0, curve: 0 },
+        { x: 48.5, y: 15.5, curve: 0 },
+        { x: 34.0, y: 15.0, curve: 0 }
+      ]
+    },
+    {
+      name: "Ô Upper Ring",
+      fillType: "linearGradient",
+      color: "#00aa48",
+      gradColor1: "#00dd55",
+      gradColor2: "#00451a",
+      gradUseMid: true,
+      gradColorMid: "#00993a",
+      gradStart: { x: 34.0, y: 18.5 },
+      gradEnd: { x: 34.0, y: 38.5 },
+      alpha: 0.95,
+      strokeColor: "#a0ffb8",
+      strokeWidth: 1.0,
+      blur: 0,
+      closed: true,
+      points: [
+        { x: 9.9, y: 38.5, curve: -20.0 }, // Outer arc over top
+        { x: 58.1, y: 38.5, curve: 0 },    // Right cut
+        { x: 51.9, y: 38.5, curve: 14.0 },  // Inner arc over top
+        { x: 16.1, y: 38.5, curve: 0 }     // Left cut
+      ]
+    },
+    {
+      name: "Ô Lower Ring",
+      fillType: "linearGradient",
+      color: "#004a20",
+      gradColor1: "#00451a",
+      gradColor2: "#001a08",
+      gradUseMid: false,
+      gradColorMid: "#002a10",
+      gradStart: { x: 34.0, y: 47.5 },
+      gradEnd: { x: 34.0, y: 67.5 },
+      alpha: 0.95,
+      strokeColor: "#a0ffb8",
+      strokeWidth: 1.0,
+      blur: 0,
+      closed: true,
+      points: [
+        { x: 58.1, y: 47.5, curve: -20.0 }, // Outer arc under bottom
+        { x: 9.9, y: 47.5, curve: 0 },      // Left cut
+        { x: 16.1, y: 47.5, curve: 14.0 },  // Inner arc under bottom
+        { x: 51.9, y: 47.5, curve: 0 }      // Right cut
+      ]
+    },
+    {
+      name: "X Front Limb (TL -> BR)",
+      fillType: "linearGradient",
+      color: "#a8ff3e",
+      gradColor1: "#88ff00",
+      gradColor2: "#226810",
+      gradUseMid: true,
+      gradColorMid: "#5fd014",
+      gradStart: { x: 52.0, y: 9.0 },
+      gradEnd: { x: 91.5, y: 73.0 },
+      alpha: 0.95,
+      strokeColor: "#f4ffe0",
+      strokeWidth: 1.0,
+      blur: 0,
+      closed: true,
+      points: [
+        { x: 47.5, y: 9.0, curve: 0 },
+        { x: 56.5, y: 9.0, curve: 0 },
+        { x: 96.5, y: 73.0, curve: 0 },
+        { x: 86.0, y: 73.0, curve: 0 }
+      ]
+    },
+    {
+      name: "X Back Limb Blade (BL -> TR)",
+      fillType: "linearGradient",
+      color: "#76d610",
+      gradColor1: "#1c560c",
+      gradColor2: "#8eff18",
+      gradUseMid: true,
+      gradColorMid: "#48aa12",
+      gradStart: { x: 47.5, y: 87.0 },
+      gradEnd: { x: 86.5, y: 10.0 },
+      alpha: 0.95,
+      strokeColor: "#f4ffe0",
+      strokeWidth: 1.0,
+      blur: 0,
+      closed: true,
+      points: [
+        { x: 46.0, y: 87.0, curve: 0 },
+        { x: 84.0, y: 10.0, curve: 0 },
+        { x: 89.0, y: 10.0, curve: 0 },
+        { x: 49.0, y: 87.0, curve: 0 }
+      ]
+    },
+    {
+      name: "e Upper Loop & Bar",
+      fillType: "linearGradient",
+      color: "#ffd600",
+      gradColor1: "#ffee44",
+      gradColor2: "#b57c00",
+      gradUseMid: true,
+      gradColorMid: "#e6a800",
+      gradStart: { x: 112.5, y: 17.0 },
+      gradEnd: { x: 112.5, y: 46.5 },
+      alpha: 0.95,
+      strokeColor: "#fff9c4",
+      strokeWidth: 1.0,
+      blur: 0,
+      closed: true,
+      points: [
+        { x: 87.5, y: 46.5, curve: 29.5 }, // Outer arch over top
+        { x: 138.0, y: 46.5, curve: 0 }     // Bottom flat edge of crossbar
+      ],
+      holes: [
+        [
+          { x: 95.0, y: 39.5, curve: 16.0 }, // Inner hole arch over top
+          { x: 130.0, y: 39.5, curve: 0 }    // Inner hole flat bottom edge
+        ]
+      ]
+    },
+    {
+      name: "e Lower Ring",
+      fillType: "linearGradient",
+      color: "#c69200",
+      gradColor1: "#b57c00",
+      gradColor2: "#4a2c00",
+      gradUseMid: false,
+      gradColorMid: "#7a5000",
+      gradStart: { x: 112.5, y: 47.5 },
+      gradEnd: { x: 112.5, y: 67.5 },
+      alpha: 0.95,
+      strokeColor: "#fff9c4",
+      strokeWidth: 1.0,
+      blur: 0,
+      closed: true,
+      points: [
+        { x: 136.6, y: 47.5, curve: -20.0 }, // Outer arc under bottom
+        { x: 88.4, y: 47.5, curve: 0 },      // Left cut
+        { x: 94.6, y: 47.5, curve: 14.0 },   // Inner arc under bottom
+        { x: 130.4, y: 47.5, curve: 0 }      // Right cut
+      ]
+    }
+  ];
+}
+
+function savePenPolygons() {
+  try {
+    localStorage.setItem('oxe_tracer_polygons_v5', JSON.stringify(polygons));
+  } catch (e) {}
+}
+
+function loadPenPolygons() {
+  try {
+    const saved = localStorage.getItem('oxe_tracer_polygons_v5');
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed.map(normalizePolygon);
+      }
+    }
+  } catch (e) {}
+  return getDefaultPolygons();
+}
+
+let polygons = loadPenPolygons();
+let activePolyIndex = 0;
+let activeContourType = 'outer'; // 'outer' or 'hole_0', 'hole_1', ...
+let selectedPointIndex = null;
+let draggingPenPoint = null; // { polyIdx, contourType, pointIdx }
+let draggingCurveApex = null; // { contourType, pointIdx, p1, p2, len, nx, ny }
+let draggingGradHandle = null; // { handle: 'start' | 'end' }
+let dragActionStartState = null; // Snapshot taken at mousedown for undo
+
+function getPolyContourPoints(poly, contourType = activeContourType) {
+  if (!poly) return [];
+  if (contourType === 'outer' || !poly.holes) return poly.points || [];
+  const holeIdx = parseInt(contourType.replace('hole_', ''), 10);
+  if (poly.holes[holeIdx]) return poly.holes[holeIdx];
+  return poly.points || [];
+}
+
+// Full Undo / Redo Action History
+const MAX_HISTORY = 60;
+let undoStack = [];
+let redoStack = [];
+
+function recordState() {
+  return JSON.stringify({
+    polygons: polygons,
+    activePolyIndex: activePolyIndex,
+    activeContourType: activeContourType,
+    selectedPointIndex: selectedPointIndex
+  });
+}
+
+function pushAction() {
+  const state = recordState();
+  if (undoStack.length > 0 && undoStack[undoStack.length - 1] === state) return;
+  undoStack.push(state);
+  if (undoStack.length > MAX_HISTORY) undoStack.shift();
+  redoStack = [];
+  updateUndoRedoUI();
+}
+
+function undo() {
+  if (undoStack.length === 0) return;
+  redoStack.push(recordState());
+  const prev = JSON.parse(undoStack.pop());
+  polygons = prev.polygons;
+  activePolyIndex = Math.min(prev.activePolyIndex, polygons.length - 1);
+  selectedPointIndex = prev.selectedPointIndex;
+  syncPolyUI();
+  render();
+  updateCode();
+  updateCanvasCode();
+  savePenPolygons();
+  updateUndoRedoUI();
+  showToast("Undo");
+}
+
+function redo() {
+  if (redoStack.length === 0) return;
+  undoStack.push(recordState());
+  const next = JSON.parse(redoStack.pop());
+  polygons = next.polygons;
+  activePolyIndex = Math.min(next.activePolyIndex, polygons.length - 1);
+  selectedPointIndex = next.selectedPointIndex;
+  syncPolyUI();
+  render();
+  updateCode();
+  updateCanvasCode();
+  savePenPolygons();
+  updateUndoRedoUI();
+  showToast("Redo");
+}
+
+function updateUndoRedoUI() {
+  const canUndo = (undoStack.length > 0);
+  const canRedo = (redoStack.length > 0);
+  ['btnUndo', 'btnUndoInside'].forEach(id => {
+    const b = document.getElementById(id);
+    if (b) {
+      b.disabled = !canUndo;
+      b.style.opacity = canUndo ? '1' : '0.4';
+      b.style.cursor = canUndo ? 'pointer' : 'not-allowed';
+    }
+  });
+  ['btnRedo', 'btnRedoInside'].forEach(id => {
+    const b = document.getElementById(id);
+    if (b) {
+      b.disabled = !canRedo;
+      b.style.opacity = canRedo ? '1' : '0.4';
+      b.style.cursor = canRedo ? 'pointer' : 'not-allowed';
+    }
+  });
+}
+
+// DOM elements
+const canvasLeft = document.getElementById('canvasLeft');
+const canvasRight = document.getElementById('canvasRight');
+const ctxL = canvasLeft.getContext('2d');
+const ctxR = canvasRight.getContext('2d');
+const boxLeft = document.getElementById('boxLeft');
+const boxRight = document.getElementById('boxRight');
+const canvasStage = document.getElementById('canvasStage');
+const sidebar = document.getElementById('sidebar');
+
+const selViewMode = document.getElementById('selViewMode');
+const groupOverlaySlider = document.getElementById('groupOverlaySlider');
+const rngOverlayOpacity = document.getElementById('rngOverlayOpacity');
+const selZoom = document.getElementById('selZoom');
+const zoomDisplay = document.getElementById('zoomDisplay');
+const selRenderMode = document.getElementById('selRenderMode');
+const selBg = document.getElementById('selBg');
+const chkHandles = document.getElementById('chkHandles');
+const chkGrid = document.getElementById('chkGrid');
+const btnToggleFlicker = document.getElementById('btnToggleFlicker');
+const btnResetView = document.getElementById('btnResetView');
+const btnToggleSidebar = document.getElementById('btnToggleSidebar');
+const btnCloseSidebar = document.getElementById('btnCloseSidebar');
+const btnOpenSidebar = document.getElementById('btnOpenSidebar');
+const btnFullscreen = document.getElementById('btnFullscreen');
+
+// Zoom & Pan State
+let currentZoomFactor = 1.0;
+let isFlickering = false;
+let flickerState = false;
+let flickerTimer = null;
+
+// Sidebar collapse / expand
+function toggleSidebar(show) {
+  const willCollapse = (typeof show === 'boolean') ? !show : !sidebar.classList.contains('collapsed');
+  sidebar.classList.toggle('collapsed', willCollapse);
+  btnToggleSidebar.textContent = willCollapse ? "▶ Show Panel" : "◀ Hide Panel";
+  btnOpenSidebar.style.display = willCollapse ? "inline-flex" : "none";
+  
+  setTimeout(() => {
+    updateZoom();
+  }, 260);
+}
+
+btnToggleSidebar.addEventListener('click', () => toggleSidebar());
+btnCloseSidebar.addEventListener('click', () => toggleSidebar(false));
+btnOpenSidebar.addEventListener('click', () => toggleSidebar(true));
+
+// Fullscreen Toggle
+btnFullscreen.addEventListener('click', () => {
+  if (!document.fullscreenElement) {
+    document.documentElement.requestFullscreen().catch(() => {});
+    btnFullscreen.textContent = "Exit Fullscreen";
+  } else {
+    document.exitFullscreen().catch(() => {});
+    btnFullscreen.textContent = "⛶ Fullscreen";
+  }
+});
+
+// Tab Switching
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.panel-content').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    const target = document.getElementById(btn.dataset.tab);
+    if (target) target.classList.add('active');
+
+    // Always refresh code and UI when switching tabs
+    if (btn.dataset.tab === 'tabCode') {
+      updateCode();
+    } else if (btn.dataset.tab === 'tabCanvasCode') {
+      updateCanvasCode();
+    } else if (btn.dataset.tab === 'tabPen') {
+      syncPolyUI();
+    }
+  });
+});
+
+// View Mode Changes
+selViewMode.addEventListener('change', () => {
+  const mode = selViewMode.value;
+  groupOverlaySlider.style.display = (mode === 'overlay') ? 'flex' : 'none';
+  updateZoom();
+});
+
+rngOverlayOpacity.addEventListener('input', render);
+selZoom.addEventListener('change', updateZoom);
+selRenderMode.addEventListener('change', updateZoom);
+selBg.addEventListener('change', render);
+chkHandles.addEventListener('change', render);
+chkGrid.addEventListener('change', render);
+btnResetView.addEventListener('click', () => {
+  selZoom.value = 'fit';
+  updateZoom();
+});
+
+// Calculate maximized auto-fit zoom based on stage container
+function calculateAutoFitZoom() {
+  const stage = canvasStage;
+  const paddingX = 40;
+  const paddingY = 48;
+  const availW = Math.max(100, stage.clientWidth - paddingX);
+  const availH = Math.max(100, stage.clientHeight - paddingY);
+
+  const mode = selViewMode.value;
+  let baseW = 148;
+  let baseH = 110;
+
+  if (mode === 'synthPreview') {
+    baseW = 320;
+    baseH = 120;
+  } else if (mode === 'sideBySide') {
+    baseW = 148 * 2 + 20; // Two canvases + gap
+    baseH = 110;
+  }
+
+  const scale = Math.max(1.0, Math.min(availW / baseW, availH / baseH) * 0.96);
+  return scale;
+}
+
+function updateZoom() {
+  const zoomVal = selZoom.value;
+  let z = 1.0;
+  if (zoomVal === 'fit') {
+    z = calculateAutoFitZoom();
+    zoomDisplay.textContent = Math.round(z * 100) + '% (Fit)';
+  } else {
+    z = parseFloat(zoomVal);
+    zoomDisplay.textContent = Math.round(z * 100) + '%';
+  }
+  currentZoomFactor = z;
+
+  const mode = selViewMode.value;
+  const isSynth = (mode === 'synthPreview');
+  const baseW = isSynth ? 320 : 148;
+  const baseH = isSynth ? 120 : 110;
+
+  const displayW = Math.round(baseW * z);
+  const displayH = Math.round(baseH * z);
+
+  const isCrisp = (selRenderMode.value === 'crisp');
+  const dpr = window.devicePixelRatio || 1;
+
+  // Update canvas sizing
+  [canvasLeft, canvasRight].forEach(c => {
+    c.style.width = displayW + 'px';
+    c.style.height = displayH + 'px';
+
+    if (isCrisp && c === canvasRight) {
+      c.width = Math.round(baseW * z * dpr);
+      c.height = Math.round(baseH * z * dpr);
+      c.style.imageRendering = 'auto';
+    } else {
+      c.width = baseW;
+      c.height = baseH;
+      c.style.imageRendering = 'pixelated';
+    }
+  });
+
+  render();
+}
+
+// Window resize listener
+window.addEventListener('resize', () => {
+  if (selZoom.value === 'fit') {
+    updateZoom();
+  }
+});
+
+// Mouse Wheel Zoom
+canvasStage.addEventListener('wheel', (e) => {
+  e.preventDefault();
+  const delta = e.deltaY < 0 ? 1.15 : 0.87;
+  let newZoom = currentZoomFactor * delta;
+  newZoom = Math.max(0.5, Math.min(20.0, newZoom));
+  currentZoomFactor = newZoom;
+  selZoom.value = 'custom';
+  zoomDisplay.textContent = Math.round(newZoom * 100) + '%';
+
+  const mode = selViewMode.value;
+  const isSynth = (mode === 'synthPreview');
+  const baseW = isSynth ? 320 : 148;
+  const baseH = isSynth ? 120 : 110;
+
+  const displayW = Math.round(baseW * newZoom);
+  const displayH = Math.round(baseH * newZoom);
+  const isCrisp = (selRenderMode.value === 'crisp');
+  const dpr = window.devicePixelRatio || 1;
+
+  [canvasLeft, canvasRight].forEach(c => {
+    c.style.width = displayW + 'px';
+    c.style.height = displayH + 'px';
+    if (isCrisp && c === canvasRight) {
+      c.width = Math.round(baseW * newZoom * dpr);
+      c.height = Math.round(baseH * newZoom * dpr);
+    } else {
+      c.width = baseW;
+      c.height = baseH;
+    }
+  });
+
+  render();
+}, { passive: false });
+
+btnToggleFlicker.addEventListener('click', () => {
+  isFlickering = !isFlickering;
+  btnToggleFlicker.classList.toggle('btn-primary', isFlickering);
+  if (isFlickering) {
+    flickerTimer = setInterval(() => {
+      flickerState = !flickerState;
+      render();
+    }, 400);
+  } else {
+    clearInterval(flickerTimer);
+    flickerState = false;
+    render();
+  }
+});
+
+// Draw pixel grid
+function drawGrid(ctx, w, h, scaleFactor = 1.0) {
+  if (!chkGrid.checked) return;
+  ctx.save();
+  ctx.scale(scaleFactor, scaleFactor);
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+  ctx.lineWidth = 0.5 / scaleFactor;
+  for (let x = 0; x < w; x += 5) {
+    ctx.beginPath();
+    ctx.moveTo(x + 0.5, 0);
+    ctx.lineTo(x + 0.5, h);
+    ctx.stroke();
+  }
+  for (let y = 0; y < h; y += 5) {
+    ctx.beginPath();
+    ctx.moveTo(0, y + 0.5);
+    ctx.lineTo(w, y + 0.5);
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
+function getBgColor() {
+  switch (selBg.value) {
+    case 'gray': return '#9c9c9c';
+    case 'black': return '#000000';
+    case 'white': return '#ffffff';
+    default: return '#0b0e14';
+  }
+}
+
+// Draw interactive polygons and curved segments directly on context
+function drawTracerPolygons(ctx, scaleFactor = 1.0, ox = 0, oy = 0) {
+  ctx.save();
+  ctx.translate(ox, oy);
+  ctx.scale(scaleFactor, scaleFactor);
+
+  // 1. Draw polygon shapes
+  polygons.forEach((poly, polyIdx) => {
+    const isActive = (polyIdx === activePolyIndex);
+    if (!poly.points || poly.points.length === 0) return;
+
+    ctx.save();
+
+    // Blur filter for ambient glows or soft shadows
+    if (poly.blur && poly.blur > 0) {
+      ctx.filter = `blur(${poly.blur}px)`;
+    }
+
+    function tracePathContour(cCtx, pts, closed) {
+      if (!pts || pts.length === 0) return;
+      cCtx.moveTo(pts[0].x, pts[0].y);
+      const numPts = pts.length;
+      for (let i = 0; i < numPts; i++) {
+        const isLast = (i === numPts - 1);
+        if (isLast && !closed) break;
+        const nextIdx = (i + 1) % numPts;
+        const p1 = pts[i];
+        const p2 = pts[nextIdx];
+
+        if (p1.curve && Math.abs(p1.curve) >= 0.05) {
+          const arc = getArcForSegment(p1, p2, p1.curve);
+          if (arc) {
+            cCtx.arc(arc.cx, arc.cy, arc.r, arc.startAngle, arc.endAngle, arc.anticlockwise);
+          } else if (!isLast) {
+            cCtx.lineTo(p2.x, p2.y);
+          }
+        } else if (!isLast) {
+          cCtx.lineTo(p2.x, p2.y);
+        }
+      }
+      if (closed && pts.length >= 2) {
+        cCtx.closePath();
+      }
+    }
+
+    ctx.beginPath();
+    tracePathContour(ctx, poly.points, poly.closed);
+    if (poly.holes) {
+      poly.holes.forEach(hole => {
+        if (hole && hole.length >= 2) {
+          tracePathContour(ctx, hole, true);
+        }
+      });
+    }
+
+    // Fill with "evenodd" rule so holes are hollowed out
+    if (poly.alpha > 0) {
+      ctx.save();
+      ctx.globalAlpha = poly.alpha;
+      if (poly.fillType === 'linearGradient' && poly.gradStart && poly.gradEnd) {
+        const grad = ctx.createLinearGradient(
+          poly.gradStart.x, poly.gradStart.y,
+          poly.gradEnd.x, poly.gradEnd.y
+        );
+        grad.addColorStop(0.0, poly.gradColor1 || poly.color || '#00aa48');
+        if (poly.gradUseMid && poly.gradColorMid) {
+          grad.addColorStop(0.5, poly.gradColorMid);
+        }
+        grad.addColorStop(1.0, poly.gradColor2 || '#00220a');
+        ctx.fillStyle = grad;
+      } else {
+        ctx.fillStyle = poly.color || '#00aa48';
+      }
+      ctx.fill("evenodd");
+      ctx.restore();
+    }
+
+    // Stroke
+    if (poly.strokeWidth > 0) {
+      ctx.strokeStyle = poly.strokeColor || '#00f0ff';
+      ctx.lineWidth = poly.strokeWidth;
+      if (!isActive) {
+        ctx.globalAlpha = 0.6;
+      }
+      ctx.stroke();
+    }
+
+    ctx.restore(); // Restores filter and state
+  });
+
+  // 2. Draw editable vertices and interactive arc curve handles
+  if (chkHandles.checked) {
+    const ptRadius = Math.max(2.5, 4.0 / Math.sqrt(scaleFactor));
+
+    polygons.forEach((poly, polyIdx) => {
+      if (!poly.points) return;
+      const isActive = (polyIdx === activePolyIndex);
+
+      function drawContourHandles(pts, cType, isClosed) {
+        if (!pts) return;
+        const numPts = pts.length;
+        const isEditingThisContour = (isActive && activeContourType === cType);
+
+        // Curve apex diamonds
+        for (let i = 0; i < numPts; i++) {
+          const isLast = (i === numPts - 1);
+          if (isLast && !isClosed) break;
+          const nextIdx = (i + 1) % numPts;
+          const p1 = pts[i];
+          const p2 = pts[nextIdx];
+          const curve = p1.curve || 0;
+
+          if (isActive && (Math.abs(curve) >= 0.05 || (isEditingThisContour && i === selectedPointIndex))) {
+            const dx = p2.x - p1.x;
+            const dy = p2.y - p1.y;
+            const len = Math.hypot(dx, dy);
+            if (len > 0.1) {
+              const nx = -dy / len;
+              const ny = dx / len;
+              const mx = (p1.x + p2.x) / 2 + nx * curve;
+              const my = (p1.y + p2.y) / 2 + ny * curve;
+
+              const dSize = ptRadius * 1.1;
+              ctx.beginPath();
+              ctx.moveTo(mx, my - dSize);
+              ctx.lineTo(mx + dSize, my);
+              ctx.lineTo(mx, my + dSize);
+              ctx.lineTo(mx - dSize, my);
+              ctx.closePath();
+              ctx.fillStyle = (cType === 'outer') ? '#ff9100' : '#ff007f';
+              ctx.strokeStyle = '#000000';
+              ctx.lineWidth = 1.1 / scaleFactor;
+              ctx.fill();
+              ctx.stroke();
+
+              if (Math.abs(curve) >= 0.5) {
+                ctx.font = `bold ${Math.max(6.5, 7.5 / Math.sqrt(scaleFactor))}px monospace`;
+                ctx.fillStyle = (cType === 'outer') ? '#ff9100' : '#ff007f';
+                ctx.fillText(`c:${curve.toFixed(1)}`, mx + 4.0 / Math.sqrt(scaleFactor), my - 3.0 / Math.sqrt(scaleFactor));
+              }
+            }
+          }
+        }
+
+        // Vertices
+        pts.forEach((pt, ptIdx) => {
+          const isSel = (isEditingThisContour && ptIdx === selectedPointIndex);
+          ctx.beginPath();
+          ctx.arc(pt.x, pt.y, isSel ? ptRadius * 1.5 : ptRadius, 0, Math.PI * 2);
+
+          if (isSel) {
+            ctx.fillStyle = '#ffea00'; // Yellow for selected
+            ctx.strokeStyle = '#000000';
+            ctx.lineWidth = 1.5 / scaleFactor;
+          } else if (isEditingThisContour) {
+            ctx.fillStyle = (ptIdx === 0) ? '#00e676' : '#00f0ff'; // Green for 1st pt, cyan for rest
+            ctx.strokeStyle = '#000000';
+            ctx.lineWidth = 1.0 / scaleFactor;
+          } else if (isActive) {
+            ctx.fillStyle = (cType === 'outer') ? 'rgba(0, 240, 255, 0.45)' : 'rgba(255, 0, 127, 0.45)';
+            ctx.strokeStyle = '#000000';
+            ctx.lineWidth = 0.8 / scaleFactor;
+          } else {
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+            ctx.strokeStyle = 'rgba(0, 0, 0, 0.6)';
+            ctx.lineWidth = 0.7 / scaleFactor;
+          }
+          ctx.fill();
+          ctx.stroke();
+
+          // Label vertex
+          if (isActive && (ptIdx === 0 || isSel || pts.length <= 16)) {
+            ctx.font = `bold ${Math.max(7, 8.5 / Math.sqrt(scaleFactor))}px monospace`;
+            ctx.fillStyle = isEditingThisContour ? '#ffffff' : 'rgba(255, 255, 255, 0.7)';
+            const prefix = (cType === 'outer') ? '' : 'H:';
+            ctx.fillText(`${prefix}${ptIdx}`, pt.x + 3.0 / Math.sqrt(scaleFactor), pt.y - 3.0 / Math.sqrt(scaleFactor));
+          }
+        });
+      }
+
+      drawContourHandles(poly.points, 'outer', poly.closed);
+      if (poly.holes) {
+        poly.holes.forEach((h, hIdx) => {
+          drawContourHandles(h, `hole_${hIdx}`, true);
+        });
+      }
+
+      // 1.5. Draw gradient handles and vector line for active shape
+      if (isActive && poly.fillType === 'linearGradient' && poly.gradStart && poly.gradEnd) {
+        const g1 = poly.gradStart;
+        const g2 = poly.gradEnd;
+        const gRadius = ptRadius * 1.35;
+
+        // Dashed gradient orientation axis line
+        ctx.save();
+        ctx.setLineDash([4 / scaleFactor, 3 / scaleFactor]);
+        ctx.strokeStyle = '#ff4081';
+        ctx.lineWidth = 1.3 / scaleFactor;
+        ctx.beginPath();
+        ctx.moveTo(g1.x, g1.y);
+        ctx.lineTo(g2.x, g2.y);
+        ctx.stroke();
+        ctx.restore();
+
+        // G1 Start Pin (Magenta accent, colored inner core)
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(g1.x, g1.y, gRadius, 0, Math.PI * 2);
+        ctx.fillStyle = poly.gradColor1 || '#00dd55';
+        ctx.fill();
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 1.5 / scaleFactor;
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(g1.x, g1.y, gRadius + 2.0 / scaleFactor, 0, Math.PI * 2);
+        ctx.strokeStyle = '#ff4081';
+        ctx.lineWidth = 1.0 / scaleFactor;
+        ctx.stroke();
+        ctx.font = `bold ${Math.max(7, 8.5 / Math.sqrt(scaleFactor))}px monospace`;
+        ctx.fillStyle = '#ff4081';
+        ctx.fillText('G1 (0%)', g1.x + 5.0 / Math.sqrt(scaleFactor), g1.y - 4.0 / Math.sqrt(scaleFactor));
+        ctx.restore();
+
+        // G2 End Pin (Violet accent, colored inner core)
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(g2.x, g2.y, gRadius, 0, Math.PI * 2);
+        ctx.fillStyle = poly.gradColor2 || '#00451a';
+        ctx.fill();
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 1.5 / scaleFactor;
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(g2.x, g2.y, gRadius + 2.0 / scaleFactor, 0, Math.PI * 2);
+        ctx.strokeStyle = '#7c4dff';
+        ctx.lineWidth = 1.0 / scaleFactor;
+        ctx.stroke();
+        ctx.font = `bold ${Math.max(7, 8.5 / Math.sqrt(scaleFactor))}px monospace`;
+        ctx.fillStyle = '#7c4dff';
+        ctx.fillText('G2 (100%)', g2.x + 5.0 / Math.sqrt(scaleFactor), g2.y - 4.0 / Math.sqrt(scaleFactor));
+        ctx.restore();
+      }
+
+
+    });
+  }
+
+  // 3. Draw FM Synth text at the bottom of the logo
+  ctx.save();
+  ctx.font = "bold 20px -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Trebuchet MS', Arial, sans-serif";
+  ctx.fillStyle = "#bee400";
+  ctx.fillText("FM Synth", 58.0, 103.0);
+  ctx.restore();
+
+  ctx.restore();
+}
+
+function drawActiveLogo(ctx, ox = 0, oy = 0, scale = 1.0) {
+  drawTracerPolygons(ctx, scale, ox, oy);
+}
+
+// Main Render Loop
+function render() {
+  const mode = selViewMode.value;
+  const bg = getBgColor();
+  const isCrisp = (selRenderMode.value === 'crisp');
+  const dpr = window.devicePixelRatio || 1;
+  const renderScale = (isCrisp) ? (currentZoomFactor * dpr) : 1.0;
+
+  if (mode === 'synthPreview') {
+    boxLeft.style.display = 'none';
+    boxRight.style.display = 'flex';
+    document.getElementById('lblLeft').style.display = 'none';
+    document.getElementById('lblRight').textContent = "MODERN SYNTH HEADER CONTEXT";
+
+    // Dark synth background
+    ctxR.fillStyle = '#0b0e14';
+    ctxR.fillRect(0, 0, canvasRight.width, canvasRight.height);
+
+    ctxR.save();
+    ctxR.scale(renderScale, renderScale);
+
+    // Header Card base
+    ctxR.fillStyle = '#131822';
+    ctxR.strokeStyle = '#242d3d';
+    ctxR.lineWidth = 1.0;
+    ctxR.beginPath();
+    if (ctxR.roundRect) ctxR.roundRect(10, 10, 300, 100, [6]);
+    else ctxR.rect(10, 10, 300, 100);
+    ctxR.fill();
+    ctxR.stroke();
+
+    // Draw active logo vector at scale 0.75
+    drawActiveLogo(ctxR, 15, 12, 0.75);
+
+    // Accompanying typography matching editor.cpp
+    ctxR.font = "bold 9px -apple-system, BlinkMacSystemFont, sans-serif";
+    ctxR.fillStyle = "#8a9baf";
+    ctxR.fillText("FM SYNTH", 185, 48);
+
+    ctxR.fillStyle = "#45566e";
+    ctxR.fillText("v2.0.0", 185, 62);
+
+    // Accent line
+    const gradLine = ctxR.createLinearGradient(185, 68, 290, 68);
+    gradLine.addColorStop(0.0, "rgba(0, 255, 119, 0.9)");
+    gradLine.addColorStop(0.5, "rgba(0, 229, 255, 0.6)");
+    gradLine.addColorStop(1.0, "rgba(0, 229, 255, 0)");
+    ctxR.strokeStyle = gradLine;
+    ctxR.lineWidth = 1.5;
+    ctxR.beginPath();
+    ctxR.moveTo(185, 68);
+    ctxR.lineTo(290, 68);
+    ctxR.stroke();
+
+    ctxR.restore();
+    return;
+  }
+
+  document.getElementById('lblLeft').style.display = (mode === 'sideBySide') ? 'inline' : 'none';
+  document.getElementById('lblRight').style.display = 'inline';
+
+  if (mode === 'sideBySide') {
+    boxLeft.style.display = 'flex';
+    boxRight.style.display = 'flex';
+    document.getElementById('lblLeft').textContent = "ORIGINAL BG.BMP (148×110)";
+    document.getElementById('lblRight').textContent = "POLYGON & ARC VECTOR (148×110)";
+
+    // Left: Original image
+    ctxL.fillStyle = bg;
+    ctxL.fillRect(0, 0, 148, 110);
+    if (origImg.complete) ctxL.drawImage(origImg, 0, 0);
+    drawGrid(ctxL, 148, 110, 1.0);
+
+    // Right: Vector / Polygons
+    ctxR.fillStyle = bg;
+    ctxR.fillRect(0, 0, canvasRight.width, canvasRight.height);
+    drawActiveLogo(ctxR, 0, 0, renderScale);
+        drawGrid(ctxR, 148, 110, renderScale);
+
+  } else if (mode === 'overlay') {
+    boxLeft.style.display = 'none';
+    boxRight.style.display = 'flex';
+    document.getElementById('lblRight').textContent = "OVERLAY CROSSFADE (ORIGINAL BG.BMP + VECTORS)";
+
+    ctxR.fillStyle = bg;
+    ctxR.fillRect(0, 0, canvasRight.width, canvasRight.height);
+
+    const alphaVector = parseInt(rngOverlayOpacity.value, 10) / 100.0;
+    const alphaOrig = 1.0 - alphaVector;
+
+    if (flickerState) {
+      // Flicker: show original only
+      if (origImg.complete) {
+        ctxR.save();
+        ctxR.scale(renderScale, renderScale);
+        ctxR.drawImage(origImg, 0, 0);
+        ctxR.restore();
+      }
+    } else {
+      // Overlay blend
+      if (origImg.complete && alphaOrig > 0) {
+        ctxR.save();
+        ctxR.globalAlpha = alphaOrig;
+        ctxR.scale(renderScale, renderScale);
+        ctxR.drawImage(origImg, 0, 0);
+        ctxR.restore();
+      }
+
+      if (alphaVector > 0) {
+        ctxR.save();
+        ctxR.globalAlpha = alphaVector;
+        drawActiveLogo(ctxR, 0, 0, renderScale);
+        ctxR.restore();
+      }
+    }
+
+        drawGrid(ctxR, 148, 110, renderScale);
+
+  } else if (mode === 'difference') {
+    boxLeft.style.display = 'none';
+    boxRight.style.display = 'flex';
+    document.getElementById('lblRight').textContent = "DIFFERENCE MAP (BLACK = PERFECT 1:1 MATCH)";
+
+    ctxR.fillStyle = bg;
+    ctxR.fillRect(0, 0, canvasRight.width, canvasRight.height);
+
+    // Draw original
+    if (origImg.complete) {
+      ctxR.save();
+      ctxR.scale(renderScale, renderScale);
+      ctxR.drawImage(origImg, 0, 0);
+      ctxR.restore();
+    }
+
+    // Draw vector/polygons with 'difference' blend mode
+    ctxR.save();
+    ctxR.globalCompositeOperation = 'difference';
+    drawActiveLogo(ctxR, 0, 0, renderScale);
+    ctxR.restore();
+
+        drawGrid(ctxR, 148, 110, renderScale);
+
+  } else if (mode === 'vectorOnly') {
+    boxLeft.style.display = 'none';
+    boxRight.style.display = 'flex';
+    document.getElementById('lblRight').textContent = "ISOLATED VECTOR RENDERING";
+
+    ctxR.fillStyle = bg;
+    ctxR.fillRect(0, 0, canvasRight.width, canvasRight.height);
+    drawActiveLogo(ctxR, 0, 0, renderScale);
+        drawGrid(ctxR, 148, 110, renderScale);
+  }
+}
+
+// Real-Time C++ Code Generator
+function hexToBLRgba(hex, alpha = 1.0) {
+  let r = 0, g = 0, b = 0;
+  if (hex.startsWith('#')) hex = hex.slice(1);
+  if (hex.length === 6) {
+    r = parseInt(hex.slice(0, 2), 16);
+    g = parseInt(hex.slice(2, 4), 16);
+    b = parseInt(hex.slice(4, 6), 16);
+  }
+  const a = Math.round(alpha * 255);
+  return `BLRgba32(0x${r.toString(16).padStart(2, '0')}, 0x${g.toString(16).padStart(2, '0')}, 0x${b.toString(16).padStart(2, '0')}${a < 255 ? ', 0x' + a.toString(16).padStart(2, '0') : ''})`;
+}
+
+// Blend2D Polygon & Curved Path Code Generator
+function generateBlend2DPolygonCode() {
+  const hasAnyBlur = polygons.some(p => p.blur && p.blur > 0);
+
+  let code = `// ============================================================================
+// Procedural 2004 "Ô X e" Logo for Blend2D (Calibrated to bg.bmp 148x110)
+// Rendered as discrete polygons with mathematical circular arc segments
+// Tuned with Oxe FM Synth Vector Studio
+// ============================================================================
+`;
+
+  if (hasAnyBlur) {
+    code += `// Fast separable box blur for Blend2D 32-bit PRGB offscreen layers
+static void ApplyBlur(BLImage &img, float radius)
+{
+    int r = (int)radius;
+    if (r <= 0) return;
+    BLImageData data;
+    if (img.make_mutable(&data) != BL_SUCCESS) return;
+
+    int w = data.size.w;
+    int h = data.size.h;
+    if (w <= 0 || h <= 0) return;
+
+    uint32_t *pix = static_cast<uint32_t*>(data.pixel_data);
+    int stride = static_cast<int>(data.stride / 4);
+    uint32_t *temp = new uint32_t[w * h];
+    int div = 2 * r + 1;
+
+    // Horizontal blur pass
+    for (int y = 0; y < h; ++y) {
+        int aSum = 0, rSum = 0, gSum = 0, bSum = 0;
+        for (int i = -r; i <= r; ++i) {
+            int cx = (i < 0) ? 0 : ((i >= w) ? w - 1 : i);
+            uint32_t c = pix[y * stride + cx];
+            aSum += (c >> 24) & 0xff;
+            rSum += (c >> 16) & 0xff;
+            gSum += (c >> 8) & 0xff;
+            bSum += c & 0xff;
+        }
+        for (int x = 0; x < w; ++x) {
+            temp[y * w + x] = ((aSum / div) << 24) | ((rSum / div) << 16) | ((gSum / div) << 8) | (bSum / div);
+            int remX = (x - r < 0) ? 0 : x - r;
+            int addX = (x + r + 1 >= w) ? w - 1 : x + r + 1;
+            uint32_t cRem = pix[y * stride + remX];
+            uint32_t cAdd = pix[y * stride + addX];
+            aSum += ((cAdd >> 24) & 0xff) - ((cRem >> 24) & 0xff);
+            rSum += ((cAdd >> 16) & 0xff) - ((cRem >> 16) & 0xff);
+            gSum += ((cAdd >> 8) & 0xff) - ((cRem >> 8) & 0xff);
+            bSum += (cAdd & 0xff) - (cRem & 0xff);
+        }
+    }
+
+    // Vertical blur pass
+    for (int x = 0; x < w; ++x) {
+        int aSum = 0, rSum = 0, gSum = 0, bSum = 0;
+        for (int i = -r; i <= r; ++i) {
+            int cy = (i < 0) ? 0 : ((i >= h) ? h - 1 : i);
+            uint32_t c = temp[cy * w + x];
+            aSum += (c >> 24) & 0xff;
+            rSum += (c >> 16) & 0xff;
+            gSum += (c >> 8) & 0xff;
+            bSum += c & 0xff;
+        }
+        for (int y = 0; y < h; ++y) {
+            pix[y * stride + x] = ((aSum / div) << 24) | ((rSum / div) << 16) | ((gSum / div) << 8) | (bSum / div);
+            int remY = (y - r < 0) ? 0 : y - r;
+            int addY = (y + r + 1 >= h) ? h - 1 : y + r + 1;
+            uint32_t cRem = temp[remY * w + x];
+            uint32_t cAdd = temp[addY * w + x];
+            aSum += ((cAdd >> 24) & 0xff) - ((cRem >> 24) & 0xff);
+            rSum += ((cAdd >> 16) & 0xff) - ((cRem >> 16) & 0xff);
+            gSum += ((cAdd >> 8) & 0xff) - ((cRem >> 8) & 0xff);
+            bSum += (cAdd & 0xff) - (cRem & 0xff);
+        }
+    }
+
+    delete[] temp;
+}
+
+`;
+  }
+
+  code += `void CEditor::DrawOxeLogo(BLContext &ctx, float x, float y, float scale)
+{
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.scale(scale, scale);
+
+`;
+
+  polygons.forEach((poly, idx) => {
+    if (!poly.points || poly.points.length < 2) return;
+    const varName = `poly${idx + 1}`;
+    const isBlurred = !!(poly.blur && poly.blur > 0);
+    const targetCtx = isBlurred ? `blurCtx${idx + 1}` : `ctx`;
+    const indent = isBlurred ? `        ` : `    `;
+
+    code += `    // ------------------------------------------------------------------------\n`;
+    code += `    // Shape ${idx + 1}: ${poly.name}${isBlurred ? ` (Blur: ${poly.blur.toFixed(1)}px)` : ''}\n`;
+    code += `    // ------------------------------------------------------------------------\n`;
+    code += `    BLPath ${varName};\n`;
+
+    function appendB2DContour(pts, closed, label) {
+      if (!pts || pts.length === 0) return '';
+      let cOut = `    // ${label}\n`;
+      cOut += `    ${varName}.move_to(${pts[0].x.toFixed(1)}f, ${pts[0].y.toFixed(1)}f);\n`;
+      const numPts = pts.length;
+      for (let i = 0; i < numPts; i++) {
+        const isLast = (i === numPts - 1);
+        if (isLast && !closed) break;
+        const nextIdx = (i + 1) % numPts;
+        const p1 = pts[i];
+        const p2 = pts[nextIdx];
+
+        if (p1.curve && Math.abs(p1.curve) >= 0.05) {
+          const arc = getArcForSegment(p1, p2, p1.curve);
+          if (arc) {
+            cOut += `    ${varName}.arc_to(${arc.cx.toFixed(1)}f, ${arc.cy.toFixed(1)}f, ${arc.r.toFixed(1)}f, ${arc.r.toFixed(1)}f, ${arc.startAngle.toFixed(4)}f, ${arc.sweep.toFixed(4)}f, false); // Arc to (${p2.x.toFixed(1)}, ${p2.y.toFixed(1)})\n`;
+          } else if (!isLast) {
+            cOut += `    ${varName}.line_to(${p2.x.toFixed(1)}f, ${p2.y.toFixed(1)}f);\n`;
+          }
+        } else if (!isLast) {
+          cOut += `    ${varName}.line_to(${p2.x.toFixed(1)}f, ${p2.y.toFixed(1)}f);\n`;
+        }
+      }
+      if (closed) {
+        cOut += `    ${varName}.close();\n`;
+      }
+      return cOut;
+    }
+
+    code += appendB2DContour(poly.points, poly.closed, 'Outer Contour');
+    const hasHoles = !!(poly.holes && poly.holes.length > 0);
+    if (hasHoles) {
+      poly.holes.forEach((h, hIdx) => {
+        code += appendB2DContour(h, true, `Hole ${hIdx + 1} Contour`);
+      });
+    }
+
+    if (isBlurred) {
+      code += `    // Render blurred shape via offscreen buffer and ApplyBlur\n`;
+      code += `    {\n`;
+      code += `        BLImage blurImg${idx + 1}(148, 110, BL_FORMAT_PRGB32);\n`;
+      code += `        BLContext blurCtx${idx + 1}(blurImg${idx + 1});\n`;
+      code += `        blurCtx${idx + 1}.clear_all();\n`;
+    }
+
+    if (poly.alpha > 0) {
+      if (poly.fillType === 'linearGradient' && poly.gradStart && poly.gradEnd) {
+        const gVar = `grad${idx + 1}`;
+        code += `${indent}BLGradient ${gVar}(BLLinearGradientValues(${poly.gradStart.x.toFixed(1)}f, ${poly.gradStart.y.toFixed(1)}f, ${poly.gradEnd.x.toFixed(1)}f, ${poly.gradEnd.y.toFixed(1)}f));
+`;
+        code += `${indent}${gVar}.add_stop(0.0f, ${hexToBLRgba(poly.gradColor1 || poly.color, poly.alpha)});
+`;
+        if (poly.gradUseMid && poly.gradColorMid) {
+          code += `${indent}${gVar}.add_stop(0.5f, ${hexToBLRgba(poly.gradColorMid, poly.alpha)});
+`;
+        }
+        code += `${indent}${gVar}.add_stop(1.0f, ${hexToBLRgba(poly.gradColor2, poly.alpha)});
+`;
+        if (hasHoles) {
+          code += `${indent}${targetCtx}.set_fill_rule(BL_FILL_RULE_EVEN_ODD);
+`;
+        }
+        code += `${indent}${targetCtx}.fill_path(${varName}, ${gVar});
+`;
+      } else {
+        if (hasHoles) {
+          code += `${indent}${targetCtx}.set_fill_rule(BL_FILL_RULE_EVEN_ODD);
+`;
+        }
+        code += `${indent}${targetCtx}.fill_path(${varName}, ${hexToBLRgba(poly.color, poly.alpha)});
+`;
+      }
+    }
+    if (poly.strokeWidth > 0 && poly.strokeColor) {
+      code += `${indent}${targetCtx}.set_stroke_width(${poly.strokeWidth.toFixed(1)}f);
+`;
+      code += `${indent}${targetCtx}.stroke_path(${varName}, ${hexToBLRgba(poly.strokeColor, 1.0)});
+`;
+    }
+
+    if (isBlurred) {
+      code += `        blurCtx${idx + 1}.end();
+`;
+      code += `        ApplyBlur(blurImg${idx + 1}, ${poly.blur.toFixed(1)}f);
+`;
+      code += `        ctx.blit_image(BLPoint(0, 0), blurImg${idx + 1});
+`;
+      code += `    }\n`;
+    }
+
+    code += `\n`;
+  });
+
+  code += `    // ------------------------------------------------------------------------\n`;
+  code += `    // FM Synth\n`;
+  code += `    // ------------------------------------------------------------------------\n`;
+  code += `    BLFont fontLogo = CFontManager::GetFontBold(20.0f);\n`;
+  code += `    if (!fontLogo.is_valid())\n`;
+  code += `    {\n`;
+  code += `        fontLogo = CFontManager::GetFont(20.0f);\n`;
+  code += `    }\n`;
+  code += `    if (fontLogo.is_valid())\n`;
+  code += `    {\n`;
+  code += `        ctx.fill_utf8_text(BLPoint(58.0f, 103.0f), fontLogo, "FM Synth", SIZE_MAX, BLRgba32(0xbe, 0xe4, 0x00));\n`;
+  code += `    }\n\n`;
+  code += `    ctx.restore();\n}\n`;
+  return code;
+}
+
+// Master C++ Code Generator
+function updateCode() {
+  const code = generateBlend2DPolygonCode();
+  const el = document.getElementById('codeOutput');
+  if (el) el.textContent = code;
+}
+
+// Generate HTML5 Canvas 2D API Code from Polygons & Curved Segments
+function updateCanvasCode() {
+  let code = `/**
+ * Oxe FM Synth 2004 Logo - HTML5 Canvas 2D API
+ * Calibrated to 148 x 110 reference bitmap
+ * Generated by Oxe FM Synth Vector Studio
+ */
+function drawOxeLogo(ctx, x = 0, y = 0, scale = 1.0) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.scale(scale, scale);
+
+`;
+
+  polygons.forEach((poly, idx) => {
+    if (!poly.points || poly.points.length < 2) return;
+    code += `    // --------------------------------------------------------\n`;
+    code += `    // Shape ${idx + 1}: ${poly.name}\n`;
+    code += `    // --------------------------------------------------------\n`;
+
+    let r = 0, g = 0, b = 0;
+    if (poly.color && poly.color.startsWith('#') && poly.color.length === 7) {
+      r = parseInt(poly.color.slice(1, 3), 16);
+      g = parseInt(poly.color.slice(3, 5), 16);
+      b = parseInt(poly.color.slice(5, 7), 16);
+    }
+    const alpha = (poly.alpha !== undefined) ? poly.alpha : 1.0;
+    const rgba = `rgba(${r}, ${g}, ${b}, ${alpha.toFixed(2)})`;
+
+    if (poly.blur && poly.blur > 0) {
+      code += `    ctx.filter = "blur(${poly.blur.toFixed(1)}px)";\n`;
+    }
+    if (poly.fillType === 'linearGradient' && poly.gradStart && poly.gradEnd) {
+      const gVar = `grad${idx + 1}`;
+      code += `    const ${gVar} = ctx.createLinearGradient(${poly.gradStart.x.toFixed(1)}, ${poly.gradStart.y.toFixed(1)}, ${poly.gradEnd.x.toFixed(1)}, ${poly.gradEnd.y.toFixed(1)});\n`;
+      code += `    ${gVar}.addColorStop(0.0, "${poly.gradColor1 || poly.color || '#000000'}");\n`;
+      if (poly.gradUseMid && poly.gradColorMid) {
+        code += `    ${gVar}.addColorStop(0.5, "${poly.gradColorMid}");\n`;
+      }
+      code += `    ${gVar}.addColorStop(1.0, "${poly.gradColor2 || '#000000'}");\n`;
+      code += `    ctx.fillStyle = ${gVar};\n`;
+    } else {
+      code += `    ctx.fillStyle = "${rgba}";\n`;
+    }
+    if (poly.strokeWidth > 0 && poly.strokeColor) {
+      code += `    ctx.strokeStyle = "${poly.strokeColor}";\n`;
+      code += `    ctx.lineWidth = ${poly.strokeWidth.toFixed(1)};\n`;
+    }
+    code += `    ctx.beginPath();\n`;
+
+    function appendCanvasContour(pts, closed, label) {
+      if (!pts || pts.length === 0) return '';
+      let cOut = `    // ${label}\n`;
+      cOut += `    ctx.moveTo(${pts[0].x.toFixed(1)}, ${pts[0].y.toFixed(1)});\n`;
+      const numPts = pts.length;
+      for (let i = 0; i < numPts; i++) {
+        const isLast = (i === numPts - 1);
+        if (isLast && !closed) break;
+        const nextIdx = (i + 1) % numPts;
+        const p1 = pts[i];
+        const p2 = pts[nextIdx];
+
+        if (p1.curve && Math.abs(p1.curve) >= 0.05) {
+          const arc = getArcForSegment(p1, p2, p1.curve);
+          if (arc) {
+            cOut += `    ctx.arc(${arc.cx.toFixed(1)}, ${arc.cy.toFixed(1)}, ${arc.r.toFixed(1)}, ${arc.startAngle.toFixed(4)}, ${arc.endAngle.toFixed(4)}, ${arc.anticlockwise}); // Arc to (${p2.x.toFixed(1)}, ${p2.y.toFixed(1)})\n`;
+          } else if (!isLast) {
+            cOut += `    ctx.lineTo(${p2.x.toFixed(1)}, ${p2.y.toFixed(1)});\n`;
+          }
+        } else if (!isLast) {
+          cOut += `    ctx.lineTo(${p2.x.toFixed(1)}, ${p2.y.toFixed(1)});\n`;
+        }
+      }
+      if (closed) {
+        cOut += `    ctx.closePath();\n`;
+      }
+      return cOut;
+    }
+
+    code += appendCanvasContour(poly.points, poly.closed, 'Outer Contour');
+    const hasCanvasHoles = !!(poly.holes && poly.holes.length > 0);
+    if (hasCanvasHoles) {
+      poly.holes.forEach((h, hIdx) => {
+        code += appendCanvasContour(h, true, `Hole ${hIdx + 1} Contour`);
+      });
+    }
+
+    if (poly.alpha > 0) {
+      code += hasCanvasHoles ? `    ctx.fill("evenodd");\n` : `    ctx.fill();\n`;
+    }
+    if (poly.strokeWidth > 0 && poly.strokeColor) {
+      code += `    ctx.stroke();\n`;
+    }
+    if (poly.blur && poly.blur > 0) {
+      code += `    ctx.filter = "none";\n`;
+    }
+    code += `\n`;
+  });
+
+  code += `    // --------------------------------------------------------\n`;
+  code += `    // FM Synth\n`;
+  code += `    // --------------------------------------------------------\n`;
+  code += `    ctx.font = "bold 20px -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Trebuchet MS', Arial, sans-serif";\n`;
+  code += `    ctx.fillStyle = "#bee400";\n`;
+  code += `    ctx.fillText("FM Synth", 58.0, 103.0);\n\n`;
+  code += `    ctx.restore();\n}\n`;
+
+  const canvasOutput = document.getElementById('canvasCodeOutput');
+  if (canvasOutput) canvasOutput.textContent = code;
+}
+
+// Copy HTML5 Canvas 2D Code
+function copyCanvasCode() {
+  updateCanvasCode();
+  const code = document.getElementById('canvasCodeOutput').textContent;
+  navigator.clipboard.writeText(code).then(() => {
+    showToast("HTML5 Canvas 2D Code Copied!");
+  });
+}
+
+document.getElementById('btnCopyCanvas').addEventListener('click', copyCanvasCode);
+document.getElementById('btnCopyCanvasInside').addEventListener('click', copyCanvasCode);
+
+// Copy C++ Code
+function copyCode() {
+  updateCode();
+  const code = document.getElementById('codeOutput').textContent;
+  navigator.clipboard.writeText(code).then(() => {
+    showToast("Blend2D C++ Code Copied!");
+  });
+}
+
+document.getElementById('btnCopyCPP').addEventListener('click', copyCode);
+document.getElementById('btnCopyCPPInside').addEventListener('click', copyCode);
+
+// Polygon Vector Studio UI Synchronization
+function syncPolyUI() {
+  const sel = document.getElementById('selActivePolygon');
+  if (!sel) return;
+
+  sel.innerHTML = '';
+  polygons.forEach((poly, idx) => {
+    const opt = document.createElement('option');
+    opt.value = idx;
+    opt.textContent = `${idx + 1}: ${poly.name} (${poly.points ? poly.points.length : 0} pts)`;
+    if (idx === activePolyIndex) opt.selected = true;
+    sel.appendChild(opt);
+  });
+
+  const cur = polygons[activePolyIndex];
+  if (!cur) return;
+
+  // Properties
+  normalizePolygon(cur);
+  document.getElementById('txtPolyName').value = cur.name;
+  document.getElementById('selPolyFillType').value = cur.fillType || 'linearGradient';
+
+  const isGrad = (cur.fillType === 'linearGradient');
+  document.getElementById('rowSolidColor').style.display = isGrad ? 'none' : 'flex';
+  document.getElementById('sectionGradient').style.display = isGrad ? 'block' : 'none';
+
+  document.getElementById('polyColor').value = cur.color || '#00aa48';
+  document.getElementById('polyColor_hex').textContent = cur.color || '#00aa48';
+
+  // Gradient inputs
+  document.getElementById('polyGradColor1').value = cur.gradColor1 || cur.color || '#00dd55';
+  document.getElementById('polyGradColor1_hex').textContent = cur.gradColor1 || cur.color || '#00dd55';
+  document.getElementById('polyGradColor2').value = cur.gradColor2 || '#00451a';
+  document.getElementById('polyGradColor2_hex').textContent = cur.gradColor2 || '#00451a';
+
+  const chkMid = document.getElementById('chkGradUseMid');
+  const wrapMid = document.getElementById('wrapGradColorMid');
+  chkMid.checked = !!cur.gradUseMid;
+  wrapMid.style.opacity = cur.gradUseMid ? '1' : '0.4';
+  wrapMid.style.pointerEvents = cur.gradUseMid ? 'auto' : 'none';
+  document.getElementById('polyGradColorMid').value = cur.gradColorMid || '#00993a';
+  document.getElementById('polyGradColorMid_hex').textContent = cur.gradColorMid || '#00993a';
+
+  document.getElementById('selGradDirection').value = detectGradDirectionPreset(cur);
+  const lblG1 = document.getElementById('lblGradG1');
+  const lblG2 = document.getElementById('lblGradG2');
+  if (lblG1 && cur.gradStart) lblG1.textContent = `${cur.gradStart.x.toFixed(1)},${cur.gradStart.y.toFixed(1)}`;
+  if (lblG2 && cur.gradEnd) lblG2.textContent = `${cur.gradEnd.x.toFixed(1)},${cur.gradEnd.y.toFixed(1)}`;
+
+  document.getElementById('rngPolyAlpha').value = cur.alpha;
+  document.getElementById('numPolyAlpha').value = cur.alpha;
+
+  // Blur (px)
+  const blurVal = (cur.blur !== undefined) ? cur.blur : 0;
+  document.getElementById('rngPolyBlur').value = blurVal;
+  document.getElementById('numPolyBlur').value = blurVal;
+
+  document.getElementById('polyStrokeColor').value = cur.strokeColor || '#00f0ff';
+  document.getElementById('polyStrokeColor_hex').textContent = cur.strokeColor || '#00f0ff';
+  document.getElementById('rngPolyStrokeWidth').value = cur.strokeWidth || 0;
+  document.getElementById('numPolyStrokeWidth').value = cur.strokeWidth || 0;
+  document.getElementById('chkPolyClosed').checked = !!cur.closed;
+
+  // Update Contour selector (Outer vs Holes)
+  const selContour = document.getElementById('selActiveContour');
+  if (selContour) {
+    selContour.innerHTML = '';
+    const optOuter = document.createElement('option');
+    optOuter.value = 'outer';
+    optOuter.textContent = `Outer Boundary (${cur.points ? cur.points.length : 0} pts)`;
+    if (activeContourType === 'outer') optOuter.selected = true;
+    selContour.appendChild(optOuter);
+
+    if (cur.holes) {
+      cur.holes.forEach((h, hIdx) => {
+        const optHole = document.createElement('option');
+        optHole.value = `hole_${hIdx}`;
+        optHole.textContent = `Hole ${hIdx + 1} (${h.length} pts)`;
+        if (activeContourType === `hole_${hIdx}`) optHole.selected = true;
+        selContour.appendChild(optHole);
+      });
+    }
+  }
+
+  const btnDelHole = document.getElementById('btnDeleteHole');
+  if (btnDelHole) {
+    btnDelHole.style.display = (activeContourType !== 'outer') ? 'inline-block' : 'none';
+  }
+
+  // Active contour points
+  const activePts = getPolyContourPoints(cur, activeContourType);
+
+  const lblVCount = document.getElementById('lblVertexCount');
+  if (lblVCount) lblVCount.textContent = activePts ? activePts.length : 0;
+
+  const curCurve = (selectedPointIndex !== null && activePts && activePts[selectedPointIndex]) ? (activePts[selectedPointIndex].curve || 0) : 0;
+  const rngCurve = document.getElementById('rngVertexCurve');
+  const numCurve = document.getElementById('numVertexCurve');
+  if (rngCurve) rngCurve.value = curCurve;
+  if (numCurve) numCurve.value = curCurve;
+
+  const tbody = document.getElementById('tblVerticesBody');
+  tbody.innerHTML = '';
+  if (activePts) {
+    activePts.forEach((pt, idx) => {
+      const tr = document.createElement('tr');
+      tr.className = `vertex-row ${idx === selectedPointIndex ? 'active' : ''}`;
+      tr.style.cssText = `cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05); ${idx === selectedPointIndex ? 'background: rgba(0, 240, 255, 0.2); font-weight: bold;' : ''}`;
+      const curveVal = pt.curve || 0;
+      tr.innerHTML = `
+        <td style="padding: 3px 6px; color: var(--text-dim);">${idx}</td>
+        <td style="padding: 2px 4px;"><input type="number" step="0.5" class="num-input pt-x" data-idx="${idx}" value="${pt.x}" style="width: 48px; padding: 2px 4px; font-size: 11px;"></td>
+        <td style="padding: 2px 4px;"><input type="number" step="0.5" class="num-input pt-y" data-idx="${idx}" value="${pt.y}" style="width: 48px; padding: 2px 4px; font-size: 11px;"></td>
+        <td style="padding: 2px 4px;"><input type="number" step="0.5" class="num-input pt-curve" data-idx="${idx}" value="${curveVal}" title="Arc curvature / sagitta height" style="width: 48px; padding: 2px 4px; font-size: 11px; color: ${curveVal !== 0 ? 'var(--accent-amber)' : 'inherit'};"></td>
+        <td style="padding: 2px 4px; text-align: center;"><button class="btn btn-delete-pt" data-idx="${idx}" style="padding: 1px 4px; font-size: 10px; color: #ff5252;">✕</button></td>
+      `;
+
+      tr.addEventListener('click', (e) => {
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON') return;
+        selectedPointIndex = idx;
+        syncPolyUI();
+        render();
+      });
+
+      tbody.appendChild(tr);
+    });
+  }
+
+  tbody.querySelectorAll('.pt-x').forEach(inp => {
+    let beforeVal = null;
+    inp.addEventListener('focus', () => { beforeVal = recordState(); });
+    inp.addEventListener('input', (e) => {
+      const idx = parseInt(e.target.dataset.idx, 10);
+      const pts = getPolyContourPoints(cur, activeContourType);
+      if (pts[idx]) pts[idx].x = parseFloat(e.target.value) || 0;
+      render();
+      updateCanvasCode();
+      updateCode();
+      savePenPolygons();
+    });
+    inp.addEventListener('change', () => {
+      if (beforeVal && beforeVal !== recordState()) {
+        undoStack.push(beforeVal);
+        redoStack = [];
+        updateUndoRedoUI();
+      }
+    });
+  });
+
+  tbody.querySelectorAll('.pt-y').forEach(inp => {
+    let beforeVal = null;
+    inp.addEventListener('focus', () => { beforeVal = recordState(); });
+    inp.addEventListener('input', (e) => {
+      const idx = parseInt(e.target.dataset.idx, 10);
+      const pts = getPolyContourPoints(cur, activeContourType);
+      if (pts[idx]) pts[idx].y = parseFloat(e.target.value) || 0;
+      render();
+      updateCanvasCode();
+      updateCode();
+      savePenPolygons();
+    });
+    inp.addEventListener('change', () => {
+      if (beforeVal && beforeVal !== recordState()) {
+        undoStack.push(beforeVal);
+        redoStack = [];
+        updateUndoRedoUI();
+      }
+    });
+  });
+
+  tbody.querySelectorAll('.pt-curve').forEach(inp => {
+    let beforeVal = null;
+    inp.addEventListener('focus', () => { beforeVal = recordState(); });
+    inp.addEventListener('input', (e) => {
+      const idx = parseInt(e.target.dataset.idx, 10);
+      const val = parseFloat(e.target.value) || 0;
+      const pts = getPolyContourPoints(cur, activeContourType);
+      if (pts[idx]) pts[idx].curve = val;
+      if (idx === selectedPointIndex) {
+        if (rngCurve) rngCurve.value = val;
+        if (numCurve) numCurve.value = val;
+      }
+      render();
+      updateCanvasCode();
+      updateCode();
+      savePenPolygons();
+    });
+    inp.addEventListener('change', () => {
+      if (beforeVal && beforeVal !== recordState()) {
+        undoStack.push(beforeVal);
+        redoStack = [];
+        updateUndoRedoUI();
+      }
+    });
+  });
+
+  tbody.querySelectorAll('.btn-delete-pt').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      pushAction();
+      const idx = parseInt(e.target.dataset.idx, 10);
+      const pts = getPolyContourPoints(cur, activeContourType);
+      pts.splice(idx, 1);
+      if (selectedPointIndex === idx) selectedPointIndex = null;
+      else if (selectedPointIndex > idx) selectedPointIndex--;
+      syncPolyUI();
+      render();
+      updateCanvasCode();
+      updateCode();
+      savePenPolygons();
+    });
+  });
+
+  updateUndoRedoUI();
+}
+
+function updatePointInputsInTable(pointIdx, x, y) {
+  const tbody = document.getElementById('tblVerticesBody');
+  if (!tbody) return;
+  const row = tbody.children[pointIdx];
+  if (!row) return;
+  const inps = row.querySelectorAll('input');
+  if (inps.length >= 2) {
+    inps[0].value = x;
+    inps[1].value = y;
+  }
+}
+
+// Shape Selection & Actions
+document.getElementById('selActivePolygon').addEventListener('change', (e) => {
+  activePolyIndex = parseInt(e.target.value, 10);
+  activeContourType = 'outer';
+  selectedPointIndex = null;
+  syncPolyUI();
+  render();
+  updateCanvasCode();
+  updateCode();
+});
+
+// Contour selection (Outer vs Holes)
+document.getElementById('selActiveContour').addEventListener('change', (e) => {
+  activeContourType = e.target.value;
+  selectedPointIndex = null;
+  syncPolyUI();
+  render();
+});
+
+document.getElementById('btnAddHole').addEventListener('click', () => {
+  pushAction();
+  const cur = polygons[activePolyIndex];
+  if (!cur.holes) cur.holes = [];
+  cur.holes.push([]);
+  activeContourType = `hole_${cur.holes.length - 1}`;
+  selectedPointIndex = null;
+  syncPolyUI();
+  render();
+  updateCanvasCode();
+  updateCode();
+  savePenPolygons();
+  showToast(`Added Hole ${cur.holes.length} (Click canvas to add hole vertices)`);
+});
+
+document.getElementById('btnDeleteHole').addEventListener('click', () => {
+  if (activeContourType === 'outer') return;
+  const cur = polygons[activePolyIndex];
+  if (!cur.holes) return;
+  const holeIdx = parseInt(activeContourType.replace('hole_', ''), 10);
+  pushAction();
+  cur.holes.splice(holeIdx, 1);
+  activeContourType = 'outer';
+  selectedPointIndex = null;
+  syncPolyUI();
+  render();
+  updateCanvasCode();
+  updateCode();
+  savePenPolygons();
+  showToast("Deleted Hole Contour");
+});
+
+document.getElementById('btnNewPolygon').addEventListener('click', () => {
+  pushAction();
+  const newIdx = polygons.length + 1;
+  polygons.push({
+    name: `Shape ${newIdx}`,
+    fillType: 'linearGradient',
+    color: '#00f0ff',
+    gradColor1: '#00f0ff',
+    gradColor2: '#003366',
+    gradUseMid: false,
+    gradColorMid: '#0088b3',
+    gradStart: { x: 30.0, y: 20.0 },
+    gradEnd: { x: 60.0, y: 60.0 },
+    alpha: 0.9,
+    strokeColor: '#ffffff',
+    strokeWidth: 1.0,
+    blur: 0,
+    closed: true,
+    points: []
+  });
+  activePolyIndex = polygons.length - 1;
+  selectedPointIndex = null;
+  syncPolyUI();
+  render();
+  updateCanvasCode();
+  updateCode();
+  savePenPolygons();
+  showToast(`Added Shape ${newIdx}`);
+});
+
+document.getElementById('btnDeletePolygon').addEventListener('click', () => {
+  if (polygons.length <= 1) {
+    alert("At least one shape must remain.");
+    return;
+  }
+  pushAction();
+  const name = polygons[activePolyIndex].name;
+  polygons.splice(activePolyIndex, 1);
+  if (activePolyIndex >= polygons.length) activePolyIndex = polygons.length - 1;
+  selectedPointIndex = null;
+  syncPolyUI();
+  render();
+  updateCanvasCode();
+  updateCode();
+  savePenPolygons();
+  showToast(`Deleted ${name}`);
+});
+
+document.getElementById('btnClearPoints').addEventListener('click', () => {
+  const cur = polygons[activePolyIndex];
+  if (cur && cur.points && cur.points.length > 0) {
+    pushAction();
+    cur.points = [];
+    selectedPointIndex = null;
+    syncPolyUI();
+    render();
+    updateCanvasCode();
+    updateCode();
+    savePenPolygons();
+    showToast("Cleared vertices");
+  }
+});
+
+document.getElementById('btnResetToCalibrated').addEventListener('click', () => {
+  if (confirm("Reset all polygons to calibrated 2004 defaults?")) {
+    pushAction();
+    polygons = getDefaultPolygons();
+    activePolyIndex = 0;
+    selectedPointIndex = null;
+    syncPolyUI();
+    render();
+    updateCanvasCode();
+    updateCode();
+    savePenPolygons();
+    showToast("Reset to Calibrated Defaults");
+  }
+});
+
+// Hook Undo / Redo buttons
+['btnUndo', 'btnUndoInside'].forEach(id => {
+  const b = document.getElementById(id);
+  if (b) b.addEventListener('click', undo);
+});
+['btnRedo', 'btnRedoInside'].forEach(id => {
+  const b = document.getElementById(id);
+  if (b) b.addEventListener('click', redo);
+});
+
+// Vertex curve slider with undo support
+const rngVertexCurve = document.getElementById('rngVertexCurve');
+const numVertexCurve = document.getElementById('numVertexCurve');
+let curveChangeStartState = null;
+if (rngVertexCurve && numVertexCurve) {
+  const onCurveStart = () => { curveChangeStartState = recordState(); };
+  const onCurveCommit = () => {
+    if (curveChangeStartState && curveChangeStartState !== recordState()) {
+      undoStack.push(curveChangeStartState);
+      redoStack = [];
+      updateUndoRedoUI();
+    }
+    curveChangeStartState = null;
+  };
+
+  rngVertexCurve.addEventListener('pointerdown', onCurveStart);
+  rngVertexCurve.addEventListener('change', onCurveCommit);
+  numVertexCurve.addEventListener('focus', onCurveStart);
+  numVertexCurve.addEventListener('change', onCurveCommit);
+
+  rngVertexCurve.addEventListener('input', (e) => {
+    const val = parseFloat(e.target.value);
+    numVertexCurve.value = val;
+    const cur = polygons[activePolyIndex];
+    const pts = getPolyContourPoints(cur, activeContourType);
+    if (cur && pts && selectedPointIndex !== null && pts[selectedPointIndex]) {
+      pts[selectedPointIndex].curve = val;
+      const inp = document.querySelector(`.pt-curve[data-idx="${selectedPointIndex}"]`);
+      if (inp) inp.value = val;
+      render();
+      updateCanvasCode();
+      updateCode();
+      savePenPolygons();
+    }
+  });
+
+  numVertexCurve.addEventListener('input', (e) => {
+    const val = parseFloat(e.target.value) || 0;
+    rngVertexCurve.value = val;
+    const cur = polygons[activePolyIndex];
+    const pts = getPolyContourPoints(cur, activeContourType);
+    if (cur && pts && selectedPointIndex !== null && pts[selectedPointIndex]) {
+      pts[selectedPointIndex].curve = val;
+      const inp = document.querySelector(`.pt-curve[data-idx="${selectedPointIndex}"]`);
+      if (inp) inp.value = val;
+      render();
+      updateCanvasCode();
+      updateCode();
+      savePenPolygons();
+    }
+  });
+}
+
+// Property change listeners with Undo support
+function bindUndoPropertyInput(elId, eventType, onInput, isImmediatePush = false) {
+  const el = document.getElementById(elId);
+  if (!el) return;
+  let startState = null;
+  el.addEventListener('focus', () => { startState = recordState(); });
+  el.addEventListener('pointerdown', () => { startState = recordState(); });
+  el.addEventListener('input', onInput);
+  el.addEventListener(eventType, () => {
+    if (isImmediatePush) pushAction();
+    else if (startState && startState !== recordState()) {
+      undoStack.push(startState);
+      redoStack = [];
+      updateUndoRedoUI();
+    }
+    startState = null;
+  });
+}
+
+bindUndoPropertyInput('txtPolyName', 'change', (e) => {
+  polygons[activePolyIndex].name = e.target.value;
+  const opt = document.getElementById('selActivePolygon').children[activePolyIndex];
+  if (opt) {
+    const p = polygons[activePolyIndex];
+    opt.textContent = `${activePolyIndex + 1}: ${e.target.value} (${p.points ? p.points.length : 0} pts)`;
+  }
+  updateCanvasCode();
+  updateCode();
+  savePenPolygons();
+});
+
+bindUndoPropertyInput('polyColor', 'change', (e) => {
+  polygons[activePolyIndex].color = e.target.value;
+  document.getElementById('polyColor_hex').textContent = e.target.value;
+  render();
+  updateCanvasCode();
+  updateCode();
+  savePenPolygons();
+});
+
+// Fill Type selector
+document.getElementById('selPolyFillType').addEventListener('change', (e) => {
+  pushAction();
+  polygons[activePolyIndex].fillType = e.target.value;
+  syncPolyUI();
+  render();
+  updateCanvasCode();
+  updateCode();
+  savePenPolygons();
+});
+
+// Gradient Direction Presets
+document.getElementById('selGradDirection').addEventListener('change', (e) => {
+  if (e.target.value !== 'custom') {
+    pushAction();
+    applyGradDirectionPreset(e.target.value, polygons[activePolyIndex]);
+    syncPolyUI();
+    render();
+    updateCanvasCode();
+    updateCode();
+    savePenPolygons();
+  }
+});
+
+// Fit Gradient to Shape Bounds
+document.getElementById('btnFitGradToShape').addEventListener('click', () => {
+  pushAction();
+  applyGradDirectionPreset('topDown', polygons[activePolyIndex]);
+  syncPolyUI();
+  render();
+  updateCanvasCode();
+  updateCode();
+  savePenPolygons();
+  showToast("Gradient fit to shape bounds");
+});
+
+// Gradient Color Inputs with Undo
+bindUndoPropertyInput('polyGradColor1', 'change', (e) => {
+  polygons[activePolyIndex].gradColor1 = e.target.value;
+  document.getElementById('polyGradColor1_hex').textContent = e.target.value;
+  render();
+  updateCanvasCode();
+  updateCode();
+  savePenPolygons();
+});
+
+bindUndoPropertyInput('polyGradColor2', 'change', (e) => {
+  polygons[activePolyIndex].gradColor2 = e.target.value;
+  document.getElementById('polyGradColor2_hex').textContent = e.target.value;
+  render();
+  updateCanvasCode();
+  updateCode();
+  savePenPolygons();
+});
+
+bindUndoPropertyInput('polyGradColorMid', 'change', (e) => {
+  polygons[activePolyIndex].gradColorMid = e.target.value;
+  document.getElementById('polyGradColorMid_hex').textContent = e.target.value;
+  render();
+  updateCanvasCode();
+  updateCode();
+  savePenPolygons();
+});
+
+document.getElementById('chkGradUseMid').addEventListener('change', (e) => {
+  pushAction();
+  polygons[activePolyIndex].gradUseMid = e.target.checked;
+  syncPolyUI();
+  render();
+  updateCanvasCode();
+  updateCode();
+  savePenPolygons();
+});
+
+const rngPolyAlpha = document.getElementById('rngPolyAlpha');
+const numPolyAlpha = document.getElementById('numPolyAlpha');
+bindUndoPropertyInput('rngPolyAlpha', 'change', (e) => {
+  const val = parseFloat(e.target.value);
+  polygons[activePolyIndex].alpha = val;
+  numPolyAlpha.value = val;
+  render();
+  updateCanvasCode();
+  updateCode();
+  savePenPolygons();
+});
+bindUndoPropertyInput('numPolyAlpha', 'change', (e) => {
+  const val = parseFloat(e.target.value) || 0;
+  polygons[activePolyIndex].alpha = val;
+  rngPolyAlpha.value = val;
+  render();
+  updateCanvasCode();
+  updateCode();
+  savePenPolygons();
+});
+
+const rngPolyBlur = document.getElementById('rngPolyBlur');
+const numPolyBlur = document.getElementById('numPolyBlur');
+bindUndoPropertyInput('rngPolyBlur', 'change', (e) => {
+  const val = parseFloat(e.target.value);
+  polygons[activePolyIndex].blur = val;
+  numPolyBlur.value = val;
+  render();
+  updateCanvasCode();
+  updateCode();
+  savePenPolygons();
+});
+bindUndoPropertyInput('numPolyBlur', 'change', (e) => {
+  const val = parseFloat(e.target.value) || 0;
+  polygons[activePolyIndex].blur = val;
+  rngPolyBlur.value = val;
+  render();
+  updateCanvasCode();
+  updateCode();
+  savePenPolygons();
+});
+
+bindUndoPropertyInput('polyStrokeColor', 'change', (e) => {
+  polygons[activePolyIndex].strokeColor = e.target.value;
+  document.getElementById('polyStrokeColor_hex').textContent = e.target.value;
+  render();
+  updateCanvasCode();
+  updateCode();
+  savePenPolygons();
+});
+
+const rngPolyStrokeWidth = document.getElementById('rngPolyStrokeWidth');
+const numPolyStrokeWidth = document.getElementById('numPolyStrokeWidth');
+bindUndoPropertyInput('rngPolyStrokeWidth', 'change', (e) => {
+  const val = parseFloat(e.target.value);
+  polygons[activePolyIndex].strokeWidth = val;
+  numPolyStrokeWidth.value = val;
+  render();
+  updateCanvasCode();
+  updateCode();
+  savePenPolygons();
+});
+bindUndoPropertyInput('numPolyStrokeWidth', 'change', (e) => {
+  const val = parseFloat(e.target.value) || 0;
+  polygons[activePolyIndex].strokeWidth = val;
+  rngPolyStrokeWidth.value = val;
+  render();
+  updateCanvasCode();
+  updateCode();
+  savePenPolygons();
+});
+
+document.getElementById('chkPolyClosed').addEventListener('change', (e) => {
+  pushAction();
+  polygons[activePolyIndex].closed = e.target.checked;
+  render();
+  updateCanvasCode();
+  updateCode();
+  savePenPolygons();
+});
+
+// Coordinate snap helper
+function snapCoord(val) {
+  const snap = parseFloat(document.getElementById('selPolySnap').value);
+  if (snap > 0) {
+    return Math.round(val / snap) * snap;
+  }
+  return Math.round(val * 10) / 10;
+}
+
+function getMouseCanvasPos(e) {
+  const rect = canvasRight.getBoundingClientRect();
+  const isSynth = (selViewMode.value === 'synthPreview');
+  const baseW = isSynth ? 320 : 148;
+  const baseH = isSynth ? 120 : 110;
+  const rawX = (e.clientX - rect.left) / (rect.width / baseW);
+  const rawY = (e.clientY - rect.top) / (rect.height / baseH);
+  return {
+    rawX,
+    rawY,
+    x: snapCoord(rawX),
+    y: snapCoord(rawY)
+  };
+}
+
+function findCurveApexNear(rawX, rawY, cur) {
+  if (!cur) return null;
+  const threshold = Math.max(4.0, 7.5 / Math.sqrt(currentZoomFactor));
+
+  function checkContour(pts, cType, isClosed) {
+    if (!pts || pts.length < 2) return null;
+    const isEditingThisContour = (activeContourType === cType);
+    const numPts = pts.length;
+    for (let i = 0; i < numPts; i++) {
+      const isLast = (i === numPts - 1);
+      if (isLast && !isClosed) break;
+      const nextIdx = (i + 1) % numPts;
+      const p1 = pts[i];
+      const p2 = pts[nextIdx];
+      const curve = p1.curve || 0;
+      if (Math.abs(curve) >= 0.05 || (isEditingThisContour && i === selectedPointIndex)) {
+        const dx = p2.x - p1.x;
+        const dy = p2.y - p1.y;
+        const len = Math.hypot(dx, dy);
+        if (len > 0.1) {
+          const nx = -dy / len;
+          const ny = dx / len;
+          const mx = (p1.x + p2.x) / 2 + nx * curve;
+          const my = (p1.y + p2.y) / 2 + ny * curve;
+          if (Math.hypot(rawX - mx, rawY - my) <= threshold) {
+            return { contourType: cType, pointIdx: i, p1, p2, len, nx, ny };
+          }
+        }
+      }
+    }
+    return null;
+  }
+
+  // Check active contour first, then others
+  const curHit = checkContour(getPolyContourPoints(cur, activeContourType), activeContourType, activeContourType === 'outer' ? cur.closed : true);
+  if (curHit) return curHit;
+
+  if (activeContourType !== 'outer') {
+    const outerHit = checkContour(cur.points, 'outer', cur.closed);
+    if (outerHit) return outerHit;
+  }
+  if (cur.holes) {
+    for (let h = 0; h < cur.holes.length; h++) {
+      if (activeContourType !== `hole_${h}`) {
+        const hHit = checkContour(cur.holes[h], `hole_${h}`, true);
+        if (hHit) return hHit;
+      }
+    }
+  }
+  return null;
+}
+
+function findGradientHandleNear(rawX, rawY, poly) {
+  if (!poly || poly.fillType !== 'linearGradient' || !poly.gradStart || !poly.gradEnd) return null;
+  const threshold = Math.max(5.0, 8.5 / Math.sqrt(currentZoomFactor));
+  if (Math.hypot(rawX - poly.gradStart.x, rawY - poly.gradStart.y) <= threshold) {
+    return 'start';
+  }
+  if (Math.hypot(rawX - poly.gradEnd.x, rawY - poly.gradEnd.y) <= threshold) {
+    return 'end';
+  }
+  return null;
+}
+
+function findVertexNear(rawX, rawY) {
+  const threshold = Math.max(3.5, 6.5 / Math.sqrt(currentZoomFactor));
+
+  // Check active polygon active contour vertices first
+  const curPoly = polygons[activePolyIndex];
+  if (curPoly) {
+    const pts = getPolyContourPoints(curPoly, activeContourType);
+    for (let i = 0; i < pts.length; i++) {
+      if (Math.hypot(rawX - pts[i].x, rawY - pts[i].y) <= threshold) {
+        return { polyIdx: activePolyIndex, contourType: activeContourType, pointIdx: i };
+      }
+    }
+    // Check other contours of active polygon
+    if (activeContourType !== 'outer' && curPoly.points) {
+      for (let i = 0; i < curPoly.points.length; i++) {
+        if (Math.hypot(rawX - curPoly.points[i].x, rawY - curPoly.points[i].y) <= threshold) {
+          return { polyIdx: activePolyIndex, contourType: 'outer', pointIdx: i };
+        }
+      }
+    }
+    if (curPoly.holes) {
+      for (let h = 0; h < curPoly.holes.length; h++) {
+        if (activeContourType !== `hole_${h}`) {
+          const hPts = curPoly.holes[h];
+          for (let i = 0; i < hPts.length; i++) {
+            if (Math.hypot(rawX - hPts[i].x, rawY - hPts[i].y) <= threshold) {
+              return { polyIdx: activePolyIndex, contourType: `hole_${h}`, pointIdx: i };
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // Check other polygons
+  for (let p = 0; p < polygons.length; p++) {
+    if (p === activePolyIndex || !polygons[p].points) continue;
+    const pts = polygons[p].points;
+    for (let i = 0; i < pts.length; i++) {
+      if (Math.hypot(rawX - pts[i].x, rawY - pts[i].y) <= threshold) {
+        return { polyIdx: p, pointIdx: i };
+      }
+    }
+  }
+  return null;
+}
+
+// Canvas Mouse Interactions with Undo support
+canvasRight.addEventListener('mousedown', (e) => {
+  const { rawX, rawY, x, y } = getMouseCanvasPos(e);
+  const cur = polygons[activePolyIndex];
+
+  // 0. Check gradient handle hits (G1 start / G2 end pins)
+  if (cur && cur.fillType === 'linearGradient') {
+    const gradHit = findGradientHandleNear(rawX, rawY, cur);
+    if (gradHit) {
+      dragActionStartState = recordState();
+      draggingGradHandle = { handle: gradHit };
+      return;
+    }
+  }
+
+  // 1. Check curve apex diamond handle hit
+  if (cur) {
+    const curveHit = findCurveApexNear(rawX, rawY, cur);
+    if (curveHit) {
+      dragActionStartState = recordState();
+      selectedPointIndex = curveHit.pointIdx;
+      draggingCurveApex = curveHit;
+      syncPolyUI();
+      render();
+      updateCanvasCode();
+      updateCode();
+      return;
+    }
+  }
+
+  // 2. Check vertex hit across all polygons
+  const hit = findVertexNear(rawX, rawY);
+
+  // Alt + Click or Option + Click: delete clicked vertex
+  if (e.altKey && hit) {
+    pushAction();
+    polygons[hit.polyIdx].points.splice(hit.pointIdx, 1);
+    selectedPointIndex = null;
+    syncPolyUI();
+    render();
+    updateCanvasCode();
+    updateCode();
+    savePenPolygons();
+    return;
+  }
+
+  if (hit) {
+    dragActionStartState = recordState();
+    activePolyIndex = hit.polyIdx;
+    if (hit.contourType) activeContourType = hit.contourType;
+    selectedPointIndex = hit.pointIdx;
+    draggingPenPoint = hit;
+    syncPolyUI();
+    render();
+    updateCanvasCode();
+    updateCode();
+    return;
+  }
+
+  // 3. Check if clicked near first point of active polygon to close it
+  if (cur && cur.points && cur.points.length >= 3 && !cur.closed) {
+    const p0 = cur.points[0];
+    const threshold = Math.max(4.0, 7.5 / Math.sqrt(currentZoomFactor));
+    if (Math.hypot(rawX - p0.x, rawY - p0.y) <= threshold) {
+      pushAction();
+      cur.closed = true;
+      document.getElementById('chkPolyClosed').checked = true;
+      render();
+      updateCanvasCode();
+      updateCode();
+      savePenPolygons();
+      showToast("Closed Shape Path");
+      return;
+    }
+  }
+
+  // 4. Otherwise add new point to active polygon's active contour
+  if (cur) {
+    pushAction();
+    const pts = getPolyContourPoints(cur, activeContourType);
+    pts.push({ x, y, curve: 0 });
+    selectedPointIndex = pts.length - 1;
+    dragActionStartState = recordState();
+    draggingPenPoint = { polyIdx: activePolyIndex, contourType: activeContourType, pointIdx: selectedPointIndex };
+    syncPolyUI();
+    render();
+    updateCanvasCode();
+    updateCode();
+    savePenPolygons();
+  }
+});
+
+window.addEventListener('mousemove', (e) => {
+  if (draggingGradHandle) {
+    const { rawX, rawY } = getMouseCanvasPos(e);
+    const snapX = snapCoord(rawX);
+    const snapY = snapCoord(rawY);
+    const cur = polygons[activePolyIndex];
+    if (cur) {
+      if (draggingGradHandle.handle === 'start') {
+        cur.gradStart = { x: snapX, y: snapY };
+      } else {
+        cur.gradEnd = { x: snapX, y: snapY };
+      }
+      const selDir = document.getElementById('selGradDirection');
+      if (selDir) selDir.value = detectGradDirectionPreset(cur);
+      const lblG1 = document.getElementById('lblGradG1');
+      const lblG2 = document.getElementById('lblGradG2');
+      if (lblG1 && cur.gradStart) lblG1.textContent = `${cur.gradStart.x.toFixed(1)},${cur.gradStart.y.toFixed(1)}`;
+      if (lblG2 && cur.gradEnd) lblG2.textContent = `${cur.gradEnd.x.toFixed(1)},${cur.gradEnd.y.toFixed(1)}`;
+      canvasRight.style.cursor = 'grabbing';
+      render();
+      updateCanvasCode();
+      updateCode();
+    }
+  } else if (draggingCurveApex) {
+    const { rawX, rawY } = getMouseCanvasPos(e);
+    const p1 = draggingCurveApex.p1;
+    const p2 = draggingCurveApex.p2;
+    const mx = (p1.x + p2.x) / 2;
+    const my = (p1.y + p2.y) / 2;
+    const dist = (rawX - mx) * draggingCurveApex.nx + (rawY - my) * draggingCurveApex.ny;
+    const curveVal = snapCoord(dist);
+    const cPts = getPolyContourPoints(polygons[activePolyIndex], draggingCurveApex.contourType || activeContourType);
+    if (cPts[draggingCurveApex.pointIdx]) cPts[draggingCurveApex.pointIdx].curve = curveVal;
+    const numInp = document.getElementById('numVertexCurve');
+    const rngInp = document.getElementById('rngVertexCurve');
+    if (numInp) numInp.value = curveVal;
+    if (rngInp) rngInp.value = curveVal;
+    render();
+    updateCanvasCode();
+    updateCode();
+  } else if (draggingPenPoint) {
+    const { x, y } = getMouseCanvasPos(e);
+    const pts = getPolyContourPoints(polygons[draggingPenPoint.polyIdx], draggingPenPoint.contourType || activeContourType);
+    const pt = pts[draggingPenPoint.pointIdx];
+    if (pt) {
+      pt.x = x;
+      pt.y = y;
+      updatePointInputsInTable(draggingPenPoint.pointIdx, x, y);
+      render();
+      updateCanvasCode();
+      updateCode();
+    }
+  } else {
+    const rect = canvasRight.getBoundingClientRect();
+    if (e.clientX >= rect.left && e.clientX <= rect.right && e.clientY >= rect.top && e.clientY <= rect.bottom) {
+      const { rawX, rawY } = getMouseCanvasPos(e);
+      const cur = polygons[activePolyIndex];
+      const gradHit = cur ? findGradientHandleNear(rawX, rawY, cur) : null;
+      const curveHit = cur ? findCurveApexNear(rawX, rawY, cur) : null;
+      const hit = findVertexNear(rawX, rawY);
+      if (gradHit) {
+        canvasRight.style.cursor = 'grab';
+      } else if (curveHit || hit) {
+        canvasRight.style.cursor = 'move';
+      } else {
+        canvasRight.style.cursor = 'crosshair';
+      }
+    } else {
+      canvasRight.style.cursor = 'default';
+    }
+  }
+});
+
+window.addEventListener('mouseup', () => {
+  if (draggingGradHandle || draggingCurveApex || draggingPenPoint) {
+    if (dragActionStartState && dragActionStartState !== recordState()) {
+      undoStack.push(dragActionStartState);
+      if (undoStack.length > MAX_HISTORY) undoStack.shift();
+      redoStack = [];
+      updateUndoRedoUI();
+    }
+    dragActionStartState = null;
+    draggingGradHandle = null;
+    draggingCurveApex = null;
+    draggingPenPoint = null;
+    savePenPolygons();
+    syncPolyUI();
+    updateCode();
+    updateCanvasCode();
+  }
+});
+
+// Global Keyboard Shortcuts (Undo, Redo, Delete)
+window.addEventListener('keydown', (e) => {
+  const tag = (e.target && e.target.tagName) ? e.target.tagName.toUpperCase() : '';
+  const isInput = (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT');
+
+  const isCtrlOrCmd = (e.ctrlKey || e.metaKey);
+  if (isCtrlOrCmd) {
+    if (e.key.toLowerCase() === 'z' && !e.shiftKey) {
+      if (!isInput) {
+        e.preventDefault();
+        undo();
+        return;
+      }
+    } else if ((e.key.toLowerCase() === 'z' && e.shiftKey) || e.key.toLowerCase() === 'y') {
+      if (!isInput) {
+        e.preventDefault();
+        redo();
+        return;
+      }
+    }
+  }
+
+  if (isInput) return;
+
+  if (e.key === 'Delete' || e.key === 'Backspace') {
+    const poly = polygons[activePolyIndex];
+    if (poly && selectedPointIndex !== null && selectedPointIndex >= 0 && selectedPointIndex < poly.points.length) {
+      e.preventDefault();
+      pushAction();
+      poly.points.splice(selectedPointIndex, 1);
+      selectedPointIndex = null;
+      syncPolyUI();
+      render();
+      updateCanvasCode();
+      updateCode();
+      savePenPolygons();
+      showToast("Deleted Vertex");
+    }
+  }
+});
+
+// JSON Export / Import (Exports Vectors: Arc Rings & Polygons)
+document.getElementById('btnExportJSON').addEventListener('click', () => {
+  const payload = {
+    polygons: polygons
+  };
+  const str = JSON.stringify(payload, null, 2);
+  const blob = new Blob([str], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'oxe_logo_vectors.json';
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast("Exported oxe_logo_vectors.json");
+});
+
+const fileInputJSON = document.getElementById('fileInputJSON');
+document.getElementById('btnImportJSON').addEventListener('click', () => {
+  fileInputJSON.click();
+});
+
+fileInputJSON.addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (evt) => {
+    try {
+      pushAction();
+      const imported = JSON.parse(evt.target.result);
+      if (imported.polygons && Array.isArray(imported.polygons)) {
+        polygons = imported.polygons.map(normalizePolygon);
+      } else if (Array.isArray(imported)) {
+        polygons = imported.map(normalizePolygon);
+      }
+      activePolyIndex = 0;
+      selectedPointIndex = null;
+      savePenPolygons();
+      syncPolyUI();
+      render();
+      updateCode();
+      updateCanvasCode();
+      showToast("Imported Vector JSON");
+    } catch (err) {
+      alert("Invalid JSON file");
+    }
+  };
+  reader.readAsText(file);
+});
+
+// Toast helper
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+// Initial boot
+origImg.onload = () => {
+  updateZoom();
+  syncPolyUI();
+  render();
+  updateCode();
+  updateCanvasCode();
+};
+if (origImg.complete) {
+  updateZoom();
+  syncPolyUI();
+  render();
+  updateCode();
+  updateCanvasCode();
+}
+</script>
+</body>
+</html>

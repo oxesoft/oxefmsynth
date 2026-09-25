@@ -17,69 +17,19 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #import <Cocoa/Cocoa.h>
+#include <blend2d/blend2d.h>
 #include "editor.h"
 #include "cocoatoolkit.h"
-#include "bitmaps.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
-#ifndef __USE_GNU
-#define __USE_GNU
-#endif
-#include <dlfcn.h>
-#ifndef PATH_MAX
-#define PATH_MAX 512
-#endif
-
-typedef struct __attribute__((packed))
-{
-    char         signature[2];
-    unsigned int fileSize;
-    short        reserved[2];
-    unsigned int fileOffsetToPixelArray;
-} BITMAPFILEHEADER;
-
-typedef struct __attribute__((packed))
-{
-    unsigned int   dibHeaderSize;
-    unsigned int   width;
-    unsigned int   height;
-    unsigned short planes;
-    unsigned short bitsPerPixel;
-    unsigned int   compression;
-    unsigned int   imageSize;
-} BITMAPV5HEADER;
-
-typedef struct
-{
-    BITMAPFILEHEADER fh;
-    BITMAPV5HEADER   v5;
-} BITMAPHEADER;
-
-static void GetResourcesPath(char *path, int size)
-{
-    Dl_info info;
-    dladdr((void*)GetResourcesPath, &info);
-    strncpy(path, info.dli_fname, size);
-    char* tmp = strrchr(path, '/');
-    if (tmp) *tmp = 0;
-    strncat(path, "/../../../" BMP_PATH "/", size - strlen(path) - 1);
-}
-
-struct OxeBitmap
-{
-    int width;
-    int height;
-    uint32_t *pixels;
-};
+#include <math.h>
 
 @interface PluginView : NSView
 {
-    CCocoaToolkit*  toolkit;
-    CGContextRef    bitmapContext;
-    CGColorSpaceRef colorSpace;
+    CCocoaToolkit* toolkit;
+    BLImage        blImage;
 }
-- (id)   initWithToolkit:(CCocoaToolkit*)toolkitPtr pixels:(uint32_t*)pixels size:(NSSize)size;
+- (id)   initWithToolkit:(CCocoaToolkit*)toolkitPtr size:(NSSize)size;
 - (void) clearToolkit;
 - (void) viewDidMoveToWindow;
 - (void) mouseDown:(NSEvent *)event;
@@ -90,9 +40,13 @@ struct OxeBitmap
 - (void) keyDown:(NSEvent *)event;
 - (BOOL) acceptsFirstResponder;
 - (BOOL) isOpaque;
+- (NSMenu *) menuForEvent:(NSEvent *)event;
+- (void) scale100:(id)sender;
+- (void) scale150:(id)sender;
+- (void) scale200:(id)sender;
 @end
 
-@interface CocoaWindowController : NSObject <NSApplicationDelegate>
+@interface CocoaWindowController : NSObject <NSApplicationDelegate, NSWindowDelegate>
 {
     CCocoaToolkit*     toolkit;
     NSView*            parentView;
@@ -107,22 +61,25 @@ struct OxeBitmap
 - (void) closeWindow;
 - (void) waitWindowClosed;
 - (void) update;
+- (void) invalidate;
 - (void) invalidateRect:(NSRect)rect;
+- (void) resizeToWidth:(int)w height:(int)h;
+- (void) scale100:(id)sender;
+- (void) scale150:(id)sender;
+- (void) scale200:(id)sender;
 @end
 
 struct CCocoaToolkitImpl
 {
     CocoaWindowController *controller;
     PluginView            *view;
-    OxeBitmap             bmps[BMP_COUNT];
-    uint32_t              *screenPixels;
 };
 
 //----------------------------------------------------------------------
 
 @implementation PluginView
 
-- (id) initWithToolkit:(CCocoaToolkit*)toolkitPtr pixels:(uint32_t*)pixels size:(NSSize)size
+- (id) initWithToolkit:(CCocoaToolkit*)toolkitPtr size:(NSSize)size
 {
     NSRect frame = NSMakeRect(0, 0, size.width, size.height);
     self = [super initWithFrame:frame];
@@ -131,17 +88,6 @@ struct CCocoaToolkitImpl
         toolkit = toolkitPtr;
         [self setWantsLayer:YES];
         [self setLayerContentsRedrawPolicy:NSViewLayerContentsRedrawOnSetNeedsDisplay];
-
-        colorSpace = CGColorSpaceCreateDeviceRGB();
-        bitmapContext = CGBitmapContextCreate(
-            pixels,
-            GUI_WIDTH,
-            GUI_HEIGHT,
-            8,
-            GUI_WIDTH * sizeof(uint32_t),
-            colorSpace,
-            kCGImageAlphaNoneSkipLast | kCGBitmapByteOrder32Big
-        );
     }
     return self;
 }
@@ -153,38 +99,71 @@ struct CCocoaToolkitImpl
 
 - (void) dealloc
 {
-    if (bitmapContext)
-    {
-        CGContextRelease(bitmapContext);
-        bitmapContext = NULL;
-    }
-    if (colorSpace)
-    {
-        CGColorSpaceRelease(colorSpace);
-        colorSpace = NULL;
-    }
+    blImage.reset();
     [super dealloc];
 }
 
 - (void) drawRect:(NSRect)dirtyRect
 {
-    if (!toolkit || !bitmapContext)
+    if (!toolkit || !toolkit->editor)
     {
         return;
     }
-    CGImageRef image = CGBitmapContextCreateImage(bitmapContext);
-    if (image)
+
+    NSRect bounds = [self bounds];
+    CGFloat backingScale = [self window] ? [[self window] backingScaleFactor] : 1.0;
+    if (backingScale < 1.0) backingScale = 1.0;
+
+    int pixelW = (int)ceil(bounds.size.width * backingScale);
+    int pixelH = (int)ceil(bounds.size.height * backingScale);
+    if (pixelW <= 0 || pixelH <= 0) return;
+
+    if (blImage.width() != pixelW || blImage.height() != pixelH)
     {
-        CGContextRef context = [[NSGraphicsContext currentContext] CGContext];
-        CGContextSetInterpolationQuality(context, kCGInterpolationNone);
-        CGContextDrawImage(context, CGRectMake(0, 0, GUI_WIDTH, GUI_HEIGHT), image);
-        CGImageRelease(image);
+        blImage.create(pixelW, pixelH, BL_FORMAT_PRGB32);
     }
+
+    BLContext ctx(blImage);
+    ctx.clear_all();
+
+    double scaleX = (double)pixelW / (double)GUI_WIDTH;
+    double scaleY = (double)pixelH / (double)GUI_HEIGHT;
+    ctx.scale(scaleX, scaleY);
+
+    toolkit->editor->Paint(ctx);
+    ctx.end();
+
+    BLImageData imgData;
+    blImage.get_data(&imgData);
+
+    CGDataProviderRef provider = CGDataProviderCreateWithData(NULL, imgData.pixel_data, imgData.stride * pixelH, NULL);
+    CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
+    CGImageRef cgImage = CGImageCreate(
+        pixelW,
+        pixelH,
+        8,
+        32,
+        imgData.stride,
+        colorSpace,
+        kCGImageAlphaPremultipliedFirst | kCGBitmapByteOrder32Little,
+        provider,
+        NULL,
+        false,
+        kCGRenderingIntentDefault
+    );
+
+    CGContextRef cgContext = [[NSGraphicsContext currentContext] CGContext];
+    CGContextSetInterpolationQuality(cgContext, kCGInterpolationHigh);
+    CGContextDrawImage(cgContext, NSRectToCGRect(bounds), cgImage);
+
+    CGImageRelease(cgImage);
+    CGColorSpaceRelease(colorSpace);
+    CGDataProviderRelease(provider);
 }
 
 - (void) viewDidMoveToWindow
 {
-    [self addTrackingRect:NSMakeRect(0, 0, GUI_WIDTH, GUI_HEIGHT) owner:self userData:NULL assumeInside:NO];
+    [self addTrackingRect:[self bounds] owner:self userData:NULL assumeInside:NO];
 }
 
 - (BOOL) isOpaque
@@ -208,7 +187,12 @@ struct CCocoaToolkitImpl
 {
     if (!toolkit || !toolkit->editor) return;
     NSPoint loc = [self convertPoint:[event locationInWindow] fromView:nil];
-    toolkit->editor->OnLButtonDown((int)loc.x, GUI_HEIGHT - (int)loc.y);
+    NSRect bounds = [self bounds];
+    float sx = bounds.size.width / (float)GUI_WIDTH;
+    float sy = bounds.size.height / (float)GUI_HEIGHT;
+    int x = (int)(loc.x / sx);
+    int y = GUI_HEIGHT - (int)(loc.y / sy);
+    toolkit->editor->OnLButtonDown(x, y);
 }
 
 - (void) mouseUp:(NSEvent *)event
@@ -218,7 +202,12 @@ struct CCocoaToolkitImpl
     if ([event clickCount] == 2)
     {
         NSPoint loc = [self convertPoint:[event locationInWindow] fromView:nil];
-        toolkit->editor->OnLButtonDblClick((int)loc.x, GUI_HEIGHT - (int)loc.y);
+        NSRect bounds = [self bounds];
+        float sx = bounds.size.width / (float)GUI_WIDTH;
+        float sy = bounds.size.height / (float)GUI_HEIGHT;
+        int x = (int)(loc.x / sx);
+        int y = GUI_HEIGHT - (int)(loc.y / sy);
+        toolkit->editor->OnLButtonDblClick(x, y);
     }
 }
 
@@ -226,24 +215,39 @@ struct CCocoaToolkitImpl
 {
     if (!toolkit || !toolkit->editor) return;
     NSPoint loc = [self convertPoint:[event locationInWindow] fromView:nil];
-    toolkit->editor->OnMouseMove((int)loc.x, GUI_HEIGHT - (int)loc.y);
+    NSRect bounds = [self bounds];
+    float sx = bounds.size.width / (float)GUI_WIDTH;
+    float sy = bounds.size.height / (float)GUI_HEIGHT;
+    int x = (int)(loc.x / sx);
+    int y = GUI_HEIGHT - (int)(loc.y / sy);
+    toolkit->editor->OnMouseMove(x, y);
 }
 
 - (void) mouseDragged:(NSEvent *)event
 {
     if (!toolkit || !toolkit->editor) return;
     NSPoint loc = [self convertPoint:[event locationInWindow] fromView:nil];
-    toolkit->editor->OnMouseMove((int)loc.x, GUI_HEIGHT - (int)loc.y);
+    NSRect bounds = [self bounds];
+    float sx = bounds.size.width / (float)GUI_WIDTH;
+    float sy = bounds.size.height / (float)GUI_HEIGHT;
+    int x = (int)(loc.x / sx);
+    int y = GUI_HEIGHT - (int)(loc.y / sy);
+    toolkit->editor->OnMouseMove(x, y);
 }
 
 - (void) scrollWheel:(NSEvent *)event
 {
     if (!toolkit || !toolkit->editor) return;
     NSPoint loc = [self convertPoint:[event locationInWindow] fromView:nil];
+    NSRect bounds = [self bounds];
+    float sx = bounds.size.width / (float)GUI_WIDTH;
+    float sy = bounds.size.height / (float)GUI_HEIGHT;
+    int x = (int)(loc.x / sx);
+    int y = GUI_HEIGHT - (int)(loc.y / sy);
     CGFloat delta = [event deltaY];
     if (delta != 0.0)
     {
-        toolkit->editor->OnMouseWheel((int)loc.x, GUI_HEIGHT - (int)loc.y, delta > 0.0 ? 1 : -1);
+        toolkit->editor->OnMouseWheel(x, y, delta > 0.0 ? 1 : -1);
     }
 }
 
@@ -255,6 +259,37 @@ struct CCocoaToolkitImpl
     {
         toolkit->editor->OnChar((int)c[0]);
     }
+}
+
+- (NSMenu *) menuForEvent:(NSEvent *)event
+{
+    if ([event type] == NSEventTypeRightMouseDown)
+    {
+        NSMenu *menu = [[[NSMenu alloc] initWithTitle:@"Zoom"] autorelease];
+        NSMenuItem *i100 = [menu addItemWithTitle:@"Scale 100% (950 × 656)" action:@selector(scale100:) keyEquivalent:@"1"];
+        [i100 setTarget:self];
+        NSMenuItem *i150 = [menu addItemWithTitle:@"Scale 150% (1425 × 984)" action:@selector(scale150:) keyEquivalent:@"2"];
+        [i150 setTarget:self];
+        NSMenuItem *i200 = [menu addItemWithTitle:@"Scale 200% (1900 × 1312)" action:@selector(scale200:) keyEquivalent:@"3"];
+        [i200 setTarget:self];
+        return menu;
+    }
+    return [super menuForEvent:event];
+}
+
+- (void) scale100:(id)sender
+{
+    if (toolkit) toolkit->Resize(GUI_WIDTH, GUI_HEIGHT);
+}
+
+- (void) scale150:(id)sender
+{
+    if (toolkit) toolkit->Resize((int)(GUI_WIDTH * 1.5), (int)(GUI_HEIGHT * 1.5));
+}
+
+- (void) scale200:(id)sender
+{
+    if (toolkit) toolkit->Resize(GUI_WIDTH * 2, GUI_HEIGHT * 2);
 }
 
 @end
@@ -278,14 +313,37 @@ struct CCocoaToolkitImpl
             NSRect rect = NSMakeRect(0, 0, GUI_WIDTH, GUI_HEIGHT);
             window = [[NSWindow alloc]
                 initWithContentRect: rect
-                styleMask: NSWindowStyleMaskClosable | NSWindowStyleMaskTitled
+                styleMask: NSWindowStyleMaskClosable | NSWindowStyleMaskTitled | NSWindowStyleMaskResizable
                 backing: NSBackingStoreBuffered
                 defer: NO
             ];
+            [window setContentAspectRatio:NSMakeSize(GUI_WIDTH, GUI_HEIGHT)];
+            [window setMinSize:NSMakeSize(475, 328)];
             [window setTitle:@TITLE_FULL];
             [window center];
             [window setContentView: view];
+            [window setDelegate:self];
             [NSApp setDelegate:self];
+
+            NSMenu *mainMenu = [[[NSMenu alloc] init] autorelease];
+            NSMenuItem *appMenuItem = [[[NSMenuItem alloc] init] autorelease];
+            [mainMenu addItem:appMenuItem];
+            NSMenu *appMenu = [[[NSMenu alloc] initWithTitle:@"App"] autorelease];
+            [appMenu addItemWithTitle:@"Quit Oxe FM Synth" action:@selector(terminate:) keyEquivalent:@"q"];
+            [appMenuItem setSubmenu:appMenu];
+
+            NSMenuItem *viewMenuItem = [[[NSMenuItem alloc] init] autorelease];
+            [mainMenu addItem:viewMenuItem];
+            NSMenu *viewMenu = [[[NSMenu alloc] initWithTitle:@"View"] autorelease];
+            NSMenuItem *mi100 = [viewMenu addItemWithTitle:@"Scale 100% (950 × 656)" action:@selector(scale100:) keyEquivalent:@"1"];
+            [mi100 setTarget:self];
+            NSMenuItem *mi150 = [viewMenu addItemWithTitle:@"Scale 150% (1425 × 984)" action:@selector(scale150:) keyEquivalent:@"2"];
+            [mi150 setTarget:self];
+            NSMenuItem *mi200 = [viewMenu addItemWithTitle:@"Scale 200% (1900 × 1312)" action:@selector(scale200:) keyEquivalent:@"3"];
+            [mi200 setTarget:self];
+            [viewMenuItem setSubmenu:viewMenu];
+
+            [NSApp setMainMenu:mainMenu];
         }
         else
         {
@@ -294,6 +352,16 @@ struct CCocoaToolkitImpl
         }
     }
     return self;
+}
+
+- (void) windowDidResize:(NSNotification *)notification
+{
+    if (window && view)
+    {
+        NSRect contentRect = [[window contentView] bounds];
+        [view setFrame:contentRect];
+        [view setNeedsDisplay:YES];
+    }
 }
 
 - (void) closeWindow
@@ -380,79 +448,47 @@ struct CCocoaToolkitImpl
     }
 }
 
+- (void) invalidate
+{
+    [view setNeedsDisplay:YES];
+}
+
 - (void) invalidateRect:(NSRect)rect
 {
-    [view setNeedsDisplayInRect:rect];
+    [self invalidate];
+}
+
+- (void) resizeToWidth:(int)w height:(int)h
+{
+    if (window)
+    {
+        [window setContentSize:NSMakeSize(w, h)];
+    }
+    if (view)
+    {
+        [view setFrame:NSMakeRect(0, 0, w, h)];
+        [view setNeedsDisplay:YES];
+    }
+}
+
+- (void) scale100:(id)sender
+{
+    [self resizeToWidth:GUI_WIDTH height:GUI_HEIGHT];
+}
+
+- (void) scale150:(id)sender
+{
+    [self resizeToWidth:(int)(GUI_WIDTH * 1.5) height:(int)(GUI_HEIGHT * 1.5)];
+}
+
+- (void) scale200:(id)sender
+{
+    [self resizeToWidth:(GUI_WIDTH * 2) height:(GUI_HEIGHT * 2)];
 }
 
 @end
 
 //----------------------------------------------------------------------
-
-static bool LoadBitmap(OxeBitmap *bmp, const unsigned char *buffer, const char *skinPath, const char *filename)
-{
-    unsigned char *fileBuf = NULL;
-    if (skinPath && skinPath[0])
-    {
-        char fullPath[PATH_MAX];
-        snprintf(fullPath, sizeof(fullPath), "%s%s", skinPath, filename);
-        FILE *f = fopen(fullPath, "rb");
-        if (f)
-        {
-            fseek(f, 0, SEEK_END);
-            long sz = ftell(f);
-            fseek(f, 0, SEEK_SET);
-            fileBuf = (unsigned char*)malloc(sz);
-            if (fread(fileBuf, sz, 1, f))
-            {
-                buffer = fileBuf;
-            }
-            else
-            {
-                free(fileBuf);
-                fileBuf = NULL;
-            }
-            fclose(f);
-        }
-    }
-
-    BITMAPHEADER *header = (BITMAPHEADER *)buffer;
-    if (!buffer || header->fh.signature[0] != 'B' || header->fh.signature[1] != 'M')
-    {
-        if (fileBuf) free(fileBuf);
-        return false;
-    }
-
-    int width = header->v5.width;
-    int height = header->v5.height;
-    bmp->width = width;
-    bmp->height = height;
-    bmp->pixels = (uint32_t*)malloc(width * height * sizeof(uint32_t));
-
-    unsigned int imageSize = header->v5.imageSize;
-    if (!imageSize)
-    {
-        imageSize = header->fh.fileSize - sizeof(BITMAPFILEHEADER) - header->v5.dibHeaderSize;
-    }
-    unsigned int bytesPerLine = ((width * 3 + 3) / 4) * 4;
-    const unsigned char *data = buffer + header->fh.fileOffsetToPixelArray;
-
-    for (int y = 0; y < height; y++)
-    {
-        const unsigned char *src = data + ((height - 1 - y) * bytesPerLine);
-        uint32_t *dst = bmp->pixels + (y * width);
-        for (int x = 0; x < width; x++)
-        {
-            unsigned char b = *(src++);
-            unsigned char g = *(src++);
-            unsigned char r = *(src++);
-            *dst++ = (uint32_t)r | ((uint32_t)g << 8) | ((uint32_t)b << 16) | (0xFF000000U);
-        }
-    }
-
-    if (fileBuf) free(fileBuf);
-    return true;
-}
 
 CCocoaToolkit::CCocoaToolkit(void *parentWindow, CEditor *editor)
 {
@@ -462,28 +498,7 @@ CCocoaToolkit::CCocoaToolkit(void *parentWindow, CEditor *editor)
     CCocoaToolkitImpl *pImpl = new CCocoaToolkitImpl();
     this->impl = pImpl;
 
-    for (int i = 0; i < BMP_COUNT; i++)
-    {
-        pImpl->bmps[i].width = 0;
-        pImpl->bmps[i].height = 0;
-        pImpl->bmps[i].pixels = NULL;
-    }
-
-    pImpl->screenPixels = (uint32_t*)calloc(GUI_WIDTH * GUI_HEIGHT, sizeof(uint32_t));
-
-    char skinPath[PATH_MAX];
-    GetResourcesPath(skinPath, sizeof(skinPath));
-
-    LoadBitmap(&pImpl->bmps[BMP_CHARS  ], (const unsigned char*)chars_bmp  , skinPath, "chars.bmp"  );
-    LoadBitmap(&pImpl->bmps[BMP_KNOB   ], (const unsigned char*)knob_bmp   , skinPath, "knob.bmp"   );
-    LoadBitmap(&pImpl->bmps[BMP_KNOB2  ], (const unsigned char*)knob2_bmp  , skinPath, "knob2.bmp"  );
-    LoadBitmap(&pImpl->bmps[BMP_KNOB3  ], (const unsigned char*)knob3_bmp  , skinPath, "knob3.bmp"  );
-    LoadBitmap(&pImpl->bmps[BMP_KEY    ], (const unsigned char*)key_bmp    , skinPath, "key.bmp"    );
-    LoadBitmap(&pImpl->bmps[BMP_BG     ], (const unsigned char*)bg_bmp     , skinPath, "bg.bmp"     );
-    LoadBitmap(&pImpl->bmps[BMP_BUTTONS], (const unsigned char*)buttons_bmp, skinPath, "buttons.bmp");
-    LoadBitmap(&pImpl->bmps[BMP_OPS    ], (const unsigned char*)ops_bmp    , skinPath, "ops.bmp"    );
-
-    pImpl->view = [[PluginView alloc] initWithToolkit:this pixels:pImpl->screenPixels size:NSMakeSize(GUI_WIDTH, GUI_HEIGHT)];
+    pImpl->view = [[PluginView alloc] initWithToolkit:this size:NSMakeSize(GUI_WIDTH, GUI_HEIGHT)];
     pImpl->controller = [[CocoaWindowController alloc] initWithToolkit:this view:pImpl->view parent:(id)parentWindow];
 }
 
@@ -504,55 +519,28 @@ CCocoaToolkit::~CCocoaToolkit()
             [pImpl->view release];
             pImpl->view = nil;
         }
-
-        for (int i = 0; i < BMP_COUNT; i++)
-        {
-            if (pImpl->bmps[i].pixels)
-            {
-                free(pImpl->bmps[i].pixels);
-                pImpl->bmps[i].pixels = NULL;
-            }
-        }
-
-        if (pImpl->screenPixels)
-        {
-            free(pImpl->screenPixels);
-            pImpl->screenPixels = NULL;
-        }
-
         delete pImpl;
         this->impl = NULL;
     }
 }
 
-void CCocoaToolkit::CopyRect(int destX, int destY, int width, int height, int origBmp, int origX, int origY)
+void CCocoaToolkit::Invalidate()
 {
     CCocoaToolkitImpl *pImpl = (CCocoaToolkitImpl*)this->impl;
-    if (!pImpl || origBmp < 0 || origBmp >= BMP_COUNT || !pImpl->bmps[origBmp].pixels || !pImpl->screenPixels)
-        return;
-
-    const OxeBitmap &src = pImpl->bmps[origBmp];
-
-    if (destX < 0) { width += destX; origX -= destX; destX = 0; }
-    if (destY < 0) { height += destY; origY -= destY; destY = 0; }
-    if (destX + width > GUI_WIDTH) width = GUI_WIDTH - destX;
-    if (destY + height > GUI_HEIGHT) height = GUI_HEIGHT - destY;
-    if (width <= 0 || height <= 0) return;
-
-    if (origX < 0) { width += origX; destX -= origX; origX = 0; }
-    if (origY < 0) { height += origY; destY -= origY; origY = 0; }
-    if (origX + width > src.width) width = src.width - origX;
-    if (origY + height > src.height) height = src.height - origY;
-    if (width <= 0 || height <= 0) return;
-
-    for (int y = 0; y < height; y++)
+    if (pImpl && pImpl->controller)
     {
-        const uint32_t *s = src.pixels + ((origY + y) * src.width) + origX;
-        uint32_t *d = pImpl->screenPixels + ((destY + y) * GUI_WIDTH) + destX;
-        memcpy(d, s, width * sizeof(uint32_t));
+        [pImpl->controller invalidate];
     }
+}
 
-    [pImpl->controller invalidateRect:NSMakeRect(destX, GUI_HEIGHT - destY - height, width, height)];
+void CCocoaToolkit::InvalidateRect(int x, int y, int width, int height)
+{
+    Invalidate();
+}
+
+void CCocoaToolkit::CopyRect(int destX, int destY, int width, int height, int origBmp, int origX, int origY)
+{
+    InvalidateRect(destX, destY, width, height);
 }
 
 void CCocoaToolkit::StartMouseCapture()
@@ -580,4 +568,24 @@ int CCocoaToolkit::WaitWindowClosed()
         [pImpl->controller waitWindowClosed];
     }
     return 0;
+}
+
+float CCocoaToolkit::GetScale()
+{
+    CCocoaToolkitImpl *pImpl = (CCocoaToolkitImpl*)this->impl;
+    if (pImpl && pImpl->view)
+    {
+        NSRect bounds = [pImpl->view bounds];
+        return bounds.size.width / (float)GUI_WIDTH;
+    }
+    return 1.0f;
+}
+
+void CCocoaToolkit::Resize(int width, int height)
+{
+    CCocoaToolkitImpl *pImpl = (CCocoaToolkitImpl*)this->impl;
+    if (pImpl && pImpl->controller)
+    {
+        [pImpl->controller resizeToWidth:width height:height];
+    }
 }

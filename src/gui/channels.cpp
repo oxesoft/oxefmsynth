@@ -22,8 +22,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "control.h"
 #include "channels.h"
 
-#define KEY_WIDTH   10
-#define KEY_HEIGHT  10
+#define KEY_WIDTH   15
+#define KEY_HEIGHT  15
 
 CChannels::CChannels(int bmp, CSynthesizer *synthesizer, char &channel, int x, int y)
 {
@@ -77,17 +77,40 @@ int CChannels::GetCoordinates (oxeCoords *coords)
 
 void CChannels::Repaint()
 {
-    if (!toolkit)
+    if (toolkit)
     {
-        return;
+        toolkit->InvalidateRect(this->left, this->top, this->right - this->left, this->bottom - this->top);
     }
-    oxeCoords coords[MIDICHANNELS];
-    oxeCoords *c = coords;
-    int count = GetCoordinates(c);
-    while (count--)
+}
+
+void CChannels::Paint(BLContext &ctx, const BLFont &fontSmall, const BLFont &fontNormal)
+{
+    float cellW = (float)(right - left) / 8.0f;
+    float cellH = (float)(bottom - top) / 2.0f;
+    float r = (cellW < cellH ? cellW : cellH) * 0.36f;
+
+    for (int i = 0; i < 16; i++)
     {
-        toolkit->CopyRect(c->destX, c->destY, c->width, c->height, c->origBmp, c->origX, c->origY);
-        c++;
+        int col = (i < 8) ? i : (i - 8);
+        int row = (i < 8) ? 0 : 1;
+        float cx = left + (col + 0.5f) * cellW;
+        float cy = top  + (row + 0.5f) * cellH;
+
+        if (*channel == i)
+        {
+            // Active selected channel
+            ctx.fill_circle(cx, cy, r + 2.0f, BLRgba32(0x00, 0xf0, 0xff, 0x40));
+            ctx.fill_circle(cx, cy, r, BLRgba32(0x00, 0xf0, 0xff));
+            ctx.fill_circle(cx - r * 0.25f, cy - r * 0.25f, r * 0.3f, BLRgba32(0xff, 0xff, 0xff, 0xd0));
+        }
+        else
+        {
+            // Inactive channel LED
+            ctx.fill_circle(cx, cy, r, BLRgba32(0x19, 0x20, 0x2b));
+            ctx.set_stroke_width(1.0);
+            ctx.stroke_circle(cx, cy, r, BLRgba32(0x2f, 0x3b, 0x4c));
+            ctx.fill_circle(cx, cy, r * 0.35f, BLRgba32(0x24, 0x2c, 0x38));
+        }
     }
 }
 

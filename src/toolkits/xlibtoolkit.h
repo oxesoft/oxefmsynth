@@ -1,6 +1,6 @@
 /*
 Oxe FM Synth: a software synthesizer
-Copyright (C) 2004-2015  Daniel Moura <oxe@oxesoft.com>
+Copyright (C) 2004-2026  Daniel Moura <oxe@oxesoft.com>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -16,35 +16,39 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-class CXlibToolkit
-#ifdef USE_OPENGL
-: public COpenGLToolkit
-#else
-: public CToolkit
-#endif
+#pragma once
+
+#include "toolkit.h"
+#include <blend2d/blend2d.h>
+#include <X11/Xlib.h>
+#include <X11/Xutil.h>
+
+class CEditor;
+
+class CXlibToolkit : public CToolkit
 {
 private:
-    Pixmap bmps[BMP_COUNT];
-    Pixmap LoadImageFromFile(const char *path, XVisualInfo *v);
-    Pixmap LoadImageFromBuffer(const char *buffer, XVisualInfo *v);
+    BLImage      blImage;
 public:
     void        *parentWindow;
     CEditor     *editor;
-    Display      *display;
+    Display     *display;
     Window       window;
     GC           gc;
     Atom         WM_DELETE_WINDOW;
     Atom         WM_TIMER;
-    Pixmap       offscreen;
     bool         thread1Finished;
     bool         thread2Finished;
-#ifdef USE_OPENGL
-    GLXContext   glxContext;
-#endif
-    bool         openGLmode;
     CXlibToolkit(void *parentWindow, CEditor *editor);
-    ~CXlibToolkit();
-    void StartWindowProcesses();
-    void CopyRect(int destX, int destY, int width, int height, int origBmp, int origX, int origY);
-    int  WaitWindowClosed();
+    virtual ~CXlibToolkit();
+    virtual void Invalidate() override;
+    virtual void InvalidateRect(int x, int y, int width, int height) override;
+    virtual void CopyRect(int destX, int destY, int width, int height, int origBmp, int origX, int origY) override;
+    virtual void StartMouseCapture() override;
+    virtual void StopMouseCapture() override;
+    virtual void StartWindowProcesses() override;
+    virtual int  WaitWindowClosed() override;
+    virtual float GetScale() override;
+    void Resize(int width, int height);
+    void Draw();
 };

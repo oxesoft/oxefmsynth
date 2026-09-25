@@ -61,13 +61,82 @@ int CKey::GetCoordinates (oxeCoords *coords)
 
 void CKey::Repaint()
 {
-    if (!toolkit)
+    if (toolkit)
     {
-        return;
+        toolkit->InvalidateRect(this->left, this->top, this->right - this->left, this->bottom - this->top);
     }
-    oxeCoords coords;
-    GetCoordinates(&coords);
-    toolkit->CopyRect(coords.destX, coords.destY, coords.width, coords.height, coords.origBmp, coords.origX, coords.origY);
+}
+
+void CKey::Paint(BLContext &ctx, const BLFont &fontSmall, const BLFont &fontNormal)
+{
+    float w = right - left;
+    float h = bottom - top;
+    float cx = left + w * 0.5f;
+    float cy = top + h * 0.5f;
+    float r = (w < h ? w : h) * 0.44f;
+
+    // Check if it's one of the matrix diagonal operator toggles
+    bool isMatrixOp = (bmp == BMP_OPS);
+
+    if (isMatrixOp)
+    {
+        // Matrix diagonal operator node (labeled A, B, C, D, E, F, X, Z)
+        static const char opLetters[] = {'A', 'B', 'C', 'D', 'E', 'F', 'X', 'Z'};
+        char letter[2] = { (index >= 0 && index < 8) ? opLetters[index] : '?', 0 };
+
+        BLRgba32 accentColor(0x00, 0xf0, 0xff); // default cyan
+        switch (index)
+        {
+            case 0: accentColor = BLRgba32(0x00, 0xf0, 0xff); break; // A: cyan
+            case 1: accentColor = BLRgba32(0x00, 0xe6, 0x76); break; // B: emerald green
+            case 2: accentColor = BLRgba32(0xff, 0xd6, 0x00); break; // C: amber
+            case 3: accentColor = BLRgba32(0xff, 0x91, 0x00); break; // D: orange
+            case 4: accentColor = BLRgba32(0xb3, 0x88, 0xff); break; // E: violet
+            case 5: accentColor = BLRgba32(0xff, 0x40, 0x81); break; // F: magenta
+            case 6: accentColor = BLRgba32(0x40, 0xc4, 0xff); break; // X: ice blue
+            case 7: accentColor = BLRgba32(0xee, 0xf2, 0xf6); break; // Z: white
+        }
+
+        // Circular background
+        ctx.fill_circle(cx, cy, r, BLRgba32(0x18, 0x20, 0x2b));
+        ctx.set_stroke_width(1.8);
+
+        if (value)
+        {
+            ctx.stroke_circle(cx, cy, r, accentColor);
+            if (fontNormal.is_valid())
+            {
+                ctx.fill_utf8_text(BLPoint(cx - 4.5f, cy + 4.5f), fontNormal, letter, 1, accentColor);
+            }
+        }
+        else
+        {
+            ctx.stroke_circle(cx, cy, r, BLRgba32(0x30, 0x3c, 0x4c));
+            if (fontNormal.is_valid())
+            {
+                ctx.fill_utf8_text(BLPoint(cx - 4.5f, cy + 4.5f), fontNormal, letter, 1, BLRgba32(0x55, 0x64, 0x76));
+            }
+        }
+    }
+    else
+    {
+        // Standard LED or toggle button
+        if (value)
+        {
+            // Illuminated active LED
+            ctx.fill_circle(cx, cy, r + 2.0f, BLRgba32(0x00, 0xf0, 0xff, 0x38)); // soft outer glow
+            ctx.fill_circle(cx, cy, r, BLRgba32(0x00, 0xf0, 0xff)); // bright cyan center
+            ctx.fill_circle(cx - r * 0.25f, cy - r * 0.25f, r * 0.35f, BLRgba32(0xff, 0xff, 0xff, 0xd0)); // highlight
+        }
+        else
+        {
+            // Dark inactive LED
+            ctx.fill_circle(cx, cy, r, BLRgba32(0x18, 0x1e, 0x27));
+            ctx.set_stroke_width(1.2);
+            ctx.stroke_circle(cx, cy, r, BLRgba32(0x32, 0x3e, 0x4e));
+            ctx.fill_circle(cx, cy, r * 0.35f, BLRgba32(0x24, 0x2c, 0x38));
+        }
+    }
 }
 
 bool CKey::Update(void)

@@ -93,6 +93,13 @@ Steinberg::tresult PLUGIN_API COxeVst3Editor::getSize(Steinberg::ViewRect* size)
 
 Steinberg::tresult PLUGIN_API COxeVst3Editor::onSize(Steinberg::ViewRect* newSize)
 {
+    if (!newSize) return Steinberg::kInvalidArgument;
+    int w = newSize->right - newSize->left;
+    int h = newSize->bottom - newSize->top;
+    if (toolkit)
+    {
+        toolkit->Resize(w, h);
+    }
     return Steinberg::kResultTrue;
 }
 
@@ -109,15 +116,18 @@ Steinberg::tresult PLUGIN_API COxeVst3Editor::setFrame(Steinberg::IPlugFrame* fr
 
 Steinberg::tresult PLUGIN_API COxeVst3Editor::canResize()
 {
-    return Steinberg::kResultFalse;
+    return Steinberg::kResultTrue;
 }
 
 Steinberg::tresult PLUGIN_API COxeVst3Editor::checkSizeConstraint(Steinberg::ViewRect* rect)
 {
     if (!rect)
         return Steinberg::kInvalidArgument;
-    rect->right = rect->left + GUI_WIDTH;
-    rect->bottom = rect->top + GUI_HEIGHT;
+    int width = rect->right - rect->left;
+    if (width < 475) width = 475;
+    int height = (int)((width * (double)GUI_HEIGHT) / (double)GUI_WIDTH);
+    rect->right = rect->left + width;
+    rect->bottom = rect->top + height;
     return Steinberg::kResultTrue;
 }
 

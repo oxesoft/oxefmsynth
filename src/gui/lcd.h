@@ -27,9 +27,10 @@ private:
     char     text1[LCD_COLS];
     int      lcdx;
     int      lcdy;
-    void Repaint();
+    void Repaint() override;
 public:
     CLcd(int bmpchars, int x, int y);
     bool SetText(char lineIndex, const char *text);
-    int  GetCoordinates(oxeCoords *coords);
+    int  GetCoordinates(oxeCoords *coords) override;
+    void Paint(BLContext &ctx, const BLFont &fontSmall, const BLFont &fontNormal) override;
 };

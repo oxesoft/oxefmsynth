@@ -32,10 +32,14 @@ public:
     CEditor     *editor;
     CCocoaToolkit(void *parentWindow, CEditor *editor);
     virtual ~CCocoaToolkit();
+    virtual void Invalidate();
+    virtual void InvalidateRect(int x, int y, int width, int height);
     virtual void CopyRect(int destX, int destY, int width, int height, int origBmp, int origX, int origY);
     virtual void StartMouseCapture();
     virtual void StopMouseCapture();
     virtual void StartWindowProcesses();
     virtual int  WaitWindowClosed();
-    void*        GetScreenPixels();
+    virtual float GetScale();
+    void         Resize(int width, int height);
 };
+

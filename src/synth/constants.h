@@ -16,14 +16,16 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#pragma once
+
 // ------------------------------------------------------------------
 // configuration constants
 // ------------------------------------------------------------------
 
-#define OXFM_MAJOR_VERSION  1
-#define OXFM_MINOR_VERSION  3
-#define OXFM_PATCH_VERSION  5
-#define VERSION_STR         "1.3.6"
+#define OXFM_MAJOR_VERSION  2
+#define OXFM_MINOR_VERSION  0
+#define OXFM_PATCH_VERSION  0
+#define VERSION_STR         "2.0.0"
 #define VERSION_INT         ((OXFM_MAJOR_VERSION * 100) + (OXFM_MINOR_VERSION * 10) + OXFM_PATCH_VERSION)
 #define TITLE_SMALL         "Oxe FM Synth " VERSION_STR
 #define TITLE_FULL          TITLE_SMALL " :: http://www.oxesoft.com"
@@ -55,8 +57,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define TIMER_RESOLUTION_MS 20
 #define BMP_PATH            "skin"
 #define GUI_CONTROLS        189
-#define GUI_WIDTH           633
-#define GUI_HEIGHT          437
+#define GUI_WIDTH           950
+#define GUI_HEIGHT          656
+#define LEGACY_GUI_WIDTH    633
+#define LEGACY_GUI_HEIGHT   437
 enum
 {
     BMP_CHARS  ,

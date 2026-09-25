@@ -17,6 +17,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include <string.h>
+#include <stdio.h>
 #include "synthesizer.h"
 #include "control.h"
 #include "lcd.h"
@@ -30,62 +31,65 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 CLcd::CLcd(int bmp, int x, int y)
 {
-    int i;
-    for (i=0;i<LCD_COLS;i++)
-        text0[i] = ' ';
-    for (i=0;i<LCD_COLS;i++)
-        text1[i] = ' ';
+    memset(text0, ' ', LCD_COLS);
+    memset(text1, ' ', LCD_COLS);
+    const char* def0 = "  Oxe FM Synth  ";
+    char def1[32];
+    snprintf(def1, sizeof(def1), "     v%s", VERSION_STR);
+    int vlen = (int)strlen(def1);
+    while (vlen < LCD_COLS) def1[vlen++] = ' ';
+    def1[LCD_COLS] = 0;
+    memcpy(text0, def0, strlen(def0) > LCD_COLS ? LCD_COLS : strlen(def0));
+    memcpy(text1, def1, LCD_COLS);
     this->lcdx     = x;
     this->lcdy     = y;
     this->bmp      = bmp;
-    this->left     = x + LCD_X;
-    this->top      = y + LCD_Y;
-    this->right    = this->left + (LCD_CHAR_W * LCD_COLS ) + (LCD_SEP_H * LCD_COLS );
-    this->bottom   = this->top  + (LCD_CHAR_H * LCD_LINES) + (LCD_SEP_V * LCD_LINES);
+    this->left     = x;
+    this->top      = y;
+    this->right    = x + 165;
+    this->bottom   = y + 42;
     this->toolkit  = NULL;
 }
 
 int CLcd::GetCoordinates (oxeCoords *coords)
 {
-    int i;
-    for (i=0;i<LCD_COLS;i++)
-    {
-        coords->destX   = lcdx + LCD_X + LCD_SEP_H + ((LCD_SEP_H + LCD_CHAR_W) * i);
-        coords->destY   = lcdy + LCD_Y + LCD_SEP_V;
-        coords->width   = LCD_CHAR_W;
-        coords->height  = LCD_CHAR_H;
-        coords->origBmp = this->bmp;
-        coords->origX   = (0xF & (text0[i] - ' ')) * LCD_CHAR_W;
-        coords->origY   = ((0xF0 & (text0[i] - ' ')) / 0x10) * LCD_CHAR_H;
-        coords++;
-    }
-    for (i=0;i<LCD_COLS;i++)
-    {
-        coords->destX   = lcdx + LCD_X + LCD_SEP_H + ((LCD_SEP_H + LCD_CHAR_W) * i);
-        coords->destY   = lcdy + LCD_Y + LCD_SEP_V + LCD_CHAR_H + LCD_SEP_V;
-        coords->width   = LCD_CHAR_W;
-        coords->height  = LCD_CHAR_H;
-        coords->origBmp = this->bmp;
-        coords->origX   = (0xF & (text1[i] - ' ')) * LCD_CHAR_W;
-        coords->origY   = ((0xF0 & (text1[i] - ' ')) / 0x10) * LCD_CHAR_H;
-        coords++;
-	}
     return LCD_COORDS;
 }
 
 void CLcd::Repaint()
 {
-    if (!toolkit)
+    if (toolkit)
     {
-        return;
+        toolkit->InvalidateRect(this->left, this->top, this->right - this->left, this->bottom - this->top);
     }
-    oxeCoords coords[LCD_COLS * LCD_LINES];
-    oxeCoords *c = coords;
-    int count = GetCoordinates(c);
-    while (count--)
+}
+
+void CLcd::Paint(BLContext &ctx, const BLFont &fontSmall, const BLFont &fontNormal)
+{
+    float w = right - left;
+    float h = bottom - top;
+    BLRoundRect rr(left, top, w, h, 4.0, 4.0);
+
+    // Recessed dark display screen
+    ctx.fill_round_rect(rr, BLRgba32(0x0c, 0x10, 0x16));
+    ctx.set_stroke_width(1.0);
+    ctx.stroke_round_rect(rr, BLRgba32(0x25, 0x30, 0x40));
+
+    char str0[LCD_COLS + 1];
+    char str1[LCD_COLS + 1];
+    memcpy(str0, text0, LCD_COLS); str0[LCD_COLS] = 0;
+    memcpy(str1, text1, LCD_COLS); str1[LCD_COLS] = 0;
+
+    // Line 0 (top line: bank or parameter label)
+    if (fontSmall.is_valid())
     {
-        toolkit->CopyRect(c->destX, c->destY, c->width, c->height, c->origBmp, c->origX, c->origY);
-        c++;
+        ctx.fill_utf8_text(BLPoint(left + 8, top + 16), fontSmall, str0, SIZE_MAX, BLRgba32(0x6e, 0x9e, 0xb8));
+    }
+
+    // Line 1 (bottom line: preset or parameter value)
+    if (fontNormal.is_valid())
+    {
+        ctx.fill_utf8_text(BLPoint(left + 8, top + 33), fontNormal, str1, SIZE_MAX, BLRgba32(0x00, 0xf0, 0xff));
     }
 }
 

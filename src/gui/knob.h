@@ -25,15 +25,16 @@ private:
     int   knobSize;        // size in pixels
     int   par;             // synth parameter assigned
     int   type;            // control type
-    void  Repaint();
+    void  Repaint() override;
 public:
     CKnob(int bmp, int knobSize, const char *name, CSynthesizer *synthesizer, char &channel, int type, int par, int x, int y);
-    bool  Update         (void);
-    bool  GetName        (char* str);
-    bool  IsKnob()       {return true;}
-    bool  IncreaseValue  (int delta);
-    int   GetIndex       (void);
-    int   GetType        (void);
+    bool  Update         (void) override;
+    bool  GetName        (char* str) override;
+    bool  IsKnob()       override {return true;}
+    bool  IncreaseValue  (int delta) override;
+    int   GetIndex       (void) override;
+    int   GetType        (void) override;
     float GetValue       (char channel);
-    int   GetCoordinates (oxeCoords *coords);
+    int   GetCoordinates (oxeCoords *coords) override;
+    void  Paint          (BLContext &ctx, const BLFont &fontSmall, const BLFont &fontNormal) override;
 };

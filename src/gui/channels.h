@@ -19,11 +19,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 class CChannels : public CControl
 {
 private:
-    void Repaint();
+    void Repaint() override;
 public:
     CChannels(int bmp, CSynthesizer *synthesizer, char &channel, int x, int y);
-    void OnClick(int x, int y);
-    bool GetName(char* str);
-    int  GetType(void);
-    int  GetCoordinates(oxeCoords *coords);
+    void OnClick(int x, int y) override;
+    bool GetName(char* str) override;
+    int  GetType(void) override;
+    int  GetCoordinates(oxeCoords *coords) override;
+    void Paint(BLContext &ctx, const BLFont &fontSmall, const BLFont &fontNormal) override;
 };

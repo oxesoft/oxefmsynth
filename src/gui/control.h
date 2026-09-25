@@ -27,6 +27,8 @@ typedef struct
     int origY;
 } oxeCoords;
 
+#include <blend2d/blend2d.h>
+
 class CControl
 {
 protected:
@@ -39,8 +41,15 @@ protected:
     CSynthesizer   *synthesizer;   // object to get/set the value
     CToolkit       *toolkit;       // graphical toolkit
     CHostInterface *hostinterface;
-    virtual void  Repaint        ()                      {             }
+    virtual void  Repaint        ()
+    {
+        if (toolkit)
+        {
+            toolkit->InvalidateRect(left, top, right - left, bottom - top);
+        }
+    }
 public:
+    virtual ~CControl() {}
     virtual void  OnClick        (int x, int y)          {             }
     virtual bool  GetName        (char* str)             {return false;}
     virtual bool  Update         (void)                  {return false;}
@@ -49,6 +58,7 @@ public:
     virtual int   GetIndex       (void)                  {return -1   ;}
     virtual int   GetType        (void)                  {return -1   ;}
     virtual int   GetCoordinates (oxeCoords *coords)     {return  0   ;}
+    virtual void  Paint          (BLContext &ctx, const BLFont &fontSmall, const BLFont &fontNormal) {}
     void SetToolkit(CToolkit *toolkit)
     {
         this->toolkit = toolkit;
@@ -65,6 +75,10 @@ public:
     {
         return ((x >= left) && (x < right) && (y >= top) && (y < bottom));
     }
+    int GetLeft()   const { return left; }
+    int GetTop()    const { return top; }
+    int GetRight()  const { return right; }
+    int GetBottom() const { return bottom; }
 };
 
 enum

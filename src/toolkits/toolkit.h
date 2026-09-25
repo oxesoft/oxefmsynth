@@ -24,11 +24,15 @@ class CToolkit
 {
 public:
     virtual ~CToolkit() {}
+    virtual void Invalidate() {}
+    virtual void InvalidateRect(int x, int y, int width, int height) { Invalidate(); }
     virtual void CopyRect(int destX, int destY, int width, int height, int origBmp, int origX, int origY) {}
     virtual void StartMouseCapture() {}
     virtual void StopMouseCapture() {}
     virtual void StartWindowProcesses() {}
     virtual int  WaitWindowClosed() {return 0;}   // standalone only
+    virtual float GetScale() { return 1.0f; }
+    virtual void Resize(int width, int height) {}
 };
 
 #endif

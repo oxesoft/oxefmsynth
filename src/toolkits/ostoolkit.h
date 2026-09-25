@@ -22,10 +22,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #elif defined(__linux)
     #include <X11/Xlib.h>
     #include <X11/Xutil.h>
-    #ifdef USE_OPENGL
-        #include <GL/glx.h>
-        #include "opengltoolkit.h"
-    #endif
     #include "xlibtoolkit.h"
     #define COSToolkit CXlibToolkit
 #else

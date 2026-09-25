@@ -16,7 +16,7 @@
 
 UNAME_S:=$(shell uname -s)
 
-.PHONY: all clean vst3 clap install install-vst3 install-clap
+.PHONY: all clean standalone vst3 clap install install-vst3 install-clap
 
 all:
 	@echo "Building converter"
@@ -26,6 +26,10 @@ all:
 	@echo "Building standalone"
 	@$(MAKE) -s -f Makefile.standalone
 	@$(MAKE) -s clap
+
+standalone:
+	@echo "Building standalone"
+	@$(MAKE) -s -f Makefile.standalone
 
 vst3:
 	@echo "Building VST3 plugin"
@@ -44,4 +48,4 @@ install-clap:
 install: install-clap
 
 clean:
-	@rm -rf oxeconverter oxefmsynthdemo oxefmsynthdemo.exe oxefmsynthdemo.wav oxefmsynth oxefmsynth.exe embedresources bitmaps.cpp *.o *.d oxefmsynth.app oxefmsynth.vst3 oxefmsynth.clap
+	@rm -rf oxeconverter oxefmsynthdemo oxefmsynthdemo.exe oxefmsynthdemo.wav oxefmsynth oxefmsynth.exe *.o *.d oxefmsynth.app oxefmsynth.vst3 oxefmsynth.clap

@@ -791,31 +791,37 @@ bool COxeClapPlugin::gui_get_size(const clap_plugin_t *plugin, uint32_t *width, 
 
 bool COxeClapPlugin::gui_can_resize(const clap_plugin_t *plugin)
 {
-    return false;
+    return true;
 }
 
 bool COxeClapPlugin::gui_get_resize_hints(const clap_plugin_t *plugin, clap_gui_resize_hints_t *hints)
 {
     if (!hints) return false;
-    hints->can_resize_horizontally = false;
-    hints->can_resize_vertically = false;
-    hints->preserve_aspect_ratio = true;
-    hints->aspect_ratio_width = GUI_WIDTH;
-    hints->aspect_ratio_height = GUI_HEIGHT;
+    hints->can_resize_horizontally = true;
+    hints->can_resize_vertically   = true;
+    hints->preserve_aspect_ratio   = true;
+    hints->aspect_ratio_width      = GUI_WIDTH;
+    hints->aspect_ratio_height     = GUI_HEIGHT;
     return true;
 }
 
 bool COxeClapPlugin::gui_adjust_size(const clap_plugin_t *plugin, uint32_t *width, uint32_t *height)
 {
     if (!width || !height) return false;
-    *width = GUI_WIDTH;
-    *height = GUI_HEIGHT;
+    if (*width < 475) *width = 475;
+    *height = (uint32_t)((*width * (double)GUI_HEIGHT) / (double)GUI_WIDTH);
     return true;
 }
 
 bool COxeClapPlugin::gui_set_size(const clap_plugin_t *plugin, uint32_t width, uint32_t height)
 {
-    return (width == GUI_WIDTH && height == GUI_HEIGHT);
+    COxeClapPlugin *plug = (COxeClapPlugin *)plugin->plugin_data;
+    if (plug && plug->guiToolkit)
+    {
+        plug->guiToolkit->Resize((int)width, (int)height);
+        return true;
+    }
+    return true;
 }
 
 bool COxeClapPlugin::gui_set_parent(const clap_plugin_t *plugin, const clap_window_t *window)

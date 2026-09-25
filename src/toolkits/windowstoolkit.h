@@ -1,6 +1,6 @@
 /*
 Oxe FM Synth: a software synthesizer
-Copyright (C) 2004-2015  Daniel Moura <oxe@oxesoft.com>
+Copyright (C) 2004-2026  Daniel Moura <oxe@oxesoft.com>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -16,23 +16,32 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#pragma once
+
+#include "toolkit.h"
+#include <blend2d/blend2d.h>
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+
+class CEditor;
+
 class CWindowsToolkit : public CToolkit
 {
 private:
     HWND         hWnd;
-    HDC          hdc;
-    HDC          hdcAux;
-    HBITMAP      bitmap;
-    HBITMAP      bmps[BMP_COUNT];
+    BLImage      blImage;
 public:
     void        *parentWindow;
     CEditor     *editor;
-    HDC          hdcMem;
     CWindowsToolkit(void *parentWindow, CEditor *editor);
-    ~CWindowsToolkit();
-    void StartWindowProcesses();
-    void CopyRect(int destX, int destY, int width, int height, int origBmp, int origX, int origY);
-    void StartMouseCapture();
-    void StopMouseCapture();
-    int  WaitWindowClosed();
+    virtual ~CWindowsToolkit();
+    virtual void Invalidate() override;
+    virtual void InvalidateRect(int x, int y, int width, int height) override;
+    virtual void CopyRect(int destX, int destY, int width, int height, int origBmp, int origX, int origY) override;
+    virtual void StartMouseCapture() override;
+    virtual void StopMouseCapture() override;
+    virtual void StartWindowProcesses() override;
+    virtual int  WaitWindowClosed() override;
+    virtual float GetScale() override;
+    void Resize(int width, int height);
 };

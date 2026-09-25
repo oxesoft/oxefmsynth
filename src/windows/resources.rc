@@ -3,14 +3,6 @@
 #include "constants.h"
 
 IDI_ICON                ICON    DISCARDABLE     "icon.ico"
-IDB_CHARS               BITMAP  DISCARDABLE     "chars.bmp"
-IDB_KNOB                BITMAP  DISCARDABLE     "knob.bmp"
-IDB_KNOB2               BITMAP  DISCARDABLE     "knob2.bmp"
-IDB_KNOB3               BITMAP  DISCARDABLE     "knob3.bmp"
-IDB_CHAVE               BITMAP  DISCARDABLE     "key.bmp"
-IDB_FUNDO               BITMAP  DISCARDABLE     "bg.bmp"
-IDB_BUTTONS             BITMAP  DISCARDABLE     "buttons.bmp"
-IDB_OPS                 BITMAP  DISCARDABLE     "ops.bmp"
 
 VS_VERSION_INFO VERSIONINFO
  FILEVERSION OXFM_MAJOR_VERSION,OXFM_MINOR_VERSION,OXFM_PATCH_VERSION,0

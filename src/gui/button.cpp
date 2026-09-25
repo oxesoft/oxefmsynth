@@ -22,8 +22,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "control.h"
 #include "button.h"
 
-#define BUTTON_WIDTH   42
-#define BUTTON_HEIGHT  16
+#define BUTTON_WIDTH   63
+#define BUTTON_HEIGHT  24
 
 CButton::CButton(int bmp, int index, CSynthesizer *synthesizer, char &channel, int type, int x, int y)
 {
@@ -157,13 +157,64 @@ int CButton::GetCoordinates (oxeCoords *coords)
 
 void CButton::Repaint()
 {
-    if (!toolkit)
+    if (toolkit)
     {
-        return;
+        toolkit->InvalidateRect(this->left, this->top, this->right - this->left, this->bottom - this->top);
     }
-    oxeCoords coords;
-    GetCoordinates(&coords);
-    toolkit->CopyRect(coords.destX, coords.destY, coords.width, coords.height, coords.origBmp, coords.origX, coords.origY);
+}
+
+void CButton::Paint(BLContext &ctx, const BLFont &fontSmall, const BLFont &fontNormal)
+{
+    float w = right - left;
+    float h = bottom - top;
+    BLRoundRect rr(left, top, w, h, 3.5, 3.5);
+
+    // Button background
+    ctx.fill_round_rect(rr, BLRgba32(0x1e, 0x25, 0x32));
+    ctx.set_stroke_width(1.0);
+    ctx.stroke_round_rect(rr, BLRgba32(0x32, 0x3d, 0x4f));
+
+    const char* label = "";
+    switch (type)
+    {
+        case BT_BANK:     label = "Bank"; break;
+        case BT_PROGRAM:  label = "Program"; break;
+        case BT_MINUS_10: label = "-10"; break;
+        case BT_MINUS_1:  label = "-1"; break;
+        case BT_PLUS_1:   label = "+1"; break;
+        case BT_PLUS_10:  label = "+10"; break;
+        case BT_NAME:     label = "Name"; break;
+        case BT_STORE:    label = "Store"; break;
+    }
+
+    // Small status LED for Bank and Program
+    if (type == BT_BANK || type == BT_PROGRAM)
+    {
+        float ledX = left + 7.5f;
+        float ledY = top + h * 0.5f;
+        bool isActive = (type == BT_BANK) ? synthesizer->GetBankMode() : !synthesizer->GetBankMode();
+        if (isActive)
+        {
+            ctx.fill_circle(ledX, ledY, 2.8, BLRgba32(0x00, 0xf0, 0xff));
+        }
+        else
+        {
+            ctx.fill_circle(ledX, ledY, 2.0, BLRgba32(0x2d, 0x38, 0x46));
+        }
+    }
+
+    // Centered label text
+    if (label[0] && fontSmall.is_valid())
+    {
+        float tw = strlen(label) * 5.8f;
+        float tx = left + (w - tw) * 0.5f;
+        if (type == BT_BANK || type == BT_PROGRAM)
+        {
+            tx += 4.0f;
+        }
+        float ty = top + h * 0.5f + 3.5f;
+        ctx.fill_utf8_text(BLPoint(tx, ty), fontSmall, label, SIZE_MAX, BLRgba32(0xc8, 0xd4, 0xe4));
+    }
 }
 
 bool CButton::GetName(char* str)

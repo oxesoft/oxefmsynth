@@ -15,6 +15,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 BUNDLE_NAME:=oxefmsynth.clap
+VERSION_STR:=$(shell grep '\#define VERSION_STR' src/synth/constants.h | awk -F '"' '{print $$2}')
 
 ifeq ($(CLAPSDK_PATH),)
     ifneq ($(wildcard clap/include/clap/clap.h),)
@@ -26,7 +27,7 @@ ifeq ($(CLAPSDK_PATH),)
     endif
 endif
 
-INCLUDES:=-Isrc/synth -Isrc/gui -Isrc/toolkits -Isrc/clap -I. -isystem $(CLAPSDK_PATH)/include
+INCLUDES:=-Isrc/synth -Isrc/gui -Isrc/toolkits -Isrc/clap -I. -isystem $(CLAPSDK_PATH)/include -I.deps/blend2d -I.deps/blend2d/blend2d -I.deps/asmjit
 
 SOURCES:=src/synth/buffers.cpp \
          src/synth/delay.cpp \
@@ -50,7 +51,8 @@ SOURCES:=src/synth/buffers.cpp \
          src/clap/oxeclapentry.cpp \
          src/clap/claphostinterface.cpp
 
-CXXFLAGS+=-std=c++17
+CXXFLAGS+=-std=c++17 -DBL_STATIC
+LIBS+=-L.deps/blend2d/build -lblend2d -lpthread -lm
 
 ifeq ($(DEBUG),YES)
     CXXFLAGS+=-g -O0
@@ -88,14 +90,12 @@ else
         SOURCES+=resources.o
         INSTALL_CMD=cp -f "$(TARGET_FILE)" "$(USER_CLAP_DIR)/"
     else
-        DEPS:=bitmaps.cpp
-        SOURCES+=bitmaps.cpp
         ifeq ($(UNAME_S),Darwin)
             LDFLAGS+=-framework Cocoa
             SOURCES+=src/toolkits/cocoatoolkit.mm
             BUNDLE_DIR:=$(BUNDLE_NAME)/Contents/MacOS
             BUNDLE_BINARY:=$(BUNDLE_DIR)/oxefmsynth
-            BUNDLE_SETUP:=@mkdir -p $(BUNDLE_DIR) && cp src/macosx/clap/* $(BUNDLE_NAME)/Contents/
+            BUNDLE_SETUP:=@mkdir -p $(BUNDLE_DIR) && cp src/macosx/clap/PkgInfo $(BUNDLE_NAME)/Contents/ 2>/dev/null || true && sed 's/__VERSION__/$(VERSION_STR)/g' src/macosx/clap/Info.plist.in > $(BUNDLE_NAME)/Contents/Info.plist
             TARGET_FILE:=$(BUNDLE_NAME)
             USER_CLAP_DIR?=$(HOME)/Library/Audio/Plug-Ins/CLAP
             INSTALL_CMD=rm -rf "$(USER_CLAP_DIR)/$(BUNDLE_NAME)" && cp -R "$(BUNDLE_NAME)" "$(USER_CLAP_DIR)/"
@@ -130,15 +130,10 @@ $(CLAPSDK_PATH)/include/clap/clap.h:
 	@mkdir -p .deps
 	@git clone --depth 1 --branch 1.2.10 https://github.com/free-audio/clap.git .deps/clap
 
-bitmaps.cpp:
-	@$(CXX) -o embedresources $(CXXFLAGS) src/toolkits/embedresources.cpp
-	@./embedresources $@
-	@rm embedresources
-
 resources.o:
-	@$(RC) -Isrc/synth -Iskins/default src/windows/resources.rc resources.o
+	@$(RC) -Isrc/synth src/windows/resources.rc resources.o
 
 clean:
-	@rm -rf $(BUNDLE_NAME) embedresources bitmaps.cpp *.o *.d
+	@rm -rf $(BUNDLE_NAME) *.o *.d
 
 .PHONY: all clean install
