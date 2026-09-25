@@ -755,6 +755,24 @@ void CEditor::GetParName(int index, char* text)
     strncpy(text, "not found", TEXT_SIZE);
 }
 
+struct OpCard {
+    float x, y, w, h;
+    const char* tag;
+    const char* title;
+    BLRgba32 accent;
+};
+
+static const OpCard opCards[8] = {
+    {  12.0f,  86.0f, 292.0f, 132.0f, "A", "OPERATOR A",                BLRgba32(0x00, 0xf0, 0xff) },
+    { 310.0f,  86.0f, 292.0f, 132.0f, "B", "OPERATOR B",                BLRgba32(0x00, 0xe6, 0x76) },
+    {  12.0f, 227.0f, 292.0f, 132.0f, "C", "OPERATOR C",                BLRgba32(0xff, 0xd6, 0x00) },
+    { 310.0f, 227.0f, 292.0f, 132.0f, "D", "OPERATOR D",                BLRgba32(0xff, 0x91, 0x00) },
+    {  12.0f, 368.0f, 292.0f, 132.0f, "E", "OPERATOR E",                BLRgba32(0xb3, 0x88, 0xff) },
+    { 310.0f, 368.0f, 292.0f, 132.0f, "F", "OPERATOR F",                BLRgba32(0xff, 0x40, 0x81) },
+    {  12.0f, 509.0f, 292.0f, 136.0f, "X", "OPERATOR X (FILTER/NOISE)", BLRgba32(0x40, 0xc4, 0xff) },
+    { 310.0f, 509.0f, 292.0f, 136.0f, "Z", "OPERATOR Z (FILTER)",       BLRgba32(0xee, 0xf2, 0xf6) }
+};
+
 void CEditor::DrawPanelCards(BLContext &ctx, const BLFont &fontSmall, const BLFont &fontNormal, const BLFont &fontHeader)
 {
     // 1. Top Header Card
@@ -776,22 +794,6 @@ void CEditor::DrawPanelCards(BLContext &ctx, const BLFont &fontSmall, const BLFo
     }
 
     // 2. Operator Cards (A through F, X, Z)
-    static const struct {
-        float x, y, w, h;
-        const char* tag;
-        const char* title;
-        BLRgba32 accent;
-    } opCards[8] = {
-        {  12.0f,  86.0f, 292.0f, 132.0f, "A", "OPERATOR A",                BLRgba32(0x00, 0xf0, 0xff) },
-        { 310.0f,  86.0f, 292.0f, 132.0f, "B", "OPERATOR B",                BLRgba32(0x00, 0xe6, 0x76) },
-        {  12.0f, 227.0f, 292.0f, 132.0f, "C", "OPERATOR C",                BLRgba32(0xff, 0xd6, 0x00) },
-        { 310.0f, 227.0f, 292.0f, 132.0f, "D", "OPERATOR D",                BLRgba32(0xff, 0x91, 0x00) },
-        {  12.0f, 368.0f, 292.0f, 132.0f, "E", "OPERATOR E",                BLRgba32(0xb3, 0x88, 0xff) },
-        { 310.0f, 368.0f, 292.0f, 132.0f, "F", "OPERATOR F",                BLRgba32(0xff, 0x40, 0x81) },
-        {  12.0f, 509.0f, 292.0f, 136.0f, "X", "OPERATOR X (FILTER/NOISE)", BLRgba32(0x40, 0xc4, 0xff) },
-        { 310.0f, 509.0f, 292.0f, 136.0f, "Z", "OPERATOR Z (FILTER)",       BLRgba32(0xee, 0xf2, 0xf6) }
-    };
-
     for (int i = 0; i < 8; i++)
     {
         float cx = opCards[i].x;
@@ -812,9 +814,6 @@ void CEditor::DrawPanelCards(BLContext &ctx, const BLFont &fontSmall, const BLFo
             ctx.fill_utf8_text(BLPoint(cx + 12.5f, cy + 19.0f), fontSmall, opCards[i].tag, 1, opCards[i].accent);
             ctx.fill_utf8_text(BLPoint(cx + 30.0f, cy + 19.0f), fontSmall, opCards[i].title, SIZE_MAX, BLRgba32(0x8a, 0x9b, 0xaf));
         }
-
-        // Real-time envelope curve in card header
-        DrawOperatorEnvelope(ctx, i, cx + 172.0f, cy + 6.0f, 112.0f, 19.0f, fontSmall, opCards[i].accent);
     }
 
     // 3. Matrix Card
@@ -1166,21 +1165,56 @@ void CEditor::DrawOxeLogo(BLContext &ctx, float x, float y, float scale)
     ctx.restore();
 }
 
-void CEditor::Paint(BLContext &ctx)
+void CEditor::RenderBackgroundCache(int targetW, int targetH)
 {
+    bgCache.create(targetW, targetH, BL_FORMAT_PRGB32);
+    BLContext bgCtx(bgCache);
+    bgCtx.clear_all();
+
+    double scaleX = (double)targetW / (double)GUI_WIDTH;
+    double scaleY = (double)targetH / (double)GUI_HEIGHT;
+    bgCtx.scale(scaleX, scaleY);
+
     BLFont fontSmall  = CFontManager::GetFont(9.0f);
     BLFont fontNormal = CFontManager::GetFont(11.0f);
     BLFont fontHeader = CFontManager::GetFont(13.0f);
 
     // Global background
-    ctx.fill_box(0.0, 0.0, GUI_WIDTH, GUI_HEIGHT, BLRgba32(0x0b, 0x0e, 0x14));
+    bgCtx.fill_box(0.0, 0.0, GUI_WIDTH, GUI_HEIGHT, BLRgba32(0x0b, 0x0e, 0x14));
 
-    // Panel cards
-    DrawPanelCards(ctx, fontSmall, fontNormal, fontHeader);
+    // Panel cards (static base, borders, headers)
+    DrawPanelCards(bgCtx, fontSmall, fontNormal, fontHeader);
 
     // Matrix decorations & branding logo
-    DrawMatrixDecorations(ctx, fontSmall, fontNormal);
-    DrawOxeLogo(ctx, 746.0f, 94.0f, 1.2f);
+    DrawMatrixDecorations(bgCtx, fontSmall, fontNormal);
+    DrawOxeLogo(bgCtx, 746.0f, 94.0f, 1.2f);
+
+    bgCtx.end();
+}
+
+void CEditor::Paint(BLContext &ctx)
+{
+    int targetW = (int)ctx.target_width();
+    int targetH = (int)ctx.target_height();
+    if (bgCache.width() != targetW || bgCache.height() != targetH)
+    {
+        RenderBackgroundCache(targetW, targetH);
+    }
+
+    // Fast 1:1 background blit
+    ctx.save();
+    ctx.reset_transform();
+    ctx.blit_image(BLPointI(0, 0), bgCache);
+    ctx.restore();
+
+    BLFont fontSmall  = CFontManager::GetFont(9.0f);
+    BLFont fontNormal = CFontManager::GetFont(11.0f);
+
+    // Real-time dynamic envelope curves in card headers
+    for (int i = 0; i < 8; i++)
+    {
+        DrawOperatorEnvelope(ctx, i, opCards[i].x + 172.0f, opCards[i].y + 6.0f, 112.0f, 19.0f, fontSmall, opCards[i].accent);
+    }
 
     // Paint LCD
     if (lcd)

@@ -103,7 +103,12 @@ struct CCocoaToolkitImpl
     [super dealloc];
 }
 
-- (void) drawRect:(NSRect)dirtyRect
+- (BOOL) wantsUpdateLayer
+{
+    return YES;
+}
+
+- (void) updateLayer
 {
     if (!toolkit || !toolkit->editor)
     {
@@ -152,9 +157,8 @@ struct CCocoaToolkitImpl
         kCGRenderingIntentDefault
     );
 
-    CGContextRef cgContext = [[NSGraphicsContext currentContext] CGContext];
-    CGContextSetInterpolationQuality(cgContext, kCGInterpolationHigh);
-    CGContextDrawImage(cgContext, NSRectToCGRect(bounds), cgImage);
+    self.layer.contents = (__bridge id)cgImage;
+    self.layer.contentsScale = backingScale;
 
     CGImageRelease(cgImage);
     CGColorSpaceRelease(colorSpace);

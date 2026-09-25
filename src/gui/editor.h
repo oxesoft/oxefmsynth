@@ -42,6 +42,8 @@ private:
     int            TranslateNote(int cod);
     CToolkit       *toolkit;
     CHostInterface *hostinterface;
+    BLImage        bgCache;
+    void           RenderBackgroundCache(int targetW, int targetH);
 public:
     CEditor(CSynthesizer *synthesizer);
     ~CEditor();

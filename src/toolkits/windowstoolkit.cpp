@@ -172,7 +172,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
             bmi.bmiHeader.biBitCount = 32;
             bmi.bmiHeader.biCompression = BI_RGB;
 
-            SetStretchBltMode(dc, HALFTONE);
+            SetStretchBltMode(dc, COLORONCOLOR);
             StretchDIBits(dc, 0, 0, cw, ch, 0, 0, cw, ch, imgData.pixel_data, &bmi, DIB_RGB_COLORS, SRCCOPY);
         }
         EndPaint(hWnd, &ps);

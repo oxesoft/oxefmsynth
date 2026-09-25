@@ -25,6 +25,11 @@ private:
     int   knobSize;        // size in pixels
     int   par;             // synth parameter assigned
     int   type;            // control type
+    const char* shortLabel;
+    bool  isMatrix;
+    bool  isOutput;
+    bool  isPan;
+    bool  isSelfMod;
     void  Repaint() override;
 public:
     CKnob(int bmp, int knobSize, const char *name, CSynthesizer *synthesizer, char &channel, int type, int par, int x, int y);

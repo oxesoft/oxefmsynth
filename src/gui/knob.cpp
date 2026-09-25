@@ -25,6 +25,40 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "knob.h"
 #include "mapper.h"
 
+static const char* GetShortLabel(const char* fullName)
+{
+    if (strstr(fullName, "Attack Time")) return "ATT";
+    if (strstr(fullName, "Decay Time")) return "DECAY";
+    if (strstr(fullName, "Sustain Lvl")) return "SUST";
+    if (strstr(fullName, "SustainTime")) return "TIME";
+    if (strstr(fullName, "ReleaseTime") || strstr(fullName, "Release Time")) return "REL";
+    if (strstr(fullName, "Cuttof") || strstr(fullName, "Cutoff")) return "CUTTF";
+    if (strstr(fullName, "Resonance")) return "RESO";
+    if (strstr(fullName, "Amount")) return "AMNT";
+    if (strstr(fullName, "VlSensivity")) return "VEL";
+    if (strstr(fullName, "KeybScaling")) return "SCA";
+    if (strstr(fullName, "Coarse Tune")) return "COAR";
+    if (strstr(fullName, "Fine Tune")) return "FINE";
+    if (strstr(fullName, "Delay Feedback")) return "FEED";
+    if (strstr(fullName, "Delay LFO Rate")) return "RATE";
+    if (strstr(fullName, "Delay LFO Amt")) return "AMNT";
+    if (strstr(fullName, "Reverb Damp")) return "DAMP";
+    if (strstr(fullName, "Reverb Time")) return "TIME";
+    if (strstr(fullName, "Delay Level")) return "DELAY";
+    if (strstr(fullName, "Reverb Level")) return "REVRS";
+    if (strstr(fullName, "Portamento")) return "PORTA";
+    if (strstr(fullName, "Pitch Curve")) return "CURVE";
+    if (strstr(fullName, "PitchCurveTime")) return "TIME";
+    if (strstr(fullName, "LFO Rate")) return "RATE";
+    if (strstr(fullName, "LFO Depth")) return "DEPHT";
+    if (strstr(fullName, "LFO Delay")) return "DELAY";
+    if (strstr(fullName, "LFO Destination")) return "DEST";
+    if (strstr(fullName, "Mod Destination")) return "DEST";
+    if (strstr(fullName, "Waveform")) return "WAVE";
+    if (strstr(fullName, "Delay Time")) return "DELAY";
+    return "";
+}
+
 CKnob::CKnob(int bmp, int knobSize, const char *name, CSynthesizer *synthesizer, char &channel, int type, int par, int x, int y)
 {
     strncpy(this->name, name, TEXT_SIZE);
@@ -41,6 +75,14 @@ CKnob::CKnob(int bmp, int knobSize, const char *name, CSynthesizer *synthesizer,
     this->bottom      = y + knobSize;
     this->value       = 0;
     this->fvalue      = 999.f;
+    this->isMatrix    = (par >= MAA && par <= MZP);
+    this->isOutput    = (par == MAO || par == MBO || par == MCO || par == MDO ||
+                         par == MEO || par == MFO || par == MXO || par == MZO);
+    this->isPan       = (par == MAP || par == MBP || par == MCP || par == MDP ||
+                         par == MEP || par == MFP || par == MXP || par == MZP || type == VL_PAN);
+    this->isSelfMod   = (par == MAA || par == MBB || par == MCC || par == MDD ||
+                         par == MEE || par == MFF);
+    this->shortLabel  = GetShortLabel(this->name);
 }
 
 int CKnob::GetCoordinates (oxeCoords *coords)
@@ -81,53 +123,13 @@ void CKnob::Repaint()
     }
 }
 
-static const char* GetShortLabel(const char* fullName)
-{
-    if (strstr(fullName, "Attack Time")) return "ATT";
-    if (strstr(fullName, "Decay Time")) return "DECAY";
-    if (strstr(fullName, "Sustain Lvl")) return "SUST";
-    if (strstr(fullName, "SustainTime")) return "TIME";
-    if (strstr(fullName, "ReleaseTime") || strstr(fullName, "Release Time")) return "REL";
-    if (strstr(fullName, "Cuttof") || strstr(fullName, "Cutoff")) return "CUTTF";
-    if (strstr(fullName, "Resonance")) return "RESO";
-    if (strstr(fullName, "Amount")) return "AMNT";
-    if (strstr(fullName, "VlSensivity")) return "VEL";
-    if (strstr(fullName, "KeybScaling")) return "SCA";
-    if (strstr(fullName, "Coarse Tune")) return "COAR";
-    if (strstr(fullName, "Fine Tune")) return "FINE";
-    if (strstr(fullName, "Delay Feedback")) return "FEED";
-    if (strstr(fullName, "Delay LFO Rate")) return "RATE";
-    if (strstr(fullName, "Delay LFO Amt")) return "AMNT";
-    if (strstr(fullName, "Reverb Damp")) return "DAMP";
-    if (strstr(fullName, "Reverb Time")) return "TIME";
-    if (strstr(fullName, "Delay Level")) return "DELAY";
-    if (strstr(fullName, "Reverb Level")) return "REVRS";
-    if (strstr(fullName, "Portamento")) return "PORTA";
-    if (strstr(fullName, "Pitch Curve")) return "CURVE";
-    if (strstr(fullName, "PitchCurveTime")) return "TIME";
-    if (strstr(fullName, "LFO Rate")) return "RATE";
-    if (strstr(fullName, "LFO Depth")) return "DEPHT";
-    if (strstr(fullName, "LFO Delay")) return "DELAY";
-    if (strstr(fullName, "LFO Destination")) return "DEST";
-    if (strstr(fullName, "Mod Destination")) return "DEST";
-    if (strstr(fullName, "Waveform")) return "WAVE";
-    if (strstr(fullName, "Delay Time")) return "DELAY";
-    return "";
-}
+
 
 void CKnob::Paint(BLContext &ctx, const BLFont &fontSmall, const BLFont &fontNormal)
 {
     float cx = left + knobSize * 0.5f;
     float cy = top + knobSize * 0.5f;
     float r  = knobSize * 0.42f;
-
-    bool isMatrix = (par >= MAA && par <= MZP);
-    bool isOutput = (par == MAO || par == MBO || par == MCO || par == MDO ||
-                     par == MEO || par == MFO || par == MXO || par == MZO);
-    bool isPan    = (par == MAP || par == MBP || par == MCP || par == MDP ||
-                     par == MEP || par == MFP || par == MXP || par == MZP || type == VL_PAN);
-    bool isSelfMod = (par == MAA || par == MBB || par == MCC || par == MDD ||
-                      par == MEE || par == MFF);
 
     if (isMatrix)
     {
@@ -238,14 +240,13 @@ void CKnob::Paint(BLContext &ctx, const BLFont &fontSmall, const BLFont &fontNor
         ctx.stroke_path(needle, BLRgba32(0xff, 0xff, 0xff));
 
         // Short label below dial
-        const char* shortLbl = GetShortLabel(name);
-        if (shortLbl[0] && fontSmall.is_valid())
+        if (shortLabel[0] && fontSmall.is_valid())
         {
             // Estimate text width: ~5.5px per char at size 9
-            float tw = strlen(shortLbl) * 5.5f;
+            float tw = strlen(shortLabel) * 5.5f;
             float tx = cx - tw * 0.5f;
             float ty = top + knobSize + 9.0f;
-            ctx.fill_utf8_text(BLPoint(tx, ty), fontSmall, shortLbl, SIZE_MAX, BLRgba32(0x7a, 0x8a, 0x9e));
+            ctx.fill_utf8_text(BLPoint(tx, ty), fontSmall, shortLabel, SIZE_MAX, BLRgba32(0x7a, 0x8a, 0x9e));
         }
     }
 }
