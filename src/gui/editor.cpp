@@ -499,6 +499,47 @@ void CEditor::OnLButtonDblClick(int x, int y)
     }
 }
 
+struct OpCard {
+    float x, y, w, h;
+    const char* tag;
+    const char* title;
+    BLRgba32 accent;
+};
+
+static const OpCard opCards[8] = {
+    {  12.0f,  86.0f, 292.0f, 132.0f, "A", "OPERATOR A",                BLRgba32(0x00, 0xf0, 0xff) },
+    { 310.0f,  86.0f, 292.0f, 132.0f, "B", "OPERATOR B",                BLRgba32(0x00, 0xe6, 0x76) },
+    {  12.0f, 227.0f, 292.0f, 132.0f, "C", "OPERATOR C",                BLRgba32(0xff, 0xd6, 0x00) },
+    { 310.0f, 227.0f, 292.0f, 132.0f, "D", "OPERATOR D",                BLRgba32(0xff, 0x91, 0x00) },
+    {  12.0f, 368.0f, 292.0f, 132.0f, "E", "OPERATOR E",                BLRgba32(0xb3, 0x88, 0xff) },
+    { 310.0f, 368.0f, 292.0f, 132.0f, "F", "OPERATOR F",                BLRgba32(0xff, 0x40, 0x81) },
+    {  12.0f, 509.0f, 292.0f, 136.0f, "X", "OPERATOR X (FILTER/NOISE)", BLRgba32(0x40, 0xc4, 0xff) },
+    { 310.0f, 509.0f, 292.0f, 136.0f, "Z", "OPERATOR Z (FILTER)",       BLRgba32(0xee, 0xf2, 0xf6) }
+};
+
+static int GetEnvelopeOpIndexForParam(int par)
+{
+    if ((par >= OPADL && par <= OPARE) || par == OPAON) return 0;
+    if ((par >= OPBDL && par <= OPBRE) || par == OPBON) return 1;
+    if ((par >= OPCDL && par <= OPCRE) || par == OPCON) return 2;
+    if ((par >= OPDDL && par <= OPDRE) || par == OPDON) return 3;
+    if ((par >= OPEDL && par <= OPERE) || par == OPEON) return 4;
+    if ((par >= OPFDL && par <= OPFRE) || par == OPFON) return 5;
+    if ((par >= OPXDL && par <= OPXRE) || par == OPXON) return 6;
+    if ((par >= OPZDL && par <= OPZRE) || par == OPZON) return 7;
+    return -1;
+}
+
+static inline void InvalidateEnvelopeIfParam(CToolkit *toolkit, int par)
+{
+    if (!toolkit) return;
+    int op = GetEnvelopeOpIndexForParam(par);
+    if (op >= 0)
+    {
+        toolkit->InvalidateRect((int)opCards[op].x + 170, (int)opCards[op].y + 4, 116, 23);
+    }
+}
+
 void CEditor::OnLButtonDown(int x, int y)
 {
     char str[TEXT_SIZE];
@@ -517,6 +558,7 @@ void CEditor::OnLButtonDown(int x, int y)
             lcd->SetText(0,str);
             CMapper::GetDisplayValue(this->synthesizer, this->channel, ctl[i]->GetIndex(), ctl[i]->GetType(), str);
             lcd->SetText(1,str);
+            InvalidateEnvelopeIfParam(toolkit, ctl[i]->GetIndex());
             cID = i;
             if (ctl[i]->IsKnob() == true)
             {
@@ -586,10 +628,7 @@ void CEditor::OnMouseMove(int x, int y)
         {
             CMapper::GetDisplayValue(this->synthesizer, this->channel, ctl[cID]->GetIndex(), ctl[cID]->GetType(), str);
             lcd->SetText(1, str);
-            if (toolkit)
-            {
-                toolkit->Invalidate();
-            }
+            InvalidateEnvelopeIfParam(toolkit, ctl[cID]->GetIndex());
         }
     }
 }
@@ -609,10 +648,7 @@ void CEditor::OnMouseWheel(int x, int y, int delta)
                 {
                     CMapper::GetDisplayValue(this->synthesizer, this->channel, ctl[i]->GetIndex(), ctl[i]->GetType(), str);
                     lcd->SetText(1,str);
-                    if (toolkit)
-                    {
-                        toolkit->Invalidate();
-                    }
+                    InvalidateEnvelopeIfParam(toolkit, ctl[i]->GetIndex());
                     if (channel == 0)
                     {
                         int index = ctl[i]->GetIndex();
@@ -697,10 +733,7 @@ void CEditor::SetPar(int index, float value)
             float fvalue = CMapper::IntValueToFloatValue(this->synthesizer, CHANNEL, index, type, lrintf(value * MAXPARVALUE));
             synthesizer->SetPar(CHANNEL, index, fvalue);
             ctl[i]->Update();
-            if (toolkit)
-            {
-                toolkit->Invalidate();
-            }
+            InvalidateEnvelopeIfParam(toolkit, index);
             break;
         }
     }
@@ -754,24 +787,6 @@ void CEditor::GetParName(int index, char* text)
     }
     strncpy(text, "not found", TEXT_SIZE);
 }
-
-struct OpCard {
-    float x, y, w, h;
-    const char* tag;
-    const char* title;
-    BLRgba32 accent;
-};
-
-static const OpCard opCards[8] = {
-    {  12.0f,  86.0f, 292.0f, 132.0f, "A", "OPERATOR A",                BLRgba32(0x00, 0xf0, 0xff) },
-    { 310.0f,  86.0f, 292.0f, 132.0f, "B", "OPERATOR B",                BLRgba32(0x00, 0xe6, 0x76) },
-    {  12.0f, 227.0f, 292.0f, 132.0f, "C", "OPERATOR C",                BLRgba32(0xff, 0xd6, 0x00) },
-    { 310.0f, 227.0f, 292.0f, 132.0f, "D", "OPERATOR D",                BLRgba32(0xff, 0x91, 0x00) },
-    {  12.0f, 368.0f, 292.0f, 132.0f, "E", "OPERATOR E",                BLRgba32(0xb3, 0x88, 0xff) },
-    { 310.0f, 368.0f, 292.0f, 132.0f, "F", "OPERATOR F",                BLRgba32(0xff, 0x40, 0x81) },
-    {  12.0f, 509.0f, 292.0f, 136.0f, "X", "OPERATOR X (FILTER/NOISE)", BLRgba32(0x40, 0xc4, 0xff) },
-    { 310.0f, 509.0f, 292.0f, 136.0f, "Z", "OPERATOR Z (FILTER)",       BLRgba32(0xee, 0xf2, 0xf6) }
-};
 
 void CEditor::DrawPanelCards(BLContext &ctx, const BLFont &fontSmall, const BLFont &fontNormal, const BLFont &fontHeader)
 {
@@ -1192,43 +1207,103 @@ void CEditor::RenderBackgroundCache(int targetW, int targetH)
     bgCtx.end();
 }
 
-void CEditor::Paint(BLContext &ctx)
+static inline bool RectsIntersect(int x1, int y1, int w1, int h1, int x2, int y2, int w2, int h2)
+{
+    return !(x1 + w1 <= x2 || x2 + w2 <= x1 || y1 + h1 <= y2 || y2 + h2 <= y1);
+}
+
+void CEditor::Paint(BLContext &ctx, int dirtyX, int dirtyY, int dirtyW, int dirtyH)
 {
     int targetW = (int)ctx.target_width();
     int targetH = (int)ctx.target_height();
     if (bgCache.width() != targetW || bgCache.height() != targetH)
     {
         RenderBackgroundCache(targetW, targetH);
+        dirtyW = 0; // force full repaint
     }
 
-    // Fast 1:1 background blit
-    ctx.save();
-    ctx.reset_transform();
-    ctx.blit_image(BLPointI(0, 0), bgCache);
-    ctx.restore();
+    double scaleX = (double)targetW / (double)GUI_WIDTH;
+    double scaleY = (double)targetH / (double)GUI_HEIGHT;
+
+    bool isFullRepaint = (dirtyW <= 0 || dirtyH <= 0 || (dirtyX <= 0 && dirtyY <= 0 && dirtyW >= GUI_WIDTH && dirtyH >= GUI_HEIGHT));
+
+    if (isFullRepaint)
+    {
+        // Fast 1:1 background blit
+        ctx.save();
+        ctx.reset_transform();
+        ctx.blit_image(BLPointI(0, 0), bgCache);
+        ctx.restore();
+    }
+    else
+    {
+        // Restore background from cache for dirty region only
+        int px = (int)floor(dirtyX * scaleX);
+        int py = (int)floor(dirtyY * scaleY);
+        int pw = (int)ceil(dirtyW * scaleX) + 1;
+        int ph = (int)ceil(dirtyH * scaleY) + 1;
+
+        if (px < 0) { pw += px; px = 0; }
+        if (py < 0) { ph += py; py = 0; }
+        if (px + pw > targetW) pw = targetW - px;
+        if (py + ph > targetH) ph = targetH - py;
+
+        if (pw > 0 && ph > 0)
+        {
+            ctx.save();
+            ctx.reset_transform();
+            ctx.blit_image(BLPointI(px, py), bgCache, BLRectI(px, py, pw, ph));
+            ctx.restore();
+        }
+
+        ctx.save();
+        ctx.clip_to_rect(BLRect((double)dirtyX, (double)dirtyY, (double)dirtyW, (double)dirtyH));
+    }
 
     BLFont fontSmall  = CFontManager::GetFont(9.0f);
     BLFont fontNormal = CFontManager::GetFont(11.0f);
 
-    // Real-time dynamic envelope curves in card headers
+    // Dynamic envelope curves in card headers
     for (int i = 0; i < 8; i++)
     {
-        DrawOperatorEnvelope(ctx, i, opCards[i].x + 172.0f, opCards[i].y + 6.0f, 112.0f, 19.0f, fontSmall, opCards[i].accent);
+        int ex = (int)opCards[i].x + 170;
+        int ey = (int)opCards[i].y + 4;
+        int ew = 116;
+        int eh = 23;
+        if (isFullRepaint || RectsIntersect(ex, ey, ew, eh, dirtyX, dirtyY, dirtyW, dirtyH))
+        {
+            DrawOperatorEnvelope(ctx, i, opCards[i].x + 172.0f, opCards[i].y + 6.0f, 112.0f, 19.0f, fontSmall, opCards[i].accent);
+        }
     }
 
     // Paint LCD
     if (lcd)
     {
-        lcd->Paint(ctx, fontSmall, fontNormal);
+        int lx, ly, lw, lh;
+        lcd->GetRepaintBounds(lx, ly, lw, lh);
+        if (isFullRepaint || RectsIntersect(lx, ly, lw, lh, dirtyX, dirtyY, dirtyW, dirtyH))
+        {
+            lcd->Paint(ctx, fontSmall, fontNormal);
+        }
     }
 
-    // Paint all controls
+    // Paint controls
     for (int i = 0; i < GUI_CONTROLS; i++)
     {
         if (ctl[i])
         {
-            ctl[i]->Paint(ctx, fontSmall, fontNormal);
+            int cx, cy, cw, ch;
+            ctl[i]->GetRepaintBounds(cx, cy, cw, ch);
+            if (isFullRepaint || RectsIntersect(cx, cy, cw, ch, dirtyX, dirtyY, dirtyW, dirtyH))
+            {
+                ctl[i]->Paint(ctx, fontSmall, fontNormal);
+            }
         }
+    }
+
+    if (!isFullRepaint)
+    {
+        ctx.restore();
     }
 }
 

@@ -32,5 +32,6 @@ public:
     CLcd(int bmpchars, int x, int y);
     bool SetText(char lineIndex, const char *text);
     int  GetCoordinates(oxeCoords *coords) override;
+    void GetRepaintBounds(int &rx, int &ry, int &rw, int &rh) const override;
     void Paint(BLContext &ctx, const BLFont &fontSmall, const BLFont &fontNormal) override;
 };

@@ -45,7 +45,9 @@ protected:
     {
         if (toolkit)
         {
-            toolkit->InvalidateRect(left, top, right - left, bottom - top);
+            int rx, ry, rw, rh;
+            GetRepaintBounds(rx, ry, rw, rh);
+            toolkit->InvalidateRect(rx, ry, rw, rh);
         }
     }
 public:
@@ -79,6 +81,15 @@ public:
     int GetTop()    const { return top; }
     int GetRight()  const { return right; }
     int GetBottom() const { return bottom; }
+    int GetWidth()  const { return right - left; }
+    int GetHeight() const { return bottom - top; }
+    virtual void GetRepaintBounds(int &rx, int &ry, int &rw, int &rh) const
+    {
+        rx = left;
+        ry = top;
+        rw = right - left;
+        rh = bottom - top;
+    }
 };
 
 enum

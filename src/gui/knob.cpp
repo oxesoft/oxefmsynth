@@ -115,11 +115,31 @@ int CKnob::GetCoordinates (oxeCoords *coords)
     return 1;
 }
 
+void CKnob::GetRepaintBounds(int &rx, int &ry, int &rw, int &rh) const
+{
+    if (isMatrix)
+    {
+        rx = this->left - 2;
+        ry = this->top - 2;
+        rw = this->knobSize + 4;
+        rh = this->knobSize + 4;
+    }
+    else
+    {
+        rx = this->left - 6;
+        ry = this->top - 2;
+        rw = this->knobSize + 12;
+        rh = this->knobSize + 16;
+    }
+}
+
 void CKnob::Repaint()
 {
     if (toolkit)
     {
-        toolkit->InvalidateRect(this->left, this->top, this->right - this->left, this->bottom - this->top);
+        int rx, ry, rw, rh;
+        GetRepaintBounds(rx, ry, rw, rh);
+        toolkit->InvalidateRect(rx, ry, rw, rh);
     }
 }
 

@@ -107,7 +107,8 @@ void* eventProc(void* ptr)
             }
             case Expose:
             {
-                toolkit->Draw();
+                XExposeEvent *e = (XExposeEvent*)&event;
+                toolkit->Draw(e->x, e->y, e->width, e->height);
                 break;
             }
             case ClientMessage:
@@ -269,7 +270,7 @@ void CXlibToolkit::StartWindowProcesses()
     pthread_create(&thread2, NULL, &updateProc, (void*)this);
 }
 
-void CXlibToolkit::Draw()
+void CXlibToolkit::Draw(int x, int y, int w, int h)
 {
     if (!editor || !display || !window) return;
     XWindowAttributes wa;
@@ -278,17 +279,33 @@ void CXlibToolkit::Draw()
     int winH = wa.height;
     if (winW <= 0 || winH <= 0) return;
 
+    bool isFull = (w <= 0 || h <= 0);
+
     if (blImage.width() != winW || blImage.height() != winH)
     {
         blImage.create(winW, winH, BL_FORMAT_PRGB32);
+        isFull = true;
+    }
+
+    double sx = (double)winW / (double)GUI_WIDTH;
+    double sy = (double)winH / (double)GUI_HEIGHT;
+
+    int dirtyX = 0, dirtyY = 0, dirtyW = GUI_WIDTH, dirtyH = GUI_HEIGHT;
+    if (!isFull)
+    {
+        dirtyX = (int)floor(x / sx);
+        dirtyY = (int)floor(y / sy);
+        dirtyW = (int)ceil(w / sx) + 1;
+        dirtyH = (int)ceil(h / sy) + 1;
+        if (dirtyX < 0) dirtyX = 0;
+        if (dirtyY < 0) dirtyY = 0;
+        if (dirtyX + dirtyW > GUI_WIDTH) dirtyW = GUI_WIDTH - dirtyX;
+        if (dirtyY + dirtyH > GUI_HEIGHT) dirtyH = GUI_HEIGHT - dirtyY;
     }
 
     BLContext ctx(blImage);
-    ctx.clear_all();
-    double sx = (double)winW / (double)GUI_WIDTH;
-    double sy = (double)winH / (double)GUI_HEIGHT;
     ctx.scale(sx, sy);
-    editor->Paint(ctx);
+    editor->Paint(ctx, dirtyX, dirtyY, dirtyW, dirtyH);
     ctx.end();
 
     BLImageData imgData;
@@ -299,7 +316,23 @@ void CXlibToolkit::Draw()
     XImage *ximage = XCreateImage(display, visual, depth, ZPixmap, 0, (char*)imgData.pixel_data, winW, winH, 32, imgData.stride);
     if (ximage)
     {
-        XPutImage(display, window, gc, ximage, 0, 0, 0, 0, winW, winH);
+        if (isFull)
+        {
+            XPutImage(display, window, gc, ximage, 0, 0, 0, 0, winW, winH);
+        }
+        else
+        {
+            int bltX = (int)floor(dirtyX * sx);
+            int bltY = (int)floor(dirtyY * sy);
+            int bltW = (int)ceil(dirtyW * sx) + 1;
+            int bltH = (int)ceil(dirtyH * sy) + 1;
+            if (bltX + bltW > winW) bltW = winW - bltX;
+            if (bltY + bltH > winH) bltH = winH - bltY;
+            if (bltW > 0 && bltH > 0)
+            {
+                XPutImage(display, window, gc, ximage, bltX, bltY, bltX, bltY, bltW, bltH);
+            }
+        }
         ximage->data = NULL; // prevent XDestroyImage from freeing Blend2D memory
         XDestroyImage(ximage);
     }
@@ -314,7 +347,19 @@ void CXlibToolkit::Invalidate()
 
 void CXlibToolkit::InvalidateRect(int x, int y, int width, int height)
 {
-    Invalidate();
+    if (!display || !window) return;
+    XWindowAttributes wa;
+    XGetWindowAttributes(display, window, &wa);
+    double sx = wa.width > 0 ? (double)wa.width / (double)GUI_WIDTH : 1.0;
+    double sy = wa.height > 0 ? (double)wa.height / (double)GUI_HEIGHT : 1.0;
+    int vx = (int)floor((x - 1) * sx);
+    int vy = (int)floor((y - 1) * sy);
+    int vw = (int)ceil((width + 2) * sx);
+    int vh = (int)ceil((height + 2) * sy);
+    if (vx < 0) { vw += vx; vx = 0; }
+    if (vy < 0) { vh += vy; vy = 0; }
+    XClearArea(display, window, vx, vy, vw, vh, True);
+    XFlush(display);
 }
 
 void CXlibToolkit::CopyRect(int destX, int destY, int width, int height, int origBmp, int origX, int origY)

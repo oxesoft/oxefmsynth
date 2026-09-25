@@ -65,7 +65,7 @@ public:
     void  GetCoordinates   (oxeCoords *coords);
     void  SetToolkit       (CToolkit *toolkit);
     void  SetHostInterface (CHostInterface *hostinterface);
-    void  Paint            (BLContext &ctx);
+    void  Paint            (BLContext &ctx, int dirtyX = 0, int dirtyY = 0, int dirtyW = 0, int dirtyH = 0);
 private:
     void  DrawPanelCards   (BLContext &ctx, const BLFont &fontSmall, const BLFont &fontNormal, const BLFont &fontHeader);
     void  DrawOperatorEnvelope(BLContext &ctx, int opIndex, float x, float y, float w, float h, const BLFont &fontSmall, const BLRgba32 &accentColor = BLRgba32(0x00, 0xf0, 0xff));

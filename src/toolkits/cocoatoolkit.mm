@@ -103,12 +103,7 @@ struct CCocoaToolkitImpl
     [super dealloc];
 }
 
-- (BOOL) wantsUpdateLayer
-{
-    return YES;
-}
-
-- (void) updateLayer
+- (void) drawRect:(NSRect)dirtyRect
 {
     if (!toolkit || !toolkit->editor)
     {
@@ -126,16 +121,30 @@ struct CCocoaToolkitImpl
     if (blImage.width() != pixelW || blImage.height() != pixelH)
     {
         blImage.create(pixelW, pixelH, BL_FORMAT_PRGB32);
+        dirtyRect = bounds;
     }
 
-    BLContext ctx(blImage);
-    ctx.clear_all();
+    double sx = bounds.size.width / (double)GUI_WIDTH;
+    double sy = bounds.size.height / (double)GUI_HEIGHT;
 
+    // Convert dirtyRect (Cocoa coords, bottom-left) to user GUI coords (top-left)
+    double topInView = bounds.size.height - (dirtyRect.origin.y + dirtyRect.size.height);
+    int dirtyX = (int)floor(dirtyRect.origin.x / sx);
+    int dirtyY = (int)floor(topInView / sy);
+    int dirtyW = (int)ceil(dirtyRect.size.width / sx) + 1;
+    int dirtyH = (int)ceil(dirtyRect.size.height / sy) + 1;
+
+    if (dirtyX < 0) dirtyX = 0;
+    if (dirtyY < 0) dirtyY = 0;
+    if (dirtyX + dirtyW > GUI_WIDTH) dirtyW = GUI_WIDTH - dirtyX;
+    if (dirtyY + dirtyH > GUI_HEIGHT) dirtyH = GUI_HEIGHT - dirtyY;
+
+    BLContext ctx(blImage);
     double scaleX = (double)pixelW / (double)GUI_WIDTH;
     double scaleY = (double)pixelH / (double)GUI_HEIGHT;
     ctx.scale(scaleX, scaleY);
 
-    toolkit->editor->Paint(ctx);
+    toolkit->editor->Paint(ctx, dirtyX, dirtyY, dirtyW, dirtyH);
     ctx.end();
 
     BLImageData imgData;
@@ -157,8 +166,11 @@ struct CCocoaToolkitImpl
         kCGRenderingIntentDefault
     );
 
-    self.layer.contents = (__bridge id)cgImage;
-    self.layer.contentsScale = backingScale;
+    CGContextRef context = [[NSGraphicsContext currentContext] CGContext];
+    CGContextSaveGState(context);
+    CGContextSetInterpolationQuality(context, kCGInterpolationNone);
+    CGContextDrawImage(context, NSRectToCGRect(bounds), cgImage);
+    CGContextRestoreGState(context);
 
     CGImageRelease(cgImage);
     CGColorSpaceRelease(colorSpace);
@@ -457,9 +469,21 @@ struct CCocoaToolkitImpl
     [view setNeedsDisplay:YES];
 }
 
-- (void) invalidateRect:(NSRect)rect
+- (void) invalidateRect:(NSRect)guiRect
 {
-    [self invalidate];
+    if (!view) return;
+    NSRect bounds = [view bounds];
+    double sx = bounds.size.width / (double)GUI_WIDTH;
+    double sy = bounds.size.height / (double)GUI_HEIGHT;
+
+    double vx = (guiRect.origin.x - 1) * sx;
+    double vy = (guiRect.origin.y - 1) * sy;
+    double vw = (guiRect.size.width + 2) * sx;
+    double vh = (guiRect.size.height + 2) * sy;
+
+    double cy = bounds.size.height - (vy + vh);
+    NSRect cocoaRect = NSMakeRect(floor(vx), floor(cy), ceil(vw), ceil(vh));
+    [view setNeedsDisplayInRect:cocoaRect];
 }
 
 - (void) resizeToWidth:(int)w height:(int)h
@@ -539,7 +563,11 @@ void CCocoaToolkit::Invalidate()
 
 void CCocoaToolkit::InvalidateRect(int x, int y, int width, int height)
 {
-    Invalidate();
+    CCocoaToolkitImpl *pImpl = (CCocoaToolkitImpl*)this->impl;
+    if (pImpl && pImpl->controller)
+    {
+        [pImpl->controller invalidateRect:NSMakeRect(x, y, width, height)];
+    }
 }
 
 void CCocoaToolkit::CopyRect(int destX, int destY, int width, int height, int origBmp, int origX, int origY)

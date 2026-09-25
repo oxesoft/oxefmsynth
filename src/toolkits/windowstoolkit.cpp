@@ -149,19 +149,34 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
         GetClientRect(hWnd, &clientRect);
         int cw = clientRect.right - clientRect.left;
         int ch = clientRect.bottom - clientRect.top;
-        if (cw > 0 && ch > 0 && toolkit->editor)
+        if (cw > 0 && ch > 0 && toolkit && toolkit->editor)
         {
-            BLImage blImg(cw, ch, BL_FORMAT_PRGB32);
-            BLContext ctx(blImg);
-            ctx.clear_all();
+            if (toolkit->blImage.width() != cw || toolkit->blImage.height() != ch)
+            {
+                toolkit->blImage.create(cw, ch, BL_FORMAT_PRGB32);
+                ps.rcPaint = clientRect;
+            }
+
             double sx = (double)cw / (double)GUI_WIDTH;
             double sy = (double)ch / (double)GUI_HEIGHT;
+
+            int dirtyX = (int)floor(ps.rcPaint.left / sx);
+            int dirtyY = (int)floor(ps.rcPaint.top / sy);
+            int dirtyW = (int)ceil((ps.rcPaint.right - ps.rcPaint.left) / sx) + 1;
+            int dirtyH = (int)ceil((ps.rcPaint.bottom - ps.rcPaint.top) / sy) + 1;
+
+            if (dirtyX < 0) dirtyX = 0;
+            if (dirtyY < 0) dirtyY = 0;
+            if (dirtyX + dirtyW > GUI_WIDTH) dirtyW = GUI_WIDTH - dirtyX;
+            if (dirtyY + dirtyH > GUI_HEIGHT) dirtyH = GUI_HEIGHT - dirtyY;
+
+            BLContext ctx(toolkit->blImage);
             ctx.scale(sx, sy);
-            toolkit->editor->Paint(ctx);
+            toolkit->editor->Paint(ctx, dirtyX, dirtyY, dirtyW, dirtyH);
             ctx.end();
 
             BLImageData imgData;
-            blImg.get_data(&imgData);
+            toolkit->blImage.get_data(&imgData);
 
             BITMAPINFO bmi;
             ZeroMemory(&bmi, sizeof(BITMAPINFO));
@@ -173,7 +188,11 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
             bmi.bmiHeader.biCompression = BI_RGB;
 
             SetStretchBltMode(dc, COLORONCOLOR);
-            StretchDIBits(dc, 0, 0, cw, ch, 0, 0, cw, ch, imgData.pixel_data, &bmi, DIB_RGB_COLORS, SRCCOPY);
+            int bltX = ps.rcPaint.left;
+            int bltY = ps.rcPaint.top;
+            int bltW = ps.rcPaint.right - ps.rcPaint.left;
+            int bltH = ps.rcPaint.bottom - ps.rcPaint.top;
+            StretchDIBits(dc, bltX, bltY, bltW, bltH, bltX, bltY, bltW, bltH, imgData.pixel_data, &bmi, DIB_RGB_COLORS, SRCCOPY);
         }
         EndPaint(hWnd, &ps);
         return 0;
@@ -301,7 +320,14 @@ void CWindowsToolkit::Invalidate()
 
 void CWindowsToolkit::InvalidateRect(int x, int y, int width, int height)
 {
-    Invalidate();
+    if (!hWnd) return;
+    float scale = GetScale();
+    RECT rc;
+    rc.left   = (int)floor((x - 1) * scale);
+    rc.top    = (int)floor((y - 1) * scale);
+    rc.right  = (int)ceil((x + width + 1) * scale);
+    rc.bottom = (int)ceil((y + height + 1) * scale);
+    ::InvalidateRect(hWnd, &rc, FALSE);
 }
 
 void CWindowsToolkit::CopyRect(int destX, int destY, int width, int height, int origBmp, int origX, int origY)

@@ -56,11 +56,21 @@ int CLcd::GetCoordinates (oxeCoords *coords)
     return LCD_COORDS;
 }
 
+void CLcd::GetRepaintBounds(int &rx, int &ry, int &rw, int &rh) const
+{
+    rx = this->left - 2;
+    ry = this->top - 2;
+    rw = (this->right - this->left) + 4;
+    rh = (this->bottom - this->top) + 4;
+}
+
 void CLcd::Repaint()
 {
     if (toolkit)
     {
-        toolkit->InvalidateRect(this->left, this->top, this->right - this->left, this->bottom - this->top);
+        int rx, ry, rw, rh;
+        GetRepaintBounds(rx, ry, rw, rh);
+        toolkit->InvalidateRect(rx, ry, rw, rh);
     }
 }
 

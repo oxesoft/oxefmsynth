@@ -50,5 +50,5 @@ public:
     virtual int  WaitWindowClosed() override;
     virtual float GetScale() override;
     void Resize(int width, int height);
-    void Draw();
+    void Draw(int x = 0, int y = 0, int w = 0, int h = 0);
 };
