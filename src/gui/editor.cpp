@@ -206,7 +206,7 @@ CEditor::CEditor(CSynthesizer *synthesizer)
     aX = cX;
     aY = cY + oY * 3;
     ctl[ctlcount++] = new CKey     (BMP_KEY,  0,15,15,"OPX On/Off",      synthesizer, channel,                   OPXON, aX         , aY+10   );
-    ctl[ctlcount++] = new CKnob    (BMP_KNOB,   36,   "OPX Cuttof",      synthesizer, channel, VL_FILTER_CUTOFF, OPXCU, aX+sX2     , aY      );
+    ctl[ctlcount++] = new CKnob    (BMP_KNOB,   36,   "OPX Cutoff",      synthesizer, channel, VL_FILTER_CUTOFF, OPXCU, aX+sX2     , aY      );
     ctl[ctlcount++] = new CKnob    (BMP_KNOB,   36,   "OPX Resonance",   synthesizer, channel, VL_ZERO_TO_ONE,   OPXRS, aX+sX+sX2  , aY      );
     ctl[ctlcount++] = new CKnob    (BMP_KNOB,   36,   "OPX Amount",      synthesizer, channel, VL_ZERO_TO_ONE,   OPXAM, aX+sX*2+sX2, aY      );
     ctl[ctlcount++] = new CKey     (BMP_KEY,  0,15,15,"OPX Bypass",      synthesizer, channel,                   OPXBP, aX+sX*3+sX2, aY+10   );
@@ -223,7 +223,7 @@ CEditor::CEditor(CSynthesizer *synthesizer)
     aX = cX + oX;
     aY = cY + oY * 3;
     ctl[ctlcount++] = new CKey     (BMP_KEY,  0,15,15,"OPZ On/Off",      synthesizer, channel,                   OPZON, aX         , aY+10   );
-    ctl[ctlcount++] = new CKnob    (BMP_KNOB,   36,   "OPZ Cuttof",      synthesizer, channel, VL_FILTER_CUTOFF, OPZCU, aX+sX2     , aY      );
+    ctl[ctlcount++] = new CKnob    (BMP_KNOB,   36,   "OPZ Cutoff",      synthesizer, channel, VL_FILTER_CUTOFF, OPZCU, aX+sX2     , aY      );
     ctl[ctlcount++] = new CKnob    (BMP_KNOB,   36,   "OPZ Resonance",   synthesizer, channel, VL_ZERO_TO_ONE,   OPZRS, aX+sX+sX2  , aY      );
     ctl[ctlcount++] = new CKnob    (BMP_KNOB,   36,   "OPZ Type",        synthesizer, channel, VL_FILTER,        OPZTY, aX+sX*2+sX2, aY      );
     ctl[ctlcount++] = new CKey     (BMP_KEY,  0,15,15,"OPZ Keyb Track",  synthesizer, channel,                   OPZKT, aX+sX*3+sX2, aY+10   );
@@ -507,14 +507,14 @@ struct OpCard {
 };
 
 static const OpCard opCards[8] = {
-    {  12.0f,  86.0f, 292.0f, 132.0f, "A", "OPERATOR A",                BLRgba32(0x00, 0xf0, 0xff) },
-    { 310.0f,  86.0f, 292.0f, 132.0f, "B", "OPERATOR B",                BLRgba32(0x00, 0xe6, 0x76) },
-    {  12.0f, 227.0f, 292.0f, 132.0f, "C", "OPERATOR C",                BLRgba32(0xff, 0xd6, 0x00) },
-    { 310.0f, 227.0f, 292.0f, 132.0f, "D", "OPERATOR D",                BLRgba32(0xff, 0x91, 0x00) },
-    {  12.0f, 368.0f, 292.0f, 132.0f, "E", "OPERATOR E",                BLRgba32(0xb3, 0x88, 0xff) },
-    { 310.0f, 368.0f, 292.0f, 132.0f, "F", "OPERATOR F",                BLRgba32(0xff, 0x40, 0x81) },
-    {  12.0f, 509.0f, 292.0f, 136.0f, "X", "OPERATOR X (FILTER/NOISE)", BLRgba32(0x40, 0xc4, 0xff) },
-    { 310.0f, 509.0f, 292.0f, 136.0f, "Z", "OPERATOR Z (FILTER)",       BLRgba32(0xee, 0xf2, 0xf6) }
+    {  12.0f,  86.0f, 292.0f, 132.0f, "A", "OSCILLATOR", BLRgba32(0x00, 0xf0, 0xff) },
+    { 310.0f,  86.0f, 292.0f, 132.0f, "B", "OSCILLATOR", BLRgba32(0x00, 0xe6, 0x76) },
+    {  12.0f, 227.0f, 292.0f, 132.0f, "C", "OSCILLATOR", BLRgba32(0xff, 0xd6, 0x00) },
+    { 310.0f, 227.0f, 292.0f, 132.0f, "D", "OSCILLATOR", BLRgba32(0xff, 0x91, 0x00) },
+    {  12.0f, 368.0f, 292.0f, 132.0f, "E", "OSCILLATOR", BLRgba32(0xb3, 0x88, 0xff) },
+    { 310.0f, 368.0f, 292.0f, 132.0f, "F", "OSCILLATOR", BLRgba32(0xff, 0x40, 0x81) },
+    {  12.0f, 509.0f, 292.0f, 136.0f, "X", "NOISE",      BLRgba32(0x40, 0xc4, 0xff) },
+    { 310.0f, 509.0f, 292.0f, 136.0f, "Z", "FILTER",     BLRgba32(0xee, 0xf2, 0xf6) }
 };
 
 static int GetEnvelopeOpIndexForParam(int par)
@@ -826,7 +826,12 @@ void CEditor::DrawPanelCards(BLContext &ctx, const BLFont &fontSmall, const BLFo
         ctx.stroke_round_rect(BLRoundRect(cx + 8.0f, cy + 7.0f, 16.0f, 16.0f, 3.0f), opCards[i].accent);
         if (fontSmall.is_valid())
         {
-            ctx.fill_utf8_text(BLPoint(cx + 12.5f, cy + 19.0f), fontSmall, opCards[i].tag, 1, opCards[i].accent);
+            BLGlyphBuffer gb;
+            gb.set_utf8_text(opCards[i].tag, 1);
+            BLTextMetrics tm;
+            fontSmall.get_text_metrics(gb, tm);
+            float tagX = cx + 8.0f + (16.0f - (float)(tm.bounding_box.x0 + tm.bounding_box.x1)) * 0.5f;
+            ctx.fill_utf8_text(BLPoint(tagX, cy + 19.0f), fontSmall, opCards[i].tag, 1, opCards[i].accent);
             ctx.fill_utf8_text(BLPoint(cx + 30.0f, cy + 19.0f), fontSmall, opCards[i].title, SIZE_MAX, BLRgba32(0x8a, 0x9b, 0xaf));
         }
     }

@@ -372,7 +372,7 @@ void CNote::SendEvent(char param, float value, int position)
                         lfoosc.SetPar(FREQUENCY, value * program->LFORA * (float)SAMPLES_PER_PROCESS);
                     }
                     break;
-                case 2: // Filter Cuttof
+                case 2: // Filter Cutoff
                     if (opstate[7])
                     {
                         filter.SetPar(FREQUENCY, Key2Frequency((char)lrintf(value * program->OPZCU / MAXPARVALUE * MAXFREQFLT)));
@@ -387,7 +387,7 @@ void CNote::SendEvent(char param, float value, int position)
                         lfoosc.SetPar(FREQUENCY, (1.f - value) * program->LFORA * (float)SAMPLES_PER_PROCESS);
                     }
                     break;
-                case 5: // Filter Cuttof Invert
+                case 5: // Filter Cutoff Invert
                     if (opstate[7])
                     {
                         filter.SetPar(FREQUENCY, Key2Frequency((char)lrintf((1.f - value) * program->OPZCU / MAXPARVALUE * MAXFREQFLT)));

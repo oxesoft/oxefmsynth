@@ -101,12 +101,21 @@ void CKey::Paint(BLContext &ctx, const BLFont &fontSmall, const BLFont &fontNorm
         ctx.fill_circle(cx, cy, r, BLRgba32(0x18, 0x20, 0x2b));
         ctx.set_stroke_width(1.8);
 
+        BLGlyphBuffer gb;
+        gb.set_utf8_text(letter, 1);
+        BLTextMetrics tm;
+        if (fontNormal.is_valid())
+        {
+            fontNormal.get_text_metrics(gb, tm);
+        }
+        float lx = cx - (float)(tm.bounding_box.x0 + tm.bounding_box.x1) * 0.5f;
+
         if (value)
         {
             ctx.stroke_circle(cx, cy, r, accentColor);
             if (fontNormal.is_valid())
             {
-                ctx.fill_utf8_text(BLPoint(cx - 4.5f, cy + 4.5f), fontNormal, letter, 1, accentColor);
+                ctx.fill_utf8_text(BLPoint(lx, cy + 4.5f), fontNormal, letter, 1, accentColor);
             }
         }
         else
@@ -114,7 +123,7 @@ void CKey::Paint(BLContext &ctx, const BLFont &fontSmall, const BLFont &fontNorm
             ctx.stroke_circle(cx, cy, r, BLRgba32(0x30, 0x3c, 0x4c));
             if (fontNormal.is_valid())
             {
-                ctx.fill_utf8_text(BLPoint(cx - 4.5f, cy + 4.5f), fontNormal, letter, 1, BLRgba32(0x55, 0x64, 0x76));
+                ctx.fill_utf8_text(BLPoint(lx, cy + 4.5f), fontNormal, letter, 1, BLRgba32(0x55, 0x64, 0x76));
             }
         }
     }

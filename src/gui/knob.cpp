@@ -32,7 +32,7 @@ static const char* GetShortLabel(const char* fullName)
     if (strstr(fullName, "Sustain Lvl")) return "SUST";
     if (strstr(fullName, "SustainTime")) return "TIME";
     if (strstr(fullName, "ReleaseTime") || strstr(fullName, "Release Time")) return "REL";
-    if (strstr(fullName, "Cuttof") || strstr(fullName, "Cutoff")) return "CUTTF";
+    if (strstr(fullName, "Cutoff")) return "CUTOFF";
     if (strstr(fullName, "Resonance")) return "RESO";
     if (strstr(fullName, "Amount")) return "AMNT";
     if (strstr(fullName, "VlSensivity")) return "VEL";

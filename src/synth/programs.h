@@ -284,7 +284,7 @@ struct SProgram
     float OPFRE;  // Release Time
     // Operator X
     float OPXON;  // On/Off
-    float OPXCU;  // Cuttoff
+    float OPXCU;  // Cutoff
     float OPXRS;  // Resonance
     float OPXAM;  // Amount
     float OPXBP;  // Bypass
@@ -298,7 +298,7 @@ struct SProgram
     float OPXRE;  // Release Time
     // Operator Z
     float OPZON;  // On/Off
-    float OPZCU;  // Cuttof
+    float OPZCU;  // Cutoff
     float OPZRS;  // Resonance
     float OPZTY;  // Type
     float OPZKT;  // Keyboard Track

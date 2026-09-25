@@ -338,7 +338,7 @@ void CMapper::GetDisplayValue(CSynthesizer *synthesizer, char channel, int par, 
             else if (fvalue == 1.f)
                 strncpy(str, "LFO Rate", TEXT_SIZE);
             else if (fvalue == 2.f)
-                strncpy(str, "Filter Cuttof", TEXT_SIZE);
+                strncpy(str, "Filter Cutoff", TEXT_SIZE);
             else if (fvalue == 3.f)
                 strncpy(str, "LFO Depth Invert", TEXT_SIZE);
             else if (fvalue == 4.f)

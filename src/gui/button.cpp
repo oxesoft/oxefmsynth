@@ -206,7 +206,11 @@ void CButton::Paint(BLContext &ctx, const BLFont &fontSmall, const BLFont &fontN
     // Centered label text
     if (label[0] && fontSmall.is_valid())
     {
-        float tw = strlen(label) * 5.8f;
+        BLGlyphBuffer gb;
+        gb.set_utf8_text(label);
+        BLTextMetrics tm;
+        fontSmall.get_text_metrics(gb, tm);
+        float tw = (float)tm.advance.x;
         float tx = left + (w - tw) * 0.5f;
         if (type == BT_BANK || type == BT_PROGRAM)
         {
