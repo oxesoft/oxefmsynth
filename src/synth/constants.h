@@ -151,8 +151,8 @@ enum
     SINGLESAMPLEMODE
 };
 
-#ifndef min
-#define min(X, Y) (((X) < (Y)) ? (X) : (Y))
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
 #endif
 
 #ifndef NULL
@@ -163,6 +163,6 @@ enum
 #define MAX_PATH 256
 #endif
 
-#ifdef _WIN32
+#if defined(_MSC_VER) && _MSC_VER < 1900
     #define snprintf _snprintf
 #endif

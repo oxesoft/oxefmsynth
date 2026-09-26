@@ -29,8 +29,8 @@ class CWindowsToolkit : public CToolkit
 {
 private:
     HWND         hWnd;
-    BLImage      blImage;
 public:
+    BLImage      blImage;
     void        *parentWindow;
     CEditor     *editor;
     CWindowsToolkit(void *parentWindow, CEditor *editor);

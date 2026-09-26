@@ -68,7 +68,7 @@ static const void *clap_entry_get_factory(const char *factory_id)
     return nullptr;
 }
 
-CLAP_EXPORT const clap_plugin_entry_t clap_entry = {
+extern CLAP_EXPORT const clap_plugin_entry_t clap_entry = {
     CLAP_VERSION,
     clap_entry_init,
     clap_entry_deinit,

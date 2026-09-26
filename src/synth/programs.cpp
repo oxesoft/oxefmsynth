@@ -25,6 +25,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #endif
 #include "programs.h"
 #include <string.h>
+#include <algorithm>
 
 void CPrograms::Init()
 {
@@ -706,7 +707,7 @@ void CPrograms::GetProgName(char* str, int numpg)
 void CPrograms::SetProgName(char* str, int numpg)
 {
     memset(currentbank->prg[numpg].PNAME, 0, PG_NAME_SIZE);
-    memcpy(currentbank->prg[numpg].PNAME, str, min(strlen(str), PG_NAME_SIZE));
+    memcpy(currentbank->prg[numpg].PNAME, str, std::min(strlen(str), (size_t)PG_NAME_SIZE));
     haschanges = true;
     if (hostinterface)
     {
