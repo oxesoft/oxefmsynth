@@ -1,0 +1,121 @@
+name: Build Plugins
+
+on:
+  push:
+    branches: [ master, main ]
+    tags: [ 'v*' ]
+  pull_request:
+    branches: [ master, main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            platform: linux
+            arch: x86_64
+            name: Linux (x86_64)
+
+          - os: macos-latest
+            platform: macos
+            arch: universal
+            name: macOS (Universal: arm64 + x86_64)
+
+          - os: windows-latest
+            platform: windows
+            arch: x64
+            name: Windows (x64)
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # -------------------------------------------------------------
+      # CACHE DEPENDENCIES (.deps)
+      # -------------------------------------------------------------
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: .deps
+          key: deps-${{ matrix.platform }}-${{ matrix.arch }}-${{ hashFiles('Makefile.clap', 'Makefile.vst3') }}
+
+      # -------------------------------------------------------------
+      # PLATFORM-SPECIFIC TOOLCHAIN SETUP
+      # -------------------------------------------------------------
+      - name: Install Linux dependencies
+        if: matrix.platform == 'linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libx11-dev zip
+
+      - name: Setup MSYS2 (Windows)
+        if: matrix.platform == 'windows'
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          update: true
+          install: >-
+            git
+            make
+            zip
+            mingw-w64-x86_64-gcc
+            mingw-w64-x86_64-cmake
+            mingw-w64-x86_64-ninja
+
+      # -------------------------------------------------------------
+      # BUILD & PACKAGE
+      # -------------------------------------------------------------
+      - name: Build and package plugins (Unix)
+        if: matrix.platform != 'windows'
+        run: |
+          make clap
+          make vst3
+          cd bin && zip -r ../oxefmsynth-${{ matrix.platform }}-${{ matrix.arch }}.zip oxefmsynth.clap oxefmsynth.vst3
+
+      - name: Build and package plugins (Windows)
+        if: matrix.platform == 'windows'
+        shell: msys2 {0}
+        run: |
+          make clap
+          make vst3
+          cd bin && zip -r ../oxefmsynth-${{ matrix.platform }}-${{ matrix.arch }}.zip oxefmsynth.clap oxefmsynth.vst3
+
+      # -------------------------------------------------------------
+      # UPLOAD ARTIFACTS
+      # -------------------------------------------------------------
+      - name: Upload plugin package
+        uses: actions/upload-artifact@v4
+        with:
+          name: oxefmsynth-${{ matrix.platform }}-${{ matrix.arch }}
+          path: oxefmsynth-${{ matrix.platform }}-${{ matrix.arch }}.zip
+          if-no-files-found: error
+
+  # -----------------------------------------------------------------
+  # RELEASE JOB (Triggers on version tags, e.g. v2.0.0)
+  # -----------------------------------------------------------------
+  release:
+    name: Create GitHub Release
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: artifacts/*.zip
+          draft: false
+          prerelease: false
+          generate_release_notes: true

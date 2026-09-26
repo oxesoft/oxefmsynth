@@ -95,7 +95,9 @@ else
         INSTALL_CMD=cp -f "$(TARGET_FILE)" "$(USER_CLAP_DIR)/"
     else
         ifeq ($(UNAME_S),Darwin)
-            LDFLAGS+=-framework Cocoa
+            ARCH_FLAGS?=-arch arm64 -arch x86_64
+            CXXFLAGS+=$(ARCH_FLAGS)
+            LDFLAGS+=$(ARCH_FLAGS) -framework Cocoa
             SOURCES+=src/toolkits/cocoatoolkit.mm
             BUNDLE_DIR:=$(BIN_DIR)/$(BUNDLE_NAME)/Contents/MacOS
             BUNDLE_BINARY:=$(BUNDLE_DIR)/oxefmsynth
@@ -117,7 +119,9 @@ else
     endif
 endif
 
-all: $(CLAPSDK_PATH)/include/clap/clap.h $(DEPS)
+BLEND2D_LIB?=.deps/blend2d/build/libblend2d.a
+
+all: $(CLAPSDK_PATH)/include/clap/clap.h $(BLEND2D_LIB) $(DEPS)
 	$(BUNDLE_SETUP)
 	@$(CXX) -shared -o $(BUNDLE_BINARY) $(CXXFLAGS) $(SOURCES) $(INCLUDES) $(LIBS) $(LDFLAGS)
 
@@ -135,8 +139,30 @@ $(CLAPSDK_PATH)/include/clap/clap.h:
 	@mkdir -p .deps
 	@git clone --depth 1 --branch 1.2.10 https://github.com/free-audio/clap.git .deps/clap
 
+ifeq ($(UNAME_S),Darwin)
+$(BLEND2D_LIB):
+	@echo "Downloading and building Blend2D (Universal)..."
+	@mkdir -p .deps
+	@if [ ! -d .deps/asmjit ]; then git clone --depth 1 https://github.com/asmjit/asmjit.git .deps/asmjit; fi
+	@if [ ! -d .deps/blend2d ]; then git clone --depth 1 --branch v0.21.3 https://github.com/blend2d/blend2d.git .deps/blend2d; fi
+	@cmake -B .deps/blend2d/build_arm64 -S .deps/blend2d -DCMAKE_BUILD_TYPE=Release -DBLEND2D_STATIC=TRUE -DCMAKE_OSX_ARCHITECTURES=arm64
+	@cmake --build .deps/blend2d/build_arm64 --config Release
+	@cmake -B .deps/blend2d/build_x86_64 -S .deps/blend2d -DCMAKE_BUILD_TYPE=Release -DBLEND2D_STATIC=TRUE -DCMAKE_OSX_ARCHITECTURES=x86_64
+	@cmake --build .deps/blend2d/build_x86_64 --config Release
+	@mkdir -p .deps/blend2d/build
+	@lipo -create .deps/blend2d/build_arm64/libblend2d.a .deps/blend2d/build_x86_64/libblend2d.a -output .deps/blend2d/build/libblend2d.a
+else
+$(BLEND2D_LIB):
+	@echo "Downloading and building Blend2D..."
+	@mkdir -p .deps
+	@if [ ! -d .deps/asmjit ]; then git clone --depth 1 https://github.com/asmjit/asmjit.git .deps/asmjit; fi
+	@if [ ! -d .deps/blend2d ]; then git clone --depth 1 --branch v0.21.3 https://github.com/blend2d/blend2d.git .deps/blend2d; fi
+	@cmake -B .deps/blend2d/build -S .deps/blend2d -DCMAKE_BUILD_TYPE=Release -DBLEND2D_STATIC=TRUE -DCMAKE_POSITION_INDEPENDENT_CODE=ON
+	@cmake --build .deps/blend2d/build --config Release
+endif
+
 resources.o:
-	@$(RC) -Isrc/synth src/windows/resources.rc resources.o
+	@$(RC) -Isrc/synth -Isrc/windows src/windows/resources.rc resources.o
 
 clean:
 	@rm -rf $(TARGET_FILE) $(BUNDLE_NAME) *.o *.d

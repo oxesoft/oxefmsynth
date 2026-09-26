@@ -86,7 +86,9 @@ else
     else
         INCLUDES+=-I.
         ifeq ($(UNAME_S),Darwin)
-            LDFLAGS+=-framework Cocoa
+            ARCH_FLAGS?=-arch arm64 -arch x86_64
+            CXXFLAGS+=$(ARCH_FLAGS)
+            LDFLAGS+=$(ARCH_FLAGS) -framework Cocoa
             SOURCES+=src/toolkits/cocoatoolkit.mm
             TARGET_APP:=$(BIN_DIR)/$(EXECUTABLE_NAME).app
             TARGET_FILE:=$(TARGET_APP)/Contents/MacOS/$(EXECUTABLE_NAME)
@@ -100,7 +102,9 @@ else
     endif
 endif
 
-all: $(DEPS)
+BLEND2D_LIB?=.deps/blend2d/build/libblend2d.a
+
+all: $(BLEND2D_LIB) $(DEPS)
 ifeq ($(UNAME_S),Darwin)
 	@mkdir -p $(TARGET_APP)/Contents/MacOS
 	@$(CXX) -o $(TARGET_FILE) -DEXECUTABLE_NAME=\"$(EXECUTABLE_NAME)\" $(CXXFLAGS) $(SOURCES) $(INCLUDES) $(LDFLAGS)
@@ -112,8 +116,30 @@ else
 endif
 	@$(CMD)
 
+ifeq ($(UNAME_S),Darwin)
+$(BLEND2D_LIB):
+	@echo "Downloading and building Blend2D (Universal)..."
+	@mkdir -p .deps
+	@if [ ! -d .deps/asmjit ]; then git clone --depth 1 https://github.com/asmjit/asmjit.git .deps/asmjit; fi
+	@if [ ! -d .deps/blend2d ]; then git clone --depth 1 --branch v0.21.3 https://github.com/blend2d/blend2d.git .deps/blend2d; fi
+	@cmake -B .deps/blend2d/build_arm64 -S .deps/blend2d -DCMAKE_BUILD_TYPE=Release -DBLEND2D_STATIC=TRUE -DCMAKE_OSX_ARCHITECTURES=arm64
+	@cmake --build .deps/blend2d/build_arm64 --config Release
+	@cmake -B .deps/blend2d/build_x86_64 -S .deps/blend2d -DCMAKE_BUILD_TYPE=Release -DBLEND2D_STATIC=TRUE -DCMAKE_OSX_ARCHITECTURES=x86_64
+	@cmake --build .deps/blend2d/build_x86_64 --config Release
+	@mkdir -p .deps/blend2d/build
+	@lipo -create .deps/blend2d/build_arm64/libblend2d.a .deps/blend2d/build_x86_64/libblend2d.a -output .deps/blend2d/build/libblend2d.a
+else
+$(BLEND2D_LIB):
+	@echo "Downloading and building Blend2D..."
+	@mkdir -p .deps
+	@if [ ! -d .deps/asmjit ]; then git clone --depth 1 https://github.com/asmjit/asmjit.git .deps/asmjit; fi
+	@if [ ! -d .deps/blend2d ]; then git clone --depth 1 --branch v0.21.3 https://github.com/blend2d/blend2d.git .deps/blend2d; fi
+	@cmake -B .deps/blend2d/build -S .deps/blend2d -DCMAKE_BUILD_TYPE=Release -DBLEND2D_STATIC=TRUE -DCMAKE_POSITION_INDEPENDENT_CODE=ON
+	@cmake --build .deps/blend2d/build --config Release
+endif
+
 resources.o:
-	@$(RC) -Isrc/synth src/windows/resources.rc resources.o
+	@$(RC) -Isrc/synth -Isrc/windows src/windows/resources.rc resources.o
 
 clean:
 	@rm -rf $(BIN_DIR)/$(EXECUTABLE_NAME).app $(BIN_DIR)/$(EXECUTABLE_NAME) $(BIN_DIR)/$(EXECUTABLE_NAME).exe $(EXECUTABLE_NAME).app $(EXECUTABLE_NAME) *.o *.d
