@@ -1,7 +1,7 @@
 # Oxe FM Synth
 Welcome to the [Oxe FM Synth](https://github.com/oxesoft/oxefmsynth/) official repository.
 
-![Oxe FM Synth](other/screenshot.png)
+![Oxe FM Synth](docs/assets/screenshot.png)
 
 This repository contains the synth core and four different ways to use it:
 

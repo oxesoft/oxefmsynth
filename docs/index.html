@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Oxe FM Synth - Open Source FM Synthesizer</title>
+  <meta name="description" content="An open source frequency modulation synthesizer plugin for Windows, macOS and Linux.">
+  <meta name="keywords" content="Oxe FM Synth, FM Synthesizer, CLAP plugin, VST3, open source synth, audio plugin, Daniel Moura, demoscene">
+  
+  <!-- Open Graph / Social Sharing -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://oxesoft.github.io/oxefmsynth/">
+  <meta property="og:title" content="Oxe FM Synth - Open Source FM Synthesizer">
+  <meta property="og:description" content="An open source frequency modulation synthesizer plugin for Windows, macOS and Linux.">
+  <meta property="og:image" content="https://oxesoft.github.io/oxefmsynth/assets/screenshot.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="theme-color" content="#07090e">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+  
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Ambient Background Lighting -->
+  <div class="bg-glow-container">
+    <div class="bg-glow-1"></div>
+    <div class="bg-glow-2"></div>
+  </div>
+
+  <!-- Navigation -->
+  <header>
+    <div class="container nav-container">
+      <a href="#" class="nav-brand">
+        <img src="assets/oxe-logo.svg" alt="Oxe FM Synth Logo" class="nav-logo-svg">
+        <div class="brand-title">
+          <span>OXE FM SYNTH</span>
+          <span class="brand-badge">v2.0</span>
+        </div>
+      </a>
+
+      <nav class="nav-links">
+        <a href="#tracks">Tracks</a>
+        <a href="#standards">CLAP & VST3</a>
+        <a href="#install">Installation</a>
+        <a href="#build">Build</a>
+        <a href="#specs">Specs</a>
+      </nav>
+
+      <div class="nav-actions">
+        <a href="https://github.com/oxesoft/oxefmsynth" target="_blank" rel="noopener" class="btn btn-secondary btn-sm">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+          </svg>
+          GitHub
+        </a>
+        <a href="https://github.com/oxesoft/oxefmsynth/releases" target="_blank" rel="noopener" class="btn btn-primary btn-sm">Download</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="container">
+      <h1 class="hero-title">Oxe FM Synth</h1>
+      <p class="hero-subtitle">
+        An open source frequency modulation synthesizer plugin for Windows, macOS and Linux.
+      </p>
+
+      <div class="hero-cta">
+        <a href="https://github.com/oxesoft/oxefmsynth/releases" target="_blank" rel="noopener" class="btn btn-primary">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          Download Releases
+        </a>
+        <a href="https://github.com/oxesoft/oxefmsynth" target="_blank" rel="noopener" class="btn btn-secondary">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+          </svg>
+          Star on GitHub
+        </a>
+        <a href="#install" class="btn btn-secondary">
+          <span>📖 Installation Paths</span>
+        </a>
+      </div>
+
+      <!-- Screenshot Showcase with Click to Expand -->
+      <div class="screenshot-wrapper">
+        <img id="mainScreenshot" src="assets/screenshot.png" alt="Oxe FM Synth GUI Screenshot" class="screenshot-img" title="Click to enlarge screenshot">
+        <div class="screenshot-caption">Oxe FM Synth interface running with 8 operators, envelopes, filters, and effect rack. (Click to zoom)</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SoundCloud Audio Demo Section -->
+  <section id="tracks" class="container" style="margin-bottom: 70px;">
+    <div class="audio-demo-card">
+      <div class="audio-demo-header">
+        <div class="audio-demo-title">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--accent-cyan)" stroke-width="2">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+            <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+          </svg>
+          <span>Audio Demos</span>
+        </div>
+      </div>
+
+      <p class="audio-demo-intro">
+        Listen below to some of the many tracks composed using only Oxe FM Synth patches from the contest 
+        <a href="https://sites.google.com/site/kvrosc/2015/osc-81-oxe-fm" target="_blank" rel="noopener noreferrer">One Synth Challenge edition 81</a>:
+      </p>
+
+      <div class="soundcloud-frame-wrapper">
+        <iframe width="100%" height="450" scrolling="no" frameborder="no" allow="autoplay" src="https://w.soundcloud.com/player/?url=https%3A%2F%2Fapi.soundcloud.com%2Fplaylists%2F177376136&amp;auto_play=false&amp;hide_related=false&amp;visual=false&amp;show_comments=true&amp;show_user=true&amp;show_reposts=false&amp;color=ff5500"></iframe>
+      </div>
+    </div>
+  </section>
+
+  <!-- CLAP & VST3 Standards Section -->
+  <section id="standards" class="section">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-tag">Plugin Standards</div>
+        <h2 class="section-title">Embracing the CLAP Standard</h2>
+        <p class="section-desc">
+          Oxe FM Synth prioritizes <strong>CLAP</strong> (CLever Audio Plug-in), the modern, open, and non-proprietary audio plugin standard, while offering <strong>VST3</strong> for full host compatibility.
+        </p>
+      </div>
+
+      <div class="standards-grid">
+        <!-- CLAP Standard Card -->
+        <div class="standard-card primary-standard">
+          <span class="standard-pill clap">Prioritized Standard</span>
+          <h3>CLAP Plugin</h3>
+          <p>
+            <a href="https://cleveraudio.org/" target="_blank" rel="noopener" style="color: var(--accent-green); text-decoration: none; font-weight: 600;">CLAP</a> is completely open, free, and developed collaboratively by the audio community. It resolves decades of licensing constraints, providing a truly open foundation for musicians and developers.
+          </p>
+
+          <ul class="standard-features-list">
+            <li>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent-green)" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              <span><strong>Sample-accurate automation:</strong> Parameter changes and note events are tightly coupled with the audio stream.</span>
+            </li>
+            <li>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent-green)" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              <span><strong>Modern multi-threading:</strong> Seamless thread-pool collaboration between plugin and host for superior CPU distribution.</span>
+            </li>
+            <li>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent-green)" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              <span><strong>Built by default:</strong> Prioritized out-of-the-box (`make clap` or simply `make`).</span>
+            </li>
+            <li>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent-green)" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              <span><strong>No proprietary licensing:</strong> Permissive MIT license — free from closed vendor agreements.</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- VST3 Standard Card -->
+        <div class="standard-card">
+          <span class="standard-pill vst3">Broad Compatibility</span>
+          <h3>VST3 Plugin</h3>
+          <p>
+            For digital audio workstations and environments that require Steinberg's VST3 standard, Oxe FM Synth also provides an optional, fully native VST3 implementation.
+          </p>
+
+          <ul class="standard-features-list">
+            <li>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent-cyan)" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              <span><strong>Universal DAW support:</strong> Compatible with Cubase, Studio One, Ableton Live, FL Studio, REAPER, and more.</span>
+            </li>
+            <li>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent-cyan)" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              <span><strong>Cross-platform:</strong> Available across Windows, macOS, and Linux.</span>
+            </li>
+            <li>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent-cyan)" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              <span><strong>Easy compilation:</strong> Built effortlessly on demand with `make vst3`.</span>
+            </li>
+            <li>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent-cyan)" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              <span><strong>Standard paths:</strong> Automatically installed to default system VST3 directories via `make install-vst3`.</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Installation Guide Section -->
+  <section id="install" class="section">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-tag">Quick Start</div>
+        <h2 class="section-title">Plugin Installation Paths</h2>
+        <p class="section-desc">
+          Drop the downloaded plugin bundle into your system's standard audio plugin directory:
+        </p>
+      </div>
+
+      <div style="max-width: 900px; margin: 0 auto; display: grid; gap: 20px;">
+        <!-- macOS paths -->
+        <div class="code-container">
+          <div class="code-header">
+            <span>macOS Plugin Directories</span>
+            <button class="copy-btn" onclick="copyCode(this, '~/Library/Audio/Plug-Ins/CLAP\n~/Library/Audio/Plug-Ins/VST3')">Copy</button>
+          </div>
+          <pre><code># CLAP (Recommended)
+~/Library/Audio/Plug-Ins/CLAP/oxefmsynth.clap
+
+# VST3
+~/Library/Audio/Plug-Ins/VST3/oxefmsynth.vst3</code></pre>
+        </div>
+
+        <!-- Linux paths -->
+        <div class="code-container">
+          <div class="code-header">
+            <span>Linux Plugin Directories</span>
+            <button class="copy-btn" onclick="copyCode(this, '~/.clap\n~/.vst3')">Copy</button>
+          </div>
+          <pre><code># CLAP (Recommended)
+~/.clap/oxefmsynth.clap
+
+# VST3
+~/.vst3/oxefmsynth.vst3</code></pre>
+        </div>
+
+        <!-- Windows paths -->
+        <div class="code-container">
+          <div class="code-header">
+            <span>Windows Plugin Directories</span>
+            <button class="copy-btn" onclick="copyCode(this, '%LOCALAPPDATA%\\Programs\\Common\\CLAP\n%COMMONPROGRAMFILES%\\VST3')">Copy</button>
+          </div>
+          <pre><code># CLAP (Recommended)
+%LOCALAPPDATA%\Programs\Common\CLAP\oxefmsynth.clap
+
+# VST3
+C:\Program Files\Common Files\VST3\oxefmsynth.vst3</code></pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Build from Source Section -->
+  <section id="build" class="section">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-tag">Source Code</div>
+        <h2 class="section-title">Compiling From Source</h2>
+        <p class="section-desc">
+          Typing <code>make</code> builds the demo, converter, standalone application, and the <strong>CLAP plugin</strong> into the <code>bin/</code> directory.
+        </p>
+      </div>
+
+      <div style="max-width: 900px; margin: 0 auto;">
+        <div class="code-container">
+          <div class="code-header">
+            <span>Terminal (macOS, Linux, or Windows MSYS2)</span>
+            <button class="copy-btn" onclick="copyCode(this, 'git clone https://github.com/oxesoft/oxefmsynth.git\ncd oxefmsynth\nmake clap\nmake install')">Copy</button>
+          </div>
+          <pre><code># 1. Clone repository
+git clone https://github.com/oxesoft/oxefmsynth.git
+cd oxefmsynth
+
+# 2. Build CLAP plugin (SDK downloaded automatically)
+make clap
+
+# 3. Install to your user plugin folder
+make install
+
+# (Optional) Build VST3 plugin
+make vst3
+make install-vst3</code></pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Specifications Table -->
+  <section id="specs" class="section">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-tag">Technical Data</div>
+        <h2 class="section-title">Synth Specifications</h2>
+      </div>
+
+      <div class="specs-table-wrapper">
+        <table class="specs-table">
+          <tbody>
+            <tr>
+              <th>Architecture</th>
+              <td>8-Operator Frequency Modulation (FM) Synthesizer</td>
+            </tr>
+            <tr>
+              <th>Multitimbral</th>
+              <td>16 MIDI channels</td>
+            </tr>
+            <tr>
+              <th>Operators</th>
+              <td>6 Oscillators, 1 Noise Generator / Limiter, 1 Filter, all with envelopes</td>
+            </tr>
+            <tr>
+              <th>Modulation</th>
+              <td>Frequency modulation half-matrix with self-modulation</td>
+            </tr>
+            <tr>
+              <th>Polyphony</th>
+              <td>Up to 64 simultaneous voices</td>
+            </tr>
+            <tr>
+              <th>Effects</th>
+              <td>Global Reverb and Delay sends per channel</td>
+            </tr>
+            <tr>
+              <th>Soundbanks</th>
+              <td>Embedded soundbanks (Bank 0 by Annabelle, Bank 1 by Summa & Teksonic)</td>
+            </tr>
+            <tr>
+              <th>Plugin Formats</th>
+              <td>CLAP (Recommended), VST3</td>
+            </tr>
+            <tr>
+              <th>Supported Platforms</th>
+              <td>Windows, macOS, Linux</td>
+            </tr>
+            <tr>
+              <th>License</th>
+              <td>GNU General Public License (GPL)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="footer-top">
+        <div class="footer-brand">
+          <div class="brand-title" style="font-weight: 700; font-size: 1.2rem; color: var(--text-main); display: flex; align-items: center; gap: 10px;">
+            <img src="assets/oxe-logo.svg" alt="Oxe Logo" style="height: 30px;">
+            <span>OXE FM SYNTH</span>
+          </div>
+          <p>
+            An open-source synthesizer created by Daniel Moura.
+          </p>
+        </div>
+
+        <div class="footer-links-group">
+          <div class="footer-col">
+            <h4>Project</h4>
+            <ul>
+              <li><a href="#tracks">Tracks</a></li>
+              <li><a href="#standards">CLAP & VST3</a></li>
+              <li><a href="#install">Installation</a></li>
+              <li><a href="#build">Build</a></li>
+              <li><a href="#specs">Specifications</a></li>
+            </ul>
+          </div>
+
+          <div class="footer-col">
+            <h4>Resources</h4>
+            <ul>
+              <li><a href="https://github.com/oxesoft/oxefmsynth" target="_blank" rel="noopener">GitHub Repository</a></li>
+              <li><a href="https://github.com/oxesoft/oxefmsynth/releases" target="_blank" rel="noopener">Releases & Binaries</a></li>
+              <li><a href="https://github.com/oxesoft/oxefmsynth/issues" target="_blank" rel="noopener">Issue Tracker</a></li>
+              <li><a href="https://cleveraudio.org/" target="_blank" rel="noopener">CLAP Audio Standard</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <div>
+          Copyright &copy; 2004–2026 <strong>Daniel Moura</strong> (oxesoft). Released under the GNU General Public License.
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Lightbox Modal -->
+  <div id="imgModal" class="modal">
+    <span class="modal-close" id="modalClose">&times;</span>
+    <img class="modal-content" id="modalImg" alt="Enlarged screenshot">
+  </div>
+
+  <script src="main.js"></script>
+</body>
+</html>
