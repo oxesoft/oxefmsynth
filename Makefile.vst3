@@ -91,7 +91,7 @@ ifeq ($(OS),Windows_NT)
     INCLUDES+=-Isrc/windows
     SOURCES+=src/toolkits/windowstoolkit.cpp \
              $(VST3SDK_PATH)/public.sdk/source/main/dllmain.cpp
-    LIBS+=-lgdi32
+    LIBS+=-lgdi32 -lole32
     LDFLAGS+=-static -s
     BUNDLE_DIR:=$(BIN_DIR)/$(BUNDLE_NAME)/Contents/x86_64-win
     BUNDLE_BINARY:=$(BUNDLE_DIR)/oxefmsynth.vst3
@@ -108,7 +108,7 @@ else
         INCLUDES+=-Isrc/windows
         SOURCES+=src/toolkits/windowstoolkit.cpp \
                  $(VST3SDK_PATH)/public.sdk/source/main/dllmain.cpp
-        LIBS+=-lgdi32
+        LIBS+=-lgdi32 -lole32
         LDFLAGS+=-static -s
         BUNDLE_DIR:=$(BIN_DIR)/$(BUNDLE_NAME)/Contents/x86_64-win
         BUNDLE_BINARY:=$(BUNDLE_DIR)/oxefmsynth.vst3

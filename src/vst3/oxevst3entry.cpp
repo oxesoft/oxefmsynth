@@ -36,3 +36,7 @@ BEGIN_FACTORY_DEF ("Oxe Music Software", "https://github.com/oxesoft/oxefmsynth"
                 Steinberg::Vst::COxeVst3::createInstance)
 
 END_FACTORY
+
+#if defined(_WIN32)
+void* hInstance = nullptr;
+#endif

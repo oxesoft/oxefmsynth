@@ -19,6 +19,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "oxevst3editor.h"
 #include "oxevst3.h"
 
+#if defined(_WIN32)
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#endif
+
 COxeVst3Editor::COxeVst3Editor(Steinberg::Vst::COxeVst3* plugin, CSynthesizer* synth)
     : refCount(1), plugin(plugin), synth(synth), toolkit(nullptr), hostinterface(nullptr), plugFrame(nullptr)
 {
@@ -57,6 +62,15 @@ Steinberg::tresult PLUGIN_API COxeVst3Editor::attached(void* parent, Steinberg::
 {
     if (isPlatformTypeSupported(type) != Steinberg::kResultTrue)
         return Steinberg::kResultFalse;
+
+#if defined(_WIN32)
+    extern HINSTANCE ghInst;
+    extern void* hInstance;
+    if (!hInstance)
+        hInstance = (void*)ghInst;
+    if (!hInstance)
+        hInstance = (void*)GetModuleHandle(NULL);
+#endif
 
     hostinterface = new CVst3HostInterface(plugin);
     toolkit = new COSToolkit(parent, oxeeditor);
