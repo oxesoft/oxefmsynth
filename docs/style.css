@@ -17,7 +17,7 @@
 
   --glow-cyan: 0 0 25px rgba(0, 240, 255, 0.25);
   --glow-green: 0 0 25px rgba(0, 230, 118, 0.25);
-  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
   --radius-sm: 6px;
   --radius-md: 10px;
@@ -106,42 +106,59 @@ header {
 }
 
 .nav-brand {
-  display: flex;
-  align-items: center;
-  gap: 12px;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-end;
   text-decoration: none;
-  color: var(--text-main);
-  font-weight: 700;
-  font-size: 1.25rem;
-  letter-spacing: -0.02em;
+  gap: 1px;
+  line-height: 1;
 }
 
 .nav-logo-svg {
-  height: 38px;
+  height: 50px;
   width: auto;
+  display: block;
   transition: transform var(--transition);
 }
 
-.nav-brand:hover .nav-logo-svg {
-  transform: scale(1.05);
+.nav-brand:hover .nav-logo-svg,
+.footer-logo-link:hover .footer-logo-svg {
+  transform: scale(1.04);
 }
 
-.brand-title {
-  display: flex;
-  align-items: baseline;
-  gap: 6px;
-}
-
-.brand-badge {
+.brand-subtext {
+  font-family: 'Inter', var(--font-sans);
+  font-weight: 700;
   font-size: 0.65rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  padding: 2px 6px;
-  border-radius: var(--radius-sm);
-  background: rgba(0, 230, 118, 0.15);
-  color: var(--accent-green);
-  border: 1px solid rgba(0, 230, 118, 0.3);
-  font-weight: 600;
+  color: #bee400;
+  letter-spacing: -0.01em;
+  line-height: 1;
+  text-align: right;
+  text-shadow: 0 0 10px rgba(190, 228, 0, 0.4);
+  margin-top: -8px;
+  position: relative;
+  z-index: 1;
+}
+
+.footer-logo-link {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-end;
+  text-decoration: none;
+  gap: 1px;
+  line-height: 1;
+  margin-bottom: 14px;
+}
+
+.footer-logo-svg {
+  height: 56px;
+  width: auto;
+  display: block;
+  transition: transform var(--transition);
+}
+
+.footer-logo-link .brand-subtext {
+  font-size: 0.72rem;
 }
 
 nav.nav-links {
@@ -670,6 +687,12 @@ footer {
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
+  .container {
+    padding: 0 16px;
+  }
+  .nav-actions {
+    gap: 8px;
+  }
   nav.nav-links {
     display: none;
   }

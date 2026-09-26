@@ -1,5 +1,5 @@
 # Oxe FM Synth
-Welcome to the [Oxe FM Synth](https://github.com/oxesoft/oxefmsynth/) official repository.
+Welcome to the [Oxe FM Synth](https://oxesoft.github.io/oxefmsynth/) official repository.
 
 ![Oxe FM Synth](docs/assets/screenshot.png)
 

@@ -19,6 +19,11 @@
   <!-- Favicon -->
   <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
   
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
   <!-- Stylesheet -->
   <link rel="stylesheet" href="style.css">
 </head>
@@ -33,12 +38,9 @@
   <!-- Navigation -->
   <header>
     <div class="container nav-container">
-      <a href="#" class="nav-brand">
+      <a href="#" class="nav-brand" aria-label="Oxe FM Synth">
         <img src="assets/oxe-logo.svg" alt="Oxe FM Synth Logo" class="nav-logo-svg">
-        <div class="brand-title">
-          <span>OXE FM SYNTH</span>
-          <span class="brand-badge">v2.0</span>
-        </div>
+        <span class="brand-subtext">FM Synth</span>
       </a>
 
       <nav class="nav-links">
@@ -343,10 +345,10 @@ make install-vst3</code></pre>
     <div class="container">
       <div class="footer-top">
         <div class="footer-brand">
-          <div class="brand-title" style="font-weight: 700; font-size: 1.2rem; color: var(--text-main); display: flex; align-items: center; gap: 10px;">
-            <img src="assets/oxe-logo.svg" alt="Oxe Logo" style="height: 30px;">
-            <span>OXE FM SYNTH</span>
-          </div>
+          <a href="#" class="footer-logo-link" aria-label="Oxe FM Synth">
+            <img src="assets/oxe-logo.svg" alt="Oxe FM Synth Logo" class="footer-logo-svg">
+            <span class="brand-subtext">FM Synth</span>
+          </a>
           <p>
             An open-source synthesizer created by Daniel Moura.
           </p>
