@@ -91,7 +91,7 @@ jobs:
       - name: Upload plugin package
         uses: actions/upload-artifact@v4
         with:
-          name: oxefmsynth-${{ matrix.platform }}-${{ matrix.arch }}
+          name: oxefmsynth-${{ matrix.platform }}-${{ matrix.arch }}-artifact
           path: oxefmsynth-${{ matrix.platform }}-${{ matrix.arch }}.zip
           if-no-files-found: error
 
