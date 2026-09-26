@@ -1,6 +1,6 @@
 name: Build Plugins
 
-on:
+'on':
   push:
     branches: [ master, main ]
     tags: [ 'v*' ]
@@ -19,17 +19,17 @@ jobs:
           - os: ubuntu-latest
             platform: linux
             arch: x86_64
-            name: Linux (x86_64)
+            name: "Linux (x86_64)"
 
           - os: macos-latest
             platform: macos
             arch: universal
-            name: macOS (Universal: arm64 + x86_64)
+            name: "macOS (Universal: arm64 + x86_64)"
 
           - os: windows-latest
             platform: windows
             arch: x64
-            name: Windows (x64)
+            name: "Windows (x64)"
 
     steps:
       - name: Checkout repository
