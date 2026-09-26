@@ -70,20 +70,22 @@ jobs:
       # -------------------------------------------------------------
       # BUILD & PACKAGE
       # -------------------------------------------------------------
-      - name: Build and package plugins (Unix)
+      - name: Build plugins (Unix)
         if: matrix.platform != 'windows'
         run: |
           make clap
           make vst3
-          cd bin && zip -r ../oxefmsynth-${{ matrix.platform }}-${{ matrix.arch }}.zip oxefmsynth.clap oxefmsynth.vst3
+          mkdir -p dist
+          cp -R bin/oxefmsynth.clap bin/oxefmsynth.vst3 dist/
 
-      - name: Build and package plugins (Windows)
+      - name: Build plugins (Windows)
         if: matrix.platform == 'windows'
         shell: msys2 {0}
         run: |
           make clap
           make vst3
-          cd bin && zip -r ../oxefmsynth-${{ matrix.platform }}-${{ matrix.arch }}.zip oxefmsynth.clap oxefmsynth.vst3
+          mkdir -p dist
+          cp -R bin/oxefmsynth.clap bin/oxefmsynth.vst3 dist/
 
       # -------------------------------------------------------------
       # UPLOAD ARTIFACTS
@@ -91,8 +93,8 @@ jobs:
       - name: Upload plugin package
         uses: actions/upload-artifact@v4
         with:
-          name: oxefmsynth-${{ matrix.platform }}-${{ matrix.arch }}-artifact
-          path: oxefmsynth-${{ matrix.platform }}-${{ matrix.arch }}.zip
+          name: oxefmsynth-${{ matrix.platform }}-${{ matrix.arch }}
+          path: dist/*
           if-no-files-found: error
 
   # -----------------------------------------------------------------
@@ -110,7 +112,14 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           path: artifacts
-          merge-multiple: true
+
+      - name: Package release archives
+        run: |
+          cd artifacts
+          for dir in */; do
+            platform="${dir%/}"
+            (cd "$dir" && zip -r "../${platform}.zip" .)
+          done
 
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
@@ -119,3 +128,4 @@ jobs:
           draft: false
           prerelease: false
           generate_release_notes: true
+
