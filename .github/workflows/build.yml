@@ -127,5 +127,5 @@ jobs:
           files: artifacts/*.zip
           draft: true
           prerelease: false
-          generate_release_notes: false
+          generate_release_notes: true
 
