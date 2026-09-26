@@ -121,7 +121,7 @@ $(BLEND2D_LIB):
 	@echo "Downloading and building Blend2D (Universal)..."
 	@mkdir -p .deps
 	@if [ ! -d .deps/asmjit ]; then git clone --depth 1 https://github.com/asmjit/asmjit.git .deps/asmjit; fi
-	@if [ ! -d .deps/blend2d ]; then git clone --depth 1 --branch v0.21.3 https://github.com/blend2d/blend2d.git .deps/blend2d; fi
+	@if [ ! -d .deps/blend2d ]; then git clone --depth 1 https://github.com/blend2d/blend2d.git .deps/blend2d; fi
 	@cmake -B .deps/blend2d/build_arm64 -S .deps/blend2d -DCMAKE_BUILD_TYPE=Release -DBLEND2D_STATIC=TRUE -DCMAKE_OSX_ARCHITECTURES=arm64
 	@cmake --build .deps/blend2d/build_arm64 --config Release
 	@cmake -B .deps/blend2d/build_x86_64 -S .deps/blend2d -DCMAKE_BUILD_TYPE=Release -DBLEND2D_STATIC=TRUE -DCMAKE_OSX_ARCHITECTURES=x86_64
@@ -133,7 +133,7 @@ $(BLEND2D_LIB):
 	@echo "Downloading and building Blend2D..."
 	@mkdir -p .deps
 	@if [ ! -d .deps/asmjit ]; then git clone --depth 1 https://github.com/asmjit/asmjit.git .deps/asmjit; fi
-	@if [ ! -d .deps/blend2d ]; then git clone --depth 1 --branch v0.21.3 https://github.com/blend2d/blend2d.git .deps/blend2d; fi
+	@if [ ! -d .deps/blend2d ]; then git clone --depth 1 https://github.com/blend2d/blend2d.git .deps/blend2d; fi
 	@cmake -B .deps/blend2d/build -S .deps/blend2d -DCMAKE_BUILD_TYPE=Release -DBLEND2D_STATIC=TRUE -DCMAKE_POSITION_INDEPENDENT_CODE=ON
 	@cmake --build .deps/blend2d/build --config Release
 endif
