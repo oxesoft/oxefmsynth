@@ -23,7 +23,10 @@
   --radius-md: 10px;
   --radius-lg: 16px;
   --radius-full: 9999px;
-  --transition: 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  /* Custom UI easing curves */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --transition: 0.2s var(--ease-out);
 }
 
 *, *::before, *::after {
@@ -35,6 +38,18 @@
 html {
   scroll-behavior: smooth;
   color-scheme: dark;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 body {
@@ -95,7 +110,7 @@ header {
   -webkit-backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--border-subtle);
   z-index: 100;
-  transition: var(--transition);
+  transition: background-color 200ms var(--ease-out), border-color 200ms var(--ease-out);
 }
 
 .nav-container {
@@ -112,18 +127,32 @@ header {
   text-decoration: none;
   gap: 1px;
   line-height: 1;
+  transition: transform 160ms var(--ease-out);
+  transform-origin: left center;
+}
+
+.nav-brand:active {
+  transform: scale(0.97);
+}
+
+.nav-brand:focus-visible,
+.footer-logo-link:focus-visible {
+  outline: 2px solid var(--accent-cyan);
+  outline-offset: 4px;
+  border-radius: var(--radius-sm);
 }
 
 .nav-logo-svg {
   height: 50px;
   width: auto;
   display: block;
-  transition: transform var(--transition);
 }
 
-.nav-brand:hover .nav-logo-svg,
-.footer-logo-link:hover .footer-logo-svg {
-  transform: scale(1.04);
+@media (hover: hover) and (pointer: fine) {
+  .nav-brand:hover,
+  .footer-logo-link:hover {
+    transform: scale(1.03);
+  }
 }
 
 .brand-subtext {
@@ -148,13 +177,18 @@ header {
   gap: 1px;
   line-height: 1;
   margin-bottom: 14px;
+  transition: transform 160ms var(--ease-out);
+  transform-origin: left center;
+}
+
+.footer-logo-link:active {
+  transform: scale(0.97);
 }
 
 .footer-logo-svg {
   height: 56px;
   width: auto;
   display: block;
-  transition: transform var(--transition);
 }
 
 .footer-logo-link .brand-subtext {
@@ -172,11 +206,19 @@ nav.nav-links a {
   text-decoration: none;
   font-size: 0.925rem;
   font-weight: 500;
-  transition: color var(--transition);
+  transition: color 160ms var(--ease-out);
 }
 
-nav.nav-links a:hover {
-  color: var(--accent-cyan);
+@media (hover: hover) and (pointer: fine) {
+  nav.nav-links a:hover {
+    color: var(--accent-cyan);
+  }
+}
+
+nav.nav-links a:focus-visible {
+  outline: 2px solid var(--accent-cyan);
+  outline-offset: 4px;
+  border-radius: 2px;
 }
 
 .nav-actions {
@@ -196,9 +238,20 @@ nav.nav-links a:hover {
   font-weight: 600;
   border-radius: var(--radius-md);
   text-decoration: none;
-  transition: all var(--transition);
+  transition: transform 160ms var(--ease-out), box-shadow 160ms var(--ease-out), background-color 160ms var(--ease-out), border-color 160ms var(--ease-out), color 160ms var(--ease-out);
   cursor: pointer;
   border: 1px solid transparent;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.btn:active {
+  transform: scale(0.97) !important;
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--accent-cyan);
+  outline-offset: 3px;
 }
 
 .btn-primary {
@@ -208,9 +261,11 @@ nav.nav-links a:hover {
   box-shadow: 0 4px 20px rgba(0, 230, 118, 0.25);
 }
 
-.btn-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 25px rgba(0, 240, 255, 0.4);
+@media (hover: hover) and (pointer: fine) {
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 25px rgba(0, 240, 255, 0.4);
+  }
 }
 
 .btn-secondary {
@@ -219,11 +274,13 @@ nav.nav-links a:hover {
   border-color: var(--border-subtle);
 }
 
-.btn-secondary:hover {
-  background: var(--bg-card-hover);
-  border-color: var(--accent-cyan);
-  color: var(--accent-cyan);
-  transform: translateY(-2px);
+@media (hover: hover) and (pointer: fine) {
+  .btn-secondary:hover {
+    background: var(--bg-card-hover);
+    border-color: var(--accent-cyan);
+    color: var(--accent-cyan);
+    transform: translateY(-2px);
+  }
 }
 
 .btn-sm {
@@ -247,6 +304,8 @@ nav.nav-links a:hover {
   background: linear-gradient(135deg, #ffffff 40%, var(--accent-cyan) 80%, var(--accent-green) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+  animation: heroFadeUp 400ms var(--ease-out) both;
+  animation-delay: 40ms;
 }
 
 .hero-subtitle {
@@ -255,6 +314,8 @@ nav.nav-links a:hover {
   max-width: 780px;
   margin: 0 auto 36px;
   line-height: 1.6;
+  animation: heroFadeUp 400ms var(--ease-out) both;
+  animation-delay: 100ms;
 }
 
 .hero-cta {
@@ -264,6 +325,8 @@ nav.nav-links a:hover {
   justify-content: center;
   gap: 16px;
   margin-bottom: 45px;
+  animation: heroFadeUp 400ms var(--ease-out) both;
+  animation-delay: 160ms;
 }
 
 /* Screenshot Preview Container */
@@ -276,11 +339,49 @@ nav.nav-links a:hover {
   border-radius: var(--radius-lg);
   border: 1px solid rgba(0, 240, 255, 0.2);
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), var(--glow-cyan);
-  transition: transform var(--transition);
+  transition: transform 200ms var(--ease-out), border-color 200ms var(--ease-out);
+  animation: heroFadeUp 450ms var(--ease-out) both;
+  animation-delay: 220ms;
 }
 
-.screenshot-wrapper:hover {
-  border-color: rgba(0, 240, 255, 0.4);
+@keyframes heroFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.screenshot-btn {
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  display: block;
+  width: 100%;
+  border-radius: calc(var(--radius-lg) - 6px);
+  overflow: hidden;
+  transition: transform 160ms var(--ease-out);
+}
+
+.screenshot-btn:focus-visible {
+  outline: 2px solid var(--accent-cyan);
+  outline-offset: 4px;
+}
+
+.screenshot-btn:active {
+  transform: scale(0.99);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .screenshot-wrapper:hover {
+    border-color: rgba(0, 240, 255, 0.4);
+    transform: translateY(-2px);
+  }
 }
 
 .screenshot-img {
@@ -288,7 +389,6 @@ nav.nav-links a:hover {
   height: auto;
   border-radius: calc(var(--radius-lg) - 6px);
   display: block;
-  cursor: pointer;
 }
 
 .screenshot-caption {
@@ -411,16 +511,18 @@ nav.nav-links a:hover {
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-lg);
   padding: 32px;
-  transition: all var(--transition);
+  transition: transform 200ms var(--ease-out), border-color 200ms var(--ease-out), box-shadow 200ms var(--ease-out);
   position: relative;
   display: flex;
   flex-direction: column;
 }
 
-.standard-card:hover {
-  border-color: rgba(0, 240, 255, 0.35);
-  transform: translateY(-3px);
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
+@media (hover: hover) and (pointer: fine) {
+  .standard-card:hover {
+    border-color: rgba(0, 240, 255, 0.35);
+    transform: translateY(-3px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
+  }
 }
 
 .standard-card.primary-standard {
@@ -518,12 +620,37 @@ nav.nav-links a:hover {
   font-size: 0.8rem;
   padding: 4px 8px;
   border-radius: 4px;
-  transition: var(--transition);
+  transition: color 160ms var(--ease-out), background-color 160ms var(--ease-out), transform 160ms var(--ease-out);
 }
 
-.copy-btn:hover {
-  color: var(--accent-cyan);
-  background: rgba(255,255,255,0.05);
+.copy-btn:active {
+  transform: scale(0.95);
+}
+
+.copy-btn:focus-visible {
+  outline: 2px solid var(--accent-cyan);
+  outline-offset: 2px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .copy-btn:hover {
+    color: var(--accent-cyan);
+    background: rgba(255, 255, 255, 0.05);
+  }
+}
+
+.copy-btn-text {
+  display: inline-block;
+  transition: filter 100ms var(--ease-out), opacity 100ms var(--ease-out);
+}
+
+.copy-btn-text.transitioning {
+  filter: blur(2px);
+  opacity: 0.6;
+}
+
+.copy-btn.copied {
+  color: var(--accent-green);
 }
 
 pre {
@@ -623,11 +750,19 @@ footer {
   color: var(--text-muted);
   text-decoration: none;
   font-size: 0.9rem;
-  transition: color var(--transition);
+  transition: color 160ms var(--ease-out);
 }
 
-.footer-col a:hover {
-  color: var(--accent-cyan);
+@media (hover: hover) and (pointer: fine) {
+  .footer-col a:hover {
+    color: var(--accent-cyan);
+  }
+}
+
+.footer-col a:focus-visible {
+  outline: 2px solid var(--accent-cyan);
+  outline-offset: 2px;
+  border-radius: 2px;
 }
 
 .footer-bottom {
@@ -644,22 +779,29 @@ footer {
 
 /* Lightbox Modal for Screenshot */
 .modal {
-  display: none;
   position: fixed;
   z-index: 1000;
   left: 0;
   top: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(4, 6, 10, 0.95);
-  backdrop-filter: blur(10px);
+  background-color: rgba(4, 6, 10, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  display: flex;
   align-items: center;
   justify-content: center;
   padding: 20px;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 220ms var(--ease-out), visibility 220ms var(--ease-out);
 }
 
 .modal.active {
-  display: flex;
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
 }
 
 .modal-content {
@@ -668,21 +810,55 @@ footer {
   border-radius: var(--radius-md);
   border: 1px solid var(--border-accent);
   box-shadow: 0 0 50px rgba(0, 240, 255, 0.3);
+  transform: scale(0.95);
+  opacity: 0;
+  transform-origin: center;
+  transition: transform 220ms var(--ease-out), opacity 220ms var(--ease-out);
+}
+
+.modal.active .modal-content {
+  transform: scale(1);
+  opacity: 1;
+}
+
+/* Asymmetric timing: Exit is snappy (140ms) */
+.modal:not(.active) {
+  transition: opacity 140ms var(--ease-out), visibility 140ms var(--ease-out);
+}
+
+.modal:not(.active) .modal-content {
+  transition: transform 140ms var(--ease-out), opacity 140ms var(--ease-out);
 }
 
 .modal-close {
   position: absolute;
   top: 25px;
   right: 35px;
+  background: transparent;
+  border: none;
   color: var(--text-muted);
   font-size: 36px;
+  line-height: 1;
   font-weight: 300;
   cursor: pointer;
-  transition: var(--transition);
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  transition: color 160ms var(--ease-out), transform 160ms var(--ease-out);
 }
 
-.modal-close:hover {
-  color: var(--accent-cyan);
+.modal-close:active {
+  transform: scale(0.92);
+}
+
+.modal-close:focus-visible {
+  outline: 2px solid var(--accent-cyan);
+  outline-offset: 4px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .modal-close:hover {
+    color: var(--accent-cyan);
+  }
 }
 
 /* Responsive adjustments */

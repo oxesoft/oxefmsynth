@@ -93,7 +93,9 @@
 
       <!-- Screenshot Showcase with Click to Expand -->
       <div class="screenshot-wrapper">
-        <img id="mainScreenshot" src="assets/screenshot.png" alt="Oxe FM Synth GUI Screenshot" class="screenshot-img" title="Click to enlarge screenshot">
+        <button type="button" id="screenshotBtn" class="screenshot-btn" aria-label="Enlarge Oxe FM Synth interface screenshot">
+          <img id="mainScreenshot" src="assets/screenshot.png" alt="Oxe FM Synth GUI Screenshot" class="screenshot-img" title="Click to enlarge screenshot">
+        </button>
         <div class="screenshot-caption">Oxe FM Synth interface running with 8 operators, envelopes, filters, and effect rack. (Click to zoom)</div>
       </div>
     </div>
@@ -210,7 +212,7 @@
         <div class="code-container">
           <div class="code-header">
             <span>macOS Plugin Directories</span>
-            <button class="copy-btn" onclick="copyCode(this, '~/Library/Audio/Plug-Ins/CLAP\n~/Library/Audio/Plug-Ins/VST3')">Copy</button>
+            <button class="copy-btn" onclick="copyCode(this, '~/Library/Audio/Plug-Ins/CLAP\n~/Library/Audio/Plug-Ins/VST3')"><span class="copy-btn-text">Copy</span></button>
           </div>
           <pre><code># CLAP (Recommended)
 ~/Library/Audio/Plug-Ins/CLAP/oxefmsynth.clap
@@ -223,7 +225,7 @@
         <div class="code-container">
           <div class="code-header">
             <span>Linux Plugin Directories</span>
-            <button class="copy-btn" onclick="copyCode(this, '~/.clap\n~/.vst3')">Copy</button>
+            <button class="copy-btn" onclick="copyCode(this, '~/.clap\n~/.vst3')"><span class="copy-btn-text">Copy</span></button>
           </div>
           <pre><code># CLAP (Recommended)
 ~/.clap/oxefmsynth.clap
@@ -236,7 +238,7 @@
         <div class="code-container">
           <div class="code-header">
             <span>Windows Plugin Directories</span>
-            <button class="copy-btn" onclick="copyCode(this, '%LOCALAPPDATA%\\Programs\\Common\\CLAP\n%COMMONPROGRAMFILES%\\VST3')">Copy</button>
+            <button class="copy-btn" onclick="copyCode(this, '%LOCALAPPDATA%\\Programs\\Common\\CLAP\n%COMMONPROGRAMFILES%\\VST3')"><span class="copy-btn-text">Copy</span></button>
           </div>
           <pre><code># CLAP (Recommended)
 %LOCALAPPDATA%\Programs\Common\CLAP\oxefmsynth.clap
@@ -263,7 +265,7 @@ C:\Program Files\Common Files\VST3\oxefmsynth.vst3</code></pre>
         <div class="code-container">
           <div class="code-header">
             <span>Terminal (macOS, Linux, or Windows MSYS2)</span>
-            <button class="copy-btn" onclick="copyCode(this, 'git clone https://github.com/oxesoft/oxefmsynth.git\ncd oxefmsynth\nmake clap\nmake install')">Copy</button>
+            <button class="copy-btn" onclick="copyCode(this, 'git clone https://github.com/oxesoft/oxefmsynth.git\ncd oxefmsynth\nmake clap\nmake install')"><span class="copy-btn-text">Copy</span></button>
           </div>
           <pre><code># 1. Clone repository
 git clone https://github.com/oxesoft/oxefmsynth.git
@@ -387,8 +389,8 @@ make install-vst3</code></pre>
   </footer>
 
   <!-- Lightbox Modal -->
-  <div id="imgModal" class="modal">
-    <span class="modal-close" id="modalClose">&times;</span>
+  <div id="imgModal" class="modal" role="dialog" aria-modal="true" aria-label="Enlarged screenshot">
+    <button type="button" class="modal-close" id="modalClose" aria-label="Close modal">&times;</button>
     <img class="modal-content" id="modalImg" alt="Enlarged screenshot">
   </div>
 
