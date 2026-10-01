@@ -36,8 +36,8 @@ private:
     float curvFator;    // multiplication factor
     int   curvCont;     // samples count
     // pan and volume
-    float lpan;         // (Faixa: -1.f a 1.f) Posicionamento entre os canais Esquerdo e Direito
-    float lvol;         // (Faixa:  0.f a 1.f) Volume
+    float lpan;         // (Range: -1.0f to 1.0f) Position between Left and Right channels
+    float lvol;         // (Range:  0.0f to 1.0f) Volume
     // note position
     int   startPosition;// the sample number of the note begining
     int   lastpos;      // keeps the last position for accuracy of note off

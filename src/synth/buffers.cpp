@@ -82,16 +82,16 @@ void CBuffers::FillWaveforms(void)
         bWaves[3][i+tam2] = -1.0f;
     }
     // band limited pulse
-    Filtrar(3,4);
+    Filter(3,4);
     // band limited saw
-    Filtrar(1,5);
-    Normalizar(5);
+    Filter(1,5);
+    Normalize(5);
     // guard sample for branchless interpolation
     for (i=0;i<WAVEFORMS;i++)
         bWaves[i][WAVEFORM_BSIZE] = bWaves[i][0];
 }
 
-void CBuffers::Filtrar(int indorigem, int inddestino)
+void CBuffers::Filter(int source, int destination)
 {
     #define N 256    // number of filters
     //-----------------------------------------
@@ -103,28 +103,28 @@ void CBuffers::Filtrar(int indorigem, int inddestino)
     double tmp[N];
     memset(tmp,0,sizeof(tmp));
     //-----------------------------------------
-    double entsai = 0.0;
-    int   ciclos = 2;
+    double inout = 0.0;
+    int   cycles = 2;
     int   i;
     int   n;
-    while (ciclos--)
+    while (cycles--)
     {
         for (i=0;i<WAVEFORM_BSIZE;i++)
         {    
-            entsai = (double)bWaves[indorigem][i];
+            inout = (double)bWaves[source][i];
             for (n=0;n<N;n++)
             {
                 //-----------------------------
-                tmp[n] = ummenosp * entsai + p * tmp[n];
-                entsai = tmp[n];
+                tmp[n] = ummenosp * inout + p * tmp[n];
+                inout = tmp[n];
                 //-----------------------------
             }
-            bWaves[inddestino][i] = (float)entsai;
+            bWaves[destination][i] = (float)inout;
         }
     }
 }
 
-void CBuffers::Normalizar(int indice)
+void CBuffers::Normalize(int wave_index)
 {
     double max = 0.0;
     double aux = 0.0;
@@ -132,7 +132,7 @@ void CBuffers::Normalizar(int indice)
     // finds the peak value
     for (i=0;i<WAVEFORM_BSIZE;i++)
     {
-        aux = fabs((double)bWaves[indice][i]);
+        aux = fabs((double)bWaves[wave_index][i]);
         if (aux > max)
             max = aux;
     }
@@ -140,5 +140,5 @@ void CBuffers::Normalizar(int indice)
     aux = 1.0/max;
     // normalizes the signal
     for (i=0;i<WAVEFORM_BSIZE;i++)
-        bWaves[indice][i] = (float)((double)bWaves[indice][i]*aux);
+        bWaves[wave_index][i] = (float)((double)bWaves[wave_index][i]*aux);
 }

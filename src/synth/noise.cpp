@@ -73,7 +73,7 @@ void CNoise::Process(float *b, int size, int offset)
     {
         for (i=offset;i<size;i++)
         {
-            // Limitador (4096 / 32768.f = 0.125f)
+            // Limiter (4096 / 32768.f = 0.125f)
             if (b[i] > 0.125f)
                 b[i] = 0.125f;
             else if (b[i] < -0.125f)

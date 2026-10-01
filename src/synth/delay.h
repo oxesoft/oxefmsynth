@@ -29,8 +29,8 @@ private:
     COscillator osc;
     // buffer iterator
     unsigned short idelay; // here is the trick
-    // auxiliar
-    int  tempoant;
+    // auxiliary
+    int  prev_time;
 public:
     void Init(float *b);
     void Process(float *b, int size);

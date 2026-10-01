@@ -32,18 +32,18 @@ If we remove this, the times will respect the program values from
 
 void CEnvelop::Init()
 {
-    sr         = 0.f;
+    sr         = 0.0f;
     es         = INACTIVE;
     counter    = 0;
     coef       = 0.0f;
     sa         = 0.0f;
-    dl         = 0.f;
-    at         = 0.f;
-    de         = 0.f;
-    st         = 0.f;
-    su         = 0.f;
-    re         = 0.f;
-    ss         = 0.f;
+    dl         = 0.0f;
+    at         = 0.0f;
+    de         = 0.0f;
+    st         = 0.0f;
+    su         = 0.0f;
+    re         = 0.0f;
+    ss         = 0.0f;
 }
 
 void CEnvelop::SetPar(char param, float value)
@@ -112,7 +112,7 @@ int CEnvelop::CalcCoef()
         case DELAY:
             counter = lrintf(dl * sr);
             KEEP_OLD_BEHAVIOUR
-            coef     = 0;
+            coef     = 0.0f;
             if (at)
                 es = ATTACK;
             else if (de)

@@ -409,8 +409,8 @@ void CSynthesizer::SetSampleRate(float samplerate)
 void CSynthesizer::Process(float *b, int size, int position)
 {
     int i;
-    int tam = size<<1;
-    memset(b,0,tam*sizeof(float));
+    int length = size<<1;
+    memset(b,0,length*sizeof(float));
     if (revrbON)
         memset(buffers.bREV,0,size*sizeof(float));
     if (delayON)
@@ -419,7 +419,7 @@ void CSynthesizer::Process(float *b, int size, int position)
     {
         if (state[i] != INACTIVE)
         {
-            memset(buffers.bNoteOut,0,tam*sizeof(float));
+            memset(buffers.bNoteOut,0,length*sizeof(float));
             notes[i].Process(buffers.bNoteOut,size,position);
             if (INACTIVE == notes[i].GetState())
             {
@@ -452,7 +452,7 @@ void CSynthesizer::Process(float *b, int size, int position)
     }
     // peak limiting
     float * __restrict buf = b;
-    for (i=0;i<tam;i++)
+    for (i=0;i<length;i++)
     {
         float s = buf[i];
         if (s >  1.0f) buf[i] =  1.0f;
@@ -547,15 +547,15 @@ void CSynthesizer::SumStereoStereo(float *bInput, float *bNoteOut, float volume,
 {
     const float * __restrict in = bInput;
     float * __restrict out = bNoteOut;
-    int tam = size<<1;
+    int length = size<<1;
     if (volume == 1.0f)
     {
-        for (int i=0;i<tam;i++)
+        for (int i=0;i<length;i++)
             out[i] += in[i];
     }
     else
     {
-        for (int i=0;i<tam;i++)
+        for (int i=0;i<length;i++)
             out[i] += in[i] * volume;
     }
 }

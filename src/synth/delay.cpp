@@ -34,6 +34,7 @@ void CDelay::Init(float *b)
     lf = 0.f;
     la = 0.f;
     idelay = 0;
+    prev_time = 0;
     memset(bdelay,0,sizeof(bdelay));
     osc.SetBuffer(BWAVE,b);
 }
@@ -63,8 +64,8 @@ void CDelay::SetPar(char param, float value)
 void CDelay::Process(float *b, int size)
 {
     float          lfo;
-    int            tempo;
-    int            passo;
+    int            time;
+    int            step;
     unsigned short tmp;
     // sets the LFO that acts about the delay time
     lfo = 1.f;
@@ -74,26 +75,25 @@ void CDelay::Process(float *b, int size)
         lfo -= ((osc.Process() + 1.f)/2.f) * la * 0.25f;
     }
     // sets the time delay
-    tempo = lrintf(ti * 65535.f * 32768.f * lfo);
+    time = lrintf(ti * 65535.f * 32768.f * lfo);
     // actual process
     if (fe && ((!lf) || (!la)))
     {
-        float feedb = fe;
-        tempo = tempo>>15;
+        time = time>>15;
         for (int i=0;i<size;i++)
         {
-            tmp            = idelay-(unsigned short)tempo;
-            bdelay[idelay] = b[i] + (bdelay[tmp] * feedb);
+            tmp            = idelay-(unsigned short)time;
+            bdelay[idelay] = b[i] + (bdelay[tmp] * fe);
             b[i]           = bdelay[tmp];
             idelay++;
         }
     }
     else if (!fe && ((!lf) || (!la)))
     {
-        tempo = tempo>>15;
+        time = time>>15;
         for (int i=0;i<size;i++)
         {
-            tmp            = idelay-(unsigned short)tempo;
+            tmp            = idelay-(unsigned short)time;
             bdelay[idelay] = b[i];
             b[i]           = bdelay[tmp];
             idelay++;
@@ -101,15 +101,14 @@ void CDelay::Process(float *b, int size)
     }
     else if (fe && lf && la)
     {
-        float feedb = fe;
-        passo = (tempo - tempoant) / size;
+        step = (time - prev_time) / size;
         for (int i=0;i<size;i++)
         {
-            tempoant      += passo;
-            tmp            = idelay-(unsigned short)(tempoant>>15);
-            bdelay[idelay] = b[i] + (bdelay[tmp] * feedb);
+            prev_time     += step;
+            tmp            = idelay-(unsigned short)(prev_time>>15);
+            bdelay[idelay] = b[i] + (bdelay[tmp] * fe);
             #ifdef WITH_LINEAR_INTERPOLATION
-                float frac = (float)(65536 - ((int)tempoant & 0xFFFF)) * (1.0f / 65536.0f);
+                float frac = (float)(65536 - ((int)prev_time & 0xFFFF)) * (1.0f / 65536.0f);
                 b[i]       = bdelay[tmp] + (bdelay[(tmp+1) & 0xFFFF] - bdelay[tmp]) * frac;
             #else
                 b[i]       = bdelay[tmp];
@@ -119,14 +118,14 @@ void CDelay::Process(float *b, int size)
     }
     else if (!fe && lf && la)
     {
-        passo = (tempo - tempoant) / size;
+        step = (time - prev_time) / size;
         for (int i=0;i<size;i++)
         {
-            tempoant      += passo;
-            tmp            = idelay-(unsigned short)(tempoant>>15);
+            prev_time     += step;
+            tmp            = idelay-(unsigned short)(prev_time>>15);
             bdelay[idelay] = b[i];
             #ifdef WITH_LINEAR_INTERPOLATION
-                float frac = (float)(65536 - ((int)tempoant & 0xFFFF)) * (1.0f / 65536.0f);
+                float frac = (float)(65536 - ((int)prev_time & 0xFFFF)) * (1.0f / 65536.0f);
                 b[i]       = bdelay[tmp] + (bdelay[(tmp+1) & 0xFFFF] - bdelay[tmp]) * frac;
             #else
                 b[i]       = bdelay[tmp];
@@ -134,5 +133,5 @@ void CDelay::Process(float *b, int size)
             idelay++;
         }
     }
-    tempoant = tempo;
+    prev_time = time;
 }

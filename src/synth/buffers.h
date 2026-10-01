@@ -20,8 +20,8 @@ class CBuffers
 {
 private:
     void FillWaveforms();
-    void Filtrar(int indorigem, int inddestino);
-    void Normalizar(int indice);
+    void Filter(int source, int destination);
+    void Normalize(int wave_index);
 public:
     float bOPA          [SAMPLES_PER_PROCESS];
     float bOPB          [SAMPLES_PER_PROCESS];
@@ -38,6 +38,6 @@ public:
     float bSynthOut     [SAMPLES_PER_PROCESS<<1];
     // waveforms
     float bWaves       [WAVEFORMS][WAVEFORM_BSIZE + 1];
-    // construtor
+    // constructor
     CBuffers();
 };
