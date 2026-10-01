@@ -47,6 +47,7 @@ void CReverb::Init()
     a0   = 0.0f;
     a1   = 0.0f;
     b1   = 0.0f;
+    prev_REVDA = -1.0f;
 }
 
 void CReverb::SetPar(char param, float value)
@@ -65,10 +66,10 @@ void CReverb::SetPar(char param, float value)
     }
 }
 
-void CReverb::CalcCoefLowPass(float frequencia)
+void CReverb::CalcCoefLowPass(float frequency)
 {
     float w     = 2.0f * sr; 
-    float fCut  = 2.0f * PI * Key2Frequency(frequencia * MAXFREQFLT);
+    float fCut  = 2.0f * PI * Key2Frequency(frequency * MAXFREQFLT);
     float Norm  = 1.0f / (fCut + w); 
     b1          = (w - fCut) * Norm;
     a0 = a1     = fCut * Norm;
@@ -77,14 +78,14 @@ void CReverb::CalcCoefLowPass(float frequencia)
 void CReverb::Process(float *b, int size)
 {
     int i        = 0;
-    float ent    = 0.0f;
+    float in     = 0.0f;
     float aux    = 0.0f;
     float smp    = 0.0f;
     const float feedback = ti * (127.0f / 128.0f);
-    if (REVDAant != da) 
+    if (prev_REVDA != da) 
     {
         CalcCoefLowPass(da);
-        REVDAant =         da;
+        prev_REVDA =         da;
     }
     int l_icomb1 = icomb1;
     int l_icomb2 = icomb2;
@@ -97,22 +98,22 @@ void CReverb::Process(float *b, int size)
 
     for (i=0;i<size;i++)
     {
-        ent  = b[i];
+        in   = b[i];
         // comb 1
         float c1 = bcomb1[l_icomb1];
-        bcomb1[l_icomb1] = ent + c1 * feedback;
+        bcomb1[l_icomb1] = in + c1 * feedback;
         if (++l_icomb1>=TAMCOMB1) l_icomb1 = 0;
         // comb 2
         float c2 = bcomb2[l_icomb2];
-        bcomb2[l_icomb2] = ent + c2 * feedback;
+        bcomb2[l_icomb2] = in + c2 * feedback;
         if (++l_icomb2>=TAMCOMB2) l_icomb2 = 0;
         // comb 3
         float c3 = bcomb3[l_icomb3];
-        bcomb3[l_icomb3] = ent + c3 * feedback;
+        bcomb3[l_icomb3] = in + c3 * feedback;
         if (++l_icomb3>=TAMCOMB3) l_icomb3 = 0;
         // comb 4
         float c4 = bcomb4[l_icomb4];
-        bcomb4[l_icomb4] = ent + c4 * feedback;
+        bcomb4[l_icomb4] = in + c4 * feedback;
         if (++l_icomb4>=TAMCOMB4) l_icomb4 = 0;
 
         smp = c1 + c2 + c3 + c4;
@@ -145,7 +146,7 @@ void CReverb::Process(float *b, int size)
     ou0 = l_ou0;
     in1 = l_in1;
 
-    if (REVDAant < 1.f)
+    if (prev_REVDA < 1.f)
     {
         float l_ou0l = ou0l;
         float l_in1l = in1l;
@@ -155,9 +156,9 @@ void CReverb::Process(float *b, int size)
         for (i=0;i<size;i++)
         {
             // low pass filter
-            float in = b[i];
-            l_ou0l = in * l_a0 + l_in1l * l_a1 + l_ou0l * l_b1;
-            l_in1l = in;
+            float in_sample = b[i];
+            l_ou0l = in_sample * l_a0 + l_in1l * l_a1 + l_ou0l * l_b1;
+            l_in1l = in_sample;
             b[i] = l_ou0l;
         }
         ou0l = l_ou0l;
@@ -179,7 +180,7 @@ char CReverb::GetState()
     return state;
 }
 
-inline float CReverb::Key2Frequency(float valor)
+inline float CReverb::Key2Frequency(float value)
 {
-    return C0 * powf(2.0f, valor / 12.0f);
+    return C0 * powf(2.0f, value / 12.0f);
 }

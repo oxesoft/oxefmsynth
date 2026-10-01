@@ -108,14 +108,14 @@ void CNoise::Process(float *b, int size, int offset)
     }
 }
 
-void CNoise::CalcCoef(double const frequencia,double const q)
+void CNoise::CalcCoef(double const frequency,double const q)
 {
     double a0;
     double a1;
     double a2;
     double b0;
     double b2;
-    double       freq   = frequencia; if (freq <= C0) freq = C0;
+    double       freq   = frequency; if (freq <= C0) freq = C0;
     double const omega  = 2.0*D_PI*freq/sr;
     double const tsin   = sin(omega);
     double const tcos   = cos(omega);

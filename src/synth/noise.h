@@ -38,7 +38,7 @@ private:
     float am;
     int bp;
     // calculates the filter coefs
-    void  CalcCoef(double const frequencia, double const q);
+    void  CalcCoef(double const frequency, double const q);
 public:
     void Init();
     void Process(float *b, int size, int offset);

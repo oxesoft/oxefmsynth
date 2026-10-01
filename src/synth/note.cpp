@@ -47,13 +47,13 @@ void CNote::Init(SProgram *prg, CBuffers *buf, unsigned char key, unsigned char 
     aft        = 0.0f;
     lfodph     = 0.0f;
     state      = INACTIVE;
-    freqAtual  = freqnote;
-    portaFator = 1.0f;
-    portaCont  = 0;
-    curvAtual  = 1.0f;
-    curvFator  = 1.0f;
-    curvCont   = 0;
-    lastpos    = 0;
+    current_freq = freqnote;
+    porta_factor = 1.0f;
+    porta_count  = 0;
+    current_curv = 1.0f;
+    curv_factor  = 1.0f;
+    curv_count   = 0;
+    lastpos      = 0;
     memset(opstate, 0, sizeof(opstate));
     lpan       = 0.0f;
     lvol       = 1.0f;
@@ -71,23 +71,23 @@ void CNote::Init(SProgram *prg, CBuffers *buf, unsigned char key, unsigned char 
     {
         if (key != previousKey && previousKey != 255)
         {
-            portaCont = (int)lrintf(program->PORTA * samplerate / SAMPLES_PER_PROCESS);
-            freqAtual = previousFreq;
-            if (portaCont)
-                portaFator = powf(freqnote / previousFreq, 1.0f / portaCont);
+            porta_count  = (int)lrintf(program->PORTA * samplerate / SAMPLES_PER_PROCESS);
+            current_freq = previousFreq;
+            if (porta_count)
+                porta_factor = powf(freqnote / previousFreq, 1.0f / porta_count);
             else
-                freqAtual = freqnote;
+                current_freq = freqnote;
         }
         else
-            freqAtual = freqnote;
+            current_freq = freqnote;
     }
     // Initializes the pitch curve constants
     if (program->PTCTI && program->PTCCU != 1.f)
     {
-        curvCont  = (int)lrintf(program->PTCTI * samplerate / SAMPLES_PER_PROCESS);
-        curvAtual = program->PTCCU;
-        if (curvCont)
-            curvFator = powf(1.f / curvAtual, 1.0f / curvCont);
+        curv_count   = (int)lrintf(program->PTCTI * samplerate / SAMPLES_PER_PROCESS);
+        current_curv = program->PTCCU;
+        if (curv_count)
+            curv_factor = powf(1.f / current_curv, 1.0f / curv_count);
     }
     UpdateProgram();
 }
@@ -437,7 +437,7 @@ static inline void MixIn(const float *bIn, float *bOut, float vol, int size, int
     }
 }
 
-void CNote::Process(float *bsaida, int size, int position)
+void CNote::Process(float *output, int size, int position)
 {
     float freqLocal;
     float curvLocal;
@@ -467,31 +467,31 @@ void CNote::Process(float *bsaida, int size, int position)
     }
 
     // portamento
-    if (portaCont)
+    if (porta_count)
     {
-        portaCont--;
-        freqAtual *= portaFator;
+        porta_count--;
+        current_freq *= porta_factor;
     }
     else
     {
-        freqAtual = freqnote;
+        current_freq = freqnote;
     }
-    freqLocal = freqAtual;
+    freqLocal = current_freq;
 
     // pitch bend
     freqLocal *= ptc;
 
     // pitch curve
-    if (curvCont)
+    if (curv_count)
     {
-        curvCont--;
-        curvAtual *= curvFator;
+        curv_count--;
+        current_curv *= curv_factor;
     }
     else
     {
-        curvAtual = 1.f;
+        current_curv = 1.f;
     }
-    curvLocal = curvAtual;
+    curvLocal = current_curv;
 
     // LFO
     if (opstate[8])
@@ -671,24 +671,24 @@ void CNote::Process(float *bsaida, int size, int position)
 
     // sums the mono operators signal to the stereo output
     if (opstate[0] && program->MAO)
-        SumMonoStereo(buffers->bOPA,bsaida,program->MAO,program->MAP,size,offset);
+        SumMonoStereo(buffers->bOPA,output,program->MAO,program->MAP,size,offset);
     if (opstate[1] && program->MBO)
-        SumMonoStereo(buffers->bOPB,bsaida,program->MBO,program->MBP,size,offset);
+        SumMonoStereo(buffers->bOPB,output,program->MBO,program->MBP,size,offset);
     if (opstate[2] && program->MCO)
-        SumMonoStereo(buffers->bOPC,bsaida,program->MCO,program->MCP,size,offset);
+        SumMonoStereo(buffers->bOPC,output,program->MCO,program->MCP,size,offset);
     if (opstate[3] && program->MDO)
-        SumMonoStereo(buffers->bOPD,bsaida,program->MDO,program->MDP,size,offset);
+        SumMonoStereo(buffers->bOPD,output,program->MDO,program->MDP,size,offset);
     if (opstate[4] && program->MEO)
-        SumMonoStereo(buffers->bOPE,bsaida,program->MEO,program->MEP,size,offset);
+        SumMonoStereo(buffers->bOPE,output,program->MEO,program->MEP,size,offset);
     if (opstate[5] && program->MFO)
-        SumMonoStereo(buffers->bOPF,bsaida,program->MFO,program->MFP,size,offset);
+        SumMonoStereo(buffers->bOPF,output,program->MFO,program->MFP,size,offset);
     if (opstate[6] && program->MXO)
-        SumMonoStereo(buffers->bOPX,bsaida,program->MXO,program->MXP,size,offset);
+        SumMonoStereo(buffers->bOPX,output,program->MXO,program->MXP,size,offset);
     if (opstate[7] && program->MZO)
-        SumMonoStereo(buffers->bOPZ,bsaida,program->MZO,program->MZP,size,offset);
+        SumMonoStereo(buffers->bOPZ,output,program->MZO,program->MZP,size,offset);
 
     // applies pan and volume
-    PanVolStereo(bsaida,lvol,lpan,size,offset);
+    PanVolStereo(output,lvol,lpan,size,offset);
 
     // the note state is defined by the operators's envelops except the Z one
     state = INACTIVE;
@@ -831,31 +831,29 @@ void CNote::PanVolStereo(float *b, float volume, float pan, int size, int offset
     }
 }
 
-float CNote::Scaling(unsigned char tecla, float valor)
+float CNote::Scaling(unsigned char key, float value)
 {
-    if (!valor)
+    if (!value)
         return 1.f;
-    unsigned char tclMax = 96; // last key of a 5 octave keyboard
-    unsigned char tclMin = 36; // first key of a 5 octave keyboard
-            float valMin = 1.f;
-            float valMax = 1.f;
-    if (valor > 0.f)
-        valMin = 1.f - valor;
-    else
-    if (valor < 0.f)
-        valMax = 1.f + valor;
+    unsigned char keyMax = 96; // last key of a 5 octave keyboard
+    unsigned char keyMin = 36; // first key of a 5 octave keyboard
+    float valMin = 1.f;
+    float valMax = 1.f;
+    if (value > 0.f)
+        valMin = 1.f - value;
+    else if (value < 0.f)
+        valMax = 1.f + value;
 
-    float volume   = valMin + (((valMax - valMin) / (float)(tclMax - tclMin)) * (float)(tecla - tclMin));
+    float volume   = valMin + (((valMax - valMin) / (float)(keyMax - keyMin)) * (float)(key - keyMin));
     
-    if (valor > 0.f)
+    if (value > 0.f)
     {
         if (volume>valMax)
             volume = valMax;
         if (volume<valMin)
             volume = valMin;
     }
-    else
-    if (valor < 0.f)
+    else if (value < 0.f)
     {
         if (volume<valMax)
             volume = valMax;
@@ -865,26 +863,26 @@ float CNote::Scaling(unsigned char tecla, float valor)
     return volume;
 }
 
-inline float CNote::VelSen(float valor, float vel)
+inline float CNote::VelSen(float value, float vel)
 {
-    float val = vel + (1.0f - valor);
+    float val = vel + (1.0f - value);
     if (val > 1.0f)
         val = 1.0f;
     val = val*val;
     return val;
 }
 
-inline float CNote::Key2Frequency(char valor)
+inline float CNote::Key2Frequency(char value)
 {
-    return C0 * powf(2.0f, valor / 12.0f);
+    return C0 * powf(2.0f, value / 12.0f);
 }
 
-inline float CNote::Val2Mul(float valor)
+inline float CNote::Val2Mul(float value)
 {
-    if      (valor > 0.0f)
-             return powf(2.0f,  valor / 12.0f);
-    else if (valor < 0.0f)
-             return powf(0.5f, -valor / 12.0f);
+    if      (value > 0.0f)
+             return powf(2.0f,  value / 12.0f);
+    else if (value < 0.0f)
+             return powf(0.5f, -value / 12.0f);
     else
              return 1.0f;
 }

@@ -63,7 +63,7 @@ private:
     void SumMonoStereo            (float *bInput, float *bNoteOut,               int size);
     void SumStereoMono            (float *bInput, float *bNoteOut, float volume, int size);
     void SumStereoStereo          (float *bInput, float *bNoteOut, float volume, int size);
-    inline float Val2Mul          (float  valor);
+    inline float Val2Mul          (float  value);
     void UpdateGlobalEffects      ();
 public:
     CSynthesizer();

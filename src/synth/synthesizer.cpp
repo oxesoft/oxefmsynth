@@ -394,7 +394,7 @@ void CSynthesizer::SendEvent(unsigned char bS,unsigned char bD1,unsigned char bD
                     }
                 }
             }
-        default:   // Ignora qualquer outro event
+        default:   // Ignores any other event
             break;
     }
 }
@@ -560,12 +560,12 @@ void CSynthesizer::SumStereoStereo(float *bInput, float *bNoteOut, float volume,
     }
 }
 
-inline float CSynthesizer::Val2Mul(float valor)
+inline float CSynthesizer::Val2Mul(float value)
 {
-    if      (valor > 0.0f)
-             return powf( 2.0f,  valor / 12.0f);
-    else if (valor < 0.0f)
-             return powf( 0.5f, -valor / 12.0f);
+    if      (value > 0.0f)
+             return powf( 2.0f,  value / 12.0f);
+    else if (value < 0.0f)
+             return powf( 0.5f, -value / 12.0f);
     else
              return 1.0f;
 }

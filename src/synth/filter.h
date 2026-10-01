@@ -37,7 +37,7 @@ private:
     float ou2;
     float in1;
     float in2;
-    void  CalcCoef(int const type, double const frequencia, double const q);
+    void  CalcCoef(int const type, double const frequency, double const q);
 public:
     void  Init();
     void  Process(float *b, int size, int offset);

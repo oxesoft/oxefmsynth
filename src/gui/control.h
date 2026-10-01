@@ -98,7 +98,7 @@ enum
     VL_MINUS1_2_PLUS1,
     VL_COARSE_TUNE,
     VL_FINE_TUNE,
-    VL_TEMPO,
+    VL_TIME,
     VL_PORTAMENTO,
     VL_WAVEFORM,
     VL_FILTER,

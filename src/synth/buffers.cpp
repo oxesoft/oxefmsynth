@@ -45,41 +45,41 @@ void CBuffers::FillWaveforms(void)
     double un   = 0.0f;
     double v0   = 0.0f;
     double v1   = 0.0f;
-    double tam  = (double)WAVEFORM_BSIZE;
-    int    tam2 =         WAVEFORM_BSIZE / 2;
-    int    tam4 =         WAVEFORM_BSIZE / 4;
-    int    ta24 = tam2 + tam4;
+    double size                 = (double)WAVEFORM_BSIZE;
+    int    half_size            =         WAVEFORM_BSIZE / 2;
+    int    quarter_size         =         WAVEFORM_BSIZE / 4;
+    int    three_quarters_size  = half_size + quarter_size;
     // sine
     for (i=0;i<WAVEFORM_BSIZE;i++)
     {
-        v0 = D_PI * 2.0 * (double)i / tam;
+        v0 = D_PI * 2.0 * (double)i / size;
         v0 = sin(v0);
         bWaves[0][i] = (float)v0;
     }
     // saw
     v0 = 1.0;
-    un = 2.0 / tam;
+    un = 2.0 / size;
     for (i=0;i<WAVEFORM_BSIZE;i++)
     {
         v0 -= un;
         bWaves[1][i] = (float)v0;
     }
     // triangle
-    un = 4.0 / tam;
+    un = 4.0 / size;
     v0 = 0.0;
-    for (i=0;i<tam4;i++)
+    for (i=0;i<quarter_size;i++)
     {
-        bWaves[2][i]      = (float)(      v0);
-        bWaves[2][i+tam4] = (float)(1.0 - v0);
-        bWaves[2][i+tam2] = (float)(    - v0);
-        bWaves[2][i+ta24] = (float)(v0 - 1.0);
+        bWaves[2][i]                   = (float)(      v0);
+        bWaves[2][i+quarter_size]      = (float)(1.0 - v0);
+        bWaves[2][i+half_size]         = (float)(    - v0);
+        bWaves[2][i+three_quarters_size] = (float)(v0 - 1.0);
         v0 += un;
     }
     // pulse
-    for (i=0;i<tam2;i++)
+    for (i=0;i<half_size;i++)
     {
-        bWaves[3][i     ] =  1.0f;
-        bWaves[3][i+tam2] = -1.0f;
+        bWaves[3][i          ] =  1.0f;
+        bWaves[3][i+half_size] = -1.0f;
     }
     // band limited pulse
     Filter(3,4);
@@ -95,11 +95,11 @@ void CBuffers::Filter(int source, int destination)
 {
     #define N 256    // number of filters
     //-----------------------------------------
-    double cutoff     = 128.f;
-    double samplerate = (double)WAVEFORM_BSIZE;
-    double x          = 2.0 * D_PI * cutoff / samplerate;
-    double p          = (2.0 - cos(x)) - sqrt(pow((2.0 - cos(x)), 2.0) - 1.0);
-    double ummenosp   = 1.0 - p;
+    double cutoff      = 128.f;
+    double samplerate  = (double)WAVEFORM_BSIZE;
+    double x           = 2.0 * D_PI * cutoff / samplerate;
+    double p           = (2.0 - cos(x)) - sqrt(pow((2.0 - cos(x)), 2.0) - 1.0);
+    double one_minus_p = 1.0 - p;
     double tmp[N];
     memset(tmp,0,sizeof(tmp));
     //-----------------------------------------
@@ -115,7 +115,7 @@ void CBuffers::Filter(int source, int destination)
             for (n=0;n<N;n++)
             {
                 //-----------------------------
-                tmp[n] = ummenosp * inout + p * tmp[n];
+                tmp[n] = one_minus_p * inout + p * tmp[n];
                 inout = tmp[n];
                 //-----------------------------
             }

@@ -54,15 +54,15 @@ private:
     float a0;
     float a1;
     float b1;
-    float REVDAant;
+    float prev_REVDA;
     // other
     char state;
     // calculates low-pass coefs
-    void CalcCoefLowPass(float frequencia);
+    void CalcCoefLowPass(float frequency);
 public:
     void         Init();
     char         GetState(void);
     void         Process(float *b, int size);
-    inline float Key2Frequency(float valor);
+    inline float Key2Frequency(float value);
     void         SetPar(char param, float value);
 };
