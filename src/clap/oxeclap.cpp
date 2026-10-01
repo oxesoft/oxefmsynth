@@ -419,8 +419,8 @@ clap_process_status COxeClapPlugin::plugin_process(const struct clap_plugin *plu
                 int32_t iaux = std::min(tambufferInt - plug->posInt, tambufferExt - plug->posExt);
                 while (iaux > 0)
                 {
-                    out1[plug->posExt] = float(plug->synthesizer.buffers.bSynthOut[plug->posInt++]) / 32767.f;
-                    out2[plug->posExt] = float(plug->synthesizer.buffers.bSynthOut[plug->posInt++]) / 32767.f;
+                    out1[plug->posExt] = plug->synthesizer.buffers.bSynthOut[plug->posInt++];
+                    out2[plug->posExt] = plug->synthesizer.buffers.bSynthOut[plug->posInt++];
                     plug->posExt++;
                     iaux -= 2;
                 }

@@ -31,13 +31,13 @@ private:
     float ti;  // time
     float da;  // damp
     // combs buffers
-    int bcomb1[TAMCOMB1];
-    int bcomb2[TAMCOMB2];
-    int bcomb3[TAMCOMB3];
-    int bcomb4[TAMCOMB4];
+    float bcomb1[TAMCOMB1];
+    float bcomb2[TAMCOMB2];
+    float bcomb3[TAMCOMB3];
+    float bcomb4[TAMCOMB4];
     // allpasses buffers
-    int ballp1[TAMALLP1];
-    int ballp2[TAMALLP2];
+    float ballp1[TAMALLP1];
+    float ballp2[TAMALLP2];
     // buffers iterators
     int icomb1;
     int icomb2;
@@ -46,14 +46,14 @@ private:
     int iallp1;
     int iallp2;
     // DC filter
-    int in1;
-    int ou0;
+    float in1;
+    float ou0;
     // low-pass filter
-    int in1l;
-    int ou0l;
-    int a0;
-    int a1;
-    int b1;
+    float in1l;
+    float ou0l;
+    float a0;
+    float a1;
+    float b1;
     float REVDAant;
     // other
     char state;
@@ -62,7 +62,7 @@ private:
 public:
     void         Init();
     char         GetState(void);
-    void         Process(int *b, int size);
+    void         Process(float *b, int size);
     inline float Key2Frequency(float valor);
     void         SetPar(char param, float value);
 };

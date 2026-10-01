@@ -27,7 +27,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //#define WITH_LINEAR_INTERPOLATION
 ///////////////////////////////////
 
-void CDelay::Init(short *b)
+void CDelay::Init(float *b)
 {
     ti = 0.f;
     fe = 0.f;
@@ -60,7 +60,7 @@ void CDelay::SetPar(char param, float value)
     }
 }
 
-void CDelay::Process(int *b, int size)
+void CDelay::Process(float *b, int size)
 {
     float          lfo;
     int            tempo;
@@ -78,12 +78,12 @@ void CDelay::Process(int *b, int size)
     // actual process
     if (fe && ((!lf) || (!la)))
     {
-        int feedb = lrintf(fe * 32768.f);
-            tempo = tempo>>15;
+        float feedb = fe;
+        tempo = tempo>>15;
         for (int i=0;i<size;i++)
         {
             tmp            = idelay-(unsigned short)tempo;
-            bdelay[idelay] = b[i] + ((bdelay[tmp] * feedb)/32768);
+            bdelay[idelay] = b[i] + (bdelay[tmp] * feedb);
             b[i]           = bdelay[tmp];
             idelay++;
         }
@@ -101,15 +101,16 @@ void CDelay::Process(int *b, int size)
     }
     else if (fe && lf && la)
     {
-        int feedb = lrintf(fe * 32768.f);
-            passo = (tempo - tempoant) / size;
+        float feedb = fe;
+        passo = (tempo - tempoant) / size;
         for (int i=0;i<size;i++)
         {
             tempoant      += passo;
             tmp            = idelay-(unsigned short)(tempoant>>15);
-            bdelay[idelay] = b[i] + ((bdelay[tmp] * feedb)/32768);
+            bdelay[idelay] = b[i] + (bdelay[tmp] * feedb);
             #ifdef WITH_LINEAR_INTERPOLATION
-                b[i]       = bdelay[tmp] + (((bdelay[(tmp+1) & 0xFFFF] - bdelay[tmp]) * (65536 - ((int)tempoant & 0xFFFF)))>>16);
+                float frac = (float)(65536 - ((int)tempoant & 0xFFFF)) * (1.0f / 65536.0f);
+                b[i]       = bdelay[tmp] + (bdelay[(tmp+1) & 0xFFFF] - bdelay[tmp]) * frac;
             #else
                 b[i]       = bdelay[tmp];
             #endif
@@ -125,7 +126,8 @@ void CDelay::Process(int *b, int size)
             tmp            = idelay-(unsigned short)(tempoant>>15);
             bdelay[idelay] = b[i];
             #ifdef WITH_LINEAR_INTERPOLATION
-                b[i]       = bdelay[tmp] + (((bdelay[(tmp+1) & 0xFFFF] - bdelay[tmp]) * (65536 - ((int)tempoant & 0xFFFF)))>>16);
+                float frac = (float)(65536 - ((int)tempoant & 0xFFFF)) * (1.0f / 65536.0f);
+                b[i]       = bdelay[tmp] + (bdelay[(tmp+1) & 0xFFFF] - bdelay[tmp]) * frac;
             #else
                 b[i]       = bdelay[tmp];
             #endif

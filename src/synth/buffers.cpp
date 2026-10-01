@@ -54,7 +54,7 @@ void CBuffers::FillWaveforms(void)
     {
         v0 = D_PI * 2.0 * (double)i / tam;
         v0 = sin(v0);
-        bWaves[0][i] = (short)lrintf(float(v0 * 32767.0));
+        bWaves[0][i] = (float)v0;
     }
     // saw
     v0 = 1.0;
@@ -62,30 +62,33 @@ void CBuffers::FillWaveforms(void)
     for (i=0;i<WAVEFORM_BSIZE;i++)
     {
         v0 -= un;
-        bWaves[1][i] = (short)lrintf(float(v0 * 32767.f));
+        bWaves[1][i] = (float)v0;
     }
     // triangle
     un = 4.0 / tam;
     v0 = 0.0;
     for (i=0;i<tam4;i++)
     {
-        bWaves[2][i]      = (short)lrintf(float((      v0) * 32767.f));
-        bWaves[2][i+tam4] = (short)lrintf(float((1.f - v0) * 32767.f));
-        bWaves[2][i+tam2] = (short)lrintf(float((    - v0) * 32767.f));
-        bWaves[2][i+ta24] = (short)lrintf(float((v0 - 1.f) * 32767.f));
+        bWaves[2][i]      = (float)(      v0);
+        bWaves[2][i+tam4] = (float)(1.0 - v0);
+        bWaves[2][i+tam2] = (float)(    - v0);
+        bWaves[2][i+ta24] = (float)(v0 - 1.0);
         v0 += un;
     }
     // pulse
     for (i=0;i<tam2;i++)
     {
-        bWaves[3][i     ] =  32767;
-        bWaves[3][i+tam2] = -32767;
+        bWaves[3][i     ] =  1.0f;
+        bWaves[3][i+tam2] = -1.0f;
     }
     // band limited pulse
     Filtrar(3,4);
     // band limited saw
     Filtrar(1,5);
     Normalizar(5);
+    // guard sample for branchless interpolation
+    for (i=0;i<WAVEFORMS;i++)
+        bWaves[i][WAVEFORM_BSIZE] = bWaves[i][0];
 }
 
 void CBuffers::Filtrar(int indorigem, int inddestino)
@@ -116,7 +119,7 @@ void CBuffers::Filtrar(int indorigem, int inddestino)
                 entsai = tmp[n];
                 //-----------------------------
             }
-            bWaves[inddestino][i] = (short)lrintf((float)entsai);
+            bWaves[inddestino][i] = (float)entsai;
         }
     }
 }
@@ -134,8 +137,8 @@ void CBuffers::Normalizar(int indice)
             max = aux;
     }
     // calculates the multiplication factor
-    aux = 32767.0/max;
+    aux = 1.0/max;
     // normalizes the signal
     for (i=0;i<WAVEFORM_BSIZE;i++)
-        bWaves[indice][i] = (short)(lrintf(float((double)bWaves[indice][i]*aux)));
+        bWaves[indice][i] = (float)((double)bWaves[indice][i]*aux);
 }

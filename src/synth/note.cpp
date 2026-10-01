@@ -55,8 +55,8 @@ void CNote::Init(SProgram *prg, CBuffers *buf, unsigned char key, unsigned char 
     curvCont   = 0;
     lastpos    = 0;
     memset(opstate, 0, sizeof(opstate));
-    lpan       = 0;
-    lvol       = 127;
+    lpan       = 0.0f;
+    lvol       = 1.0f;
     opAvol     = Scaling(key,program->OPAKS) * VelSen(program->OPAVS,velocity);
     opBvol     = Scaling(key,program->OPBKS) * VelSen(program->OPBVS,velocity);
     opCvol     = Scaling(key,program->OPCKS) * VelSen(program->OPCVS,velocity);
@@ -396,15 +396,48 @@ void CNote::SendEvent(char param, float value, int position)
             }
             break;
         case PAN:
-            lpan = lrintf(value * 127.f);
+            lpan = value;
             break;
         case VOLUME:
-            lvol = lrintf(value * 127.f);
+            lvol = value;
             break;
     }
 }
 
-void CNote::Process(int *bsaida, int size, int position)
+static inline void MixIn(const float *bIn, float *bOut, float vol, int size, int offset, bool &has_in)
+{
+    const float * __restrict in = bIn;
+    float * __restrict out = bOut;
+    if (!has_in)
+    {
+        if (vol == 1.0f)
+        {
+            for (int i = offset; i < size; i++)
+                out[i] = in[i];
+        }
+        else
+        {
+            for (int i = offset; i < size; i++)
+                out[i] = in[i] * vol;
+        }
+        has_in = true;
+    }
+    else
+    {
+        if (vol == 1.0f)
+        {
+            for (int i = offset; i < size; i++)
+                out[i] += in[i];
+        }
+        else
+        {
+            for (int i = offset; i < size; i++)
+                out[i] += in[i] * vol;
+        }
+    }
+}
+
+void CNote::Process(float *bsaida, int size, int position)
 {
     float freqLocal;
     float curvLocal;
@@ -516,97 +549,98 @@ void CNote::Process(int *bsaida, int size, int position)
     // operator A
     if (opstate[0])
     {
-        memset(buffers->bOPA,0,sizeof(buffers->bOPA));
-        osc[0].Process(buffers->bOPA,size,offset);
+        osc[0].Process(buffers->bOPA,size,offset,false);
         env[0].Process(buffers->bOPA,size,offset,opAvol);
     }
 
     // operator B
     if (opstate[1])
     {
-        memset(buffers->bOPB,0,sizeof(buffers->bOPB));
-        if (opstate[0] && program->MAB)
-            SumMonoMono(buffers->bOPA,buffers->bOPB,program->MAB,size,offset);
-        osc[1].Process(buffers->bOPB,size,offset);
-        env[1].Process(buffers->bOPB,size,offset,opBvol);
+        bool has_in = false;
+        if (opstate[0] && program->MAB != 0.0f)
+            MixIn(buffers->bOPA, buffers->bOPB, program->MAB, size, offset, has_in);
+        osc[1].Process(buffers->bOPB, size, offset, has_in);
+        env[1].Process(buffers->bOPB, size, offset, opBvol);
     }
 
     // operator C
     if (opstate[2])
     {
-        memset(buffers->bOPC,0,sizeof(buffers->bOPC));
-        if (opstate[0] && program->MAC)
-            SumMonoMono(buffers->bOPA,buffers->bOPC,program->MAC,size,offset);
-        if (opstate[1] && program->MBC)
-            SumMonoMono(buffers->bOPB,buffers->bOPC,program->MBC,size,offset);
-        osc[2].Process(buffers->bOPC,size,offset);
-        env[2].Process(buffers->bOPC,size,offset,opCvol);
+        bool has_in = false;
+        if (opstate[0] && program->MAC != 0.0f)
+            MixIn(buffers->bOPA, buffers->bOPC, program->MAC, size, offset, has_in);
+        if (opstate[1] && program->MBC != 0.0f)
+            MixIn(buffers->bOPB, buffers->bOPC, program->MBC, size, offset, has_in);
+        osc[2].Process(buffers->bOPC, size, offset, has_in);
+        env[2].Process(buffers->bOPC, size, offset, opCvol);
     }
 
     // operator D
     if (opstate[3])
     {
-        memset(buffers->bOPD,0,sizeof(buffers->bOPD));
-        if (opstate[0] && program->MAD)
-            SumMonoMono(buffers->bOPA,buffers->bOPD,program->MAD,size,offset);
-        if (opstate[1] && program->MBD)
-            SumMonoMono(buffers->bOPB,buffers->bOPD,program->MBD,size,offset);
-        if (opstate[2] && program->MCD)
-            SumMonoMono(buffers->bOPC,buffers->bOPD,program->MCD,size,offset);
-        osc[3].Process(buffers->bOPD,size,offset);
-        env[3].Process(buffers->bOPD,size,offset,opDvol);
+        bool has_in = false;
+        if (opstate[0] && program->MAD != 0.0f)
+            MixIn(buffers->bOPA, buffers->bOPD, program->MAD, size, offset, has_in);
+        if (opstate[1] && program->MBD != 0.0f)
+            MixIn(buffers->bOPB, buffers->bOPD, program->MBD, size, offset, has_in);
+        if (opstate[2] && program->MCD != 0.0f)
+            MixIn(buffers->bOPC, buffers->bOPD, program->MCD, size, offset, has_in);
+        osc[3].Process(buffers->bOPD, size, offset, has_in);
+        env[3].Process(buffers->bOPD, size, offset, opDvol);
     }
     
     // operator E
     if (opstate[4])
     {
-        memset(buffers->bOPE,0,sizeof(buffers->bOPE));
-        if (opstate[0] && program->MAE)
-            SumMonoMono(buffers->bOPA,buffers->bOPE,program->MAE,size,offset);
-        if (opstate[1] && program->MBE)
-            SumMonoMono(buffers->bOPB,buffers->bOPE,program->MBE,size,offset);
-        if (opstate[2] && program->MCE)
-            SumMonoMono(buffers->bOPC,buffers->bOPE,program->MCE,size,offset);
-        if (opstate[3] && program->MDE)
-            SumMonoMono(buffers->bOPD,buffers->bOPE,program->MDE,size,offset);
-        osc[4].Process(buffers->bOPE,size,offset);
-        env[4].Process(buffers->bOPE,size,offset,opEvol);
+        bool has_in = false;
+        if (opstate[0] && program->MAE != 0.0f)
+            MixIn(buffers->bOPA, buffers->bOPE, program->MAE, size, offset, has_in);
+        if (opstate[1] && program->MBE != 0.0f)
+            MixIn(buffers->bOPB, buffers->bOPE, program->MBE, size, offset, has_in);
+        if (opstate[2] && program->MCE != 0.0f)
+            MixIn(buffers->bOPC, buffers->bOPE, program->MCE, size, offset, has_in);
+        if (opstate[3] && program->MDE != 0.0f)
+            MixIn(buffers->bOPD, buffers->bOPE, program->MDE, size, offset, has_in);
+        osc[4].Process(buffers->bOPE, size, offset, has_in);
+        env[4].Process(buffers->bOPE, size, offset, opEvol);
     }
 
     // operator F
     if (opstate[5])
     {
-        memset(buffers->bOPF,0,sizeof(buffers->bOPF));
-        if (opstate[0] && program->MAF)
-            SumMonoMono(buffers->bOPA,buffers->bOPF,program->MAF,size,offset);
-        if (opstate[1] && program->MBF)
-            SumMonoMono(buffers->bOPB,buffers->bOPF,program->MBF,size,offset);
-        if (opstate[2] && program->MCF)
-            SumMonoMono(buffers->bOPC,buffers->bOPF,program->MCF,size,offset);
-        if (opstate[3] && program->MDF)
-            SumMonoMono(buffers->bOPD,buffers->bOPF,program->MDF,size,offset);
-        if (opstate[4] && program->MEF)
-            SumMonoMono(buffers->bOPE,buffers->bOPF,program->MEF,size,offset);
-        osc[5].Process(buffers->bOPF,size,offset);
-        env[5].Process(buffers->bOPF,size,offset,opFvol);
+        bool has_in = false;
+        if (opstate[0] && program->MAF != 0.0f)
+            MixIn(buffers->bOPA, buffers->bOPF, program->MAF, size, offset, has_in);
+        if (opstate[1] && program->MBF != 0.0f)
+            MixIn(buffers->bOPB, buffers->bOPF, program->MBF, size, offset, has_in);
+        if (opstate[2] && program->MCF != 0.0f)
+            MixIn(buffers->bOPC, buffers->bOPF, program->MCF, size, offset, has_in);
+        if (opstate[3] && program->MDF != 0.0f)
+            MixIn(buffers->bOPD, buffers->bOPF, program->MDF, size, offset, has_in);
+        if (opstate[4] && program->MEF != 0.0f)
+            MixIn(buffers->bOPE, buffers->bOPF, program->MEF, size, offset, has_in);
+        osc[5].Process(buffers->bOPF, size, offset, has_in);
+        env[5].Process(buffers->bOPF, size, offset, opFvol);
     }
 
     // operator X
     if (opstate[6])
     {
-        memset(buffers->bOPX,0,sizeof(buffers->bOPX));
-        if (opstate[0]  && program->MAX)
-            SumMonoMono(buffers->bOPA,buffers->bOPX,program->MAX,size,offset);
-        if (opstate[1]  && program->MBX)
-            SumMonoMono(buffers->bOPB,buffers->bOPX,program->MBX,size,offset);
-        if (opstate[2]  && program->MCX)
-            SumMonoMono(buffers->bOPC,buffers->bOPX,program->MCX,size,offset);
-        if (opstate[3]  && program->MDX)
-            SumMonoMono(buffers->bOPD,buffers->bOPX,program->MDX,size,offset);
-        if (opstate[4]  && program->MEX)
-            SumMonoMono(buffers->bOPE,buffers->bOPX,program->MEX,size,offset);
-        if (opstate[5] && program->MFX)
-            SumMonoMono(buffers->bOPF,buffers->bOPX,program->MFX,size,offset);
+        bool has_in = false;
+        if (opstate[0] && program->MAX != 0.0f)
+            MixIn(buffers->bOPA, buffers->bOPX, program->MAX, size, offset, has_in);
+        if (opstate[1] && program->MBX != 0.0f)
+            MixIn(buffers->bOPB, buffers->bOPX, program->MBX, size, offset, has_in);
+        if (opstate[2] && program->MCX != 0.0f)
+            MixIn(buffers->bOPC, buffers->bOPX, program->MCX, size, offset, has_in);
+        if (opstate[3] && program->MDX != 0.0f)
+            MixIn(buffers->bOPD, buffers->bOPX, program->MDX, size, offset, has_in);
+        if (opstate[4] && program->MEX != 0.0f)
+            MixIn(buffers->bOPE, buffers->bOPX, program->MEX, size, offset, has_in);
+        if (opstate[5] && program->MFX != 0.0f)
+            MixIn(buffers->bOPF, buffers->bOPX, program->MFX, size, offset, has_in);
+        if (!has_in)
+            memset(buffers->bOPX + offset, 0, (size - offset) * sizeof(float));
         noise.Process (buffers->bOPX,size,offset);
         env[6].Process(buffers->bOPX,size,offset,opXvll);
     }
@@ -614,22 +648,24 @@ void CNote::Process(int *bsaida, int size, int position)
     // operator Z
     if (opstate[7])
     {
-        memset(buffers->bOPZ,0,sizeof(buffers->bOPZ));
+        bool has_in = false;
         filter.SetPar(ENVELOP, env[7].Process() * opZvll);
-        if (opstate[0]  && program->MAZ)
-            SumMonoMono(buffers->bOPA,buffers->bOPZ,program->MAZ,size,offset);
-        if (opstate[1]  && program->MBZ)
-            SumMonoMono(buffers->bOPB,buffers->bOPZ,program->MBZ,size,offset);
-        if (opstate[2]  && program->MCZ)
-            SumMonoMono(buffers->bOPC,buffers->bOPZ,program->MCZ,size,offset);
-        if (opstate[3]  && program->MDZ)
-            SumMonoMono(buffers->bOPD,buffers->bOPZ,program->MDZ,size,offset);
-        if (opstate[4]  && program->MEZ)
-            SumMonoMono(buffers->bOPE,buffers->bOPZ,program->MEZ,size,offset);
-        if (opstate[5] && program->MFZ)
-            SumMonoMono(buffers->bOPF,buffers->bOPZ,program->MFZ,size,offset);
-        if (opstate[6] && program->MXZ)
-            SumMonoMono(buffers->bOPX,buffers->bOPZ,program->MXZ,size,offset);
+        if (opstate[0] && program->MAZ != 0.0f)
+            MixIn(buffers->bOPA, buffers->bOPZ, program->MAZ, size, offset, has_in);
+        if (opstate[1] && program->MBZ != 0.0f)
+            MixIn(buffers->bOPB, buffers->bOPZ, program->MBZ, size, offset, has_in);
+        if (opstate[2] && program->MCZ != 0.0f)
+            MixIn(buffers->bOPC, buffers->bOPZ, program->MCZ, size, offset, has_in);
+        if (opstate[3] && program->MDZ != 0.0f)
+            MixIn(buffers->bOPD, buffers->bOPZ, program->MDZ, size, offset, has_in);
+        if (opstate[4] && program->MEZ != 0.0f)
+            MixIn(buffers->bOPE, buffers->bOPZ, program->MEZ, size, offset, has_in);
+        if (opstate[5] && program->MFZ != 0.0f)
+            MixIn(buffers->bOPF, buffers->bOPZ, program->MFZ, size, offset, has_in);
+        if (opstate[6] && program->MXZ != 0.0f)
+            MixIn(buffers->bOPX, buffers->bOPZ, program->MXZ, size, offset, has_in);
+        if (!has_in)
+            memset(buffers->bOPZ + offset, 0, (size - offset) * sizeof(float));
         filter.Process(buffers->bOPZ,size,offset);
     }
 
@@ -696,92 +732,101 @@ char CNote::GetState()
     return state;
 }
 
-void CNote::SumMonoMono(int *bInput, int *bNoteOut, float volume, int size, int offset)
+void CNote::SumMonoMono(float *bInput, float *bNoteOut, float volume, int size, int offset)
 {
-    int i;
-    int vol = lrintf(volume * 127.f);
-    if (vol != 127)
-        for (i=offset;i<size;i++)
-            bNoteOut[i] += (bInput[i] * vol)>>7;
-    else
-        for (i=offset;i<size;i++)
-            bNoteOut[i] += bInput[i];
-}
-
-void CNote::SumMonoStereo(int *bInput, int *bNoteOut, float volume, float pan, int size, int offset)
-{
-    int i;
-    int stemp;
-    int ini   = offset<<1;
-    int tam   = size<<1;
-    int ptemp = lrintf(pan    * 127.f);
-    int vtemp = lrintf(volume * 127.f);
-    if (ptemp > 0)
+    const float * __restrict in = bInput;
+    float * __restrict out = bNoteOut;
+    if (volume == 1.0f)
     {
-        ptemp = 127 - ptemp;
-        for (i=ini;i<tam;i+=2)
-        {
-            stemp = (bInput[i>>1] * vtemp)>>7;
-            bNoteOut[i]   += (stemp * ptemp)>>7;
-            bNoteOut[i+1] += stemp;
-        }
-    }
-    else if (ptemp < 0)
-    {
-        ptemp = 127 + ptemp;
-        for (i=ini;i<tam;i+=2)
-        {
-            stemp = (bInput[i>>1] * vtemp)>>7;
-            bNoteOut[i]   += stemp;
-            bNoteOut[i+1] += (stemp * ptemp)>>7;
-        }
+        for (int i=offset;i<size;i++)
+            out[i] += in[i];
     }
     else
     {
-        for (i=ini;i<tam;i+=2)
+        for (int i=offset;i<size;i++)
+            out[i] += in[i] * volume;
+    }
+}
+
+void CNote::SumMonoStereo(float *bInput, float *bNoteOut, float volume, float pan, int size, int offset)
+{
+    const float * __restrict in = bInput;
+    float * __restrict out = bNoteOut;
+    float leftVol, rightVol;
+    if (pan > 0.0f)
+    {
+        leftVol  = volume * (1.0f - pan);
+        rightVol = volume;
+    }
+    else if (pan < 0.0f)
+    {
+        leftVol  = volume;
+        rightVol = volume * (1.0f + pan);
+    }
+    else
+    {
+        leftVol  = volume;
+        rightVol = volume;
+    }
+
+    int outIdx = offset << 1;
+    if (leftVol == rightVol)
+    {
+        for (int i = offset; i < size; i++)
         {
-            stemp = (bInput[i>>1] * vtemp)>>7;
-            bNoteOut[i]   += stemp;
-            bNoteOut[i+1] += stemp;
+            float v = in[i] * leftVol;
+            out[outIdx]     += v;
+            out[outIdx + 1] += v;
+            outIdx += 2;
+        }
+    }
+    else
+    {
+        for (int i = offset; i < size; i++)
+        {
+            float v = in[i];
+            out[outIdx]     += v * leftVol;
+            out[outIdx + 1] += v * rightVol;
+            outIdx += 2;
         }
     }
 }
 
-void CNote::PanVolStereo(int *b, int volume, int pan, int size, int offset)
+void CNote::PanVolStereo(float *b, float volume, float pan, int size, int offset)
 {
-    int i;
-    int i2;
     int ini   = offset<<1;
     int tam   = size<<1;
-    if (volume == 127 && !pan)
+    if (volume == 1.0f && pan == 0.0f)
         return;
-    if (pan > 0)
+    float leftGain, rightGain;
+    if (pan > 0.0f)
     {
-        pan = 127 - pan;
-        for (i=ini;i<tam;i+=2)
-        {
-            i2    = i+1;
-            b[i]  = (b[i]  * volume * pan)>>14;
-            b[i2] = (b[i2] * volume)>>7;
-        }
+        leftGain  = volume * (1.0f - pan);
+        rightGain = volume;
     }
-    else if (pan < 0)
+    else if (pan < 0.0f)
     {
-        pan = 127 + pan;
-        for (i=ini;i<tam;i+=2)
-        {
-            i2    = i+1;
-            b[i]  = (b[i]  * volume)>>7;
-            b[i2] = (b[i2] * volume * pan)>>14;
-        }
+        leftGain  = volume;
+        rightGain = volume * (1.0f + pan);
     }
     else
     {
-        for (i=ini;i<tam;i+=2)
+        leftGain  = volume;
+        rightGain = volume;
+    }
+
+    float * __restrict buf = b;
+    if (leftGain == rightGain)
+    {
+        for (int i=ini;i<tam;i++)
+            buf[i] *= leftGain;
+    }
+    else
+    {
+        for (int i=ini;i<tam;i+=2)
         {
-            i2    = i+1;
-            b[i]  = (b[i]  * volume)>>7;
-            b[i2] = (b[i2] * volume)>>7;
+            buf[i]   *= leftGain;
+            buf[i+1] *= rightGain;
         }
     }
 }

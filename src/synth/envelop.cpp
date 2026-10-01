@@ -35,8 +35,8 @@ void CEnvelop::Init()
     sr         = 0.f;
     es         = INACTIVE;
     counter    = 0;
-    coef       = 0;
-    sa         = 0;
+    coef       = 0.0f;
+    sa         = 0.0f;
     dl         = 0.f;
     at         = 0.f;
     de         = 0.f;
@@ -129,7 +129,7 @@ int CEnvelop::CalcCoef()
             {
                 counter = 1;
             }
-            coef = MAXINT / counter;
+            coef = (1.0f - sa) / (float)counter;
             if (de)
                 es = DECAY;
             else if (su)
@@ -144,8 +144,8 @@ int CEnvelop::CalcCoef()
             {
                 counter = 1;
             }
-            coef     = lrintf((-1.f + su) / counter * FMAXINT);
-            sa       = MAXINT;
+            sa       = 1.0f;
+            coef     = (su - 1.0f) / (float)counter;
             if (su)
                 es = SUSTAIN;
             else
@@ -160,15 +160,15 @@ int CEnvelop::CalcCoef()
                 {
                     counter = 1;
                 }
-                coef     = lrintf(-su / counter * FMAXINT);
+                coef     = -su / (float)counter;
                 es       = RELEASE;
             }
             else
             {
                 counter = MAXINT;
-                coef    = 0;
+                coef    = 0.0f;
             }
-            sa = lrintf(su*FMAXINT);
+            sa = su;
             break;
         case RELEASE:
             counter = lrintf(re * sr);
@@ -177,14 +177,14 @@ int CEnvelop::CalcCoef()
             {
                 counter = 1;
             }
-            coef     = -sa / counter;
+            coef     = -sa / (float)counter;
             es = ENDED;
             break;
         case ENDED:
             es       = INACTIVE;
             counter  = MAXINT;
-            coef     = 0;
-            sa       = 0;
+            coef     = 0.0f;
+            sa       = 0.0f;
             break;
     }
     return counter;
@@ -196,10 +196,7 @@ float CEnvelop::Process()
         CalcCoef();
     counter--;
     sa  += coef;
-    float  temp  = float(sa>>16);
-           temp /= 32768.f      ;
-           temp *= temp         ;
-    return temp                 ;
+    return sa * sa;
 }
 
 char CEnvelop::GetState()
@@ -207,31 +204,50 @@ char CEnvelop::GetState()
     return es;
 }
 
-void CEnvelop::Process(int *b, int size, int offset, float volume)
+void CEnvelop::Process(float *b, int size, int offset, float volume)
 {
-    int temp;
-    int vol = lrintf(volume * 127.f);
+    float * __restrict buf = b;
+    float local_sa = sa;
+    float local_coef = coef;
+
     while (counter <= size - offset)
     {
-        for (int i = offset; i < offset + counter; i++)
+        int end = offset + counter;
+        if (local_coef == 0.0f)
         {
-            sa  += coef           ;
-            temp = sa>>16         ;
-            temp = (temp*temp)>>15;
-            b[i] = (b[i] * vol)>>7;
-            b[i] = (temp*b[i])>>15;
+            const float v = local_sa * local_sa * volume;
+            for (int i = offset; i < end; i++)
+                buf[i] *= v;
+        }
+        else
+        {
+            for (int i = offset; i < end; i++)
+            {
+                local_sa += local_coef;
+                buf[i] *= (local_sa * local_sa * volume);
+            }
         }
         offset += counter;
         counter = 0;
+        sa = local_sa;
         CalcCoef();
+        local_sa = sa;
+        local_coef = coef;
     }
-    for (int i = offset; i < size; i++)
+    if (local_coef == 0.0f)
     {
-        sa  += coef           ;
-        temp = sa>>16         ;
-        temp = (temp*temp)>>15;
-        b[i] = (b[i] * vol)>>7;
-        b[i] = (temp*b[i])>>15;
+        const float v = local_sa * local_sa * volume;
+        for (int i = offset; i < size; i++)
+            buf[i] *= v;
     }
+    else
+    {
+        for (int i = offset; i < size; i++)
+        {
+            local_sa += local_coef;
+            buf[i] *= (local_sa * local_sa * volume);
+        }
+    }
+    sa = local_sa;
     counter -= size - offset;
 }

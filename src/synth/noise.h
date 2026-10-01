@@ -25,22 +25,22 @@ private:
     float re;  // resonance
     float re1; // previous resonance
     // coeficients
-    int b0a0;
-    int b2a0;
-    int a1a0;
-    int a2a0;
+    float b0a0;
+    float b2a0;
+    float a1a0;
+    float a2a0;
     // in/out history
-    int ou1;
-    int ou2;
-    int in1;
-    int in2;
+    float ou1;
+    float ou2;
+    float in1;
+    float in2;
     // noise volume
-    int am;
+    float am;
     int bp;
     // calculates the filter coefs
     void  CalcCoef(double const frequencia, double const q);
 public:
     void Init();
-    void Process(int *b, int size, int offset);
+    void Process(float *b, int size, int offset);
     void SetPar(char param, float value);
 };

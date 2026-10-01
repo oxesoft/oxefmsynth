@@ -60,15 +60,15 @@ private:
     char                      revrbON; // reverb on
     char                      delayON; // delay on
     // sum signals
-    void SumMonoStereo            (int *bInput, int *bNoteOut,               int size);
-    void SumStereoMono            (int *bInput, int *bNoteOut, float volume, int size);
-    void SumStereoStereo          (int *bInput, int *bNoteOut, float volume, int size);
+    void SumMonoStereo            (float *bInput, float *bNoteOut,               int size);
+    void SumStereoMono            (float *bInput, float *bNoteOut, float volume, int size);
+    void SumStereoStereo          (float *bInput, float *bNoteOut, float volume, int size);
     inline float Val2Mul          (float  valor);
     void UpdateGlobalEffects      ();
 public:
     CSynthesizer();
     void          SetSampleRate   (float samplerate);
-    void          Process         (int *b, int size, int position /* the start sample number */);
+    void          Process         (float *b, int size, int position /* the start sample number */);
     void          SendEvent       (unsigned char bS, unsigned char bD1,unsigned char bD2,int position /* the start position */);
     void          KillNotes       (void);
     void          AllNotesOff     (int position);

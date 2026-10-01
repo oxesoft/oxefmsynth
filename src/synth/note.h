@@ -36,8 +36,8 @@ private:
     float curvFator;    // multiplication factor
     int   curvCont;     // samples count
     // pan and volume
-    int   lpan;         // (Faixa: -1.f a 1.f) Posicionamento entre os canais Esquerdo e Direito
-    int   lvol;         // (Faixa:  0.f a 1.f) Volume
+    float lpan;         // (Faixa: -1.f a 1.f) Posicionamento entre os canais Esquerdo e Direito
+    float lvol;         // (Faixa:  0.f a 1.f) Volume
     // note position
     int   startPosition;// the sample number of the note begining
     int   lastpos;      // keeps the last position for accuracy of note off
@@ -58,9 +58,9 @@ private:
     float opXvol;
     float opZvol;
     
-    void  SumMonoMono    (int *bInput , int *bNoteOut  , float  volume  , int   size  , int offset            );
-    void  SumMonoStereo  (int *bInput , int *bNoteOut  , float  volume  , float pan   , int size  , int offset);
-    void  PanVolStereo   (int *b      , int  volume    , int    pan     , int   size  , int offset            );
+    void  SumMonoMono    (float *bInput , float *bNoteOut  , float volume  , int   size  , int offset            );
+    void  SumMonoStereo  (float *bInput , float *bNoteOut  , float volume  , float pan   , int size  , int offset);
+    void  PanVolStereo   (float *b      , float volume    , float pan     , int   size  , int offset            );
     int   enZant;
     
     float Scaling             (unsigned char tecla, float valor);
@@ -70,7 +70,7 @@ private:
 public:
     void  Init (SProgram *program, CBuffers *buf, unsigned char key, unsigned char previousKey, float velocity, float samplerate);
     void  SendEvent(char param, float value, int position);
-    void  Process(int *b, int size, int position);
+    void  Process(float *b, int size, int position);
     char  GetState(void);
     void  UpdateProgram (void);
 };

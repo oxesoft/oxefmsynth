@@ -24,7 +24,7 @@ private:
     float lf;  // LFO rate
     float la;  // LFO amount
     // 1.486 seconds buffer
-    int bdelay[0x10000];
+    float bdelay[0x10000];
     // LFO
     COscillator osc;
     // buffer iterator
@@ -32,7 +32,7 @@ private:
     // auxiliar
     int  tempoant;
 public:
-    void Init(short *b);
-    void Process(int *b, int size);
+    void Init(float *b);
+    void Process(float *b, int size);
     void SetPar(char param, float value);
 };

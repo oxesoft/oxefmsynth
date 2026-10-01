@@ -40,6 +40,6 @@ private:
     void  CalcCoef(int const type, double const frequencia, double const q);
 public:
     void  Init();
-    void  Process(int *b, int size, int offset);
+    void  Process(float *b, int size, int offset);
     void  SetPar(char param, float value);
 };
