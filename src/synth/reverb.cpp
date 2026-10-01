@@ -18,8 +18,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "constants.h"
 #include "reverb.h"
-#include <math.h>
-#include <string.h>
+#include <cmath>
+#include <cstring>
+#include <stdint.h>
 
 void CReverb::Init()
 {
@@ -78,7 +79,8 @@ void CReverb::Process(int *b, int size)
     int i        = 0;
     int ent      = 0;
     int aux      = 0;
-    int retorno  = (int)(ti * 127.f);
+    int smp      = 0;
+    int feedback = (int)(ti * 127.f);
     if (REVDAant != da) 
     {
         CalcCoefLowPass(da);
@@ -87,36 +89,35 @@ void CReverb::Process(int *b, int size)
     for (i=0;i<size;i++)
     {
         ent  = b[i];
-        b[i] = 0;
         // comb 1
-        b[i] += bcomb1[icomb1];
-        bcomb1[icomb1] = ent + ((bcomb1[icomb1] * retorno)/128);
+        smp  = bcomb1[icomb1];
+        bcomb1[icomb1] = ent + ((bcomb1[icomb1] * feedback)/128);
         if (++icomb1>=TAMCOMB1) icomb1 = 0;
         // comb 2
-        b[i] += bcomb2[icomb2];
-        bcomb2[icomb2] = ent + ((bcomb2[icomb2] * retorno)/128);
+        smp += bcomb2[icomb2];
+        bcomb2[icomb2] = ent + ((bcomb2[icomb2] * feedback)/128);
         if (++icomb2>=TAMCOMB2) icomb2 = 0;
         // comb 3
-        b[i] += bcomb3[icomb3];
-        bcomb3[icomb3] = ent + ((bcomb3[icomb3] * retorno)/128);
+        smp += bcomb3[icomb3];
+        bcomb3[icomb3] = ent + ((bcomb3[icomb3] * feedback)/128);
         if (++icomb3>=TAMCOMB3) icomb3 = 0;
         // comb 4
-        b[i] += bcomb4[icomb4];
-        bcomb4[icomb4] = ent + ((bcomb4[icomb4] * retorno)/128);
+        smp += bcomb4[icomb4];
+        bcomb4[icomb4] = ent + ((bcomb4[icomb4] * feedback)/128);
         if (++icomb4>=TAMCOMB4) icomb4 = 0;
         // allpass 1
         aux = ballp1[iallp1];
-        ballp1[iallp1] = ((aux * retorno)/128) + b[i];
-        b[i]           = aux - ((ballp1[iallp1] * retorno)/128);
+        ballp1[iallp1] = ((aux * feedback)/128) + smp;
+        smp           = aux - ((ballp1[iallp1] * feedback)/128);
         if (++iallp1>=TAMALLP1) iallp1 = 0;
         // allpass 2
         aux = ballp2[iallp2];
-        ballp2[iallp2] = ((aux * retorno)/128) + b[i];
-        b[i]           = aux - ((ballp2[iallp2] * retorno)/128);
+        ballp2[iallp2] = ((aux * feedback)/128) + smp;
+        smp           = aux - ((ballp2[iallp2] * feedback)/128);
         if (++iallp2>=TAMALLP2) iallp2 = 0;
         // DC filter
-        ou0  = b[i] - in1 + ((ou0*32674)/32768);
-        in1  = b[i];
+        ou0  = smp - in1 + (int)(((int64_t)ou0 * 32674) / 32768);
+        in1  = smp;
         b[i] = ou0>>2;
     }
     if (REVDAant < 1.f)
@@ -124,8 +125,9 @@ void CReverb::Process(int *b, int size)
         for (i=0;i<size;i++)
         {
             // low pass filter
-            ou0l = ((b[i] * a0)/32768) + ((in1l * a1)/32768) + ((ou0l * b1)/32768);
-            in1l = b[i];
+            int in = b[i];
+            ou0l = (int)(((int64_t)in * a0 + (int64_t)in1l * a1 + (int64_t)ou0l * b1) / 32768);
+            in1l = in;
             b[i] = ou0l;
         }
     }
