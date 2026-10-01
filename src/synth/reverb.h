@@ -27,42 +27,42 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 class CReverb
 {
 private:
-    double sr;
-    double ti;  // time
-    double da;  // damp
+    float sr;
+    float ti;  // time
+    float da;  // damp
     // combs buffers
-    long bcomb1[TAMCOMB1];
-    long bcomb2[TAMCOMB2];
-    long bcomb3[TAMCOMB3];
-    long bcomb4[TAMCOMB4];
+    int bcomb1[TAMCOMB1];
+    int bcomb2[TAMCOMB2];
+    int bcomb3[TAMCOMB3];
+    int bcomb4[TAMCOMB4];
     // allpasses buffers
-    long ballp1[TAMALLP1];
-    long ballp2[TAMALLP2];
+    int ballp1[TAMALLP1];
+    int ballp2[TAMALLP2];
     // buffers iterators
-    long icomb1;
-    long icomb2;
-    long icomb3;
-    long icomb4;
-    long iallp1;
-    long iallp2;
+    int icomb1;
+    int icomb2;
+    int icomb3;
+    int icomb4;
+    int iallp1;
+    int iallp2;
     // DC filter
-    long in1;
-    long ou0;
+    int in1;
+    int ou0;
     // low-pass filter
-    long in1l;
-    long ou0l;
-    long a0;
-    long a1;
-    long b1;
-    double REVDAant;
+    int in1l;
+    int ou0l;
+    int a0;
+    int a1;
+    int b1;
+    float REVDAant;
     // other
     char state;
     // calculates low-pass coefs
-    void CalcCoefLowPass(double frequencia);
+    void CalcCoefLowPass(float frequencia);
 public:
-    void          Init();
-    char          GetState(void);
-    void          Process(int *b, int size);
-    inline double Key2Frequency(double valor);
-    void          SetPar(char param, double value);
+    void         Init();
+    char         GetState(void);
+    void         Process(int *b, int size);
+    inline float Key2Frequency(float valor);
+    void         SetPar(char param, float value);
 };
