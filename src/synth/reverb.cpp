@@ -164,8 +164,13 @@ void CReverb::Process(float *b, int size)
         ou0l = l_ou0l;
         in1l = l_in1l;
     }
+    else
+    {
+        ou0l = 0.0f;
+        in1l = 0.0f;
+    }
     state = ACTIVE;
-    if (std::abs(b[0]) < 1e-6f && std::abs(b[size>>1]) < 1e-6f && std::abs(b[size>>2]) < 1e-6f && std::abs(b[size-1]) < 1e-6f && std::abs(ou0) < 1e-6f && std::abs(ou0l) < 1e-6f)
+    if (std::abs(b[0]) < 1e-6f && std::abs(b[size>>1]) < 1e-6f && std::abs(b[size>>2]) < 1e-6f && std::abs(b[size-1]) < 1e-6f && std::abs(ou0) < 1e-6f && (prev_REVDA >= 1.f || std::abs(ou0l) < 1e-6f))
     {
         state = INACTIVE;
         ou0 = 0.0f;
