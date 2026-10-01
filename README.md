@@ -41,9 +41,14 @@ make install-vst3
 ### Platform Requirements
 
 #### Windows
-Requirements: [mingw-w64](http://mingw-w64.org/) and [msys](https://msysgit.github.io/).
-Install both 32 and 64bit (run the installer twice).
-On the msys shell just type ``mingw32-make``.
+Install [MSYS2](https://www.msys2.org/) and open the **MSYS2 UCRT64** terminal.
+
+Install the required toolchain and dependencies:
+```bash
+pacman -S git make zip mingw-w64-ucrt-x86_64-gcc mingw-w64-ucrt-x86_64-cmake mingw-w64-ucrt-x86_64-ninja
+```
+
+Then simply run `make` (or `make clap`, `make vst3`).
 
 #### Linux
 To build native executables just type ``make`` (requirement: g++).
