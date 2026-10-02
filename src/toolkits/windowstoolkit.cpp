@@ -141,6 +141,8 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
         }
         break;
     }
+    case WM_ERASEBKGND:
+        return 1;
     case WM_PAINT:
     {
         PAINTSTRUCT ps;
@@ -151,48 +153,82 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
         int ch = clientRect.bottom - clientRect.top;
         if (cw > 0 && ch > 0 && toolkit && toolkit->editor)
         {
-            if (toolkit->blImage.width() != cw || toolkit->blImage.height() != ch)
+            if (toolkit->dibWidth != cw || toolkit->dibHeight != ch || !toolkit->hBitmap)
             {
-                toolkit->blImage.create(cw, ch, BL_FORMAT_PRGB32);
-                ps.rcPaint = clientRect;
+                toolkit->blImage.reset();
+                if (toolkit->hBitmap)
+                {
+                    if (toolkit->hOldBitmap)
+                    {
+                        SelectObject(toolkit->memDC, toolkit->hOldBitmap);
+                        toolkit->hOldBitmap = NULL;
+                    }
+                    DeleteObject(toolkit->hBitmap);
+                    toolkit->hBitmap = NULL;
+                    toolkit->pixelData = NULL;
+                }
+                if (!toolkit->memDC)
+                {
+                    toolkit->memDC = CreateCompatibleDC(dc);
+                }
+
+                BITMAPINFO bmi;
+                ZeroMemory(&bmi, sizeof(BITMAPINFO));
+                bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+                bmi.bmiHeader.biWidth = cw;
+                bmi.bmiHeader.biHeight = -ch; // top-down
+                bmi.bmiHeader.biPlanes = 1;
+                bmi.bmiHeader.biBitCount = 32;
+                bmi.bmiHeader.biCompression = BI_RGB;
+
+                toolkit->hBitmap = CreateDIBSection(dc, &bmi, DIB_RGB_COLORS, &toolkit->pixelData, NULL, 0);
+                if (toolkit->hBitmap)
+                {
+                    toolkit->hOldBitmap = (HBITMAP)SelectObject(toolkit->memDC, toolkit->hBitmap);
+                    toolkit->dibWidth = cw;
+                    toolkit->dibHeight = ch;
+                    toolkit->blImage.create_from_data(cw, ch, BL_FORMAT_PRGB32, toolkit->pixelData, (intptr_t)cw * 4);
+                    ps.rcPaint = clientRect;
+                }
             }
 
-            double sx = (double)cw / (double)GUI_WIDTH;
-            double sy = (double)ch / (double)GUI_HEIGHT;
+            if (toolkit->hBitmap && toolkit->pixelData)
+            {
+                double sx = (double)cw / (double)GUI_WIDTH;
+                double sy = (double)ch / (double)GUI_HEIGHT;
 
-            int dirtyX = (int)floor(ps.rcPaint.left / sx);
-            int dirtyY = (int)floor(ps.rcPaint.top / sy);
-            int dirtyW = (int)ceil((ps.rcPaint.right - ps.rcPaint.left) / sx) + 1;
-            int dirtyH = (int)ceil((ps.rcPaint.bottom - ps.rcPaint.top) / sy) + 1;
+                int dirtyX = (int)floor(ps.rcPaint.left / sx);
+                int dirtyY = (int)floor(ps.rcPaint.top / sy);
+                int dirtyW = (int)ceil((ps.rcPaint.right - ps.rcPaint.left) / sx) + 1;
+                int dirtyH = (int)ceil((ps.rcPaint.bottom - ps.rcPaint.top) / sy) + 1;
 
-            if (dirtyX < 0) dirtyX = 0;
-            if (dirtyY < 0) dirtyY = 0;
-            if (dirtyX + dirtyW > GUI_WIDTH) dirtyW = GUI_WIDTH - dirtyX;
-            if (dirtyY + dirtyH > GUI_HEIGHT) dirtyH = GUI_HEIGHT - dirtyY;
+                if (dirtyX < 0) dirtyX = 0;
+                if (dirtyY < 0) dirtyY = 0;
+                if (dirtyX + dirtyW > GUI_WIDTH) dirtyW = GUI_WIDTH - dirtyX;
+                if (dirtyY + dirtyH > GUI_HEIGHT) dirtyH = GUI_HEIGHT - dirtyY;
 
-            BLContext ctx(toolkit->blImage);
-            ctx.scale(sx, sy);
-            toolkit->editor->Paint(ctx, dirtyX, dirtyY, dirtyW, dirtyH);
-            ctx.end();
+                BLContext ctx(toolkit->blImage);
+                ctx.scale(sx, sy);
+                toolkit->editor->Paint(ctx, dirtyX, dirtyY, dirtyW, dirtyH);
+                ctx.end();
 
-            BLImageData imgData;
-            toolkit->blImage.get_data(&imgData);
+                GdiFlush();
 
-            BITMAPINFO bmi;
-            ZeroMemory(&bmi, sizeof(BITMAPINFO));
-            bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
-            bmi.bmiHeader.biWidth = cw;
-            bmi.bmiHeader.biHeight = -ch; // top-down
-            bmi.bmiHeader.biPlanes = 1;
-            bmi.bmiHeader.biBitCount = 32;
-            bmi.bmiHeader.biCompression = BI_RGB;
+                int bltX = ps.rcPaint.left;
+                int bltY = ps.rcPaint.top;
+                int bltW = ps.rcPaint.right - ps.rcPaint.left;
+                int bltH = ps.rcPaint.bottom - ps.rcPaint.top;
 
-            SetStretchBltMode(dc, COLORONCOLOR);
-            int bltX = ps.rcPaint.left;
-            int bltY = ps.rcPaint.top;
-            int bltW = ps.rcPaint.right - ps.rcPaint.left;
-            int bltH = ps.rcPaint.bottom - ps.rcPaint.top;
-            StretchDIBits(dc, bltX, bltY, bltW, bltH, bltX, bltY, bltW, bltH, imgData.pixel_data, &bmi, DIB_RGB_COLORS, SRCCOPY);
+                if (bltX < 0) { bltW += bltX; bltX = 0; }
+                if (bltY < 0) { bltH += bltY; bltY = 0; }
+                if (bltX + bltW > cw) bltW = cw - bltX;
+                if (bltY + bltH > ch) bltH = ch - bltY;
+
+                if (bltW > 0 && bltH > 0)
+                {
+                    BitBlt(dc, bltX, bltY, bltW, bltH, toolkit->memDC, bltX, bltY, SRCCOPY);
+                }
+            }
         }
         EndPaint(hWnd, &ps);
         return 0;
@@ -220,6 +256,12 @@ CWindowsToolkit::CWindowsToolkit(void *parentWindow, CEditor *editor)
 {
     this->parentWindow = parentWindow;
     this->editor       = editor;
+    this->memDC        = NULL;
+    this->hBitmap      = NULL;
+    this->hOldBitmap   = NULL;
+    this->pixelData    = NULL;
+    this->dibWidth     = 0;
+    this->dibHeight    = 0;
 
     g_useCount++;
     if (g_useCount == 1)
@@ -300,6 +342,22 @@ CWindowsToolkit::~CWindowsToolkit()
         UnregisterClassW(L"OxeEditorClass", (HINSTANCE)hInstance);
     }
     blImage.reset();
+    if (memDC)
+    {
+        if (hOldBitmap)
+        {
+            SelectObject(memDC, hOldBitmap);
+            hOldBitmap = NULL;
+        }
+        DeleteDC(memDC);
+        memDC = NULL;
+    }
+    if (hBitmap)
+    {
+        DeleteObject(hBitmap);
+        hBitmap = NULL;
+        pixelData = NULL;
+    }
 }
 
 void CWindowsToolkit::StartWindowProcesses()
