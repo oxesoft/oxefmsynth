@@ -31,6 +31,12 @@ private:
     HWND         hWnd;
 public:
     BLImage      blImage;
+    HDC          memDC;
+    HBITMAP      hBitmap;
+    HBITMAP      hOldBitmap;
+    void        *pixelData;
+    int          dibWidth;
+    int          dibHeight;
     void        *parentWindow;
     CEditor     *editor;
     CWindowsToolkit(void *parentWindow, CEditor *editor);
