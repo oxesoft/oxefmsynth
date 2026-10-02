@@ -64,23 +64,37 @@ void CFilter::SetPar(char param, float value)
     CalcCoef(tf,fr*en,re);
 }    
 
-void CFilter::Process(int *b, int size, int offset)
+void CFilter::Process(float *b, int size, int offset)
 {
-    float in0;
-    float ou0;
+    float * __restrict buf = b;
+    const float l_b0a0 = b0a0;
+    const float l_b1a0 = b1a0;
+    const float l_b2a0 = b2a0;
+    const float l_a1a0 = a1a0;
+    const float l_a2a0 = a2a0;
+    float l_in1 = in1;
+    float l_in2 = in2;
+    float l_ou1 = ou1;
+    float l_ou2 = ou2;
+
     for (int i=offset;i<size;i++)
     {
-        in0  = (float)b[i];
-        ou0  = b0a0*in0 + b1a0*in1 + b2a0*in2 - a1a0*ou1 - a2a0*ou2;
-        in2  = in1;
-        in1  = in0;
-        ou2  = ou1;
-        ou1  = ou0;
-        b[i] = lrintf(ou0);
+        float in0  = buf[i];
+        float ou0  = l_b0a0*in0 + l_b1a0*l_in1 + l_b2a0*l_in2 - l_a1a0*l_ou1 - l_a2a0*l_ou2;
+        l_in2 = l_in1;
+        l_in1 = in0;
+        l_ou2 = l_ou1;
+        l_ou1 = ou0;
+        buf[i] = ou0;
     }
+
+    in1 = l_in1;
+    in2 = l_in2;
+    ou1 = l_ou1;
+    ou2 = l_ou2;
 }
 
-void CFilter::CalcCoef(int const type,double const frequencia,double const q)
+void CFilter::CalcCoef(int const type,double const frequency,double const q)
 {
     double a0;
     double a1;
@@ -88,7 +102,7 @@ void CFilter::CalcCoef(int const type,double const frequencia,double const q)
     double b0;
     double b1;
     double b2;
-    double       freq   = frequencia; if (freq <= C0) freq = C0;
+    double       freq   = frequency; if (freq <= C0) freq = C0;
     double const omega  = 2.0*D_PI*freq/sr;
     double const tsin   = sin(omega);
     double const tcos   = cos(omega);

@@ -23,16 +23,16 @@ private:
     float fr;              // frequency
     float tu;              // tune
     float pt;              // frequency multiplier (pitch curve and LFO)
-    short prevout;         // previous output value
+    float prevout;         // previous output value
     int   phase;           // current phase
-    int   self;            // used for self-modulation
-    short *bwave;          // waveform
+    float self_scale;      // used for self-modulation
+    float *bwave;          // waveform
     bool  hq;              // high quality (interpolation)
     int   freq;            // constant phase
 public:
     void  Init();
     float Process();
-    void  SetBuffer(char param, short *b);
+    void  SetBuffer(char param, float *b);
     void  SetPar(char param, float value);
-    void  Process(int *b, int size, int offset);
+    void  Process(float *b, int size, int offset, bool has_input = true);
 };

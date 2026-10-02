@@ -394,7 +394,7 @@ void CSynthesizer::SendEvent(unsigned char bS,unsigned char bD1,unsigned char bD
                     }
                 }
             }
-        default:   // Ignora qualquer outro event
+        default:   // Ignores any other event
             break;
     }
 }
@@ -406,20 +406,20 @@ void CSynthesizer::SetSampleRate(float samplerate)
     delay.SetPar(SAMPLERATE, samplerate);
 }
 
-void CSynthesizer::Process(int *b, int size, int position)
+void CSynthesizer::Process(float *b, int size, int position)
 {
     int i;
-    int tam = size<<1;
-    memset(b,0,tam*sizeof(int));
+    int length = size<<1;
+    memset(b,0,length*sizeof(float));
     if (revrbON)
-        memset(buffers.bREV,0,sizeof(buffers.bREV));
+        memset(buffers.bREV,0,size*sizeof(float));
     if (delayON)
-        memset(buffers.bDLY,0,sizeof(buffers.bDLY));
+        memset(buffers.bDLY,0,size*sizeof(float));
     for (i=0;i<POLIPHONY;i++)
     {
         if (state[i] != INACTIVE)
         {
-            memset(buffers.bNoteOut,0,sizeof(buffers.bNoteOut));
+            memset(buffers.bNoteOut,0,length*sizeof(float));
             notes[i].Process(buffers.bNoteOut,size,position);
             if (INACTIVE == notes[i].GetState())
             {
@@ -429,11 +429,13 @@ void CSynthesizer::Process(int *b, int size, int position)
                 activeNotesCount--;
                 //---------------------
             }
-            if (revrbON)
-                SumStereoMono(buffers.bNoteOut, buffers.bREV, rev[channels[i]], size);
-            if (delayON)
-                SumStereoMono(buffers.bNoteOut, buffers.bDLY, dly[channels[i]], size);
-            SumStereoStereo(buffers.bNoteOut, b, 1.f-rev[channels[i]], size);
+            float r_vol = rev[channels[i]];
+            float d_vol = dly[channels[i]];
+            if (revrbON && r_vol > 0.0f)
+                SumStereoMono(buffers.bNoteOut, buffers.bREV, r_vol, size);
+            if (delayON && d_vol > 0.0f)
+                SumStereoMono(buffers.bNoteOut, buffers.bDLY, d_vol, size);
+            SumStereoStereo(buffers.bNoteOut, b, 1.f-r_vol, size);
         }
     }
 
@@ -449,12 +451,12 @@ void CSynthesizer::Process(int *b, int size, int position)
         SumMonoStereo(buffers.bDLY,b,size);
     }
     // peak limiting
-    for (i=0;i<tam;i++)
+    float * __restrict buf = b;
+    for (i=0;i<length;i++)
     {
-        if (b[i] >  32767)
-            b[i] =  32767;
-        if (b[i] < -32768)
-            b[i] = -32768;
+        float s = buf[i];
+        if (s >  1.0f) buf[i] =  1.0f;
+        else if (s < -1.0f) buf[i] = -1.0f;
     }
 }
 
@@ -504,50 +506,66 @@ void CSynthesizer::AllNotesOff(int position)
     }
 }
 
-void CSynthesizer::SumMonoStereo(int *bInput, int *bNoteOut, int size)
+void CSynthesizer::SumMonoStereo(float *bInput, float *bNoteOut, int size)
 {
-    int i2;
-    int tam = size<<1;
-    for (int i=0;i<tam;i+=2)
+    const float * __restrict in = bInput;
+    float * __restrict out = bNoteOut;
+    int outIdx = 0;
+    for (int i = 0; i < size; i++)
     {
-        i2 = i>>1;
-        bNoteOut[i]   += bInput[i2];
-        bNoteOut[i+1] += bInput[i2];
+        float s = in[i];
+        out[outIdx]     += s;
+        out[outIdx + 1] += s;
+        outIdx += 2;
     }
 }
 
-void CSynthesizer::SumStereoMono(int *bInput, int *bNoteOut, float volume, int size)
+void CSynthesizer::SumStereoMono(float *bInput, float *bNoteOut, float volume, int size)
 {
-    int i;
-    int tam   = size<<1;
-    int vtemp = lrintf(volume * 127.f);
-    if (volume != 1.0f)
-        for (i=0;i<tam;i+=2)
-            bNoteOut[i>>1] += ((bInput[i] + bInput[i+1]) * vtemp)>>7;
+    const float * __restrict in = bInput;
+    float * __restrict out = bNoteOut;
+    int inIdx = 0;
+    if (volume == 1.0f)
+    {
+        for (int i = 0; i < size; i++)
+        {
+            out[i] += in[inIdx] + in[inIdx + 1];
+            inIdx += 2;
+        }
+    }
     else
-        for (i=0;i<tam;i+=2)
-            bNoteOut[i>>1] += (bInput[i] + bInput[i+1]);
+    {
+        for (int i = 0; i < size; i++)
+        {
+            out[i] += (in[inIdx] + in[inIdx + 1]) * volume;
+            inIdx += 2;
+        }
+    }
 }
 
-void CSynthesizer::SumStereoStereo(int *bInput, int *bNoteOut, float volume, int size)
+void CSynthesizer::SumStereoStereo(float *bInput, float *bNoteOut, float volume, int size)
 {
-    int i;
-    int tam   = size<<1;
-    int vtemp = lrintf(volume * 127.f);
-    if (vtemp != 127)
-        for (i=0;i<tam;i++)
-            bNoteOut[i]  += (bInput[i]  * vtemp)>>7;
+    const float * __restrict in = bInput;
+    float * __restrict out = bNoteOut;
+    int length = size<<1;
+    if (volume == 1.0f)
+    {
+        for (int i=0;i<length;i++)
+            out[i] += in[i];
+    }
     else
-        for (i=0;i<tam;i++)
-            bNoteOut[i]  += bInput[i];
+    {
+        for (int i=0;i<length;i++)
+            out[i] += in[i] * volume;
+    }
 }
 
-inline float CSynthesizer::Val2Mul(float valor)
+inline float CSynthesizer::Val2Mul(float value)
 {
-    if      (valor > 0.0f)
-             return powf( 2.0f,  valor / 12.0f);
-    else if (valor < 0.0f)
-             return powf( 0.5f, -valor / 12.0f);
+    if      (value > 0.0f)
+             return powf( 2.0f,  value / 12.0f);
+    else if (value < 0.0f)
+             return powf( 0.5f, -value / 12.0f);
     else
              return 1.0f;
 }

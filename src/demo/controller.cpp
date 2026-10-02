@@ -23,6 +23,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "controller.h"
 #include <stdio.h>
 #include <string.h>
+#include <math.h>
 
 CController::CController()
 {
@@ -72,9 +73,10 @@ void CController::FillBuffer(short *bShort, int size)
         iaux = tmp1<tmp2?tmp1:tmp2;
         while (iaux--)
         {
-            bShort[posExt] = (short)synthesizer.buffers.bSynthOut[posInt];
-            posExt++;
-            posInt++;
+            float s = synthesizer.buffers.bSynthOut[posInt++];
+            if (s > 1.0f) s = 1.0f;
+            else if (s < -1.0f) s = -1.0f;
+            bShort[posExt++] = (short)(s * 32767.f);
         }
         if (posInt >= tambufferInt)
         {
