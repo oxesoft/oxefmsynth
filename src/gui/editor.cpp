@@ -483,29 +483,6 @@ bool CEditor::OnChar(int cod)
     return true;
 }
 
-void CEditor::OnLButtonDblClick(int x, int y)
-{
-    for (int i=0;i<GUI_CONTROLS;i++)
-    {
-        if (ctl[i]->IsMouseOver(x, y))
-        {
-            int index = ctl[i]->GetIndex();
-            if (index >= 0)
-            {
-                synthesizer->SetDefault(channel, index);
-                if (channel == 0)
-                {
-                    if (hostinterface)
-                    {
-                        hostinterface->ReceiveMessageFromPlugin(SET_PARAMETER, index, GetPar(index) * MAXPARVALUE);
-                    }
-                }
-            }
-            break;
-        }
-    }
-}
-
 struct OpCard {
     float x, y, w, h;
     const char* tag;
@@ -544,6 +521,41 @@ static inline void InvalidateEnvelopeIfParam(CToolkit *toolkit, int par)
     if (op >= 0)
     {
         toolkit->InvalidateRect((int)opCards[op].x + 170, (int)opCards[op].y + 4, 116, 23);
+    }
+}
+
+void CEditor::OnLButtonDblClick(int x, int y)
+{
+    char str[TEXT_SIZE];
+    for (int i=0;i<GUI_CONTROLS;i++)
+    {
+        if (ctl[i]->IsMouseOver(x, y))
+        {
+            int index = ctl[i]->GetIndex();
+            if (index >= 0)
+            {
+                synthesizer->SetDefault(channel, index);
+                ctl[i]->Update();
+                ctl[i]->GetName(str);
+                lcd->SetText(0, str);
+                CMapper::GetDisplayValue(this->synthesizer, this->channel, index, ctl[i]->GetType(), str);
+                lcd->SetText(1, str);
+                InvalidateEnvelopeIfParam(toolkit, index);
+                changingControl = false;
+                if (toolkit)
+                {
+                    toolkit->StopMouseCapture();
+                }
+                if (channel == 0)
+                {
+                    if (hostinterface)
+                    {
+                        hostinterface->ReceiveMessageFromPlugin(SET_PARAMETER, index, lrintf(GetPar(index) * MAXPARVALUE));
+                    }
+                }
+            }
+            break;
+        }
     }
 }
 

@@ -568,7 +568,19 @@ void CSynthesizer::UpdateGlobalEffects()
 
 float CSynthesizer::SetDefault(char channel, int par)
 {
-    return programs.SetDefault(channel, par);
+    float val;
+    switch (par)
+    {
+        case RVBLV:
+        case DLYLV:
+            val = 0.0f;
+            break;
+        default:
+            val = programs.SetDefault(channel, par);
+            break;
+    }
+    SetPar(channel, par, val);
+    return val;
 }
 
 void CSynthesizer::SetPar(char channel, int par, float val)

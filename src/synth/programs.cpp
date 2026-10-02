@@ -293,6 +293,8 @@ float CPrograms::SetDefault(char channel, int par)
         case DLYFE: g->DLYFE = 0.f;       return g->DLYFE;
         case DLYLF: g->DLYLF = 0.f;       return g->DLYLF;
         case DLYLA: g->DLYLA = 0.f;       return g->DLYLA;
+        case RVBLV:                       return      0.f;
+        case DLYLV:                       return      0.f;
         default:                          return      0.f;
     }
 }
