@@ -343,8 +343,8 @@ tresult PLUGIN_API COxeVst3::process(ProcessData& data)
         int32 iaux = std::min(tambufferInt - posInt, tambufferExt - posExt);
         while (iaux > 0)
         {
-            out1[posExt] = float(synthesizer.buffers.bSynthOut[posInt++]) / 32767.f;
-            out2[posExt] = float(synthesizer.buffers.bSynthOut[posInt++]) / 32767.f;
+            out1[posExt] = synthesizer.buffers.bSynthOut[posInt++];
+            out2[posExt] = synthesizer.buffers.bSynthOut[posInt++];
             posExt++;
             iaux -= 2;
         }

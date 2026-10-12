@@ -111,11 +111,11 @@ CEditor::CEditor(CSynthesizer *synthesizer)
     ctl[ctlcount++] = new CKnob    (BMP_KNOB,   36,   "OPA VlSensivity", synthesizer, channel, VL_ZERO_TO_ONE,   OPAVS, aX+sX*4    , aY      );
     ctl[ctlcount++] = new CKnob    (BMP_KNOB,   36,   "OPA KeybScaling", synthesizer, channel, VL_MINUS1_2_PLUS1,OPAKS, aX+sX*5    , aY      );
     ctl[ctlcount++] = new CKnob    (BMP_KNOB,   36,   "OPA Delay Time",  synthesizer, channel, VL_PORTAMENTO,    OPADL, aX         , aY+sY   );
-    ctl[ctlcount++] = new CKnob    (BMP_KNOB,   36,   "OPA Attack Time", synthesizer, channel, VL_TEMPO,         OPAAT, aX+sX      , aY+sY   );
-    ctl[ctlcount++] = new CKnob    (BMP_KNOB,   36,   "OPA Decay Time",  synthesizer, channel, VL_TEMPO,         OPADE, aX+sX*2    , aY+sY   );
+    ctl[ctlcount++] = new CKnob    (BMP_KNOB,   36,   "OPA Attack Time", synthesizer, channel, VL_TIME,         OPAAT, aX+sX      , aY+sY   );
+    ctl[ctlcount++] = new CKnob    (BMP_KNOB,   36,   "OPA Decay Time",  synthesizer, channel, VL_TIME,         OPADE, aX+sX*2    , aY+sY   );
     ctl[ctlcount++] = new CKnob    (BMP_KNOB,   36,   "OPA Sustain Lvl", synthesizer, channel, VL_ZERO_TO_ONE,   OPASU, aX+sX*3    , aY+sY   );
     ctl[ctlcount++] = new CKnob    (BMP_KNOB,   36,   "OPA SustainTime", synthesizer, channel, VL_PORTAMENTO,    OPAST, aX+sX*4    , aY+sY   );
-    ctl[ctlcount++] = new CKnob    (BMP_KNOB,   36,   "OPA ReleaseTime", synthesizer, channel, VL_TEMPO,         OPARE, aX+sX*5    , aY+sY   );
+    ctl[ctlcount++] = new CKnob    (BMP_KNOB,   36,   "OPA ReleaseTime", synthesizer, channel, VL_TIME,         OPARE, aX+sX*5    , aY+sY   );
 
     // OPB
     aX = cX + oX;
@@ -128,11 +128,11 @@ CEditor::CEditor(CSynthesizer *synthesizer)
     ctl[ctlcount++] = new CKnob    (BMP_KNOB,   36,   "OPB VlSensivity", synthesizer, channel, VL_ZERO_TO_ONE,   OPBVS, aX+sX*4    , aY      );
     ctl[ctlcount++] = new CKnob    (BMP_KNOB,   36,   "OPB KeybScaling", synthesizer, channel, VL_MINUS1_2_PLUS1,OPBKS, aX+sX*5    , aY      );
     ctl[ctlcount++] = new CKnob    (BMP_KNOB,   36,   "OPB Delay Time",  synthesizer, channel, VL_PORTAMENTO,    OPBDL, aX         , aY+sY   );
-    ctl[ctlcount++] = new CKnob    (BMP_KNOB,   36,   "OPB Attack Time", synthesizer, channel, VL_TEMPO,         OPBAT, aX+sX      , aY+sY   );
-    ctl[ctlcount++] = new CKnob    (BMP_KNOB,   36,   "OPB Decay Time",  synthesizer, channel, VL_TEMPO,         OPBDE, aX+sX*2    , aY+sY   );
+    ctl[ctlcount++] = new CKnob    (BMP_KNOB,   36,   "OPB Attack Time", synthesizer, channel, VL_TIME,         OPBAT, aX+sX      , aY+sY   );
+    ctl[ctlcount++] = new CKnob    (BMP_KNOB,   36,   "OPB Decay Time",  synthesizer, channel, VL_TIME,         OPBDE, aX+sX*2    , aY+sY   );
     ctl[ctlcount++] = new CKnob    (BMP_KNOB,   36,   "OPB Sustain Lvl", synthesizer, channel, VL_ZERO_TO_ONE,   OPBSU, aX+sX*3    , aY+sY   );
     ctl[ctlcount++] = new CKnob    (BMP_KNOB,   36,   "OPB SustainTime", synthesizer, channel, VL_PORTAMENTO,    OPBST, aX+sX*4    , aY+sY   );
-    ctl[ctlcount++] = new CKnob    (BMP_KNOB,   36,   "OPB ReleaseTime", synthesizer, channel, VL_TEMPO,         OPBRE, aX+sX*5    , aY+sY   );
+    ctl[ctlcount++] = new CKnob    (BMP_KNOB,   36,   "OPB ReleaseTime", synthesizer, channel, VL_TIME,         OPBRE, aX+sX*5    , aY+sY   );
 
     // OPC
     aX = cX;
@@ -145,11 +145,11 @@ CEditor::CEditor(CSynthesizer *synthesizer)
     ctl[ctlcount++] = new CKnob    (BMP_KNOB,   36,   "OPC VlSensivity", synthesizer, channel, VL_ZERO_TO_ONE,   OPCVS, aX+sX*4    , aY      );
     ctl[ctlcount++] = new CKnob    (BMP_KNOB,   36,   "OPC KeybScaling", synthesizer, channel, VL_MINUS1_2_PLUS1,OPCKS, aX+sX*5    , aY      );
     ctl[ctlcount++] = new CKnob    (BMP_KNOB,   36,   "OPC Delay Time",  synthesizer, channel, VL_PORTAMENTO,    OPCDL, aX         , aY+sY   );
-    ctl[ctlcount++] = new CKnob    (BMP_KNOB,   36,   "OPC Attack Time", synthesizer, channel, VL_TEMPO,         OPCAT, aX+sX      , aY+sY   );
-    ctl[ctlcount++] = new CKnob    (BMP_KNOB,   36,   "OPC Decay Time",  synthesizer, channel, VL_TEMPO,         OPCDE, aX+sX*2    , aY+sY   );
+    ctl[ctlcount++] = new CKnob    (BMP_KNOB,   36,   "OPC Attack Time", synthesizer, channel, VL_TIME,         OPCAT, aX+sX      , aY+sY   );
+    ctl[ctlcount++] = new CKnob    (BMP_KNOB,   36,   "OPC Decay Time",  synthesizer, channel, VL_TIME,         OPCDE, aX+sX*2    , aY+sY   );
     ctl[ctlcount++] = new CKnob    (BMP_KNOB,   36,   "OPC Sustain Lvl", synthesizer, channel, VL_ZERO_TO_ONE,   OPCSU, aX+sX*3    , aY+sY   );
     ctl[ctlcount++] = new CKnob    (BMP_KNOB,   36,   "OPC SustainTime", synthesizer, channel, VL_PORTAMENTO,    OPCST, aX+sX*4    , aY+sY   );
-    ctl[ctlcount++] = new CKnob    (BMP_KNOB,   36,   "OPC ReleaseTime", synthesizer, channel, VL_TEMPO,         OPCRE, aX+sX*5    , aY+sY   );
+    ctl[ctlcount++] = new CKnob    (BMP_KNOB,   36,   "OPC ReleaseTime", synthesizer, channel, VL_TIME,         OPCRE, aX+sX*5    , aY+sY   );
 
     // OPD
     aX = cX + oX;
@@ -162,11 +162,11 @@ CEditor::CEditor(CSynthesizer *synthesizer)
     ctl[ctlcount++] = new CKnob    (BMP_KNOB,   36,   "OPD VlSensivity", synthesizer, channel, VL_ZERO_TO_ONE,   OPDVS, aX+sX*4    , aY      );
     ctl[ctlcount++] = new CKnob    (BMP_KNOB,   36,   "OPD KeybScaling", synthesizer, channel, VL_MINUS1_2_PLUS1,OPDKS, aX+sX*5    , aY      );
     ctl[ctlcount++] = new CKnob    (BMP_KNOB,   36,   "OPD Delay Time",  synthesizer, channel, VL_PORTAMENTO,    OPDDL, aX         , aY+sY   );
-    ctl[ctlcount++] = new CKnob    (BMP_KNOB,   36,   "OPD Attack Time", synthesizer, channel, VL_TEMPO,         OPDAT, aX+sX      , aY+sY   );
-    ctl[ctlcount++] = new CKnob    (BMP_KNOB,   36,   "OPD Decay Time",  synthesizer, channel, VL_TEMPO,         OPDDE, aX+sX*2    , aY+sY   );
+    ctl[ctlcount++] = new CKnob    (BMP_KNOB,   36,   "OPD Attack Time", synthesizer, channel, VL_TIME,         OPDAT, aX+sX      , aY+sY   );
+    ctl[ctlcount++] = new CKnob    (BMP_KNOB,   36,   "OPD Decay Time",  synthesizer, channel, VL_TIME,         OPDDE, aX+sX*2    , aY+sY   );
     ctl[ctlcount++] = new CKnob    (BMP_KNOB,   36,   "OPD Sustain Lvl", synthesizer, channel, VL_ZERO_TO_ONE,   OPDSU, aX+sX*3    , aY+sY   );
     ctl[ctlcount++] = new CKnob    (BMP_KNOB,   36,   "OPD SustainTime", synthesizer, channel, VL_PORTAMENTO,    OPDST, aX+sX*4    , aY+sY   );
-    ctl[ctlcount++] = new CKnob    (BMP_KNOB,   36,   "OPD ReleaseTime", synthesizer, channel, VL_TEMPO,         OPDRE, aX+sX*5    , aY+sY   );
+    ctl[ctlcount++] = new CKnob    (BMP_KNOB,   36,   "OPD ReleaseTime", synthesizer, channel, VL_TIME,         OPDRE, aX+sX*5    , aY+sY   );
 
     // OPE
     aX = cX;
@@ -179,11 +179,11 @@ CEditor::CEditor(CSynthesizer *synthesizer)
     ctl[ctlcount++] = new CKnob    (BMP_KNOB,   36,   "OPE VlSensivity", synthesizer, channel, VL_ZERO_TO_ONE,   OPEVS, aX+sX*4    , aY      );
     ctl[ctlcount++] = new CKnob    (BMP_KNOB,   36,   "OPE KeybScaling", synthesizer, channel, VL_MINUS1_2_PLUS1,OPEKS, aX+sX*5    , aY      );
     ctl[ctlcount++] = new CKnob    (BMP_KNOB,   36,   "OPE Delay Time",  synthesizer, channel, VL_PORTAMENTO,    OPEDL, aX         , aY+sY   );
-    ctl[ctlcount++] = new CKnob    (BMP_KNOB,   36,   "OPE Attack Time", synthesizer, channel, VL_TEMPO,         OPEAT, aX+sX      , aY+sY   );
-    ctl[ctlcount++] = new CKnob    (BMP_KNOB,   36,   "OPE Decay Time",  synthesizer, channel, VL_TEMPO,         OPEDE, aX+sX*2    , aY+sY   );
+    ctl[ctlcount++] = new CKnob    (BMP_KNOB,   36,   "OPE Attack Time", synthesizer, channel, VL_TIME,         OPEAT, aX+sX      , aY+sY   );
+    ctl[ctlcount++] = new CKnob    (BMP_KNOB,   36,   "OPE Decay Time",  synthesizer, channel, VL_TIME,         OPEDE, aX+sX*2    , aY+sY   );
     ctl[ctlcount++] = new CKnob    (BMP_KNOB,   36,   "OPE Sustain Lvl", synthesizer, channel, VL_ZERO_TO_ONE,   OPESU, aX+sX*3    , aY+sY   );
     ctl[ctlcount++] = new CKnob    (BMP_KNOB,   36,   "OPE SustainTime", synthesizer, channel, VL_PORTAMENTO,    OPEST, aX+sX*4    , aY+sY   );
-    ctl[ctlcount++] = new CKnob    (BMP_KNOB,   36,   "OPE ReleaseTime", synthesizer, channel, VL_TEMPO,         OPERE, aX+sX*5    , aY+sY   );
+    ctl[ctlcount++] = new CKnob    (BMP_KNOB,   36,   "OPE ReleaseTime", synthesizer, channel, VL_TIME,         OPERE, aX+sX*5    , aY+sY   );
 
     // OPF
     aX = cX + oX;
@@ -196,11 +196,11 @@ CEditor::CEditor(CSynthesizer *synthesizer)
     ctl[ctlcount++] = new CKnob    (BMP_KNOB,   36,   "OPF VlSensivity", synthesizer, channel, VL_ZERO_TO_ONE,   OPFVS, aX+sX*4    , aY      );
     ctl[ctlcount++] = new CKnob    (BMP_KNOB,   36,   "OPF KeybScaling", synthesizer, channel, VL_MINUS1_2_PLUS1,OPFKS, aX+sX*5    , aY      );
     ctl[ctlcount++] = new CKnob    (BMP_KNOB,   36,   "OPF Delay Time",  synthesizer, channel, VL_PORTAMENTO,    OPFDL, aX         , aY+sY   );
-    ctl[ctlcount++] = new CKnob    (BMP_KNOB,   36,   "OPF Attack Time", synthesizer, channel, VL_TEMPO,         OPFAT, aX+sX      , aY+sY   );
-    ctl[ctlcount++] = new CKnob    (BMP_KNOB,   36,   "OPF Decay Time",  synthesizer, channel, VL_TEMPO,         OPFDE, aX+sX*2    , aY+sY   );
+    ctl[ctlcount++] = new CKnob    (BMP_KNOB,   36,   "OPF Attack Time", synthesizer, channel, VL_TIME,         OPFAT, aX+sX      , aY+sY   );
+    ctl[ctlcount++] = new CKnob    (BMP_KNOB,   36,   "OPF Decay Time",  synthesizer, channel, VL_TIME,         OPFDE, aX+sX*2    , aY+sY   );
     ctl[ctlcount++] = new CKnob    (BMP_KNOB,   36,   "OPF Sustain Lvl", synthesizer, channel, VL_ZERO_TO_ONE,   OPFSU, aX+sX*3    , aY+sY   );
     ctl[ctlcount++] = new CKnob    (BMP_KNOB,   36,   "OPF SustainTime", synthesizer, channel, VL_PORTAMENTO,    OPFST, aX+sX*4    , aY+sY   );
-    ctl[ctlcount++] = new CKnob    (BMP_KNOB,   36,   "OPF ReleaseTime", synthesizer, channel, VL_TEMPO,         OPFRE, aX+sX*5    , aY+sY   );
+    ctl[ctlcount++] = new CKnob    (BMP_KNOB,   36,   "OPF ReleaseTime", synthesizer, channel, VL_TIME,         OPFRE, aX+sX*5    , aY+sY   );
 
     // OPX
     aX = cX;
@@ -213,11 +213,11 @@ CEditor::CEditor(CSynthesizer *synthesizer)
     ctl[ctlcount++] = new CKnob    (BMP_KNOB,   36,   "OPX VlSensivity", synthesizer, channel, VL_ZERO_TO_ONE,   OPXVS, aX+sX*4    , aY      );
     ctl[ctlcount++] = new CKnob    (BMP_KNOB,   36,   "OPX KeybScaling", synthesizer, channel, VL_MINUS1_2_PLUS1,OPXKS, aX+sX*5    , aY      );
     ctl[ctlcount++] = new CKnob    (BMP_KNOB,   36,   "OPX Delay Time",  synthesizer, channel, VL_PORTAMENTO,    OPXDL, aX         , aY+sY   );
-    ctl[ctlcount++] = new CKnob    (BMP_KNOB,   36,   "OPX Attack Time", synthesizer, channel, VL_TEMPO,         OPXAT, aX+sX      , aY+sY   );
-    ctl[ctlcount++] = new CKnob    (BMP_KNOB,   36,   "OPX Decay Time",  synthesizer, channel, VL_TEMPO,         OPXDE, aX+sX*2    , aY+sY   );
+    ctl[ctlcount++] = new CKnob    (BMP_KNOB,   36,   "OPX Attack Time", synthesizer, channel, VL_TIME,         OPXAT, aX+sX      , aY+sY   );
+    ctl[ctlcount++] = new CKnob    (BMP_KNOB,   36,   "OPX Decay Time",  synthesizer, channel, VL_TIME,         OPXDE, aX+sX*2    , aY+sY   );
     ctl[ctlcount++] = new CKnob    (BMP_KNOB,   36,   "OPX Sustain Lvl", synthesizer, channel, VL_ZERO_TO_ONE,   OPXSU, aX+sX*3    , aY+sY   );
     ctl[ctlcount++] = new CKnob    (BMP_KNOB,   36,   "OPX SustainTime", synthesizer, channel, VL_PORTAMENTO,    OPXST, aX+sX*4    , aY+sY   );
-    ctl[ctlcount++] = new CKnob    (BMP_KNOB,   36,   "OPX ReleaseTime", synthesizer, channel, VL_TEMPO,         OPXRE, aX+sX*5    , aY+sY   );
+    ctl[ctlcount++] = new CKnob    (BMP_KNOB,   36,   "OPX ReleaseTime", synthesizer, channel, VL_TIME,         OPXRE, aX+sX*5    , aY+sY   );
 
     // OPZ
     aX = cX + oX;
@@ -230,13 +230,13 @@ CEditor::CEditor(CSynthesizer *synthesizer)
     ctl[ctlcount++] = new CKnob    (BMP_KNOB,   36,   "OPZ VlSensivity", synthesizer, channel, VL_ZERO_TO_ONE,   OPZVS, aX+sX*4    , aY      );
     ctl[ctlcount++] = new CKnob    (BMP_KNOB,   36,   "OPZ KeybScaling", synthesizer, channel, VL_MINUS1_2_PLUS1,OPZKS, aX+sX*5    , aY      );
     ctl[ctlcount++] = new CKnob    (BMP_KNOB,   36,   "OPZ Delay Time",  synthesizer, channel, VL_PORTAMENTO,    OPZDL, aX         , aY+sY   );
-    ctl[ctlcount++] = new CKnob    (BMP_KNOB,   36,   "OPZ Attack Time", synthesizer, channel, VL_TEMPO,         OPZAT, aX+sX      , aY+sY   );
-    ctl[ctlcount++] = new CKnob    (BMP_KNOB,   36,   "OPZ Decay Time",  synthesizer, channel, VL_TEMPO,         OPZDE, aX+sX*2    , aY+sY   );
+    ctl[ctlcount++] = new CKnob    (BMP_KNOB,   36,   "OPZ Attack Time", synthesizer, channel, VL_TIME,         OPZAT, aX+sX      , aY+sY   );
+    ctl[ctlcount++] = new CKnob    (BMP_KNOB,   36,   "OPZ Decay Time",  synthesizer, channel, VL_TIME,         OPZDE, aX+sX*2    , aY+sY   );
     ctl[ctlcount++] = new CKnob    (BMP_KNOB,   36,   "OPZ Sustain Lvl", synthesizer, channel, VL_ZERO_TO_ONE,   OPZSU, aX+sX*3    , aY+sY   );
     ctl[ctlcount++] = new CKnob    (BMP_KNOB,   36,   "OPZ SustainTime", synthesizer, channel, VL_PORTAMENTO,    OPZST, aX+sX*4    , aY+sY   );
-    ctl[ctlcount++] = new CKnob    (BMP_KNOB,   36,   "OPZ ReleaseTime", synthesizer, channel, VL_TEMPO,         OPZRE, aX+sX*5    , aY+sY   );
+    ctl[ctlcount++] = new CKnob    (BMP_KNOB,   36,   "OPZ ReleaseTime", synthesizer, channel, VL_TIME,         OPZRE, aX+sX*5    , aY+sY   );
 
-    // Matriz
+    // Matrix
     aX = mX;
     aY = mY;
     ctl[ctlcount++] = new CKnob    (BMP_KNOB2,  28,   "OPA Self Mod",    synthesizer, channel, VL_MOD,           MAA,     aX       , aY      );

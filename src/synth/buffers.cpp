@@ -45,83 +45,86 @@ void CBuffers::FillWaveforms(void)
     double un   = 0.0f;
     double v0   = 0.0f;
     double v1   = 0.0f;
-    double tam  = (double)WAVEFORM_BSIZE;
-    int    tam2 =         WAVEFORM_BSIZE / 2;
-    int    tam4 =         WAVEFORM_BSIZE / 4;
-    int    ta24 = tam2 + tam4;
+    double size                 = (double)WAVEFORM_BSIZE;
+    int    half_size            =         WAVEFORM_BSIZE / 2;
+    int    quarter_size         =         WAVEFORM_BSIZE / 4;
+    int    three_quarters_size  = half_size + quarter_size;
     // sine
     for (i=0;i<WAVEFORM_BSIZE;i++)
     {
-        v0 = D_PI * 2.0 * (double)i / tam;
+        v0 = D_PI * 2.0 * (double)i / size;
         v0 = sin(v0);
-        bWaves[0][i] = (short)lrintf(float(v0 * 32767.0));
+        bWaves[0][i] = (float)v0;
     }
     // saw
     v0 = 1.0;
-    un = 2.0 / tam;
+    un = 2.0 / size;
     for (i=0;i<WAVEFORM_BSIZE;i++)
     {
         v0 -= un;
-        bWaves[1][i] = (short)lrintf(float(v0 * 32767.f));
+        bWaves[1][i] = (float)v0;
     }
     // triangle
-    un = 4.0 / tam;
+    un = 4.0 / size;
     v0 = 0.0;
-    for (i=0;i<tam4;i++)
+    for (i=0;i<quarter_size;i++)
     {
-        bWaves[2][i]      = (short)lrintf(float((      v0) * 32767.f));
-        bWaves[2][i+tam4] = (short)lrintf(float((1.f - v0) * 32767.f));
-        bWaves[2][i+tam2] = (short)lrintf(float((    - v0) * 32767.f));
-        bWaves[2][i+ta24] = (short)lrintf(float((v0 - 1.f) * 32767.f));
+        bWaves[2][i]                   = (float)(      v0);
+        bWaves[2][i+quarter_size]      = (float)(1.0 - v0);
+        bWaves[2][i+half_size]         = (float)(    - v0);
+        bWaves[2][i+three_quarters_size] = (float)(v0 - 1.0);
         v0 += un;
     }
     // pulse
-    for (i=0;i<tam2;i++)
+    for (i=0;i<half_size;i++)
     {
-        bWaves[3][i     ] =  32767;
-        bWaves[3][i+tam2] = -32767;
+        bWaves[3][i          ] =  1.0f;
+        bWaves[3][i+half_size] = -1.0f;
     }
     // band limited pulse
-    Filtrar(3,4);
+    Filter(3,4);
     // band limited saw
-    Filtrar(1,5);
-    Normalizar(5);
+    Filter(1,5);
+    Normalize(5);
+    // guard sample for branchless interpolation
+    for (i=0;i<WAVEFORMS;i++)
+        bWaves[i][WAVEFORM_BSIZE] = bWaves[i][0];
 }
 
-void CBuffers::Filtrar(int indorigem, int inddestino)
+void CBuffers::Filter(int source, int destination)
 {
     #define N 256    // number of filters
     //-----------------------------------------
-    double cutoff     = 128.f;
-    double samplerate = (double)WAVEFORM_BSIZE;
-    double x          = 2.0 * D_PI * cutoff / samplerate;
-    double p          = (2.0 - cos(x)) - sqrt(pow((2.0 - cos(x)), 2.0) - 1.0);
-    double ummenosp   = 1.0 - p;
+    double cutoff      = 128.f;
+    double samplerate  = (double)WAVEFORM_BSIZE;
+    double x           = 2.0 * D_PI * cutoff / samplerate;
+    double p           = (2.0 - cos(x)) - sqrt(pow((2.0 - cos(x)), 2.0) - 1.0);
+    double one_minus_p = 1.0 - p;
     double tmp[N];
     memset(tmp,0,sizeof(tmp));
     //-----------------------------------------
-    double entsai = 0.0;
-    int   ciclos = 2;
+    double inout = 0.0;
+    int   cycles = 2;
     int   i;
     int   n;
-    while (ciclos--)
+    while (cycles--)
     {
         for (i=0;i<WAVEFORM_BSIZE;i++)
         {    
-            entsai = (double)bWaves[indorigem][i];
+            inout = (double)bWaves[source][i];
             for (n=0;n<N;n++)
             {
                 //-----------------------------
-                tmp[n] = ummenosp * entsai + p * tmp[n];
-                entsai = tmp[n];
+                tmp[n] = one_minus_p * inout + p * tmp[n];
+                inout = tmp[n];
                 //-----------------------------
             }
-            bWaves[inddestino][i] = (short)lrintf((float)entsai);
+            bWaves[destination][i] = (float)inout;
         }
     }
 }
 
-void CBuffers::Normalizar(int indice)
+void CBuffers::Normalize(int wave_index)
 {
     double max = 0.0;
     double aux = 0.0;
@@ -129,13 +132,13 @@ void CBuffers::Normalizar(int indice)
     // finds the peak value
     for (i=0;i<WAVEFORM_BSIZE;i++)
     {
-        aux = fabs((double)bWaves[indice][i]);
+        aux = fabs((double)bWaves[wave_index][i]);
         if (aux > max)
             max = aux;
     }
     // calculates the multiplication factor
-    aux = 32767.0/max;
+    aux = 1.0/max;
     // normalizes the signal
     for (i=0;i<WAVEFORM_BSIZE;i++)
-        bWaves[indice][i] = (short)(lrintf(float((double)bWaves[indice][i]*aux)));
+        bWaves[wave_index][i] = (float)((double)bWaves[wave_index][i]*aux);
 }

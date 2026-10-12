@@ -40,13 +40,14 @@ void CReverb::Init()
     memset(ballp1,0,sizeof(ballp1));
     memset(ballp2,0,sizeof(ballp2));
     state = INACTIVE;
-    ou0  = 0;
-    in1  = 0;
-    in1l = 0;
-    ou0l = 0;
-    a0   = 0;
-    a1   = 0;
-    b1   = 0;
+    ou0  = 0.0f;
+    in1  = 0.0f;
+    in1l = 0.0f;
+    ou0l = 0.0f;
+    a0   = 0.0f;
+    a1   = 0.0f;
+    b1   = 0.0f;
+    prev_REVDA = -1.0f;
 }
 
 void CReverb::SetPar(char param, float value)
@@ -65,75 +66,118 @@ void CReverb::SetPar(char param, float value)
     }
 }
 
-void CReverb::CalcCoefLowPass(float frequencia)
+void CReverb::CalcCoefLowPass(float frequency)
 {
     float w     = 2.0f * sr; 
-    float fCut  = 2.0f * PI * Key2Frequency(frequencia * MAXFREQFLT);
+    float fCut  = 2.0f * PI * Key2Frequency(frequency * MAXFREQFLT);
     float Norm  = 1.0f / (fCut + w); 
-    b1          = lrintf((w - fCut) * Norm * 32768.f);
-    a0 = a1     = lrintf(     fCut  * Norm * 32768.f);
+    b1          = (w - fCut) * Norm;
+    a0 = a1     = fCut * Norm;
 }
 
-void CReverb::Process(int *b, int size)
+void CReverb::Process(float *b, int size)
 {
     int i        = 0;
-    int ent      = 0;
-    int aux      = 0;
-    int smp      = 0;
-    int feedback = (int)(ti * 127.f);
-    if (REVDAant != da) 
+    float in     = 0.0f;
+    float aux    = 0.0f;
+    float smp    = 0.0f;
+    const float feedback = ti * (127.0f / 128.0f);
+    if (prev_REVDA != da) 
     {
         CalcCoefLowPass(da);
-        REVDAant =         da;
+        prev_REVDA =         da;
     }
+    int l_icomb1 = icomb1;
+    int l_icomb2 = icomb2;
+    int l_icomb3 = icomb3;
+    int l_icomb4 = icomb4;
+    int l_iallp1 = iallp1;
+    int l_iallp2 = iallp2;
+    float l_ou0 = ou0;
+    float l_in1 = in1;
+
     for (i=0;i<size;i++)
     {
-        ent  = b[i];
+        in   = b[i];
         // comb 1
-        smp  = bcomb1[icomb1];
-        bcomb1[icomb1] = ent + ((bcomb1[icomb1] * feedback)/128);
-        if (++icomb1>=TAMCOMB1) icomb1 = 0;
+        float c1 = bcomb1[l_icomb1];
+        bcomb1[l_icomb1] = in + c1 * feedback;
+        if (++l_icomb1>=TAMCOMB1) l_icomb1 = 0;
         // comb 2
-        smp += bcomb2[icomb2];
-        bcomb2[icomb2] = ent + ((bcomb2[icomb2] * feedback)/128);
-        if (++icomb2>=TAMCOMB2) icomb2 = 0;
+        float c2 = bcomb2[l_icomb2];
+        bcomb2[l_icomb2] = in + c2 * feedback;
+        if (++l_icomb2>=TAMCOMB2) l_icomb2 = 0;
         // comb 3
-        smp += bcomb3[icomb3];
-        bcomb3[icomb3] = ent + ((bcomb3[icomb3] * feedback)/128);
-        if (++icomb3>=TAMCOMB3) icomb3 = 0;
+        float c3 = bcomb3[l_icomb3];
+        bcomb3[l_icomb3] = in + c3 * feedback;
+        if (++l_icomb3>=TAMCOMB3) l_icomb3 = 0;
         // comb 4
-        smp += bcomb4[icomb4];
-        bcomb4[icomb4] = ent + ((bcomb4[icomb4] * feedback)/128);
-        if (++icomb4>=TAMCOMB4) icomb4 = 0;
+        float c4 = bcomb4[l_icomb4];
+        bcomb4[l_icomb4] = in + c4 * feedback;
+        if (++l_icomb4>=TAMCOMB4) l_icomb4 = 0;
+
+        smp = c1 + c2 + c3 + c4;
+
         // allpass 1
-        aux = ballp1[iallp1];
-        ballp1[iallp1] = ((aux * feedback)/128) + smp;
-        smp           = aux - ((ballp1[iallp1] * feedback)/128);
-        if (++iallp1>=TAMALLP1) iallp1 = 0;
+        aux = ballp1[l_iallp1];
+        float new_allp1 = aux * feedback + smp;
+        ballp1[l_iallp1] = new_allp1;
+        smp = aux - new_allp1 * feedback;
+        if (++l_iallp1>=TAMALLP1) l_iallp1 = 0;
+
         // allpass 2
-        aux = ballp2[iallp2];
-        ballp2[iallp2] = ((aux * feedback)/128) + smp;
-        smp           = aux - ((ballp2[iallp2] * feedback)/128);
-        if (++iallp2>=TAMALLP2) iallp2 = 0;
+        aux = ballp2[l_iallp2];
+        float new_allp2 = aux * feedback + smp;
+        ballp2[l_iallp2] = new_allp2;
+        smp = aux - new_allp2 * feedback;
+        if (++l_iallp2>=TAMALLP2) l_iallp2 = 0;
+
         // DC filter
-        ou0  = smp - in1 + (int)(((int64_t)ou0 * 32674) / 32768);
-        in1  = smp;
-        b[i] = ou0>>2;
+        l_ou0  = smp - l_in1 + l_ou0 * (32674.0f / 32768.0f);
+        l_in1  = smp;
+        b[i] = l_ou0 * 0.25f;
     }
-    if (REVDAant < 1.f)
+    icomb1 = l_icomb1;
+    icomb2 = l_icomb2;
+    icomb3 = l_icomb3;
+    icomb4 = l_icomb4;
+    iallp1 = l_iallp1;
+    iallp2 = l_iallp2;
+    ou0 = l_ou0;
+    in1 = l_in1;
+
+    if (prev_REVDA < 1.f)
     {
+        float l_ou0l = ou0l;
+        float l_in1l = in1l;
+        const float l_a0 = a0;
+        const float l_a1 = a1;
+        const float l_b1 = b1;
         for (i=0;i<size;i++)
         {
             // low pass filter
-            int in = b[i];
-            ou0l = (int)(((int64_t)in * a0 + (int64_t)in1l * a1 + (int64_t)ou0l * b1) / 32768);
-            in1l = in;
-            b[i] = ou0l;
+            float in_sample = b[i];
+            l_ou0l = in_sample * l_a0 + l_in1l * l_a1 + l_ou0l * l_b1;
+            l_in1l = in_sample;
+            b[i] = l_ou0l;
         }
+        ou0l = l_ou0l;
+        in1l = l_in1l;
+    }
+    else
+    {
+        ou0l = 0.0f;
+        in1l = 0.0f;
     }
     state = ACTIVE;
-    if (!b[0] && !b[size>>1] && !b[size>>2] && !b[size-1])
+    if (std::abs(b[0]) < 1e-6f && std::abs(b[size>>1]) < 1e-6f && std::abs(b[size>>2]) < 1e-6f && std::abs(b[size-1]) < 1e-6f && std::abs(ou0) < 1e-6f && (prev_REVDA >= 1.f || std::abs(ou0l) < 1e-6f))
+    {
         state = INACTIVE;
+        ou0 = 0.0f;
+        in1 = 0.0f;
+        ou0l = 0.0f;
+        in1l = 0.0f;
+    }
 }
 
 char CReverb::GetState()
@@ -141,7 +185,7 @@ char CReverb::GetState()
     return state;
 }
 
-inline float CReverb::Key2Frequency(float valor)
+inline float CReverb::Key2Frequency(float value)
 {
-    return C0 * powf(2.0f, valor / 12.0f);
+    return C0 * powf(2.0f, value / 12.0f);
 }

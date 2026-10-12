@@ -55,7 +55,7 @@ char CMapper::FloatValueToIntValue(CSynthesizer *synthesizer, char channel, int 
             }
             break;
         }
-        case VL_TEMPO:
+        case VL_TIME:
             value = (char)lrintf((MAXPARVALUE + 2.f) * powf(fvalue / MAXTIMEENV, 1.f/3.f) - 2.f);
             break;
         case VL_PORTAMENTO:
@@ -132,7 +132,7 @@ float CMapper::IntValueToFloatValue(CSynthesizer *synthesizer, char channel, int
                     fvalue = 1.0f;
             }
             break;
-        case VL_TEMPO:
+        case VL_TIME:
         {
             float ftemp = ((float)value + 2.0f)/(MAXPARVALUE + 2.0f);
             fvalue = MAXTIMEENV * ftemp*ftemp*ftemp;
@@ -255,7 +255,7 @@ void CMapper::GetDisplayValue(CSynthesizer *synthesizer, char channel, int par, 
             }
             break;
         }
-        case VL_TEMPO:
+        case VL_TIME:
             snprintf(str, TEXT_SIZE, "%fs", fvalue);
             break;
         case VL_PORTAMENTO:

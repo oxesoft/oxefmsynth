@@ -27,8 +27,8 @@ private:
     float  sr;
     char   es;         // envelop state
     int    counter;    // to the next state
-    int    coef;       // coeficient
-    int    sa;         // output signal
+    float  coef;       // coefficient
+    float  sa;         // output signal
     float  dl;         // delay time
     float  at;         // attack time
     float  de;         // decay time
@@ -43,5 +43,5 @@ public:
     void  SendEvent(char event, int remainingSamples);
     char  GetState(void);
     void  SetPar(char param, float value);
-    void  Process(int *b, int size, int offset, float volume);
+    void  Process(float *b, int size, int offset, float volume);
 };

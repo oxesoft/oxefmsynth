@@ -27,16 +27,16 @@ void CNoise::Init()
     fr1  =-1.f;
     re   = 0.f;
     re1  =-1.f;
-    am   = 128;
+    am   = 1.0f;
     bp   = 0;
-    b0a0 = 0;
-    b2a0 = 0;
-    a1a0 = 0;
-    a2a0 = 0;
-    ou1  = 0;
-    ou2  = 0;
-    in1  = 0;
-    in2  = 0;
+    b0a0 = 0.0f;
+    b2a0 = 0.0f;
+    a1a0 = 0.0f;
+    a2a0 = 0.0f;
+    ou1  = 0.0f;
+    ou2  = 0.0f;
+    in1  = 0.0f;
+    in2  = 0.0f;
 }
 
 void CNoise::SetPar(char param, float value)
@@ -53,7 +53,7 @@ void CNoise::SetPar(char param, float value)
             re = value;
             break;
         case VOLUME:
-            am = lrintf(value * 128.f);
+            am = value;
             break;
         case BYPASS:
             bp = lrintf(value);
@@ -63,26 +63,26 @@ void CNoise::SetPar(char param, float value)
     CalcCoef(fr,re);
 }
 
-void CNoise::Process(int *b, int size, int offset)
+void CNoise::Process(float *b, int size, int offset)
 {
-    short in0;
-    int   ou0;
+    float in0;
+    float ou0;
     int   i;
     // bypasses the signal if the key is on
     if (!bp)
     {
         for (i=offset;i<size;i++)
         {
-            // Limitador
-            if (b[i]> 4096)
-                b[i]= 4096;
-            if (b[i]<-4096)
-                b[i]=-4096;
-            b[i]<<=3;
+            // Limiter (4096 / 32768.f = 0.125f)
+            if (b[i] > 0.125f)
+                b[i] = 0.125f;
+            else if (b[i] < -0.125f)
+                b[i] = -0.125f;
+            b[i] *= 8.0f;
         }
     }
     // generates noise if there is volume
-    if (am)
+    if (am > 0.0f)
     {
         // recalc coeffs if they have changed
         if (fr1 != fr || re1 != re)
@@ -97,25 +97,25 @@ void CNoise::Process(int *b, int size, int offset)
             static unsigned int randSeed = 22222;
             randSeed = (randSeed * 196314165) + 907633515;
             // band-pass filter
-            in0  = (short)(randSeed>>16);
-            ou0  = ((b0a0*in0)>>15) + ((b2a0*in2)>>15) - ((a1a0*ou1)>>15) - ((a2a0*ou2)>>15);
+            in0  = (float)((short)(randSeed>>16)) * (1.0f / 32768.0f);
+            ou0  = b0a0*in0 + b2a0*in2 - a1a0*ou1 - a2a0*ou2;
             in2  = in1;
             in1  = in0;
             ou2  = ou1;
             ou1  = ou0;
-            b[i]+= (ou0*am)>>7;
+            b[i]+= ou0 * am;
         }
     }
 }
 
-void CNoise::CalcCoef(double const frequencia,double const q)
+void CNoise::CalcCoef(double const frequency,double const q)
 {
     double a0;
     double a1;
     double a2;
     double b0;
     double b2;
-    double       freq   = frequencia; if (freq <= C0) freq = C0;
+    double       freq   = frequency; if (freq <= C0) freq = C0;
     double const omega  = 2.0*D_PI*freq/sr;
     double const tsin   = sin(omega);
     double const tcos   = cos(omega);
@@ -129,8 +129,8 @@ void CNoise::CalcCoef(double const frequencia,double const q)
     a2=1.0-alpha;
 
     // set filter coeffs
-    b0a0=lrintf(float((b0/a0)*32768.0));
-    b2a0=lrintf(float((b2/a0)*32768.0));
-    a1a0=lrintf(float((a1/a0)*32768.0));
-    a2a0=lrintf(float((a2/a0)*32768.0));
+    b0a0=(float)(b0/a0);
+    b2a0=(float)(b2/a0);
+    a1a0=(float)(a1/a0);
+    a2a0=(float)(a2/a0);
 }

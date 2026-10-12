@@ -23,21 +23,21 @@ private:
     SProgram *program;  // the note's program
     CBuffers *buffers;  // the buffers
     float ptc;          // pitch weel (1.f == inert)
-    float aft;          // aftertouch (0.f a 1.f)
+    float aft;          // aftertouch (0.0f to 1.0f)
     float lfodph;       // from MODULATION
     char  state;        // (on/off) the note state is defined by the operators's envelops except the Z one
     // portamento
     float freqnote;     // base frequency
-    float freqAtual;    // current frequency of portamento
-    float portaFator;   // multiplication factor
-    int   portaCont;    // samples count
+    float current_freq; // current frequency of portamento
+    float porta_factor; // multiplication factor
+    int   porta_count;  // samples count
     // pitch curve
-    float curvAtual;    // current pitch curve value
-    float curvFator;    // multiplication factor
-    int   curvCont;     // samples count
+    float current_curv; // current pitch curve value
+    float curv_factor;  // multiplication factor
+    int   curv_count;   // samples count
     // pan and volume
-    int   lpan;         // (Faixa: -1.f a 1.f) Posicionamento entre os canais Esquerdo e Direito
-    int   lvol;         // (Faixa:  0.f a 1.f) Volume
+    float lpan;         // (Range: -1.0f to 1.0f) Position between Left and Right channels
+    float lvol;         // (Range:  0.0f to 1.0f) Volume
     // note position
     int   startPosition;// the sample number of the note begining
     int   lastpos;      // keeps the last position for accuracy of note off
@@ -58,19 +58,18 @@ private:
     float opXvol;
     float opZvol;
     
-    void  SumMonoMono    (int *bInput , int *bNoteOut  , float  volume  , int   size  , int offset            );
-    void  SumMonoStereo  (int *bInput , int *bNoteOut  , float  volume  , float pan   , int size  , int offset);
-    void  PanVolStereo   (int *b      , int  volume    , int    pan     , int   size  , int offset            );
-    int   enZant;
+    void  SumMonoMono    (float *bInput , float *bNoteOut  , float volume  , int   size  , int offset            );
+    void  SumMonoStereo  (float *bInput , float *bNoteOut  , float volume  , float pan   , int size  , int offset);
+    void  PanVolStereo   (float *b      , float volume    , float pan     , int   size  , int offset            );
     
-    float Scaling             (unsigned char tecla, float valor);
-    inline float VelSen       (float valor, float vel);
-    inline float Val2Mul      (float valor);
-    inline float Key2Frequency(char  valor);
+    float Scaling             (unsigned char key, float value);
+    inline float VelSen       (float value, float vel);
+    inline float Val2Mul      (float value);
+    inline float Key2Frequency(char  value);
 public:
     void  Init (SProgram *program, CBuffers *buf, unsigned char key, unsigned char previousKey, float velocity, float samplerate);
     void  SendEvent(char param, float value, int position);
-    void  Process(int *b, int size, int position);
+    void  Process(float *b, int size, int position);
     char  GetState(void);
     void  UpdateProgram (void);
 };
