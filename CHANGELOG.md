@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.0.0-beta.2] - 2026-10-12
+
+### Added
+- **Edit Buffer:** Programs now only change on Store, so editing a program no longer overwrites the stored one immediately.
+- **CI/CD:** GitHub Actions CI builds for Linux (x86_64 and arm64), macOS Universal, and Windows; draft GitHub Releases with plugin artifacts.
+
+### Changed
+- **Float DSP:** Migrated the internal DSP pipeline to 32-bit float and optimized the audio engine.
+- **Knob Rendering:** Coarse and fine tune knobs now render as bipolar, matching the pan knobs.
+- **Codebase:** Translated remaining Portuguese variable names and comments to English.
+- **Windows CI:** Migrated the Windows CI environment from MINGW64 to UCRT64.
+
+### Fixed
+- **Reverb:** Fixed allpass signal chain and DC filter multiplication causing wrapping; reverb silence detection now works when the damp filter is bypassed (#33).
+- **Windows:** Fixed UI scrambling by using DIBSection and BitBlt (#39).
+- Fixed double-clicking delay and reverb level knobs not resetting to default (#24).
+- Fixed Windows VST3 linking (ole32, hInstance).
+
+---
+
 ## [2.0.0-beta.1] - 2026-09-25
 
 ### Added
