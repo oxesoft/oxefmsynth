@@ -51,11 +51,28 @@ void CPrograms::Init()
 #else
     currentbank = (SBank*)soundbank;
 #endif
+    if (currentbank)
+    {
+        for (int i = 0; i < MIDICHANNELS; i++)
+        {
+            ReloadBuffer(i);
+        }
+    }
+}
+
+// Loads the stored program into the channel's edit buffer.
+// Edits go to the buffer only; StoreProgram commits them to the bank.
+void CPrograms::ReloadBuffer(char channel)
+{
+    if (currentbank)
+    {
+        memcpy(&prgbuffer[channel], &currentbank->prg[numprg[channel]], sizeof(SProgram));
+    }
 }
 
 SProgram* CPrograms::GetProgram(char channel)
 {
-    return &currentbank->prg[numprg[channel]];
+    return &prgbuffer[channel];
 }
 
 SGlobal* CPrograms::GetSGlobal(void)
@@ -76,6 +93,7 @@ void CPrograms::SetNumProgr(char channel, unsigned char numprog)
     else
     {
         numprg[channel] = numprog;
+        ReloadBuffer(channel);
     }
 #ifndef __OXEDMO__
     haschanges = true;
@@ -119,7 +137,7 @@ SBank* CPrograms::GetBank(void)
 
 float CPrograms::SetDefault(char channel, int par)
 {
-    SProgram *p = &currentbank->prg[numprg[channel]];
+    SProgram *p = &prgbuffer[channel];
     SGlobal  *g = &currentbank->global;
     switch (par)
     {
@@ -301,7 +319,7 @@ float CPrograms::SetDefault(char channel, int par)
 
 float CPrograms::GetPar(char channel, int par)
 {
-    SProgram *p = &currentbank->prg[numprg[channel]];
+    SProgram *p = &prgbuffer[channel];
     SGlobal  *g = &currentbank->global;
     switch (par)
     {
@@ -482,7 +500,7 @@ float CPrograms::GetPar(char channel, int par)
 void CPrograms::SetPar(char channel, int par, float val)
 {
     isWaiting[channel] = false;
-    SProgram *p = &currentbank->prg[numprg[channel]];
+    SProgram *p = &prgbuffer[channel];
     SGlobal  *g = &currentbank->global;
     switch (par)
     {
@@ -692,12 +710,17 @@ void CPrograms::SetBankMode(bool bankMode)
 
 void CPrograms::GetProgName(char* str, char channel)
 {
-    memcpy(str, currentbank->prg[numprg[channel]].PNAME, PG_NAME_SIZE);
+    memcpy(str, prgbuffer[channel].PNAME, PG_NAME_SIZE);
 }
 
 void CPrograms::SetProgName(char* str, char channel)
 {
-    SetProgName(str, numprg[channel]);
+    memset(prgbuffer[channel].PNAME, 0, PG_NAME_SIZE);
+    memcpy(prgbuffer[channel].PNAME, str, std::min(strlen(str), (size_t)PG_NAME_SIZE));
+    if (hostinterface)
+    {
+        hostinterface->ReceiveMessageFromPlugin(UPDATE_DISPLAY, 0, 0);
+    }
 }
 
 void CPrograms::GetProgName(char* str, int numpg)
@@ -751,7 +774,8 @@ void CPrograms::StoreProgram(char channel)
     {
         haschanges = true;
         isWaiting[channel] = false;
-        memcpy(&currentbank->prg[prgtmp], &currentbank->prg[numprg[channel]],sizeof(SProgram));
+        // Commit the edit buffer to the destination slot in the bank
+        memcpy(&currentbank->prg[prgtmp], &prgbuffer[channel], sizeof(SProgram));
         numprg[channel] = prgtmp;
         if (hostinterface)
         {
@@ -763,6 +787,13 @@ void CPrograms::StoreProgram(char channel)
 void CPrograms::CopyProgram(int destination, int source)
 {
     memcpy(&currentbank->prg[destination], &currentbank->prg[source], sizeof(SProgram));
+    for (int i = 0; i < MIDICHANNELS; i++)
+    {
+        if (numprg[i] == destination)
+        {
+            ReloadBuffer(i);
+        }
+    }
     haschanges = true;
     if (hostinterface)
     {

@@ -423,8 +423,10 @@ private:
     unsigned char  numprg[MIDICHANNELS];    // programs numbers
     bool           isWaiting[MIDICHANNELS]; // indicates if the GUI is waiting for store confirmation
     unsigned char  prgtmp;                  // the destination program slot to store
+    SProgram       prgbuffer[MIDICHANNELS]; // edit buffers (only committed by StoreProgram)
 public:
     void           Init();
+    void           ReloadBuffer(char channel);
     SProgram*      GetProgram  (char channel);
     SGlobal*       GetSGlobal  (void);
     void           SetNumProgr (char channel, unsigned char numprog);
