@@ -213,7 +213,8 @@ void CKnob::Paint(BLContext &ctx, const BLFont &fontSmall, const BLFont &fontNor
         // Background track (270 degrees)
         ctx.stroke_arc(BLArc(cx, cy, r, r, 0.75 * M_PI, 1.5 * M_PI), BLRgba32(0x22, 0x2a, 0x36));
 
-        bool isBipolar = (type == VL_PAN || type == VL_MINUS1_2_PLUS1);
+        bool isBipolar = (type == VL_PAN || type == VL_MINUS1_2_PLUS1 ||
+                          type == VL_COARSE_TUNE || type == VL_FINE_TUNE);
         BLRgba32 activeColor(0x00, 0xf0, 0xff); // cyan
 
         if (type == VL_COARSE_TUNE || type == VL_FINE_TUNE)
