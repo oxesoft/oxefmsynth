@@ -567,6 +567,7 @@ void CEditor::OnLButtonDown(int x, int y)
     {
         if (ctl[i]->IsMouseOver(x, y))
         {
+            bool wasWaiting = synthesizer->GetStandBy(prevchannel);
             ctl[i]->OnClick(x, y);
             synthesizer->SetEditingName(ctl[i]->GetType() == BT_NAME);
             if (synthesizer->GetStandBy(prevchannel))
@@ -575,7 +576,14 @@ void CEditor::OnLButtonDown(int x, int y)
             }
             ctl[i]->GetName(str);
             lcd->SetText(0,str);
-            CMapper::GetDisplayValue(this->synthesizer, this->channel, ctl[i]->GetIndex(), ctl[i]->GetType(), str);
+            if (wasWaiting && ctl[i]->GetType() == BT_STORE)
+            {
+                snprintf(str, TEXT_SIZE, "was stored!");
+            }
+            else
+            {
+                CMapper::GetDisplayValue(this->synthesizer, this->channel, ctl[i]->GetIndex(), ctl[i]->GetType(), str);
+            }
             lcd->SetText(1,str);
             InvalidateEnvelopeIfParam(toolkit, ctl[i]->GetIndex());
             cID = i;

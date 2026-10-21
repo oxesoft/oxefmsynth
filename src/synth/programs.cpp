@@ -772,7 +772,6 @@ void CPrograms::StoreProgram(char channel)
     }
     else
     {
-        haschanges = true;
         isWaiting[channel] = false;
         // Commit the edit buffer to the destination slot in the bank
         memcpy(&currentbank->prg[prgtmp], &prgbuffer[channel], sizeof(SProgram));

@@ -386,7 +386,7 @@ void CMapper::GetDisplayValue(CSynthesizer *synthesizer, char channel, int par, 
             }
             else
             {
-                snprintf(str, TEXT_SIZE, "was stored!");
+                synthesizer->GetProgName(str, channel);
             }
             break;
         case BT_BANK:
