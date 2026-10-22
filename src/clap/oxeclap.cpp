@@ -43,7 +43,7 @@ const clap_plugin_descriptor_t COxeClapPlugin::s_descriptor = {
     CLAP_VERSION,
     "com.oxesoft.oxefmsynth",
     "Oxe FM Synth",
-    "Oxesoft",
+    "Oxe Music Software",
     "https://github.com/oxesoft/oxefmsynth",
     "",
     "",
