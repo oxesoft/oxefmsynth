@@ -170,10 +170,13 @@ void COxeVst3::handleParamChange(ParamID id, ParamValue value, int32 pos)
     {
         int prog = (int)std::lrint(value * (MAX_PROGRAMS - 1));
         prog = std::max(0, std::min(MAX_PROGRAMS - 1, prog));
-        enqueueEvent(0xC0, (unsigned char)prog, 0, pos);
-        if (activeEditor)
+        if (prog != synthesizer.GetNumProgr(0))
         {
-            activeEditor->getEditor()->ProgramChanged();
+            enqueueEvent(0xC0, (unsigned char)prog, 0, pos);
+            if (activeEditor)
+            {
+                activeEditor->getEditor()->ProgramChanged();
+            }
         }
         return;
     }

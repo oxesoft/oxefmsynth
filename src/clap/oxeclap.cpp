@@ -226,12 +226,15 @@ void COxeClapPlugin::handleParamChange(clap_id id, double value, int32_t pos)
     {
         int prog = (int)std::lrint(value);
         prog = std::max(0, std::min(MAX_PROGRAMS - 1, prog));
-        isUpdatingProgramFromHost.store(true, std::memory_order_relaxed);
-        synthesizer.SendEvent(0xC0, (unsigned char)prog, 0, pos);
-        isUpdatingProgramFromHost.store(false, std::memory_order_relaxed);
-        if (guiEditor)
+        if (prog != synthesizer.GetNumProgr(0))
         {
-            guiEditor->ProgramChanged();
+            isUpdatingProgramFromHost.store(true, std::memory_order_relaxed);
+            synthesizer.SendEvent(0xC0, (unsigned char)prog, 0, pos);
+            isUpdatingProgramFromHost.store(false, std::memory_order_relaxed);
+            if (guiEditor)
+            {
+                guiEditor->ProgramChanged();
+            }
         }
         return;
     }
