@@ -19,12 +19,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 class CButton : public CControl
 {
 private:
-    int type;  // button type
-    int index;
+    int  type;  // button type
+    int  index;
+    bool bankMode;
     void Repaint() override;
 public:
     CButton(int bmp, int index, CSynthesizer *synthesizer, char &channel, int type, int x, int y);
     void OnClick(int x, int y) override;
+    bool Update(void) override;
     bool GetName(char* str) override;
     int  GetType(void) override;
     int  GetCoordinates(oxeCoords *coords) override;

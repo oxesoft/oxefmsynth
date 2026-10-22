@@ -569,6 +569,10 @@ void CEditor::OnLButtonDown(int x, int y)
         {
             bool wasWaiting = synthesizer->GetStandBy(prevchannel);
             ctl[i]->OnClick(x, y);
+            for (int j = 0; j < GUI_CONTROLS; j++)
+            {
+                ctl[j]->Update();
+            }
             synthesizer->SetEditingName(ctl[i]->GetType() == BT_NAME);
             if (synthesizer->GetStandBy(prevchannel))
             {

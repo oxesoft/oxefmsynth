@@ -37,6 +37,7 @@ CButton::CButton(int bmp, int index, CSynthesizer *synthesizer, char &channel, i
     this->top         = y;
     this->right       = x + BUTTON_WIDTH;
     this->bottom      = y + BUTTON_HEIGHT;
+    this->bankMode    = synthesizer->GetBankMode();
 }
 
 void CButton::OnClick(int x, int y)
@@ -161,6 +162,20 @@ void CButton::Repaint()
     {
         toolkit->InvalidateRect(this->left, this->top, this->right - this->left, this->bottom - this->top);
     }
+}
+
+bool CButton::Update(void)
+{
+    if (type == BT_BANK || type == BT_PROGRAM)
+    {
+        bool currentBankMode = synthesizer->GetBankMode();
+        if (this->bankMode != currentBankMode)
+        {
+            this->bankMode = currentBankMode;
+            Repaint();
+        }
+    }
+    return true;
 }
 
 void CButton::Paint(BLContext &ctx, const BLFont &fontSmall, const BLFont &fontNormal)
