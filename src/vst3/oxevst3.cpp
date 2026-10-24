@@ -38,6 +38,7 @@ namespace Vst {
 
 COxeVst3::COxeVst3()
     : posExt(0), posInt(0), bufferPos(0), activeEditor(nullptr),
+      editorWidth(GUI_WIDTH), editorHeight(GUI_HEIGHT),
       isUpdatingProgramFromHost(false)
 {
     memset(&events, 0, sizeof(events));
@@ -402,13 +403,39 @@ tresult PLUGIN_API COxeVst3::setState(IBStream* state)
     return kResultOk;
 }
 
-tresult PLUGIN_API COxeVst3::getEditorState(IBStream* /*state*/)
+tresult PLUGIN_API COxeVst3::getEditorState(IBStream* state)
 {
+    if (!state)
+        return kInvalidArgument;
+    int32 bytesWritten = 0;
+    if (state->write(&editorWidth, sizeof(int32), &bytesWritten) != kResultOk || bytesWritten != sizeof(int32))
+        return kResultFalse;
+    if (state->write(&editorHeight, sizeof(int32), &bytesWritten) != kResultOk || bytesWritten != sizeof(int32))
+        return kResultFalse;
     return kResultOk;
 }
 
-tresult PLUGIN_API COxeVst3::setEditorState(IBStream* /*state*/)
+tresult PLUGIN_API COxeVst3::setEditorState(IBStream* state)
 {
+    if (!state)
+        return kInvalidArgument;
+    int32 w = 0;
+    int32 h = 0;
+    int32 bytesRead = 0;
+    if (state->read(&w, sizeof(int32), &bytesRead) == kResultOk && bytesRead == sizeof(int32) &&
+        state->read(&h, sizeof(int32), &bytesRead) == kResultOk && bytesRead == sizeof(int32))
+    {
+        if (w >= 475 && h > 0)
+        {
+            editorWidth = w;
+            editorHeight = h;
+            if (activeEditor)
+            {
+                ViewRect rect(0, 0, editorWidth, editorHeight);
+                activeEditor->onSize(&rect);
+            }
+        }
+    }
     return kResultOk;
 }
 
@@ -554,6 +581,15 @@ void COxeVst3::onEditorDestroyed(COxeVst3Editor* editor)
     if (activeEditor == editor)
     {
         activeEditor = nullptr;
+    }
+}
+
+void COxeVst3::setEditorSize(int32 width, int32 height)
+{
+    if (width > 0 && height > 0)
+    {
+        editorWidth = width;
+        editorHeight = height;
     }
 }
 

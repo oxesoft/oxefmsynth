@@ -184,6 +184,8 @@ private:
     CEditor *guiEditor;
     COSToolkit *guiToolkit;
     CClapHostInterface *guiHostInterface;
+    uint32_t guiWidth;
+    uint32_t guiHeight;
     std::atomic<bool> isUpdatingProgramFromHost;
 };
 

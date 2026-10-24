@@ -94,6 +94,9 @@ public:
     void updateHostDisplay();
     void setActiveEditor(COxeVst3Editor* editor);
     void onEditorDestroyed(COxeVst3Editor* editor);
+    void setEditorSize(int32 width, int32 height);
+    int32 getEditorWidth() const { return editorWidth; }
+    int32 getEditorHeight() const { return editorHeight; }
 
 private:
     void enqueueEvent(unsigned char bstat, unsigned char bdad1, unsigned char bdad2, int32 pos);
@@ -120,6 +123,8 @@ private:
     MIDIEvents events;
 
     COxeVst3Editor* activeEditor;
+    int32 editorWidth;
+    int32 editorHeight;
     std::atomic<bool> isUpdatingProgramFromHost;
 };
 

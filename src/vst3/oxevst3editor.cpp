@@ -25,7 +25,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #endif
 
 COxeVst3Editor::COxeVst3Editor(Steinberg::Vst::COxeVst3* plugin, CSynthesizer* synth)
-    : refCount(1), plugin(plugin), synth(synth), toolkit(nullptr), hostinterface(nullptr), plugFrame(nullptr)
+    : refCount(1), plugin(plugin), synth(synth), toolkit(nullptr), hostinterface(nullptr), plugFrame(nullptr),
+      width(plugin ? plugin->getEditorWidth() : GUI_WIDTH),
+      height(plugin ? plugin->getEditorHeight() : GUI_HEIGHT)
 {
     oxeeditor = new CEditor(synth);
     if (plugin)
@@ -76,6 +78,7 @@ Steinberg::tresult PLUGIN_API COxeVst3Editor::attached(void* parent, Steinberg::
     toolkit = new COSToolkit(parent, oxeeditor);
     oxeeditor->SetToolkit(toolkit);
     oxeeditor->SetHostInterface(hostinterface);
+    toolkit->Resize(width, height);
     toolkit->StartWindowProcesses();
     return Steinberg::kResultTrue;
 }
@@ -100,8 +103,8 @@ Steinberg::tresult PLUGIN_API COxeVst3Editor::getSize(Steinberg::ViewRect* size)
         return Steinberg::kInvalidArgument;
     size->left = 0;
     size->top = 0;
-    size->right = GUI_WIDTH;
-    size->bottom = GUI_HEIGHT;
+    size->right = width;
+    size->bottom = height;
     return Steinberg::kResultTrue;
 }
 
@@ -110,9 +113,18 @@ Steinberg::tresult PLUGIN_API COxeVst3Editor::onSize(Steinberg::ViewRect* newSiz
     if (!newSize) return Steinberg::kInvalidArgument;
     int w = newSize->right - newSize->left;
     int h = newSize->bottom - newSize->top;
-    if (toolkit)
+    if (w > 0 && h > 0)
     {
-        toolkit->Resize(w, h);
+        width = w;
+        height = h;
+        if (plugin)
+        {
+            plugin->setEditorSize(w, h);
+        }
+        if (toolkit)
+        {
+            toolkit->Resize(w, h);
+        }
     }
     return Steinberg::kResultTrue;
 }

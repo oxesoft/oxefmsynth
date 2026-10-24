@@ -70,4 +70,6 @@ private:
     CToolkit* toolkit;
     CVst3HostInterface* hostinterface;
     Steinberg::IPlugFrame* plugFrame;
+    int width;
+    int height;
 };

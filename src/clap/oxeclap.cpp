@@ -98,6 +98,7 @@ COxeClapPlugin::COxeClapPlugin(const clap_host_t *host)
     : host(host), hostParams(nullptr), synthEditor(nullptr),
       posExt(0), posInt(0), bufferPos(0),
       guiEditor(nullptr), guiToolkit(nullptr), guiHostInterface(nullptr),
+      guiWidth(GUI_WIDTH), guiHeight(GUI_HEIGHT),
       isUpdatingProgramFromHost(false)
 {
     memset(&plugin, 0, sizeof(plugin));
@@ -786,9 +787,10 @@ bool COxeClapPlugin::gui_set_scale(const clap_plugin_t *plugin, double scale)
 
 bool COxeClapPlugin::gui_get_size(const clap_plugin_t *plugin, uint32_t *width, uint32_t *height)
 {
-    if (!width || !height) return false;
-    *width = GUI_WIDTH;
-    *height = GUI_HEIGHT;
+    COxeClapPlugin *plug = (COxeClapPlugin *)plugin->plugin_data;
+    if (!width || !height || !plug) return false;
+    *width = plug->guiWidth;
+    *height = plug->guiHeight;
     return true;
 }
 
@@ -819,10 +821,12 @@ bool COxeClapPlugin::gui_adjust_size(const clap_plugin_t *plugin, uint32_t *widt
 bool COxeClapPlugin::gui_set_size(const clap_plugin_t *plugin, uint32_t width, uint32_t height)
 {
     COxeClapPlugin *plug = (COxeClapPlugin *)plugin->plugin_data;
-    if (plug && plug->guiToolkit)
+    if (!plug || width == 0 || height == 0) return false;
+    plug->guiWidth = width;
+    plug->guiHeight = height;
+    if (plug->guiToolkit)
     {
         plug->guiToolkit->Resize((int)width, (int)height);
-        return true;
     }
     return true;
 }
@@ -860,6 +864,7 @@ bool COxeClapPlugin::gui_set_parent(const clap_plugin_t *plugin, const clap_wind
     plug->guiToolkit = new COSToolkit(parentHandle, plug->guiEditor);
     plug->guiEditor->SetToolkit(plug->guiToolkit);
     plug->guiEditor->SetHostInterface(plug->guiHostInterface);
+    plug->guiToolkit->Resize((int)plug->guiWidth, (int)plug->guiHeight);
     plug->guiToolkit->StartWindowProcesses();
 
     return true;
