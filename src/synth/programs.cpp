@@ -151,7 +151,7 @@ float CPrograms::SetDefault(char channel, int par)
         case OPADL: p->OPADL = 0.f;       return p->OPADL;
         case OPAAT: p->OPAAT = 0.000075f; return p->OPAAT;
         case OPADE: p->OPADE = 0.000075f; return p->OPADE;
-        case OPASU: p->OPASU = 0.7f;      return p->OPASU;
+        case OPASU: p->OPASU = 1.f;       return p->OPASU;
         case OPAST: p->OPAST = 0.f;       return p->OPAST;
         case OPARE: p->OPARE = 0.000075f; return p->OPARE;
         case OPBON: p->OPBON = 0;         return p->OPBON;
@@ -164,7 +164,7 @@ float CPrograms::SetDefault(char channel, int par)
         case OPBDL: p->OPBDL = 0.f;       return p->OPBDL;
         case OPBAT: p->OPBAT = 0.000075f; return p->OPBAT;
         case OPBDE: p->OPBDE = 0.000075f; return p->OPBDE;
-        case OPBSU: p->OPBSU = 0.7f;      return p->OPBSU;
+        case OPBSU: p->OPBSU = 1.f;       return p->OPBSU;
         case OPBST: p->OPBST = 0.f;       return p->OPBST;
         case OPBRE: p->OPBRE = 0.000075f; return p->OPBRE;
         case OPCON: p->OPCON = 0;         return p->OPCON;
@@ -177,7 +177,7 @@ float CPrograms::SetDefault(char channel, int par)
         case OPCDL: p->OPCDL = 0.f;       return p->OPCDL;
         case OPCAT: p->OPCAT = 0.000075f; return p->OPCAT;
         case OPCDE: p->OPCDE = 0.000075f; return p->OPCDE;
-        case OPCSU: p->OPCSU = 0.7f;      return p->OPCSU;
+        case OPCSU: p->OPCSU = 1.f;       return p->OPCSU;
         case OPCST: p->OPCST = 0.f;       return p->OPCST;
         case OPCRE: p->OPCRE = 0.000075f; return p->OPCRE;
         case OPDON: p->OPDON = 0;         return p->OPDON;
@@ -190,7 +190,7 @@ float CPrograms::SetDefault(char channel, int par)
         case OPDDL: p->OPDDL = 0.f;       return p->OPDDL;
         case OPDAT: p->OPDAT = 0.000075f; return p->OPDAT;
         case OPDDE: p->OPDDE = 0.000075f; return p->OPDDE;
-        case OPDSU: p->OPDSU = 0.7f;      return p->OPDSU;
+        case OPDSU: p->OPDSU = 1.f;       return p->OPDSU;
         case OPDST: p->OPDST = 0.f;       return p->OPDST;
         case OPDRE: p->OPDRE = 0.000075f; return p->OPDRE;
         case OPEON: p->OPEON = 0;         return p->OPEON;
@@ -203,7 +203,7 @@ float CPrograms::SetDefault(char channel, int par)
         case OPEDL: p->OPEDL = 0.f;       return p->OPEDL;
         case OPEAT: p->OPEAT = 0.000075f; return p->OPEAT;
         case OPEDE: p->OPEDE = 0.000075f; return p->OPEDE;
-        case OPESU: p->OPESU = 0.7f;      return p->OPESU;
+        case OPESU: p->OPESU = 1.f;       return p->OPESU;
         case OPEST: p->OPEST = 0.f;       return p->OPEST;
         case OPERE: p->OPERE = 0.000075f; return p->OPERE;
         case OPFON: p->OPFON = 0;         return p->OPFON;
@@ -216,7 +216,7 @@ float CPrograms::SetDefault(char channel, int par)
         case OPFDL: p->OPFDL = 0.f;       return p->OPFDL;
         case OPFAT: p->OPFAT = 0.000075f; return p->OPFAT;
         case OPFDE: p->OPFDE = 0.000075f; return p->OPFDE;
-        case OPFSU: p->OPFSU = 0.7f;      return p->OPFSU;
+        case OPFSU: p->OPFSU = 1.f;       return p->OPFSU;
         case OPFST: p->OPFST = 0.f;       return p->OPFST;
         case OPFRE: p->OPFRE = 0.000075f; return p->OPFRE;
         case OPXON: p->OPXON = 0;         return p->OPXON;
@@ -229,7 +229,7 @@ float CPrograms::SetDefault(char channel, int par)
         case OPXDL: p->OPXDL = 0.f;       return p->OPXDL;
         case OPXAT: p->OPXAT = 0.000075f; return p->OPXAT;
         case OPXDE: p->OPXDE = 0.000075f; return p->OPXDE;
-        case OPXSU: p->OPXSU = 0.7f;      return p->OPXSU;
+        case OPXSU: p->OPXSU = 1.f;       return p->OPXSU;
         case OPXST: p->OPXST = 0.f;       return p->OPXST;
         case OPXRE: p->OPXRE = 0.000075f; return p->OPXRE;
         case OPZON: p->OPZON = 0;         return p->OPZON;
@@ -242,7 +242,7 @@ float CPrograms::SetDefault(char channel, int par)
         case OPZDL: p->OPZDL = 0.f;       return p->OPZDL;
         case OPZAT: p->OPZAT = 0.000075f; return p->OPZAT;
         case OPZDE: p->OPZDE = 0.000075f; return p->OPZDE;
-        case OPZSU: p->OPZSU = 0.7f;      return p->OPZSU;
+        case OPZSU: p->OPZSU = 1.f;       return p->OPZSU;
         case OPZST: p->OPZST = 0.f;       return p->OPZST;
         case OPZRE: p->OPZRE = 0.000075f; return p->OPZRE;
         case MAA:   p->MAA   = 0.f;       return p->MAA  ;
