@@ -125,6 +125,9 @@ public:
     static bool CLAP_ABI state_save(const clap_plugin_t *plugin, const clap_ostream_t *stream);
     static bool CLAP_ABI state_load(const clap_plugin_t *plugin, const clap_istream_t *stream);
 
+    // Preset load extension
+    static bool CLAP_ABI preset_load_from_location(const clap_plugin_t *plugin, uint32_t location_kind, const char *location, const char *load_key);
+
     // GUI extension
     static bool CLAP_ABI gui_is_api_supported(const clap_plugin_t *plugin, const char *api, bool is_floating);
     static bool CLAP_ABI gui_get_preferred_api(const clap_plugin_t *plugin, const char **api, bool *is_floating);
@@ -153,6 +156,7 @@ private:
     clap_plugin_t plugin;
     const clap_host_t *host;
     const clap_host_params_t *hostParams;
+    const clap_host_preset_load_t *hostPresetLoad;
 
     CSynthesizer synthesizer;
     CEditor *synthEditor;

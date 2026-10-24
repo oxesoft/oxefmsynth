@@ -76,6 +76,10 @@ static const clap_plugin_state_t s_state = {
     COxeClapPlugin::state_load,
 };
 
+static const clap_plugin_preset_load_t s_preset_load = {
+    COxeClapPlugin::preset_load_from_location,
+};
+
 static const clap_plugin_gui_t s_gui = {
     COxeClapPlugin::gui_is_api_supported,
     COxeClapPlugin::gui_get_preferred_api,
@@ -95,7 +99,7 @@ static const clap_plugin_gui_t s_gui = {
 };
 
 COxeClapPlugin::COxeClapPlugin(const clap_host_t *host)
-    : host(host), hostParams(nullptr), synthEditor(nullptr),
+    : host(host), hostParams(nullptr), hostPresetLoad(nullptr), synthEditor(nullptr),
       posExt(0), posInt(0), bufferPos(0),
       guiEditor(nullptr), guiToolkit(nullptr), guiHostInterface(nullptr),
       guiWidth(GUI_WIDTH), guiHeight(GUI_HEIGHT),
@@ -136,6 +140,11 @@ bool COxeClapPlugin::plugin_init(const struct clap_plugin *plugin)
     if (plug->host)
     {
         plug->hostParams = (const clap_host_params_t *)plug->host->get_extension(plug->host, CLAP_EXT_PARAMS);
+        plug->hostPresetLoad = (const clap_host_preset_load_t *)plug->host->get_extension(plug->host, CLAP_EXT_PRESET_LOAD);
+        if (!plug->hostPresetLoad)
+        {
+            plug->hostPresetLoad = (const clap_host_preset_load_t *)plug->host->get_extension(plug->host, CLAP_EXT_PRESET_LOAD_COMPAT);
+        }
     }
     return true;
 }
@@ -189,6 +198,8 @@ const void *COxeClapPlugin::plugin_get_extension(const struct clap_plugin *plugi
         return &s_params;
     if (strcmp(id, CLAP_EXT_STATE) == 0)
         return &s_state;
+    if (strcmp(id, CLAP_EXT_PRESET_LOAD) == 0 || strcmp(id, CLAP_EXT_PRESET_LOAD_COMPAT) == 0)
+        return &s_preset_load;
     if (strcmp(id, CLAP_EXT_GUI) == 0)
         return &s_gui;
     return nullptr;
@@ -572,6 +583,28 @@ bool COxeClapPlugin::params_get_value(const clap_plugin_t *plugin, clap_id param
 
 bool COxeClapPlugin::params_value_to_text(const clap_plugin_t *plugin, clap_id param_id, double value, char *out_buffer, uint32_t out_buffer_capacity)
 {
+    COxeClapPlugin *plug = (COxeClapPlugin *)plugin->plugin_data;
+    if (!plug || !out_buffer || out_buffer_capacity == 0)
+        return false;
+
+    if (param_id < PARAMETERS_COUNT)
+    {
+        char text[TEXT_SIZE] = {0};
+        plug->synthEditor->GetParDisplay((int)param_id, text);
+        snprintf(out_buffer, out_buffer_capacity, "%s", text);
+        return true;
+    }
+
+    if (param_id == kProgramParamId)
+    {
+        int prog = (int)std::lrint(value);
+        prog = std::max(0, std::min(MAX_PROGRAMS - 1, prog));
+        char pName[PG_NAME_SIZE + 1] = {0};
+        plug->synthesizer.GetProgName(pName, prog);
+        snprintf(out_buffer, out_buffer_capacity, "%s", pName);
+        return true;
+    }
+
     return false;
 }
 
@@ -721,6 +754,38 @@ bool COxeClapPlugin::state_load(const clap_plugin_t *plugin, const clap_istream_
     }
 
     plug->updateHostDisplay();
+    return true;
+}
+
+// Preset load
+bool COxeClapPlugin::preset_load_from_location(const clap_plugin_t *plugin, uint32_t location_kind, const char *location, const char *load_key)
+{
+    COxeClapPlugin *plug = (COxeClapPlugin *)plugin->plugin_data;
+    if (!plug || location_kind != CLAP_PRESET_DISCOVERY_LOCATION_PLUGIN || !load_key)
+        return false;
+
+    char *endPtr = nullptr;
+    long prog = strtol(load_key, &endPtr, 10);
+    if (endPtr == load_key || prog < 0 || prog >= MAX_PROGRAMS)
+        return false;
+
+    plug->isUpdatingProgramFromHost.store(true, std::memory_order_relaxed);
+    plug->synthesizer.SendEvent(0xC0, (unsigned char)prog, 0, 0);
+    plug->isUpdatingProgramFromHost.store(false, std::memory_order_relaxed);
+
+    if (plug->guiEditor)
+    {
+        plug->guiEditor->ProgramChanged();
+        plug->guiEditor->Update();
+    }
+
+    plug->queueParamChange(kProgramParamId, (double)prog);
+    plug->updateHostDisplay();
+
+    if (plug->hostPresetLoad && plug->host && plug->hostPresetLoad->loaded)
+    {
+        plug->hostPresetLoad->loaded(plug->host, location_kind, location, load_key);
+    }
     return true;
 }
 
@@ -902,6 +967,12 @@ void COxeClapPlugin::setProgramFromGUI(int program)
 
     queueParamChange(kProgramParamId, (double)program);
     updateHostDisplay();
+    if (hostPresetLoad && host && hostPresetLoad->loaded)
+    {
+        char loadKey[16] = {0};
+        snprintf(loadKey, sizeof(loadKey), "%d", program);
+        hostPresetLoad->loaded(host, CLAP_PRESET_DISCOVERY_LOCATION_PLUGIN, nullptr, loadKey);
+    }
 }
 
 void COxeClapPlugin::updateHostDisplay()
