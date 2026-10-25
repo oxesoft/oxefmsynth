@@ -53,7 +53,7 @@ CLcd::CLcd(int bmp, int x, int y)
     this->left     = x;
     this->top      = y;
     this->right    = x + 165;
-    this->bottom   = y + 42;
+    this->bottom   = y + 48;
     this->toolkit  = NULL;
 }
 
@@ -99,13 +99,13 @@ void CLcd::Paint(BLContext &ctx, const BLFont &fontSmall, const BLFont &fontNorm
     // Line 0 (top line: bank or parameter label)
     if (fontSmall.is_valid())
     {
-        ctx.fill_utf8_text(BLPoint(left + 8, top + 16), fontSmall, str0, SIZE_MAX, BLRgba32(0x6e, 0x9e, 0xb8));
+        ctx.fill_utf8_text(BLPoint(left + 8, top + 18), fontSmall, str0, SIZE_MAX, BLRgba32(0x6e, 0x9e, 0xb8));
     }
 
     // Line 1 (bottom line: preset or parameter value)
     if (fontNormal.is_valid())
     {
-        ctx.fill_utf8_text(BLPoint(left + 8, top + 33), fontNormal, str1, SIZE_MAX, BLRgba32(0x00, 0xf0, 0xff));
+        ctx.fill_utf8_text(BLPoint(left + 8, top + 36), fontNormal, str1, SIZE_MAX, BLRgba32(0x00, 0xf0, 0xff));
     }
 }
 
