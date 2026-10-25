@@ -70,7 +70,7 @@ ifeq ($(OS),Windows_NT)
     INCLUDES+=-Isrc/windows
     SOURCES+=src/toolkits/windowstoolkit.cpp
     LIBS+=-lgdi32
-    LDFLAGS+=-static -s
+    LDFLAGS+=-static -s -Wl,-u,_fpreset
     TARGET_FILE:=$(BIN_DIR)/$(BUNDLE_NAME)
     BUNDLE_BINARY:=$(TARGET_FILE)
     BUNDLE_SETUP:=@mkdir -p $(BIN_DIR)
@@ -85,7 +85,7 @@ else
         INCLUDES+=-Isrc/windows
         SOURCES+=src/toolkits/windowstoolkit.cpp
         LIBS+=-lgdi32
-        LDFLAGS+=-static -s
+        LDFLAGS+=-static -s -Wl,-u,_fpreset
         TARGET_FILE:=$(BIN_DIR)/$(BUNDLE_NAME)
         BUNDLE_BINARY:=$(TARGET_FILE)
         BUNDLE_SETUP:=@mkdir -p $(BIN_DIR)
