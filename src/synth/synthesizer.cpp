@@ -52,6 +52,24 @@ CSynthesizer::CSynthesizer()
     SetSampleRate(44100.f);
 }
 
+void CSynthesizer::SendToChannel(int channel, int event, float value, int position)
+{
+    for (int i = 0; i < POLIPHONY; i++)
+    {
+        if (state[i] == ACTIVE && channels[i] == channel)
+        {
+            notes[i].SendEvent(event, value, position);
+        }
+    }
+}
+
+inline void CSynthesizer::ReleaseNote(int index)
+{
+    state[index] = INACTIVE;
+    heldkeys[index] = 0;
+    activeNotesCount--;
+}
+
 void CSynthesizer::SendEvent(unsigned char bS,unsigned char bD1,unsigned char bD2,int position)
 {
     int   i         = 0;
@@ -125,11 +143,7 @@ void CSynthesizer::SendEvent(unsigned char bS,unsigned char bD1,unsigned char bD
                             {
                                 if (state[i] == ENDED)
                                 {
-                                    //---------------------
-                                    state[i] = INACTIVE;
-                                    heldkeys[i] = 0;
-                                    activeNotesCount--;
-                                    //---------------------
+                                    ReleaseNote(i);
                                     break;
                                 }
                             }
@@ -152,11 +166,7 @@ void CSynthesizer::SendEvent(unsigned char bS,unsigned char bD1,unsigned char bD
                         if (imenorvl<POLIPHONY)
                         {
                             i = imenorvl;
-                            //---------------------
-                            state[i] = INACTIVE;
-                            heldkeys[i] = 0;
-                            activeNotesCount--;
-                            //---------------------
+                            ReleaseNote(i);
                         }
                         else
                         // case c
@@ -167,11 +177,7 @@ void CSynthesizer::SendEvent(unsigned char bS,unsigned char bD1,unsigned char bD
                                 {
                                     if (channels[i] == channel)
                                     {
-                                        //---------------------
-                                        state[i] = INACTIVE;
-                                        heldkeys[i] = 0;
-                                        activeNotesCount--;
-                                        //---------------------
+                                        ReleaseNote(i);
                                         break;
                                     }
                                 }
@@ -188,11 +194,7 @@ void CSynthesizer::SendEvent(unsigned char bS,unsigned char bD1,unsigned char bD
                                     }
                                 }
                                 i = imenorvl;
-                                //---------------------
-                                state[i] = INACTIVE;
-                                heldkeys[i] = 0;
-                                activeNotesCount--;
-                                //---------------------
+                                ReleaseNote(i);
                             }
                         }
                     }
@@ -244,48 +246,19 @@ void CSynthesizer::SendEvent(unsigned char bS,unsigned char bD1,unsigned char bD
             switch (bD1)
             {
                 case 1: // Modulation Wheel
-                {
                     f = (float)bD2 / 127.0f;
                     mod[channel] = f;
-                    for (i=0; i<POLIPHONY; i++)
-                    {
-                        if (state[i] == ACTIVE)
-                        {
-                            if (channels[i] == channel)
-                            {
-                                notes[i].SendEvent(MODULATION,f,position);
-                            }
-                        }
-                    }
+                    SendToChannel(channel, MODULATION, f, position);
                     break;
-                }
                 case 7: // Volume
                     f = (float)bD2 / 127.0f;
                     vol[channel] = f;
-                    for (i=0; i<POLIPHONY; i++)
-                    {
-                        if (state[i] == ACTIVE)
-                        {
-                            if (channels[i] == channel)
-                            {
-                                notes[i].SendEvent(VOLUME,f,position);
-                            }
-                        }
-                    }
+                    SendToChannel(channel, VOLUME, f, position);
                     break;
                 case 10: // Pan
                     f = (float)(bD2 - 64) / 64.f;
                     pan[channel] = f;
-                    for (i=0; i<POLIPHONY; i++)
-                    {
-                        if (state[i] == ACTIVE)
-                        {
-                            if (channels[i] == channel)
-                            {
-                                notes[i].SendEvent(PAN,f,position);
-                            }
-                        }
-                    }
+                    SendToChannel(channel, PAN, f, position);
                     break;
                 case 91: // Reverb
                     f = (float)bD2 / 127.0f;
@@ -364,16 +337,7 @@ void CSynthesizer::SendEvent(unsigned char bS,unsigned char bD1,unsigned char bD
         case 0xD0: // Channel aftertouch
             f = (float)bD1 / 127.0f;
             aft[channel] = f;
-            for (i=0; i<POLIPHONY; i++)
-            {
-                if (state[i] == ACTIVE)
-                {
-                    if (channels[i] == channel)
-                    {
-                        notes[i].SendEvent(AFTERTOUCH,f,position);
-                    }
-                }
-            }
+            SendToChannel(channel, AFTERTOUCH, f, position);
             break;
         case 0xE0: // Pitch wheel range
             unsigned short _14bit;
@@ -384,16 +348,7 @@ void CSynthesizer::SendEvent(unsigned char bS,unsigned char bD1,unsigned char bD
             f *= VPITCH;
             f  = Val2Mul(f);
             ptc[channel] = f;
-            for (i=0; i<POLIPHONY; i++)
-            {
-                if (state[i] == ACTIVE)
-                {
-                    if (channels[i] == channel)
-                    {
-                        notes[i].SendEvent(PITCH,f,position);
-                    }
-                }
-            }
+            SendToChannel(channel, PITCH, f, position);
         default:   // Ignores any other event
             break;
     }
@@ -423,11 +378,7 @@ void CSynthesizer::Process(float *b, int size, int position)
             notes[i].Process(buffers.bNoteOut,size,position);
             if (INACTIVE == notes[i].GetState())
             {
-                //---------------------
-                state[i] = INACTIVE;
-                heldkeys[i] = 0;
-                activeNotesCount--;
-                //---------------------
+                ReleaseNote(i);
             }
             float r_vol = rev[channels[i]];
             float d_vol = dly[channels[i]];
@@ -485,11 +436,7 @@ void CSynthesizer::KillNotes()
     {
         if (state[i] != INACTIVE)
         {
-            //---------------------
-            state[i] = INACTIVE;
-            heldkeys[i] = 0;
-            activeNotesCount--;
-            //---------------------
+            ReleaseNote(i);
         }
     }
 }

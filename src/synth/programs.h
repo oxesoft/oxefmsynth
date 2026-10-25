@@ -440,6 +440,10 @@ private:
     bool           bankMode;           // indicates if the user is choosing a bank
     bool           haschanges;         // self-explanatory
     CHostInterface *hostinterface;
+    void           MarkChanged   ();
+    void           NotifyDisplay ();
+    static void    GetName       (char *str, const char *name);
+    static void    SetName       (char *name, const char *str);
 public:
     float          SetDefault      (char channel, int par);
     float          GetPar          (char channel, int par);

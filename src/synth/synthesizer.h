@@ -65,6 +65,8 @@ private:
     void SumStereoStereo          (float *bInput, float *bNoteOut, float volume, int size);
     inline float Val2Mul          (float  value);
     void UpdateGlobalEffects      ();
+    void SendToChannel            (int channel, int event, float value, int position);
+    inline void ReleaseNote       (int index);
 public:
     CSynthesizer();
     void          SetSampleRate   (float samplerate);
