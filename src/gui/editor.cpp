@@ -79,7 +79,7 @@ CEditor::CEditor(CSynthesizer *synthesizer)
 
     // channels control coordinates
     int gX   = 490;
-    int gY   = 38;
+    int gY   = 42;
 
     // reverb section corrdinates
     int rX   = 838;
@@ -819,7 +819,7 @@ void CEditor::DrawPanelCards(BLContext &ctx, const BLFont &fontSmall, const BLFo
     // Labels in top card
     if (fontSmall.is_valid())
     {
-        ctx.fill_utf8_text(BLPoint(490.0, 22.0), fontSmall, "MIDI CHANNELS", SIZE_MAX, BLRgba32(0x60, 0x72, 0x88));
+        ctx.fill_utf8_text(BLPoint(490.0, 29.0), fontSmall, "MIDI CHANNELS", SIZE_MAX, BLRgba32(0x60, 0x72, 0x88));
         ctx.fill_utf8_text(BLPoint(632.0, 22.0), fontSmall, "DELAY", SIZE_MAX, BLRgba32(0x60, 0x72, 0x88));
         ctx.fill_utf8_text(BLPoint(838.0, 22.0), fontSmall, "REVERB", SIZE_MAX, BLRgba32(0x60, 0x72, 0x88));
     }
