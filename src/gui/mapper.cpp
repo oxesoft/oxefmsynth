@@ -363,37 +363,25 @@ void CMapper::GetDisplayValue(CSynthesizer *synthesizer, char channel, int par, 
             if (synthesizer->GetBankMode())
             {
                 synthesizer->GetBankName(str);
+                break;
             }
-            else
-            {
-                if (synthesizer->GetStandBy(channel))
-                {
-                    snprintf(str, TEXT_SIZE, "conf in Prg%03i?", synthesizer->GetNumProgr(channel));
-                }
-                else
-                {
-                    synthesizer->GetProgName(str, channel);
-                }
-            }
-            break;
-        case BT_NAME:
-            synthesizer->GetProgName(str, channel);
-            break;
+            // fall through
         case BT_STORE:
             if (synthesizer->GetStandBy(channel))
             {
-                snprintf(str, TEXT_SIZE, "conf in Prg%03i?", synthesizer->GetNumProgr(channel));
+                snprintf(str, TEXT_SIZE, "Store in program %03i?", synthesizer->GetNumProgr(channel));
             }
             else
             {
                 synthesizer->GetProgName(str, channel);
             }
             break;
-        case BT_BANK:
-            synthesizer->GetBankName(str);
-            break;
+        case BT_NAME:
         case BT_PROGRAM:
             synthesizer->GetProgName(str, channel);
+            break;
+        case BT_BANK:
+            synthesizer->GetBankName(str);
             break;
         default:
             snprintf(str, TEXT_SIZE, "%i", value);

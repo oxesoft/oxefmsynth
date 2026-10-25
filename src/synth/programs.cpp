@@ -711,6 +711,7 @@ void CPrograms::SetBankMode(bool bankMode)
 void CPrograms::GetProgName(char* str, char channel)
 {
     memcpy(str, prgbuffer[channel].PNAME, PG_NAME_SIZE);
+    str[PG_NAME_SIZE] = 0;
 }
 
 void CPrograms::SetProgName(char* str, char channel)
@@ -743,6 +744,11 @@ void CPrograms::SetProgName(char* str, int numpg)
 void CPrograms::GetBankName(char *str)
 {
     persist.GetBankName(str, iCurrentBank);
+}
+
+void CPrograms::GetBankName(char *str, int nbank)
+{
+    persist.GetBankName(str, nbank);
 }
 
 int CPrograms::GetBankCount()
@@ -802,7 +808,7 @@ void CPrograms::CopyProgram(int destination, int source)
 
 void CPrograms::SetBank(SBank *bank)
 {
-    iCurrentBank = persist.AddBank((void*)bank, sizeof(SBank), (char*)"bank from host", true);
+    iCurrentBank = persist.AddBank((void*)bank, sizeof(SBank), (char*)"Bank from Host", true);
     currentbank = (SBank*)persist.GetSoundBank(iCurrentBank);
     for (int i = 0; i < MIDICHANNELS; i++)
     {
@@ -825,6 +831,18 @@ void CPrograms::SetProgram(char num, SProgram *program)
             SetNumProgr(i, num);
         }
     }
+    haschanges = true;
+    if (hostinterface)
+    {
+        hostinterface->ReceiveMessageFromPlugin(UPDATE_DISPLAY, 0, 0);
+    }
+}
+
+void CPrograms::SetEditBuffer(char channel, const SProgram *program)
+{
+    if (channel < 0 || channel >= MIDICHANNELS || !program)
+        return;
+    memcpy(&prgbuffer[(int)channel], program, sizeof(SProgram));
     haschanges = true;
     if (hostinterface)
     {

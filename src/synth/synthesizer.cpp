@@ -708,6 +708,11 @@ void CSynthesizer::GetBankName(char *str)
     programs.GetBankName(str);
 }
 
+void CSynthesizer::GetBankName(char *str, int nbank)
+{
+    programs.GetBankName(str, nbank);
+}
+
 int CSynthesizer::GetBankCount()
 {
     return programs.GetBankCount();
@@ -748,6 +753,23 @@ void CSynthesizer::SetBank(SBank *bank)
 void CSynthesizer::SetProgram(char numprg, SProgram *program)
 {
     programs.SetProgram(numprg, program);
+}
+
+SProgram* CSynthesizer::GetEditBuffer(char channel)
+{
+    return programs.GetProgram(channel);
+}
+
+void CSynthesizer::SetEditBuffer(char channel, const SProgram *program)
+{
+    programs.SetEditBuffer(channel, program);
+    for (int i = 0; i < POLIPHONY; i++)
+    {
+        if (state[i] == ACTIVE && this->channels[i] == (unsigned char)channel)
+        {
+            notes[i].UpdateProgram();
+        }
+    }
 }
 
 bool CSynthesizer::HasChanges()

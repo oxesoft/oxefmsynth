@@ -48,7 +48,6 @@ public:
     CEditor(CSynthesizer *synthesizer);
     ~CEditor();
     void  ProgramChanged();
-    void  ProgramChangedWaiting();
     void  OnLButtonDblClick(int x, int y);
     void  OnLButtonDown    (int x, int y);
     void  OnLButtonUp      ();

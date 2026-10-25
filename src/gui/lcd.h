@@ -23,8 +23,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 class CLcd : public CControl
 {
 private:
-    char     text0[LCD_COLS];
-    char     text1[LCD_COLS];
+    char     text0[TEXT_SIZE];
+    char     text1[TEXT_SIZE];
     int      lcdx;
     int      lcdy;
     void Repaint() override;

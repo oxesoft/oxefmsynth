@@ -425,23 +425,17 @@ void CEditor::SetHostInterface(CHostInterface *hostinterface)
 void CEditor::ProgramChanged()
 {
     char str[TEXT_SIZE];
-    snprintf(str, TEXT_SIZE, "Program %03i", synthesizer->GetNumProgr(channel));
-    lcd->SetText(0,str);
-    synthesizer->GetProgName(str, channel);
-    lcd->SetText(1,str);
-    if (toolkit)
+    if (synthesizer->GetStandBy(channel))
     {
-        toolkit->Invalidate();
+        snprintf(str, TEXT_SIZE, "Store current");
     }
-}
-
-void CEditor::ProgramChangedWaiting()
-{
-    char str[TEXT_SIZE];
-    snprintf(str, TEXT_SIZE, "Store current");
-    lcd->SetText(0,str);
-    snprintf(str, TEXT_SIZE, "conf in Prg%03i?",synthesizer->GetNumProgr(channel));
-    lcd->SetText(1,str);
+    else
+    {
+        snprintf(str, TEXT_SIZE, "Program %03i", synthesizer->GetNumProgr(channel));
+    }
+    lcd->SetText(0, str);
+    CMapper::GetDisplayValue(this->synthesizer, this->channel, -1, BT_STORE, str);
+    lcd->SetText(1, str);
     if (toolkit)
     {
         toolkit->Invalidate();
@@ -450,7 +444,6 @@ void CEditor::ProgramChangedWaiting()
 
 bool CEditor::OnChar(int cod)
 {
-    char str0[PG_NAME_SIZE + 1];
     char str1[PG_NAME_SIZE + 1];
     int  pos;
     if (!synthesizer->IsEditingName())
@@ -478,8 +471,7 @@ bool CEditor::OnChar(int cod)
             synthesizer->SetProgName(str1, channel);
         }
     }
-    snprintf(str0, sizeof(str0), "Program %03i", synthesizer->GetNumProgr(channel));
-    lcd->SetText(0, str0);
+    lcd->SetText(0, "Edit name");
     return true;
 }
 
@@ -708,14 +700,7 @@ void CEditor::Update()
     {
         if (!synthesizer->GetBankMode())
         {
-            if (!synthesizer->GetStandBy(channel))
-            {
-                ProgramChanged();
-            }
-            else
-            {
-                ProgramChangedWaiting();
-            }
+            ProgramChanged();
         }
         changingControl = false;
         if (toolkit)

@@ -109,19 +109,20 @@ static bool CLAP_ABI preset_provider_get_metadata(
         COxeClapPlugin::s_descriptor.id,
     };
 
-    for (int i = 0; i < MAX_PROGRAMS; ++i)
+    int bankCount = programs->GetBankCount();
+    for (int i = 0; i < bankCount; ++i)
     {
-        char pName[PG_NAME_SIZE + 1] = {0};
-        programs->GetProgName(pName, i);
-        if (pName[0] == '\0')
+        char bName[TEXT_SIZE] = {0};
+        programs->GetBankName(bName, i);
+        if (bName[0] == '\0')
         {
-            snprintf(pName, sizeof(pName), "Program %d", i);
+            snprintf(bName, sizeof(bName), "Bank %d", i);
         }
 
         char loadKey[16] = {0};
         snprintf(loadKey, sizeof(loadKey), "%d", i);
 
-        if (!metadata_receiver->begin_preset(metadata_receiver, pName, loadKey))
+        if (!metadata_receiver->begin_preset(metadata_receiver, bName, loadKey))
             return true;
 
         if (metadata_receiver->add_plugin_id)

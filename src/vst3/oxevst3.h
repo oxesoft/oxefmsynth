@@ -31,6 +31,7 @@ enum CustomParamIDs
 {
     // Engine parameters are 0 .. PARAMETERS_COUNT - 1
     kProgramParamId = 1000,
+    kBankParamId = 1001,
 
     // MIDI controllers (16 channels each)
     kModWheelBase = 1100,    // 1100 .. 1115

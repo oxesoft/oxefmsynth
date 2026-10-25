@@ -670,6 +670,16 @@ bool COxeClapPlugin::state_save(const clap_plugin_t *plugin, const clap_ostream_
     if (!writeAll(&dlyLevel, sizeof(float)))
         return false;
 
+    for (int ch = 0; ch < MIDICHANNELS; ++ch)
+    {
+        unsigned char chProg = plug->synthesizer.GetNumProgr((char)ch);
+        if (!writeAll(&chProg, sizeof(unsigned char)))
+            return false;
+        SProgram *editBuf = plug->synthesizer.GetEditBuffer((char)ch);
+        if (!editBuf || !writeAll(editBuf, sizeof(SProgram)))
+            return false;
+    }
+
     return true;
 }
 
@@ -747,6 +757,29 @@ bool COxeClapPlugin::state_load(const clap_plugin_t *plugin, const clap_istream_
         plug->synthesizer.SetPar(0, DLYLV, dlyLevel);
     }
 
+    for (int ch = 0; ch < MIDICHANNELS; ++ch)
+    {
+        unsigned char chProg = 0;
+        SProgram editBuf;
+        if (!readAll(&chProg, sizeof(unsigned char)) || !readAll(&editBuf, sizeof(SProgram)))
+            break;
+        if (chProg < MAX_PROGRAMS &&
+            isValidFloat(editBuf.OPAON, 0.0f, 1.0f) &&
+            isValidFloat(editBuf.OPAWF, 0.0f, 6.0f) &&
+            isValidFloat(editBuf.OPACT, 0.0f, 100.0f) &&
+            isValidFloat(editBuf.MAP, -1.0f, 1.0f) &&
+            isValidFloat(editBuf.MAO, 0.0f, 1.0f))
+        {
+            if (ch > 0)
+            {
+                plug->isUpdatingProgramFromHost.store(true, std::memory_order_relaxed);
+                plug->synthesizer.SendEvent(0xC0 | ch, chProg, 0, 0);
+                plug->isUpdatingProgramFromHost.store(false, std::memory_order_relaxed);
+            }
+            plug->synthesizer.SetEditBuffer((char)ch, &editBuf);
+        }
+    }
+
     if (plug->guiEditor)
     {
         plug->guiEditor->ProgramChanged();
@@ -765,12 +798,12 @@ bool COxeClapPlugin::preset_load_from_location(const clap_plugin_t *plugin, uint
         return false;
 
     char *endPtr = nullptr;
-    long prog = strtol(load_key, &endPtr, 10);
-    if (endPtr == load_key || prog < 0 || prog >= MAX_PROGRAMS)
+    long bankIdx = strtol(load_key, &endPtr, 10);
+    if (endPtr == load_key || bankIdx < 0 || bankIdx >= plug->synthesizer.GetBankCount())
         return false;
 
     plug->isUpdatingProgramFromHost.store(true, std::memory_order_relaxed);
-    plug->synthesizer.SendEvent(0xC0, (unsigned char)prog, 0, 0);
+    plug->synthesizer.SetBankIndex((int)bankIdx);
     plug->isUpdatingProgramFromHost.store(false, std::memory_order_relaxed);
 
     if (plug->guiEditor)
@@ -779,7 +812,7 @@ bool COxeClapPlugin::preset_load_from_location(const clap_plugin_t *plugin, uint
         plug->guiEditor->Update();
     }
 
-    plug->queueParamChange(kProgramParamId, (double)prog);
+    plug->queueParamChange(kProgramParamId, (double)plug->synthesizer.GetNumProgr(0));
     plug->updateHostDisplay();
 
     if (plug->hostPresetLoad && plug->host && plug->hostPresetLoad->loaded)
@@ -967,12 +1000,6 @@ void COxeClapPlugin::setProgramFromGUI(int program)
 
     queueParamChange(kProgramParamId, (double)program);
     updateHostDisplay();
-    if (hostPresetLoad && host && hostPresetLoad->loaded)
-    {
-        char loadKey[16] = {0};
-        snprintf(loadKey, sizeof(loadKey), "%d", program);
-        hostPresetLoad->loaded(host, CLAP_PRESET_DISCOVERY_LOCATION_PLUGIN, nullptr, loadKey);
-    }
 }
 
 void COxeClapPlugin::updateHostDisplay()

@@ -89,6 +89,7 @@ public:
     void          GetProgName     (char *str, int numpg);
     void          SetProgName     (char *str, int numpg);
     void          GetBankName     (char *str);
+    void          GetBankName     (char *str, int nbank);
     int           GetBankCount    ();
     int           GetBankIndex    ();
     void          SetBankIndex    (int nbank);
@@ -97,6 +98,8 @@ public:
     void          CopyProgram     (int destination, int source);
     void          SetBank         (SBank *bank);
     void          SetProgram      (char numprg, SProgram *program);
+    SProgram*     GetEditBuffer   (char channel);
+    void          SetEditBuffer   (char channel, const SProgram *program);
     bool          HasChanges      ();
     void          SetHostInterface(CHostInterface *hostinterface);
 #endif

@@ -74,12 +74,29 @@ tresult PLUGIN_API COxeVst3::initialize(FUnknown* context)
         parameters.addParameter(uTitle, nullptr, 0, val, ParameterInfo::kCanAutomate, i);
     }
 
-    // 2. Program List & Program Change Parameter
+    // 2. Soundbank List (DAW Presets) & Program Parameter
     addUnit(new Unit(USTRING("Root"), kRootUnitId, kNoParentUnitId, 0));
-    ProgramList* prgList = new ProgramList(USTRING("Programs"), 0, kRootUnitId);
+    ProgramList* bankList = new ProgramList(USTRING("Soundbanks"), 0, kRootUnitId);
+    StringListParameter* bankParam = new StringListParameter(
+        USTRING("Soundbank"), kBankParamId, nullptr,
+        ParameterInfo::kIsProgramChange | ParameterInfo::kCanAutomate
+    );
+    int bankCount = synthesizer.GetBankCount();
+    for (int i = 0; i < bankCount; i++)
+    {
+        char bName[TEXT_SIZE] = {0};
+        synthesizer.GetBankName(bName, i);
+        TChar uName[128] = {0};
+        Steinberg::UString(uName, 128).assign(bName);
+        bankParam->appendString(uName);
+        bankList->addProgram(uName);
+    }
+    parameters.addParameter(bankParam);
+    addProgramList(bankList);
+
     StringListParameter* programParam = new StringListParameter(
         USTRING("Program"), kProgramParamId, nullptr,
-        ParameterInfo::kIsProgramChange | ParameterInfo::kCanAutomate
+        ParameterInfo::kCanAutomate
     );
     for (int i = 0; i < MAX_PROGRAMS; i++)
     {
@@ -88,10 +105,8 @@ tresult PLUGIN_API COxeVst3::initialize(FUnknown* context)
         TChar uName[128] = {0};
         Steinberg::UString(uName, 128).assign(pName);
         programParam->appendString(uName);
-        prgList->addProgram(uName);
     }
     parameters.addParameter(programParam);
-    addProgramList(prgList);
 
     // 3. MIDI Controller Parameters (mapped via IMidiMapping)
     for (int ch = 0; ch < 16; ch++)
@@ -177,6 +192,25 @@ void COxeVst3::handleParamChange(ParamID id, ParamValue value, int32 pos)
             if (activeEditor)
             {
                 activeEditor->getEditor()->ProgramChanged();
+            }
+        }
+        return;
+    }
+
+    if (id == kBankParamId)
+    {
+        int bankCount = std::max(1, synthesizer.GetBankCount());
+        int bankIdx = (int)std::lrint(value * (bankCount - 1));
+        bankIdx = std::max(0, std::min(bankCount - 1, bankIdx));
+        if (bankIdx != synthesizer.GetBankIndex())
+        {
+            isUpdatingProgramFromHost.store(true, std::memory_order_relaxed);
+            synthesizer.SetBankIndex(bankIdx);
+            isUpdatingProgramFromHost.store(false, std::memory_order_relaxed);
+            if (activeEditor)
+            {
+                activeEditor->getEditor()->ProgramChanged();
+                activeEditor->getEditor()->Update();
             }
         }
         return;
@@ -373,7 +407,27 @@ tresult PLUGIN_API COxeVst3::getState(IBStream* state)
         return kResultFalse;
 
     int32 currentProg = synthesizer.GetNumProgr(0);
-    state->write(&currentProg, sizeof(int32), &bytesWritten);
+    if (state->write(&currentProg, sizeof(int32), &bytesWritten) != kResultOk || bytesWritten != sizeof(int32))
+        return kResultFalse;
+
+    float revLevel = synthesizer.GetPar(0, RVBLV);
+    if (state->write(&revLevel, sizeof(float), &bytesWritten) != kResultOk || bytesWritten != sizeof(float))
+        return kResultFalse;
+
+    float dlyLevel = synthesizer.GetPar(0, DLYLV);
+    if (state->write(&dlyLevel, sizeof(float), &bytesWritten) != kResultOk || bytesWritten != sizeof(float))
+        return kResultFalse;
+
+    for (int ch = 0; ch < MIDICHANNELS; ++ch)
+    {
+        unsigned char chProg = synthesizer.GetNumProgr((char)ch);
+        if (state->write(&chProg, sizeof(unsigned char), &bytesWritten) != kResultOk || bytesWritten != sizeof(unsigned char))
+            return kResultFalse;
+        SProgram* editBuf = synthesizer.GetEditBuffer((char)ch);
+        if (!editBuf || state->write(editBuf, sizeof(SProgram), &bytesWritten) != kResultOk || bytesWritten != sizeof(SProgram))
+            return kResultFalse;
+    }
+
     return kResultOk;
 }
 
@@ -389,15 +443,64 @@ tresult PLUGIN_API COxeVst3::setState(IBStream* state)
     int32 currentProg = 0;
     if (state->read(&currentProg, sizeof(int32), &bytesRead) == kResultOk && bytesRead == sizeof(int32))
     {
-        isUpdatingProgramFromHost.store(true, std::memory_order_relaxed);
-        synthesizer.SendEvent(0xC0, currentProg, 0, 0);
-        isUpdatingProgramFromHost.store(false, std::memory_order_relaxed);
-        SingleComponentEffect::setParamNormalized(kProgramParamId, (double)currentProg / (MAX_PROGRAMS - 1));
+        if (currentProg >= 0 && currentProg < MAX_PROGRAMS)
+        {
+            isUpdatingProgramFromHost.store(true, std::memory_order_relaxed);
+            synthesizer.SendEvent(0xC0, (unsigned char)currentProg, 0, 0);
+            isUpdatingProgramFromHost.store(false, std::memory_order_relaxed);
+            SingleComponentEffect::setParamNormalized(kProgramParamId, (double)currentProg / (MAX_PROGRAMS - 1));
+        }
+    }
+
+    float revLevel = 0.0f;
+    if (state->read(&revLevel, sizeof(float), &bytesRead) == kResultOk && bytesRead == sizeof(float))
+    {
+        if (std::isfinite(revLevel) && revLevel >= 0.0f && revLevel <= 1.0f)
+        {
+            synthesizer.SetPar(0, RVBLV, revLevel);
+        }
+    }
+
+    float dlyLevel = 0.0f;
+    if (state->read(&dlyLevel, sizeof(float), &bytesRead) == kResultOk && bytesRead == sizeof(float))
+    {
+        if (std::isfinite(dlyLevel) && dlyLevel >= 0.0f && dlyLevel <= 1.0f)
+        {
+            synthesizer.SetPar(0, DLYLV, dlyLevel);
+        }
+    }
+
+    for (int ch = 0; ch < MIDICHANNELS; ++ch)
+    {
+        unsigned char chProg = 0;
+        SProgram editBuf;
+        if (state->read(&chProg, sizeof(unsigned char), &bytesRead) != kResultOk || bytesRead != sizeof(unsigned char) ||
+            state->read(&editBuf, sizeof(SProgram), &bytesRead) != kResultOk || bytesRead != sizeof(SProgram))
+        {
+            break;
+        }
+        if (chProg < MAX_PROGRAMS && std::isfinite(editBuf.OPAON))
+        {
+            if (ch > 0)
+            {
+                isUpdatingProgramFromHost.store(true, std::memory_order_relaxed);
+                synthesizer.SendEvent(0xC0 | ch, chProg, 0, 0);
+                isUpdatingProgramFromHost.store(false, std::memory_order_relaxed);
+            }
+            synthesizer.SetEditBuffer((char)ch, &editBuf);
+        }
+    }
+
+    CEditor tempEditor(&synthesizer);
+    for (int i = 0; i < PARAMETERS_COUNT; ++i)
+    {
+        SingleComponentEffect::setParamNormalized(i, tempEditor.GetPar(i));
     }
 
     if (activeEditor)
     {
         activeEditor->getEditor()->ProgramChanged();
+        activeEditor->getEditor()->Update();
     }
 
     return kResultOk;
@@ -471,6 +574,23 @@ tresult PLUGIN_API COxeVst3::setParamNormalized(ParamID tag, ParamValue value)
             if (activeEditor)
             {
                 activeEditor->getEditor()->ProgramChanged();
+            }
+        }
+    }
+    else if (tag == kBankParamId)
+    {
+        int bankCount = std::max(1, synthesizer.GetBankCount());
+        int bankIdx = (int)std::lrint(value * (bankCount - 1));
+        bankIdx = std::max(0, std::min(bankCount - 1, bankIdx));
+        if (bankIdx != synthesizer.GetBankIndex())
+        {
+            isUpdatingProgramFromHost.store(true, std::memory_order_relaxed);
+            synthesizer.SetBankIndex(bankIdx);
+            isUpdatingProgramFromHost.store(false, std::memory_order_relaxed);
+            if (activeEditor)
+            {
+                activeEditor->getEditor()->ProgramChanged();
+                activeEditor->getEditor()->Update();
             }
         }
     }

@@ -130,6 +130,9 @@ void CButton::OnClick(int x, int y)
                 synthesizer->SendEvent(0xC0 + *channel, numprog, 0, 0);
             }
             break;
+        case BT_NAME:
+            synthesizer->SetBankMode(false);
+            break;
         case BT_STORE:
             synthesizer->SetBankMode(false);
             synthesizer->StoreProgram(*channel);
@@ -192,7 +195,7 @@ void CButton::Paint(BLContext &ctx, const BLFont &fontSmall, const BLFont &fontN
     const char* label = "";
     switch (type)
     {
-        case BT_BANK:     label = "Bank"; break;
+        case BT_BANK:     label = "Preset"; break;
         case BT_PROGRAM:  label = "Program"; break;
         case BT_MINUS_10: label = "-10"; break;
         case BT_MINUS_1:  label = "-1"; break;
@@ -238,9 +241,13 @@ void CButton::Paint(BLContext &ctx, const BLFont &fontSmall, const BLFont &fontN
 
 bool CButton::GetName(char* str)
 {
-    if (synthesizer->GetBankMode())
+    if (this->type == BT_BANK || (synthesizer->GetBankMode() && (this->type == BT_MINUS_10 || this->type == BT_MINUS_1 || this->type == BT_PLUS_1 || this->type == BT_PLUS_10)))
     {
-        strncpy(str, "SoundBank", TEXT_SIZE);
+        strncpy(str, "Preset (soundbank)", TEXT_SIZE);
+    }
+    else if (this->type == BT_NAME && synthesizer->IsEditingName())
+    {
+        strncpy(str, "Edit name", TEXT_SIZE);
     }
     else if (synthesizer->GetStandBy(*channel))
     {
