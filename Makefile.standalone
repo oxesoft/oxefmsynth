@@ -26,7 +26,6 @@ INCLUDES+=-I.deps/blend2d -I.deps/blend2d/blend2d -I.deps/asmjit
 CXXFLAGS+=-std=c++17 -DBL_STATIC
 LDFLAGS+=-L.deps/blend2d/build -lblend2d -lpthread -lm
 
-SOURCES+=src/toolkits/nonguitoolkit.cpp
 SOURCES+=src/standalone/main.cpp
 SOURCES+=src/gui/button.cpp
 SOURCES+=src/gui/channels.cpp
