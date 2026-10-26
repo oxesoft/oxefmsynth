@@ -133,7 +133,7 @@ void CKnob::Paint(BLContext &ctx, const BLFont &fontSmall, const BLFont &fontNor
         ctx.set_stroke_width(1.5);
         ctx.stroke_circle(cx, cy, r, baseRingColor);
 
-        if (value > 0)
+        if (isPan || value > 0)
         {
             ctx.set_stroke_width(2.2);
             ctx.set_stroke_caps(BL_STROKE_CAP_ROUND);
