@@ -7,6 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.0.0-beta.3] - 2026-10-26
+
+### Added
+- **Diagonal GUI Resizing:** Added an interactive diagonal click-and-drag resize handle in the bottom-right corner across Standalone, VST3, and CLAP plugins, maintaining fixed 950:656 aspect ratio.
+- **DAW Preset Integration:** Exposed soundbanks and programs to the host's preset manager in VST3 and CLAP, and added CLAP preset discovery and preset load extension support.
+- **GUI Dimension Persistence:** Resized plugin GUI dimensions are now persisted in host project states and restored upon reopen.
+- **Parameter Labels:** Added labels for OPX bypass, keyboard tracking, and OPZ filter type.
+
+### Changed
+- **Aspect Ratio Preservation:** Preserved proportional GUI scaling and centered letterboxing in fullscreen and maximized standalone windows.
+- **Bipolar Pitch Curve:** Rendered Pitch Curve knob as bipolar.
+- **Default Envelope Settings:** Set default operator sustain level to maximum.
+- **Codebase Deduplication:** Unified GUI controls, editor, value mapper, platform toolkits, and synth parameter/event handling across standalone, VST3, and CLAP targets.
+- **CLAP Metadata:** Standardized CLAP vendor name to "Oxe Music Software".
+
+### Fixed
+- **Knob Dragging:** Fixed mouse dragging jitter and eliminated matrix pan knob highlight disappearance at 100% left.
+- **LCD & UI Alignment:** Fixed LCD text when switching banks, fixed Bank and Program button LED updates on click, corrected Store button LCD mouseover text, and aligned LCD and MIDI channel elements with button bounds.
+- **Label Spelling:** Corrected spelling of LFO Depth label.
+- **MinGW Build:** Fixed MinGW-w64 undefined reference to `__mingw_fe_dfl_env`.
+
+---
+
 ## [2.0.0-beta.2] - 2026-10-12
 
 ### Added
