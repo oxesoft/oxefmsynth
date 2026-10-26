@@ -51,7 +51,7 @@ static const char* GetShortLabel(const char* fullName)
     if (strstr(fullName, "Pitch Curve")) return "CURVE";
     if (strstr(fullName, "PitchCurveTime")) return "TIME";
     if (strstr(fullName, "LFO Rate")) return "RATE";
-    if (strstr(fullName, "LFO Depth")) return "DEPHT";
+    if (strstr(fullName, "LFO Depth")) return "DEPTH";
     if (strstr(fullName, "LFO Delay")) return "DELAY";
     if (strstr(fullName, "LFO Destination")) return "DEST";
     if (strstr(fullName, "Mod Destination")) return "DEST";
