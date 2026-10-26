@@ -43,7 +43,6 @@ public:
     virtual ~CXlibToolkit();
     virtual void Invalidate() override;
     virtual void InvalidateRect(int x, int y, int width, int height) override;
-    virtual void CopyRect(int destX, int destY, int width, int height, int origBmp, int origX, int origY) override;
     virtual void StartMouseCapture() override;
     virtual void StopMouseCapture() override;
     virtual void StartWindowProcesses() override;

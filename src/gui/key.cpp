@@ -47,26 +47,6 @@ void CKey::OnClick(int x, int y)
     Repaint();
 }
 
-int CKey::GetCoordinates (oxeCoords *coords)
-{
-    coords->destX   = this->left;
-    coords->destY   = this->top;
-    coords->width   = this->right - this->left;
-    coords->height  = this->bottom - this->top;
-    coords->origBmp = this->bmp;
-    coords->origX   = value ? this->w : 0;
-    coords->origY   = this->h * this->index;
-    return 1;
-}
-
-void CKey::Repaint()
-{
-    if (toolkit)
-    {
-        toolkit->InvalidateRect(this->left, this->top, this->right - this->left, this->bottom - this->top);
-    }
-}
-
 void CKey::Paint(BLContext &ctx, const BLFont &fontSmall, const BLFont &fontNormal)
 {
     float w = right - left;
@@ -81,21 +61,8 @@ void CKey::Paint(BLContext &ctx, const BLFont &fontSmall, const BLFont &fontNorm
     if (isMatrixOp)
     {
         // Matrix diagonal operator node (labeled A, B, C, D, E, F, X, Z)
-        static const char opLetters[] = {'A', 'B', 'C', 'D', 'E', 'F', 'X', 'Z'};
-        char letter[2] = { (index >= 0 && index < 8) ? opLetters[index] : '?', 0 };
-
-        BLRgba32 accentColor(0x00, 0xf0, 0xff); // default cyan
-        switch (index)
-        {
-            case 0: accentColor = BLRgba32(0x00, 0xf0, 0xff); break; // A: cyan
-            case 1: accentColor = BLRgba32(0x00, 0xe6, 0x76); break; // B: emerald green
-            case 2: accentColor = BLRgba32(0xff, 0xd6, 0x00); break; // C: amber
-            case 3: accentColor = BLRgba32(0xff, 0x91, 0x00); break; // D: orange
-            case 4: accentColor = BLRgba32(0xb3, 0x88, 0xff); break; // E: violet
-            case 5: accentColor = BLRgba32(0xff, 0x40, 0x81); break; // F: magenta
-            case 6: accentColor = BLRgba32(0x40, 0xc4, 0xff); break; // X: ice blue
-            case 7: accentColor = BLRgba32(0xee, 0xf2, 0xf6); break; // Z: white
-        }
+        char letter[2] = { GetOpLetter(index), 0 };
+        BLRgba32 accentColor = GetOpAccentColor(index);
 
         // Circular background
         ctx.fill_circle(cx, cy, r, BLRgba32(0x18, 0x20, 0x2b));
@@ -110,21 +77,12 @@ void CKey::Paint(BLContext &ctx, const BLFont &fontSmall, const BLFont &fontNorm
         }
         float lx = cx - (float)(tm.bounding_box.x0 + tm.bounding_box.x1) * 0.5f;
 
-        if (value)
+        BLRgba32 color = value ? accentColor : BLRgba32(0x55, 0x64, 0x76);
+        BLRgba32 ringColor = value ? accentColor : BLRgba32(0x30, 0x3c, 0x4c);
+        ctx.stroke_circle(cx, cy, r, ringColor);
+        if (fontNormal.is_valid())
         {
-            ctx.stroke_circle(cx, cy, r, accentColor);
-            if (fontNormal.is_valid())
-            {
-                ctx.fill_utf8_text(BLPoint(lx, cy + 4.5f), fontNormal, letter, 1, accentColor);
-            }
-        }
-        else
-        {
-            ctx.stroke_circle(cx, cy, r, BLRgba32(0x30, 0x3c, 0x4c));
-            if (fontNormal.is_valid())
-            {
-                ctx.fill_utf8_text(BLPoint(lx, cy + 4.5f), fontNormal, letter, 1, BLRgba32(0x55, 0x64, 0x76));
-            }
+            ctx.fill_utf8_text(BLPoint(lx, cy + 4.5f), fontNormal, letter, 1, color);
         }
     }
     else

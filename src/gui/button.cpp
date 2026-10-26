@@ -46,90 +46,33 @@ void CButton::OnClick(int x, int y)
     switch (type)
     {
         case BT_MINUS_10:
-            if (synthesizer->GetBankMode())
-            {
-                int ultbank = synthesizer->GetBankCount() - 1;
-                int numbank = synthesizer->GetBankIndex();
-                numbank -= 10;
-                if (numbank < 0)
-                    numbank = 0;
-                synthesizer->SetBankIndex(numbank);
-            }
-            else
-            {
-                unsigned char numprog;
-                numprog = synthesizer->GetNumProgr(*channel);
-                numprog -= 10;
-                if (numprog > 127)
-                    numprog = 127;
-                synthesizer->SendEvent(0xC0 + *channel, numprog, 0, 0);
-            }
-            break;
         case BT_MINUS_1:
-            if (synthesizer->GetBankMode())
-            {
-                int ultbank = synthesizer->GetBankCount() - 1;
-                int numbank = synthesizer->GetBankIndex();
-                numbank = synthesizer->GetBankIndex();
-                numbank -= 1;
-                if (numbank > ultbank)
-                    numbank = ultbank;
-                if (numbank < 0)
-                    numbank = ultbank;
-                synthesizer->SetBankIndex(numbank);
-            }
-            else
-            {
-                unsigned char numprog;
-                numprog = synthesizer->GetNumProgr(*channel);
-                numprog -= 1;
-                if (numprog > 127)
-                    numprog = 127;
-                synthesizer->SendEvent(0xC0 + *channel, numprog, 0, 0);
-            }
-            break;
         case BT_PLUS_1:
-            if (synthesizer->GetBankMode())
-            {
-                int ultbank = synthesizer->GetBankCount() - 1;
-                int numbank = synthesizer->GetBankIndex();
-                numbank = synthesizer->GetBankIndex();
-                numbank += 1;
-                if (numbank > ultbank)
-                    numbank = 0;
-                synthesizer->SetBankIndex(numbank);
-            }
-            else
-            {
-                unsigned char numprog;
-                numprog = synthesizer->GetNumProgr(*channel);
-                numprog += 1;
-                if (numprog > 127)
-                    numprog = 0;
-                synthesizer->SendEvent(0xC0 + *channel, numprog, 0, 0);
-            }
-            break;
         case BT_PLUS_10:
+        {
+            int delta = (type == BT_MINUS_10) ? -10 :
+                        (type == BT_MINUS_1)  ?  -1 :
+                        (type == BT_PLUS_1)   ?   1 : 10;
+            bool wrap = (type == BT_MINUS_1 || type == BT_PLUS_1);
             if (synthesizer->GetBankMode())
             {
-                int ultbank = synthesizer->GetBankCount() - 1;
-                int numbank = synthesizer->GetBankIndex();
-                numbank = synthesizer->GetBankIndex();
-                numbank += 10;
-                if (numbank > ultbank)
-                    numbank = ultbank;
-                synthesizer->SetBankIndex(numbank);
+                int lastbank = synthesizer->GetBankCount() - 1;
+                int bank_index = synthesizer->GetBankIndex() + delta;
+                if (bank_index < 0)
+                    bank_index = wrap ? lastbank : 0;
+                else if (bank_index > lastbank)
+                    bank_index = wrap ? 0 : lastbank;
+                synthesizer->SetBankIndex(bank_index);
             }
             else
             {
-                unsigned char numprog;
-                numprog = synthesizer->GetNumProgr(*channel);
-                numprog += 10;
+                unsigned char numprog = synthesizer->GetNumProgr(*channel) + delta;
                 if (numprog > 127)
-                    numprog = 0;
+                    numprog = (delta < 0) ? 127 : 0;
                 synthesizer->SendEvent(0xC0 + *channel, numprog, 0, 0);
             }
             break;
+        }
         case BT_NAME:
             synthesizer->SetBankMode(false);
             break;
@@ -144,26 +87,6 @@ void CButton::OnClick(int x, int y)
             synthesizer->SetBankMode(false);
             synthesizer->SetStandBy(*channel, false);
             break;
-    }
-}
-
-int CButton::GetCoordinates (oxeCoords *coords)
-{
-    coords->destX   = this->left;
-    coords->destY   = this->top;
-    coords->width   = this->right - this->left;
-    coords->height  = this->bottom - this->top;
-    coords->origBmp = this->bmp;
-    coords->origX   = 0;
-    coords->origY   = index * BUTTON_HEIGHT;
-    return 1;
-}
-
-void CButton::Repaint()
-{
-    if (toolkit)
-    {
-        toolkit->InvalidateRect(this->left, this->top, this->right - this->left, this->bottom - this->top);
     }
 }
 

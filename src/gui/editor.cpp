@@ -393,20 +393,7 @@ void CEditor::SetToolkit(CToolkit *toolkit)
     }
     if (toolkit)
     {
-        // show version
-        char version_info[LCD_COLS + 1];
-        char vstr[32];
-        snprintf(vstr, sizeof(vstr), "v%s", VERSION_STR);
-        int vlen = (int)strlen(vstr);
-        int pad = (LCD_COLS - vlen) / 2;
-        if (pad < 0) pad = 0;
-        int pos = 0;
-        for (int p = 0; p < pad && pos < LCD_COLS; p++) version_info[pos++] = ' ';
-        for (int i = 0; i < vlen && pos < LCD_COLS; i++) version_info[pos++] = vstr[i];
-        while (pos < LCD_COLS) version_info[pos++] = ' ';
-        version_info[LCD_COLS] = 0;
-        lcd->SetText(0, "  Oxe FM Synth  ");
-        lcd->SetText(1, version_info);
+        lcd->ShowWelcome();
     }
     changingControl = false;
 }
@@ -415,10 +402,10 @@ void CEditor::SetHostInterface(CHostInterface *hostinterface)
 {
     this->hostinterface = hostinterface;
     lcd->SetHostInterface(hostinterface);
+    synthesizer->SetHostInterface(hostinterface);
     for (int i = 0; i < GUI_CONTROLS; i++)
     {
         ctl[i]->SetHostInterface(hostinterface);
-        synthesizer->SetHostInterface(hostinterface);
     }
 }
 
@@ -483,27 +470,22 @@ struct OpCard {
 };
 
 static const OpCard opCards[8] = {
-    {  12.0f,  86.0f, 292.0f, 132.0f, "A", "OSCILLATOR", BLRgba32(0x00, 0xf0, 0xff) },
-    { 310.0f,  86.0f, 292.0f, 132.0f, "B", "OSCILLATOR", BLRgba32(0x00, 0xe6, 0x76) },
-    {  12.0f, 227.0f, 292.0f, 132.0f, "C", "OSCILLATOR", BLRgba32(0xff, 0xd6, 0x00) },
-    { 310.0f, 227.0f, 292.0f, 132.0f, "D", "OSCILLATOR", BLRgba32(0xff, 0x91, 0x00) },
-    {  12.0f, 368.0f, 292.0f, 132.0f, "E", "OSCILLATOR", BLRgba32(0xb3, 0x88, 0xff) },
-    { 310.0f, 368.0f, 292.0f, 132.0f, "F", "OSCILLATOR", BLRgba32(0xff, 0x40, 0x81) },
-    {  12.0f, 509.0f, 292.0f, 136.0f, "X", "NOISE",      BLRgba32(0x40, 0xc4, 0xff) },
-    { 310.0f, 509.0f, 292.0f, 136.0f, "Z", "FILTER",     BLRgba32(0xee, 0xf2, 0xf6) }
+    {  12.0f,  86.0f, 292.0f, 132.0f, "A", "OSCILLATOR", GetOpAccentColor(0) },
+    { 310.0f,  86.0f, 292.0f, 132.0f, "B", "OSCILLATOR", GetOpAccentColor(1) },
+    {  12.0f, 227.0f, 292.0f, 132.0f, "C", "OSCILLATOR", GetOpAccentColor(2) },
+    { 310.0f, 227.0f, 292.0f, 132.0f, "D", "OSCILLATOR", GetOpAccentColor(3) },
+    {  12.0f, 368.0f, 292.0f, 132.0f, "E", "OSCILLATOR", GetOpAccentColor(4) },
+    { 310.0f, 368.0f, 292.0f, 132.0f, "F", "OSCILLATOR", GetOpAccentColor(5) },
+    {  12.0f, 509.0f, 292.0f, 136.0f, "X", "NOISE",      GetOpAccentColor(6) },
+    { 310.0f, 509.0f, 292.0f, 136.0f, "Z", "FILTER",     GetOpAccentColor(7) }
 };
 
 static int GetEnvelopeOpIndexForParam(int par)
 {
-    if ((par >= OPADL && par <= OPARE) || par == OPAON) return 0;
-    if ((par >= OPBDL && par <= OPBRE) || par == OPBON) return 1;
-    if ((par >= OPCDL && par <= OPCRE) || par == OPCON) return 2;
-    if ((par >= OPDDL && par <= OPDRE) || par == OPDON) return 3;
-    if ((par >= OPEDL && par <= OPERE) || par == OPEON) return 4;
-    if ((par >= OPFDL && par <= OPFRE) || par == OPFON) return 5;
-    if ((par >= OPXDL && par <= OPXRE) || par == OPXON) return 6;
-    if ((par >= OPZDL && par <= OPZRE) || par == OPZON) return 7;
-    return -1;
+    if (par < OPAON || par > OPZRE) return -1;
+    int op = (par - OPAON) / 13;
+    int offset = (par - OPAON) % 13;
+    return (offset == 0 || offset >= 7) ? op : -1;
 }
 
 static inline void InvalidateEnvelopeIfParam(CToolkit *toolkit, int par)
@@ -516,9 +498,48 @@ static inline void InvalidateEnvelopeIfParam(CToolkit *toolkit, int par)
     }
 }
 
-void CEditor::OnLButtonDblClick(int x, int y)
+CControl* CEditor::FindControlByParam(int index)
+{
+    for (int i = 0; i < GUI_CONTROLS; i++)
+    {
+        if (ctl[i]->GetIndex() == index)
+            return ctl[i];
+    }
+    return NULL;
+}
+
+void CEditor::DisplayControlValue(CControl *c)
 {
     char str[TEXT_SIZE];
+    CMapper::GetDisplayValue(this->synthesizer, this->channel, c->GetIndex(), c->GetType(), str);
+    lcd->SetText(1, str);
+}
+
+void CEditor::DisplayControl(CControl *c, const char *overrideLine1)
+{
+    char str[TEXT_SIZE];
+    c->GetName(str);
+    lcd->SetText(0, str);
+    if (overrideLine1)
+    {
+        lcd->SetText(1, overrideLine1);
+    }
+    else
+    {
+        DisplayControlValue(c);
+    }
+}
+
+void CEditor::NotifyHostParameter(int index)
+{
+    if (channel == 0 && index >= 0 && hostinterface)
+    {
+        hostinterface->ReceiveMessageFromPlugin(SET_PARAMETER, index, lrintf(GetPar(index) * MAXPARVALUE));
+    }
+}
+
+void CEditor::OnLButtonDblClick(int x, int y)
+{
     for (int i=0;i<GUI_CONTROLS;i++)
     {
         if (ctl[i]->IsMouseOver(x, y))
@@ -528,23 +549,14 @@ void CEditor::OnLButtonDblClick(int x, int y)
             {
                 synthesizer->SetDefault(channel, index);
                 ctl[i]->Update();
-                ctl[i]->GetName(str);
-                lcd->SetText(0, str);
-                CMapper::GetDisplayValue(this->synthesizer, this->channel, index, ctl[i]->GetType(), str);
-                lcd->SetText(1, str);
+                DisplayControl(ctl[i]);
                 InvalidateEnvelopeIfParam(toolkit, index);
                 changingControl = false;
                 if (toolkit)
                 {
                     toolkit->StopMouseCapture();
                 }
-                if (channel == 0)
-                {
-                    if (hostinterface)
-                    {
-                        hostinterface->ReceiveMessageFromPlugin(SET_PARAMETER, index, lrintf(GetPar(index) * MAXPARVALUE));
-                    }
-                }
+                NotifyHostParameter(index);
             }
             break;
         }
@@ -553,7 +565,6 @@ void CEditor::OnLButtonDblClick(int x, int y)
 
 void CEditor::OnLButtonDown(int x, int y)
 {
-    char str[TEXT_SIZE];
     char prevchannel = channel; // saves the current channel in case of the clicked control be CChannels
     for (int i=0;i<GUI_CONTROLS;i++)
     {
@@ -570,17 +581,7 @@ void CEditor::OnLButtonDown(int x, int y)
             {
                 synthesizer->SetStandBy(prevchannel, ctl[i]->GetType() != BT_NAME);
             }
-            ctl[i]->GetName(str);
-            lcd->SetText(0,str);
-            if (wasWaiting && ctl[i]->GetType() == BT_STORE)
-            {
-                snprintf(str, TEXT_SIZE, "was stored!");
-            }
-            else
-            {
-                CMapper::GetDisplayValue(this->synthesizer, this->channel, ctl[i]->GetIndex(), ctl[i]->GetType(), str);
-            }
-            lcd->SetText(1,str);
+            DisplayControl(ctl[i], (wasWaiting && ctl[i]->GetType() == BT_STORE) ? "was stored!" : NULL);
             InvalidateEnvelopeIfParam(toolkit, ctl[i]->GetIndex());
             cID = i;
             if (ctl[i]->IsKnob() == true)
@@ -591,16 +592,9 @@ void CEditor::OnLButtonDown(int x, int y)
                     toolkit->StartMouseCapture();
                 }
             }
-            else if (channel == 0)
+            else
             {
-                int index = ctl[i]->GetIndex();
-                if (index >= 0)
-                {
-                    if (hostinterface)
-                    {
-                        hostinterface->ReceiveMessageFromPlugin(SET_PARAMETER, index, GetPar(index) * MAXPARVALUE);
-                    }
-                }
+                NotifyHostParameter(ctl[i]->GetIndex());
             }
             break;
         }
@@ -619,16 +613,9 @@ void CEditor::OnLButtonDown(int x, int y)
 
 void CEditor::OnLButtonUp()
 {
-    if (changingControl && channel == 0)
+    if (changingControl)
     {
-        int index = ctl[cID]->GetIndex();
-        if (index >= 0)
-        {
-            if (hostinterface)
-            {
-                hostinterface->ReceiveMessageFromPlugin(SET_PARAMETER, index, GetPar(index) * MAXPARVALUE);
-            }
-        }
+        NotifyHostParameter(ctl[cID]->GetIndex());
     }
     changingControl = false;
     if (toolkit)
@@ -643,14 +630,12 @@ void CEditor::OnMouseMove(int x, int y)
     this->currentY = y;
     if (changingControl)
     {
-        char str[TEXT_SIZE];
         int value = -(y - this->prevY) + (x - this->prevX);
         this->prevX = x;
         this->prevY = y;
         if (ctl[cID]->IncreaseValue(value) == true)
         {
-            CMapper::GetDisplayValue(this->synthesizer, this->channel, ctl[cID]->GetIndex(), ctl[cID]->GetType(), str);
-            lcd->SetText(1, str);
+            DisplayControlValue(ctl[cID]);
             InvalidateEnvelopeIfParam(toolkit, ctl[cID]->GetIndex());
         }
     }
@@ -666,23 +651,12 @@ void CEditor::OnMouseWheel(int x, int y, int delta)
             if (ctl[i]->IsKnob() == true)
             {
                 ctl[i]->GetName(str);
-                lcd->SetText(0,str);
+                lcd->SetText(0, str);
                 if (ctl[i]->IncreaseValue(delta) == true)
                 {
-                    CMapper::GetDisplayValue(this->synthesizer, this->channel, ctl[i]->GetIndex(), ctl[i]->GetType(), str);
-                    lcd->SetText(1,str);
+                    DisplayControlValue(ctl[i]);
                     InvalidateEnvelopeIfParam(toolkit, ctl[i]->GetIndex());
-                    if (channel == 0)
-                    {
-                        int index = ctl[i]->GetIndex();
-                        if (index >= 0)
-                        {
-                            if (hostinterface)
-                            {
-                                hostinterface->ReceiveMessageFromPlugin(SET_PARAMETER, index, lrintf(GetPar(index) * MAXPARVALUE));
-                            }
-                        }
-                    }
+                    NotifyHostParameter(ctl[i]->GetIndex());
                 }
             }
             break;
@@ -718,55 +692,36 @@ void CEditor::Update()
         if (ctl[i]->IsMouseOver(currentX, currentY) && cID != i)
         {
             cID = i;
-            char str[TEXT_SIZE];
-            ctl[i]->GetName(str);
-            lcd->SetText(0,str);
-            CMapper::GetDisplayValue(this->synthesizer, this->channel, ctl[i]->GetIndex(), ctl[i]->GetType(), str);
-            lcd->SetText(1,str);
+            DisplayControl(ctl[i]);
             break;
         }
-    }
-}
-
-void CEditor::GetCoordinates(oxeCoords *coords)
-{
-    Update();
-    coords += lcd->GetCoordinates(coords);
-    for (int i = 0; i < GUI_CONTROLS; i++)
-    {
-        coords += ctl[i]->GetCoordinates(coords);
     }
 }
 
 void CEditor::SetPar(int index, float value)
 {
     const char CHANNEL = 0;
-    for (int i = 0; i < GUI_CONTROLS; i++)
+    CControl *c = FindControlByParam(index);
+    if (c)
     {
-        if (ctl[i]->GetIndex() == index)
-        {
-            int type = ctl[i]->GetType();
-            float fvalue = CMapper::IntValueToFloatValue(this->synthesizer, CHANNEL, index, type, lrintf(value * MAXPARVALUE));
-            synthesizer->SetPar(CHANNEL, index, fvalue);
-            ctl[i]->Update();
-            InvalidateEnvelopeIfParam(toolkit, index);
-            break;
-        }
+        int type = c->GetType();
+        float fvalue = CMapper::IntValueToFloatValue(this->synthesizer, CHANNEL, index, type, lrintf(value * MAXPARVALUE));
+        synthesizer->SetPar(CHANNEL, index, fvalue);
+        c->Update();
+        InvalidateEnvelopeIfParam(toolkit, index);
     }
 }
 
 float CEditor::GetPar(int index)
 {
     const char CHANNEL = 0;
-    for (int i = 0; i < GUI_CONTROLS; i++)
+    CControl *c = FindControlByParam(index);
+    if (c)
     {
-        if (ctl[i]->GetIndex() == index)
-        {
-            int type = ctl[i]->GetType();
-            float fvalue = synthesizer->GetPar(CHANNEL, index);
-            float normValue = (float)CMapper::FloatValueToIntValue(this->synthesizer, CHANNEL, index, type, fvalue);
-            return normValue / MAXPARVALUE;
-        }
+        int type = c->GetType();
+        float fvalue = synthesizer->GetPar(CHANNEL, index);
+        float normValue = (float)CMapper::FloatValueToIntValue(this->synthesizer, CHANNEL, index, type, fvalue);
+        return normValue / MAXPARVALUE;
     }
     return 0.f;
 }
@@ -779,37 +734,37 @@ void CEditor::GetParLabel(int index, char* label)
 void CEditor::GetParDisplay(int index, char* text)
 {
     const char CHANNEL = 0;
-    for (int i = 0; i < GUI_CONTROLS; i++)
+    CControl *c = FindControlByParam(index);
+    if (c)
     {
-        if (ctl[i]->GetIndex() == index)
-        {
-            int type = ctl[i]->GetType();
-            CMapper::GetDisplayValue(this->synthesizer, CHANNEL, index, type, text);
-            return;
-        }
+        CMapper::GetDisplayValue(this->synthesizer, CHANNEL, index, c->GetType(), text);
+        return;
     }
     strncpy(text, "not found", TEXT_SIZE);
 }
 
 void CEditor::GetParName(int index, char* text)
 {
-    for (int i = 0; i < GUI_CONTROLS; i++)
+    CControl *c = FindControlByParam(index);
+    if (c)
     {
-        if (ctl[i]->GetIndex() == index)
-        {
-            ctl[i]->GetName(text);
-            return;
-        }
+        c->GetName(text);
+        return;
     }
     strncpy(text, "not found", TEXT_SIZE);
 }
 
 void CEditor::DrawPanelCards(BLContext &ctx, const BLFont &fontSmall, const BLFont &fontNormal, const BLFont &fontHeader)
 {
+    auto drawCard = [&](double x, double y, double w, double h, BLRgba32 borderColor = BLRgba32(0x22, 0x2a, 0x39)) {
+        BLRoundRect rr(x, y, w, h, 6.0);
+        ctx.fill_round_rect(rr, BLRgba32(0x13, 0x18, 0x22));
+        ctx.set_stroke_width(1.0);
+        ctx.stroke_round_rect(rr, borderColor);
+    };
+
     // 1. Top Header Card
-    ctx.fill_round_rect(BLRoundRect(12.0, 10.0, 926.0, 68.0, 6.0), BLRgba32(0x13, 0x18, 0x22));
-    ctx.set_stroke_width(1.0);
-    ctx.stroke_round_rect(BLRoundRect(12.0, 10.0, 926.0, 68.0, 6.0), BLRgba32(0x24, 0x2d, 0x3d));
+    drawCard(12.0, 10.0, 926.0, 68.0, BLRgba32(0x24, 0x2d, 0x3d));
 
     // Dividers in top card
     ctx.stroke_line(478.0, 16.0, 478.0, 72.0, BLRgba32(0x1e, 0x27, 0x35));
@@ -833,9 +788,7 @@ void CEditor::DrawPanelCards(BLContext &ctx, const BLFont &fontSmall, const BLFo
         float ch = opCards[i].h;
 
         // Card base
-        ctx.fill_round_rect(BLRoundRect(cx, cy, cw, ch, 6.0), BLRgba32(0x13, 0x18, 0x22));
-        ctx.set_stroke_width(1.0);
-        ctx.stroke_round_rect(BLRoundRect(cx, cy, cw, ch, 6.0), BLRgba32(0x22, 0x2a, 0x39));
+        drawCard(cx, cy, cw, ch);
 
         // Tag pill
         ctx.fill_round_rect(BLRoundRect(cx + 8.0f, cy + 7.0f, 16.0f, 16.0f, 3.0f), BLRgba32(opCards[i].accent.r(), opCards[i].accent.g(), opCards[i].accent.b(), 0x30));
@@ -853,14 +806,10 @@ void CEditor::DrawPanelCards(BLContext &ctx, const BLFont &fontSmall, const BLFo
     }
 
     // 3. Matrix Card
-    ctx.fill_round_rect(BLRoundRect(612.0, 86.0, 326.0, 399.0, 6.0), BLRgba32(0x13, 0x18, 0x22));
-    ctx.set_stroke_width(1.0);
-    ctx.stroke_round_rect(BLRoundRect(612.0, 86.0, 326.0, 399.0, 6.0), BLRgba32(0x22, 0x2a, 0x39));
+    drawCard(612.0, 86.0, 326.0, 399.0);
 
     // 4. LFO Card
-    ctx.fill_round_rect(BLRoundRect(612.0, 493.0, 326.0, 72.0, 6.0), BLRgba32(0x13, 0x18, 0x22));
-    ctx.set_stroke_width(1.0);
-    ctx.stroke_round_rect(BLRoundRect(612.0, 493.0, 326.0, 72.0, 6.0), BLRgba32(0x22, 0x2a, 0x39));
+    drawCard(612.0, 493.0, 326.0, 72.0);
     ctx.stroke_line(872.0, 499.0, 872.0, 559.0, BLRgba32(0x1e, 0x27, 0x35));
     if (fontSmall.is_valid())
     {
@@ -869,9 +818,7 @@ void CEditor::DrawPanelCards(BLContext &ctx, const BLFont &fontSmall, const BLFo
     }
 
     // 5. Pitch & Effects Card
-    ctx.fill_round_rect(BLRoundRect(612.0, 573.0, 326.0, 72.0, 6.0), BLRgba32(0x13, 0x18, 0x22));
-    ctx.set_stroke_width(1.0);
-    ctx.stroke_round_rect(BLRoundRect(612.0, 573.0, 326.0, 72.0, 6.0), BLRgba32(0x22, 0x2a, 0x39));
+    drawCard(612.0, 573.0, 326.0, 72.0);
     ctx.stroke_line(776.0, 579.0, 776.0, 639.0, BLRgba32(0x1e, 0x27, 0x35));
     ctx.stroke_line(886.0, 579.0, 886.0, 639.0, BLRgba32(0x1e, 0x27, 0x35));
     if (fontSmall.is_valid())
@@ -900,20 +847,19 @@ void CEditor::DrawOperatorEnvelope(BLContext &ctx, int opIndex, float x, float y
     float onOff = synthesizer->GetPar(channel, base);
 
     // Normalize envelope parameter values matching CMapper
-    float dl_norm = fmaxf(0.0f, fminf(1.0f, powf(fmaxf(0.0f, dl) / MAXTIMEENV, 1.0f / 3.0f)));
+    auto normEnvTime = [](float v, bool hasOffset) {
+        float raw = powf(fmaxf(0.0f, v) / MAXTIMEENV, 1.0f / 3.0f);
+        if (hasOffset)
+            raw = (raw - (2.0f / 102.0f)) / (1.0f - (2.0f / 102.0f));
+        return fmaxf(0.0f, fminf(1.0f, raw));
+    };
 
-    float at_raw = powf(fmaxf(0.0f, at) / MAXTIMEENV, 1.0f / 3.0f);
-    float at_norm = fmaxf(0.0f, fminf(1.0f, (at_raw - (2.0f / 102.0f)) / (1.0f - (2.0f / 102.0f))));
-
-    float de_raw = powf(fmaxf(0.0f, de) / MAXTIMEENV, 1.0f / 3.0f);
-    float de_norm = fmaxf(0.0f, fminf(1.0f, (de_raw - (2.0f / 102.0f)) / (1.0f - (2.0f / 102.0f))));
-
+    float dl_norm = normEnvTime(dl, false);
+    float at_norm = normEnvTime(at, true);
+    float de_norm = normEnvTime(de, true);
     float su_norm = fmaxf(0.0f, fminf(1.0f, su));
-
-    float st_norm = fmaxf(0.0f, fminf(1.0f, powf(fmaxf(0.0f, st) / MAXTIMEENV, 1.0f / 3.0f)));
-
-    float re_raw = powf(fmaxf(0.0f, re) / MAXTIMEENV, 1.0f / 3.0f);
-    float re_norm = fmaxf(0.0f, fminf(1.0f, (re_raw - (2.0f / 102.0f)) / (1.0f - (2.0f / 102.0f))));
+    float st_norm = normEnvTime(st, false);
+    float re_norm = normEnvTime(re, true);
 
     float availW = w - 4.0f;
     float bottomY = y + h - 2.0f;
@@ -972,49 +918,6 @@ void CEditor::DrawOperatorEnvelope(BLContext &ctx, int opIndex, float x, float y
     BLPath fillPath = path;
     fillPath.line_to(p5x, bottomY);
     fillPath.line_to(p0x, bottomY);
-    fillPath.close();
-
-    bool isOpActive = (onOff > 0.5f);
-    BLRgba32 strokeColor = isOpActive ? accentColor : BLRgba32(0x45, 0x54, 0x68);
-    BLRgba32 fillColor = isOpActive ? BLRgba32(accentColor.r(), accentColor.g(), accentColor.b(), 0x24)
-                                    : BLRgba32(0x30, 0x3d, 0x50, 0x18);
-
-    ctx.fill_path(fillPath, fillColor);
-    ctx.set_stroke_width(1.3);
-    ctx.stroke_path(path, strokeColor);
-}
-
-void CEditor::DrawFilterCurve(BLContext &ctx, float x, float y, float w, float h, const BLFont &fontSmall, const BLRgba32 &accentColor)
-{
-    ctx.fill_round_rect(BLRoundRect(x, y, w, h, 3.0), BLRgba32(0x0e, 0x12, 0x1a));
-    ctx.set_stroke_width(0.8);
-    ctx.stroke_round_rect(BLRoundRect(x, y, w, h, 3.0), BLRgba32(0x20, 0x28, 0x36));
-
-    if (!synthesizer) return;
-
-    float cutoff = synthesizer->GetPar(channel, OPZCU);
-    float reso   = synthesizer->GetPar(channel, OPZRS);
-    float onOff  = synthesizer->GetPar(channel, OPZON);
-
-    float normCutoff = fmaxf(0.05f, fminf(0.95f, cutoff / MAXFREQFLT));
-    float normReso   = fmaxf(0.0f, fminf(1.0f, reso));
-
-    float bottomY = y + h - 2.0f;
-    float topY    = y + 2.0f;
-    float height  = bottomY - topY;
-
-    float cx = x + 2.0f + normCutoff * (w - 4.0f);
-    float cy = topY + (1.0f - normReso * 0.7f) * (height * 0.5f);
-
-    BLPath path;
-    path.move_to(x + 2.0f, topY + height * 0.35f);
-    path.line_to(cx - 8.0f, topY + height * 0.35f);
-    path.quad_to(cx, cy, cx + 10.0f, bottomY);
-    path.line_to(x + w - 2.0f, bottomY);
-
-    BLPath fillPath = path;
-    fillPath.line_to(x + w - 2.0f, bottomY);
-    fillPath.line_to(x + 2.0f, bottomY);
     fillPath.close();
 
     bool isOpActive = (onOff > 0.5f);
@@ -1109,6 +1012,12 @@ void CEditor::DrawOxeLogo(BLContext &ctx, float x, float y, float scale)
     ctx.translate(x, y);
     ctx.scale(scale, scale);
 
+    auto fillAndStroke = [&](const BLPath &poly, const BLRgba32 &color) {
+        ctx.fill_path(poly, color);
+        ctx.set_stroke_width(0.5f);
+        ctx.stroke_path(poly, BLRgba32(0x00, 0x00, 0x00));
+    };
+
     // ------------------------------------------------------------------------
     // Shape 1: O uppper
     // ------------------------------------------------------------------------
@@ -1120,9 +1029,7 @@ void CEditor::DrawOxeLogo(BLContext &ctx, float x, float y, float scale)
     poly1.line_to(60.5f, 47.0f);
     poly1.arc_to(34.8f, 43.1f, 26.1f, 26.1f, 0.1522f, -3.4459f, false); // Arc to (9.0, 47.0)
     poly1.close();
-    ctx.fill_path(poly1, BLRgba32(0x16, 0x92, 0x2c));
-    ctx.set_stroke_width(0.5f);
-    ctx.stroke_path(poly1, BLRgba32(0x00, 0x00, 0x00));
+    fillAndStroke(poly1, BLRgba32(0x16, 0x92, 0x2c));
 
     // ------------------------------------------------------------------------
     // Shape 2: O lower
@@ -1135,9 +1042,7 @@ void CEditor::DrawOxeLogo(BLContext &ctx, float x, float y, float scale)
     poly2.line_to(60.0f, 50.0f);
     poly2.arc_to(34.8f, 44.1f, 25.9f, 25.9f, 0.2310f, 2.6796f, false); // Arc to (9.5, 50.0)
     poly2.close();
-    ctx.fill_path(poly2, BLRgba32(0x16, 0x92, 0x2c));
-    ctx.set_stroke_width(0.5f);
-    ctx.stroke_path(poly2, BLRgba32(0x00, 0x00, 0x00));
+    fillAndStroke(poly2, BLRgba32(0x16, 0x92, 0x2c));
 
     // ------------------------------------------------------------------------
     // Shape 3: Hat
@@ -1148,9 +1053,7 @@ void CEditor::DrawOxeLogo(BLContext &ctx, float x, float y, float scale)
     poly3.line_to(34.0f, 8.5f);
     poly3.line_to(46.5f, 15.5f);
     poly3.close();
-    ctx.fill_path(poly3, BLRgba32(0x58, 0x87, 0x12, 0xe6));
-    ctx.set_stroke_width(0.5f);
-    ctx.stroke_path(poly3, BLRgba32(0x00, 0x00, 0x00));
+    fillAndStroke(poly3, BLRgba32(0x58, 0x87, 0x12, 0xe6));
 
     // ------------------------------------------------------------------------
     // Shape 4: X
@@ -1168,9 +1071,7 @@ void CEditor::DrawOxeLogo(BLContext &ctx, float x, float y, float scale)
     poly4.line_to(47.0f, 91.5f);
     poly4.line_to(67.0f, 42.5f);
     poly4.close();
-    ctx.fill_path(poly4, BLRgba32(0x87, 0xc6, 0x27, 0xe6));
-    ctx.set_stroke_width(0.5f);
-    ctx.stroke_path(poly4, BLRgba32(0x00, 0x00, 0x00));
+    fillAndStroke(poly4, BLRgba32(0x87, 0xc6, 0x27, 0xe6));
 
     // ------------------------------------------------------------------------
     // Shape 5: E upper
@@ -1187,9 +1088,7 @@ void CEditor::DrawOxeLogo(BLContext &ctx, float x, float y, float scale)
     poly5.arc_to(112.8f, 41.8f, 18.8f, 18.8f, -0.0689f, -3.0037f, false); // Arc to (94.0, 40.5)
     poly5.close();
     ctx.set_fill_rule(BL_FILL_RULE_EVEN_ODD);
-    ctx.fill_path(poly5, BLRgba32(0x76, 0x70, 0x06));
-    ctx.set_stroke_width(0.5f);
-    ctx.stroke_path(poly5, BLRgba32(0x00, 0x00, 0x00));
+    fillAndStroke(poly5, BLRgba32(0x76, 0x70, 0x06));
 
     // ------------------------------------------------------------------------
     // Shape 6: E lower
@@ -1202,9 +1101,7 @@ void CEditor::DrawOxeLogo(BLContext &ctx, float x, float y, float scale)
     poly6.line_to(138.0f, 50.0f);
     poly6.arc_to(112.8f, 44.1f, 25.9f, 25.9f, 0.2310f, 2.6796f, false); // Arc to (87.5, 50.0)
     poly6.close();
-    ctx.fill_path(poly6, BLRgba32(0x76, 0x70, 0x06, 0xe6));
-    ctx.set_stroke_width(0.5f);
-    ctx.stroke_path(poly6, BLRgba32(0x00, 0x00, 0x00));
+    fillAndStroke(poly6, BLRgba32(0x76, 0x70, 0x06, 0xe6));
 
     // ------------------------------------------------------------------------
     // FM Synth

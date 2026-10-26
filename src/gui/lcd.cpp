@@ -22,44 +22,32 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "control.h"
 #include "lcd.h"
 
-#define LCD_SEP_H   1  // horizontal space between the LCD characters
-#define LCD_SEP_V   1  // vertical space between the LCD characters
-#define LCD_CHAR_H  7  // char height in pixels
-#define LCD_CHAR_W  5  // char width in pixels
-#define LCD_X       0  // bg left
-#define LCD_Y       0  // bg top
-
 CLcd::CLcd(int bmp, int x, int y)
 {
-    memset(text0, ' ', TEXT_SIZE);
-    memset(text1, ' ', TEXT_SIZE);
-    const char* def0 = "  Oxe FM Synth  ";
-    char def1[32];
+    this->bmp     = bmp;
+    this->left    = x;
+    this->top     = y;
+    this->right   = x + 165;
+    this->bottom  = y + 48;
+    this->toolkit = NULL;
+    ShowWelcome();
+}
+
+void CLcd::ShowWelcome()
+{
+    char version_info[LCD_COLS + 1];
     char vstr[32];
     snprintf(vstr, sizeof(vstr), "v%s", VERSION_STR);
     int vlen = (int)strlen(vstr);
     int pad = (LCD_COLS - vlen) / 2;
     if (pad < 0) pad = 0;
     int pos = 0;
-    for (int p = 0; p < pad && pos < LCD_COLS; p++) def1[pos++] = ' ';
-    for (int i = 0; i < vlen && pos < LCD_COLS; i++) def1[pos++] = vstr[i];
-    while (pos < LCD_COLS) def1[pos++] = ' ';
-    def1[LCD_COLS] = 0;
-    memcpy(text0, def0, strlen(def0) > TEXT_SIZE ? TEXT_SIZE : strlen(def0));
-    memcpy(text1, def1, strlen(def1) > TEXT_SIZE ? TEXT_SIZE : strlen(def1));
-    this->lcdx     = x;
-    this->lcdy     = y;
-    this->bmp      = bmp;
-    this->left     = x;
-    this->top      = y;
-    this->right    = x + 165;
-    this->bottom   = y + 48;
-    this->toolkit  = NULL;
-}
-
-int CLcd::GetCoordinates (oxeCoords *coords)
-{
-    return LCD_COORDS;
+    for (int p = 0; p < pad && pos < LCD_COLS; p++) version_info[pos++] = ' ';
+    for (int i = 0; i < vlen && pos < LCD_COLS; i++) version_info[pos++] = vstr[i];
+    while (pos < LCD_COLS) version_info[pos++] = ' ';
+    version_info[LCD_COLS] = 0;
+    SetText(0, "  Oxe FM Synth  ");
+    SetText(1, version_info);
 }
 
 void CLcd::GetRepaintBounds(int &rx, int &ry, int &rw, int &rh) const
@@ -68,16 +56,6 @@ void CLcd::GetRepaintBounds(int &rx, int &ry, int &rw, int &rh) const
     ry = this->top - 2;
     rw = (this->right - this->left) + 4;
     rh = (this->bottom - this->top) + 4;
-}
-
-void CLcd::Repaint()
-{
-    if (toolkit)
-    {
-        int rx, ry, rw, rh;
-        GetRepaintBounds(rx, ry, rw, rh);
-        toolkit->InvalidateRect(rx, ry, rw, rh);
-    }
 }
 
 void CLcd::Paint(BLContext &ctx, const BLFont &fontSmall, const BLFont &fontNormal)
@@ -93,8 +71,8 @@ void CLcd::Paint(BLContext &ctx, const BLFont &fontSmall, const BLFont &fontNorm
 
     char str0[TEXT_SIZE + 1];
     char str1[TEXT_SIZE + 1];
-    memcpy(str0, text0, TEXT_SIZE); str0[TEXT_SIZE] = 0;
-    memcpy(str1, text1, TEXT_SIZE); str1[TEXT_SIZE] = 0;
+    memcpy(str0, text[0], TEXT_SIZE); str0[TEXT_SIZE] = 0;
+    memcpy(str1, text[1], TEXT_SIZE); str1[TEXT_SIZE] = 0;
 
     // Line 0 (top line: bank or parameter label)
     if (fontSmall.is_valid())
@@ -109,39 +87,21 @@ void CLcd::Paint(BLContext &ctx, const BLFont &fontSmall, const BLFont &fontNorm
     }
 }
 
-bool CLcd::SetText(char lineIndex, const char* text)
+bool CLcd::SetText(char lineIndex, const char* str)
 {
-    int i = 0;
-    int tam = strlen(text);
-    if (lineIndex == 0)
+    if (lineIndex < 0 || lineIndex >= LCD_LINES)
+        return false;
+    char *dst = text[(int)lineIndex];
+    int tam = (int)strlen(str);
+    if (tam >= TEXT_SIZE)
     {
-        if (tam >= TEXT_SIZE)
-        {
-            memcpy(text0,text,TEXT_SIZE);
-        }
-        else if (tam < TEXT_SIZE)
-        {
-            memcpy(text0,text,tam);
-            for (i=tam;i<TEXT_SIZE;i++)
-                text0[i] = ' ';
-        }
-        Repaint();
-    }
-    else if (lineIndex == 1)
-    {
-        if (tam >= TEXT_SIZE)
-        {
-            memcpy(text1,text,TEXT_SIZE);
-        }
-        else if (tam < TEXT_SIZE)
-        {
-            memcpy(text1,text,tam);
-            for (i=tam;i<TEXT_SIZE;i++)
-                text1[i] = ' ';
-        }
-        Repaint();
+        memcpy(dst, str, TEXT_SIZE);
     }
     else
-        return false;
+    {
+        memcpy(dst, str, tam);
+        memset(dst + tam, ' ', TEXT_SIZE - tam);
+    }
+    Repaint();
     return true;
 }

@@ -24,6 +24,28 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <stdlib.h>
 #include <math.h>
 
+static const int kScalePercent[6] = { 100, 125, 150, 175, 200, 250 };
+
+static void PopulateScaleMenu(NSMenu *menu, id target, SEL action)
+{
+    static const char* const kScaleTitles[6] = {
+        "Scale 100% (950 × 656)",
+        "Scale 125% (1188 × 820)",
+        "Scale 150% (1425 × 984)",
+        "Scale 175% (1663 × 1148)",
+        "Scale 200% (1900 × 1312)",
+        "Scale 250% (2375 × 1640)"
+    };
+    for (int i = 0; i < 6; i++)
+    {
+        NSString *title = [NSString stringWithUTF8String:kScaleTitles[i]];
+        NSString *keyEq = [NSString stringWithFormat:@"%d", i + 1];
+        NSMenuItem *item = [menu addItemWithTitle:title action:action keyEquivalent:keyEq];
+        [item setTag:kScalePercent[i]];
+        [item setTarget:target];
+    }
+}
+
 @interface PluginView : NSView
 {
     CCocoaToolkit* toolkit;
@@ -32,6 +54,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 - (id)   initWithToolkit:(CCocoaToolkit*)toolkitPtr size:(NSSize)size;
 - (void) clearToolkit;
 - (void) viewDidMoveToWindow;
+- (void) getMouseCoords:(NSEvent *)event x:(int *)outX y:(int *)outY;
 - (void) mouseDown:(NSEvent *)event;
 - (void) mouseUp:(NSEvent *)event;
 - (void) mouseMoved:(NSEvent *)event;
@@ -41,12 +64,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 - (BOOL) acceptsFirstResponder;
 - (BOOL) isOpaque;
 - (NSMenu *) menuForEvent:(NSEvent *)event;
-- (void) scale100:(id)sender;
-- (void) scale125:(id)sender;
-- (void) scale150:(id)sender;
-- (void) scale175:(id)sender;
-- (void) scale200:(id)sender;
-- (void) scale250:(id)sender;
+- (void) resizeToScalePercent:(int)percent;
+- (void) applyScale:(id)sender;
 - (BOOL) performKeyEquivalent:(NSEvent *)event;
 @end
 
@@ -68,12 +87,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 - (void) invalidate;
 - (void) invalidateRect:(NSRect)rect;
 - (void) resizeToWidth:(int)w height:(int)h;
-- (void) scale100:(id)sender;
-- (void) scale125:(id)sender;
-- (void) scale150:(id)sender;
-- (void) scale175:(id)sender;
-- (void) scale200:(id)sender;
-- (void) scale250:(id)sender;
 @end
 
 struct CCocoaToolkitImpl
@@ -206,15 +219,21 @@ struct CCocoaToolkitImpl
     [[self window] makeFirstResponder:self];
 }
 
-- (void) mouseDown:(NSEvent *)event
+- (void) getMouseCoords:(NSEvent *)event x:(int *)outX y:(int *)outY
 {
-    if (!toolkit || !toolkit->editor) return;
     NSPoint loc = [self convertPoint:[event locationInWindow] fromView:nil];
     NSRect bounds = [self bounds];
     float sx = bounds.size.width / (float)GUI_WIDTH;
     float sy = bounds.size.height / (float)GUI_HEIGHT;
-    int x = (int)(loc.x / sx);
-    int y = GUI_HEIGHT - (int)(loc.y / sy);
+    *outX = (int)(loc.x / sx);
+    *outY = GUI_HEIGHT - (int)(loc.y / sy);
+}
+
+- (void) mouseDown:(NSEvent *)event
+{
+    if (!toolkit || !toolkit->editor) return;
+    int x, y;
+    [self getMouseCoords:event x:&x y:&y];
     toolkit->editor->OnLButtonDown(x, y);
 }
 
@@ -224,12 +243,8 @@ struct CCocoaToolkitImpl
     toolkit->editor->OnLButtonUp();
     if ([event clickCount] == 2)
     {
-        NSPoint loc = [self convertPoint:[event locationInWindow] fromView:nil];
-        NSRect bounds = [self bounds];
-        float sx = bounds.size.width / (float)GUI_WIDTH;
-        float sy = bounds.size.height / (float)GUI_HEIGHT;
-        int x = (int)(loc.x / sx);
-        int y = GUI_HEIGHT - (int)(loc.y / sy);
+        int x, y;
+        [self getMouseCoords:event x:&x y:&y];
         toolkit->editor->OnLButtonDblClick(x, y);
     }
 }
@@ -237,36 +252,24 @@ struct CCocoaToolkitImpl
 - (void) mouseMoved:(NSEvent *)event
 {
     if (!toolkit || !toolkit->editor) return;
-    NSPoint loc = [self convertPoint:[event locationInWindow] fromView:nil];
-    NSRect bounds = [self bounds];
-    float sx = bounds.size.width / (float)GUI_WIDTH;
-    float sy = bounds.size.height / (float)GUI_HEIGHT;
-    int x = (int)(loc.x / sx);
-    int y = GUI_HEIGHT - (int)(loc.y / sy);
+    int x, y;
+    [self getMouseCoords:event x:&x y:&y];
     toolkit->editor->OnMouseMove(x, y);
 }
 
 - (void) mouseDragged:(NSEvent *)event
 {
     if (!toolkit || !toolkit->editor) return;
-    NSPoint loc = [self convertPoint:[event locationInWindow] fromView:nil];
-    NSRect bounds = [self bounds];
-    float sx = bounds.size.width / (float)GUI_WIDTH;
-    float sy = bounds.size.height / (float)GUI_HEIGHT;
-    int x = (int)(loc.x / sx);
-    int y = GUI_HEIGHT - (int)(loc.y / sy);
+    int x, y;
+    [self getMouseCoords:event x:&x y:&y];
     toolkit->editor->OnMouseMove(x, y);
 }
 
 - (void) scrollWheel:(NSEvent *)event
 {
     if (!toolkit || !toolkit->editor) return;
-    NSPoint loc = [self convertPoint:[event locationInWindow] fromView:nil];
-    NSRect bounds = [self bounds];
-    float sx = bounds.size.width / (float)GUI_WIDTH;
-    float sy = bounds.size.height / (float)GUI_HEIGHT;
-    int x = (int)(loc.x / sx);
-    int y = GUI_HEIGHT - (int)(loc.y / sy);
+    int x, y;
+    [self getMouseCoords:event x:&x y:&y];
     CGFloat delta = [event deltaY];
     if (delta != 0.0)
     {
@@ -289,18 +292,7 @@ struct CCocoaToolkitImpl
     if ([event type] == NSEventTypeRightMouseDown)
     {
         NSMenu *menu = [[[NSMenu alloc] initWithTitle:@"Zoom"] autorelease];
-        NSMenuItem *i100 = [menu addItemWithTitle:@"Scale 100% (950 × 656)" action:@selector(scale100:) keyEquivalent:@"1"];
-        [i100 setTarget:self];
-        NSMenuItem *i125 = [menu addItemWithTitle:@"Scale 125% (1188 × 820)" action:@selector(scale125:) keyEquivalent:@"2"];
-        [i125 setTarget:self];
-        NSMenuItem *i150 = [menu addItemWithTitle:@"Scale 150% (1425 × 984)" action:@selector(scale150:) keyEquivalent:@"3"];
-        [i150 setTarget:self];
-        NSMenuItem *i175 = [menu addItemWithTitle:@"Scale 175% (1663 × 1148)" action:@selector(scale175:) keyEquivalent:@"4"];
-        [i175 setTarget:self];
-        NSMenuItem *i200 = [menu addItemWithTitle:@"Scale 200% (1900 × 1312)" action:@selector(scale200:) keyEquivalent:@"5"];
-        [i200 setTarget:self];
-        NSMenuItem *i250 = [menu addItemWithTitle:@"Scale 250% (2375 × 1640)" action:@selector(scale250:) keyEquivalent:@"6"];
-        [i250 setTarget:self];
+        PopulateScaleMenu(menu, self, @selector(applyScale:));
         return menu;
     }
     return [super menuForEvent:event];
@@ -311,44 +303,32 @@ struct CCocoaToolkitImpl
     if ([event modifierFlags] & NSEventModifierFlagCommand)
     {
         NSString *chars = [event charactersIgnoringModifiers];
-        if ([chars isEqualToString:@"1"]) { [self scale100:nil]; return YES; }
-        if ([chars isEqualToString:@"2"]) { [self scale125:nil]; return YES; }
-        if ([chars isEqualToString:@"3"]) { [self scale150:nil]; return YES; }
-        if ([chars isEqualToString:@"4"]) { [self scale175:nil]; return YES; }
-        if ([chars isEqualToString:@"5"]) { [self scale200:nil]; return YES; }
-        if ([chars isEqualToString:@"6"]) { [self scale250:nil]; return YES; }
+        if ([chars length] == 1)
+        {
+            unichar c = [chars characterAtIndex:0];
+            if (c >= '1' && c <= '6')
+            {
+                [self resizeToScalePercent:kScalePercent[c - '1']];
+                return YES;
+            }
+        }
     }
     return [super performKeyEquivalent:event];
 }
 
-- (void) scale100:(id)sender
+- (void) resizeToScalePercent:(int)percent
 {
-    if (toolkit) toolkit->Resize(GUI_WIDTH, GUI_HEIGHT);
+    if (toolkit)
+    {
+        int w = (int)round(GUI_WIDTH * (percent / 100.0));
+        int h = (int)round(GUI_HEIGHT * (percent / 100.0));
+        toolkit->Resize(w, h);
+    }
 }
 
-- (void) scale125:(id)sender
+- (void) applyScale:(id)sender
 {
-    if (toolkit) toolkit->Resize((int)round(GUI_WIDTH * 1.25), (int)round(GUI_HEIGHT * 1.25));
-}
-
-- (void) scale150:(id)sender
-{
-    if (toolkit) toolkit->Resize((int)round(GUI_WIDTH * 1.5), (int)round(GUI_HEIGHT * 1.5));
-}
-
-- (void) scale175:(id)sender
-{
-    if (toolkit) toolkit->Resize((int)round(GUI_WIDTH * 1.75), (int)round(GUI_HEIGHT * 1.75));
-}
-
-- (void) scale200:(id)sender
-{
-    if (toolkit) toolkit->Resize(GUI_WIDTH * 2, GUI_HEIGHT * 2);
-}
-
-- (void) scale250:(id)sender
-{
-    if (toolkit) toolkit->Resize((int)round(GUI_WIDTH * 2.5), (int)round(GUI_HEIGHT * 2.5));
+    [self resizeToScalePercent:(int)[sender tag]];
 }
 
 @end
@@ -394,18 +374,7 @@ struct CCocoaToolkitImpl
             NSMenuItem *viewMenuItem = [[[NSMenuItem alloc] init] autorelease];
             [mainMenu addItem:viewMenuItem];
             NSMenu *viewMenu = [[[NSMenu alloc] initWithTitle:@"View"] autorelease];
-            NSMenuItem *mi100 = [viewMenu addItemWithTitle:@"Scale 100% (950 × 656)" action:@selector(scale100:) keyEquivalent:@"1"];
-            [mi100 setTarget:self];
-            NSMenuItem *mi125 = [viewMenu addItemWithTitle:@"Scale 125% (1188 × 820)" action:@selector(scale125:) keyEquivalent:@"2"];
-            [mi125 setTarget:self];
-            NSMenuItem *mi150 = [viewMenu addItemWithTitle:@"Scale 150% (1425 × 984)" action:@selector(scale150:) keyEquivalent:@"3"];
-            [mi150 setTarget:self];
-            NSMenuItem *mi175 = [viewMenu addItemWithTitle:@"Scale 175% (1663 × 1148)" action:@selector(scale175:) keyEquivalent:@"4"];
-            [mi175 setTarget:self];
-            NSMenuItem *mi200 = [viewMenu addItemWithTitle:@"Scale 200% (1900 × 1312)" action:@selector(scale200:) keyEquivalent:@"5"];
-            [mi200 setTarget:self];
-            NSMenuItem *mi250 = [viewMenu addItemWithTitle:@"Scale 250% (2375 × 1640)" action:@selector(scale250:) keyEquivalent:@"6"];
-            [mi250 setTarget:self];
+            PopulateScaleMenu(viewMenu, view, @selector(applyScale:));
             [viewMenuItem setSubmenu:viewMenu];
 
             [NSApp setMainMenu:mainMenu];
@@ -548,36 +517,6 @@ struct CCocoaToolkitImpl
     }
 }
 
-- (void) scale100:(id)sender
-{
-    [self resizeToWidth:GUI_WIDTH height:GUI_HEIGHT];
-}
-
-- (void) scale125:(id)sender
-{
-    [self resizeToWidth:(int)round(GUI_WIDTH * 1.25) height:(int)round(GUI_HEIGHT * 1.25)];
-}
-
-- (void) scale150:(id)sender
-{
-    [self resizeToWidth:(int)round(GUI_WIDTH * 1.5) height:(int)round(GUI_HEIGHT * 1.5)];
-}
-
-- (void) scale175:(id)sender
-{
-    [self resizeToWidth:(int)round(GUI_WIDTH * 1.75) height:(int)round(GUI_HEIGHT * 1.75)];
-}
-
-- (void) scale200:(id)sender
-{
-    [self resizeToWidth:(GUI_WIDTH * 2) height:(GUI_HEIGHT * 2)];
-}
-
-- (void) scale250:(id)sender
-{
-    [self resizeToWidth:(int)round(GUI_WIDTH * 2.5) height:(int)round(GUI_HEIGHT * 2.5)];
-}
-
 @end
 
 //----------------------------------------------------------------------
@@ -632,11 +571,6 @@ void CCocoaToolkit::InvalidateRect(int x, int y, int width, int height)
     {
         [pImpl->controller invalidateRect:NSMakeRect(x, y, width, height)];
     }
-}
-
-void CCocoaToolkit::CopyRect(int destX, int destY, int width, int height, int origBmp, int origX, int origY)
-{
-    InvalidateRect(destX, destY, width, height);
 }
 
 void CCocoaToolkit::StartMouseCapture()

@@ -47,42 +47,6 @@ void CChannels::OnClick(int x, int y)
     Repaint();
 }
 
-int CChannels::GetCoordinates (oxeCoords *coords)
-{
-    char i;
-    for (i=0;i< 8;i++)
-    {
-        coords->destX   = this->left +  i    * KEY_WIDTH;
-        coords->destY   = this->top;
-        coords->width   = KEY_WIDTH;
-        coords->height  = KEY_HEIGHT;
-        coords->origBmp = this->bmp;
-        coords->origX   = (*channel==i)?KEY_WIDTH:0;
-        coords->origY   = 0;
-        coords++;
-    }
-    for (i=8;i<16;i++)
-    {
-        coords->destX   = this->left + (i-8) * KEY_WIDTH;
-        coords->destY   = this->top + KEY_HEIGHT;
-        coords->width   = KEY_WIDTH;
-        coords->height  = KEY_HEIGHT;
-        coords->origBmp = this->bmp;
-        coords->origX   = (*channel==i)?KEY_WIDTH:0;
-        coords->origY   = 0;
-        coords++;
-    }
-    return MIDICHANNELS;
-}
-
-void CChannels::Repaint()
-{
-    if (toolkit)
-    {
-        toolkit->InvalidateRect(this->left, this->top, this->right - this->left, this->bottom - this->top);
-    }
-}
-
 void CChannels::Paint(BLContext &ctx, const BLFont &fontSmall, const BLFont &fontNormal)
 {
     float cellW = (float)(right - left) / 8.0f;

@@ -85,36 +85,6 @@ CKnob::CKnob(int bmp, int knobSize, const char *name, CSynthesizer *synthesizer,
     this->shortLabel  = GetShortLabel(this->name);
 }
 
-int CKnob::GetCoordinates (oxeCoords *coords)
-{
-    char valtemp = value;
-    switch (type)
-    {
-        case VL_WAVEFORM:
-            valtemp = (char)lrintf(fvalue*(MAXPARVALUE/(WAVEFORMS-1)));
-            break;
-        case VL_FILTER:
-            valtemp = (char)lrintf(fvalue*(MAXPARVALUE/2));
-            break;
-        case VL_LFO_DEST:
-            valtemp = (char)lrintf(fvalue*(MAXPARVALUE/2));
-            break;
-        case VL_MOD_DEST:
-            valtemp = (char)lrintf(fvalue*(MAXPARVALUE/6));
-            break;
-    }
-    if (valtemp > 99)
-        valtemp = 99;
-    coords->destX   = this->left;
-    coords->destY   = this->top;
-    coords->width   = this->right - this->left;
-    coords->height  = this->bottom - this->top;
-    coords->origBmp = this->bmp;
-    coords->origX   = (valtemp - (abs(valtemp/10) * 10)) * this->knobSize;
-    coords->origY   = abs(valtemp/10) * this->knobSize;
-    return 1;
-}
-
 void CKnob::GetRepaintBounds(int &rx, int &ry, int &rw, int &rh) const
 {
     if (isMatrix)
@@ -132,18 +102,6 @@ void CKnob::GetRepaintBounds(int &rx, int &ry, int &rw, int &rh) const
         rh = this->knobSize + 16;
     }
 }
-
-void CKnob::Repaint()
-{
-    if (toolkit)
-    {
-        int rx, ry, rw, rh;
-        GetRepaintBounds(rx, ry, rw, rh);
-        toolkit->InvalidateRect(rx, ry, rw, rh);
-    }
-}
-
-
 
 void CKnob::Paint(BLContext &ctx, const BLFont &fontSmall, const BLFont &fontNormal)
 {

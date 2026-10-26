@@ -25,6 +25,29 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <unistd.h>
 #include <math.h>
 
+static void GetMouseScaled(CXlibToolkit *toolkit, int inX, int inY, int &outX, int &outY)
+{
+    XWindowAttributes wa;
+    XGetWindowAttributes(toolkit->display, toolkit->window, &wa);
+    float sx = wa.width > 0 ? (float)wa.width / (float)GUI_WIDTH : 1.0f;
+    float sy = wa.height > 0 ? (float)wa.height / (float)GUI_HEIGHT : 1.0f;
+    outX = (int)(inX / sx);
+    outY = (int)(inY / sy);
+}
+
+static void SendClientAtom(Display *display, Window window, Atom atom)
+{
+    XClientMessageEvent event;
+    event.display      = display;
+    event.window       = window;
+    event.type         = ClientMessage;
+    event.format       = 8;
+    event.data.l[0]    = atom;
+    event.message_type = atom;
+    XSendEvent(display, window, false, 0L, (XEvent*)&event);
+    XFlush(display);
+}
+
 void* eventProc(void* ptr)
 {
     XEvent event;
@@ -44,12 +67,8 @@ void* eventProc(void* ptr)
             case ButtonPress:
             {
                 XButtonEvent *e = (XButtonEvent*)&event;
-                XWindowAttributes wa;
-                XGetWindowAttributes(toolkit->display, toolkit->window, &wa);
-                float sx = wa.width > 0 ? (float)wa.width / (float)GUI_WIDTH : 1.0f;
-                float sy = wa.height > 0 ? (float)wa.height / (float)GUI_HEIGHT : 1.0f;
-                int mx = (int)(e->x / sx);
-                int my = (int)(e->y / sy);
+                int mx, my;
+                GetMouseScaled(toolkit, e->x, e->y, mx, my);
 
                 switch (e->button)
                 {
@@ -81,12 +100,8 @@ void* eventProc(void* ptr)
             case MotionNotify:
             {
                 XMotionEvent *e = (XMotionEvent*)&event;
-                XWindowAttributes wa;
-                XGetWindowAttributes(toolkit->display, toolkit->window, &wa);
-                float sx = wa.width > 0 ? (float)wa.width / (float)GUI_WIDTH : 1.0f;
-                float sy = wa.height > 0 ? (float)wa.height / (float)GUI_HEIGHT : 1.0f;
-                int mx = (int)(e->x / sx);
-                int my = (int)(e->y / sy);
+                int mx, my;
+                GetMouseScaled(toolkit, e->x, e->y, mx, my);
                 toolkit->editor->OnMouseMove(mx, my);
                 break;
             }
@@ -136,15 +151,7 @@ void* updateProc(void* ptr)
     CXlibToolkit *toolkit = (CXlibToolkit*)ptr;
     while (!toolkit->thread1Finished)
     {
-        XClientMessageEvent event;
-        event.display      = toolkit->display;
-        event.window       = toolkit->window;
-        event.type         = ClientMessage;
-        event.format       = 8;
-        event.data.l[0]    = toolkit->WM_TIMER;
-        event.message_type = toolkit->WM_TIMER;
-        XSendEvent(toolkit->display, toolkit->window, false, 0L, (XEvent*)&event);
-        XFlush(toolkit->display);
+        SendClientAtom(toolkit->display, toolkit->window, toolkit->WM_TIMER);
         usleep(1000 * TIMER_RESOLUTION_MS);
     }
     toolkit->thread2Finished = true;
@@ -169,21 +176,25 @@ CXlibToolkit::CXlibToolkit(void *parentWindow, CEditor *editor)
     attr.background_pixmap = None;
     attr.event_mask = ExposureMask | KeyPressMask | ButtonPressMask | ButtonReleaseMask | PointerMotionMask;
 
+    Window parent = parentWindow ? (Window)parentWindow : RootWindow(display, screen);
+    int winX = parentWindow ? 0 : 100;
+    int winY = parentWindow ? 0 : 100;
+
+    this->window = XCreateWindow(
+        display,
+        parent,
+        winX, winY,
+        GUI_WIDTH, GUI_HEIGHT,
+        0,
+        CopyFromParent,
+        InputOutput,
+        CopyFromParent,
+        CWBackPixmap | CWEventMask,
+        &attr
+    );
+
     if (!parentWindow)
     {
-        this->window = XCreateWindow(
-            display,
-            RootWindow(display, screen),
-            100, 100,
-            GUI_WIDTH, GUI_HEIGHT,
-            0,
-            CopyFromParent,
-            InputOutput,
-            CopyFromParent,
-            CWBackPixmap | CWEventMask,
-            &attr
-        );
-
         XStoreName(display, window, "Oxe FM Synth");
 
         // Lock aspect ratio for standalone window
@@ -196,21 +207,6 @@ CXlibToolkit::CXlibToolkit(void *parentWindow, CEditor *editor)
         hints.max_aspect.x = GUI_WIDTH;
         hints.max_aspect.y = GUI_HEIGHT;
         XSetWMNormalHints(display, window, &hints);
-    }
-    else
-    {
-        this->window = XCreateWindow(
-            display,
-            (Window)parentWindow,
-            0, 0,
-            GUI_WIDTH, GUI_HEIGHT,
-            0,
-            CopyFromParent,
-            InputOutput,
-            CopyFromParent,
-            CWBackPixmap | CWEventMask,
-            &attr
-        );
     }
 
     WM_DELETE_WINDOW = XInternAtom(display, "WM_DELETE_WINDOW", false);
@@ -226,15 +222,7 @@ CXlibToolkit::~CXlibToolkit()
 {
     if (display && window)
     {
-        XClientMessageEvent event;
-        event.display      = display;
-        event.window       = window;
-        event.type         = ClientMessage;
-        event.format       = 8;
-        event.data.l[0]    = WM_DELETE_WINDOW;
-        event.message_type = WM_DELETE_WINDOW;
-        XSendEvent(display, window, false, 0L, (XEvent*)&event);
-        XFlush(display);
+        SendClientAtom(display, window, WM_DELETE_WINDOW);
         while (!thread1Finished || !thread2Finished)
         {
             usleep(1000 * 1);
@@ -360,11 +348,6 @@ void CXlibToolkit::InvalidateRect(int x, int y, int width, int height)
     if (vy < 0) { vh += vy; vy = 0; }
     XClearArea(display, window, vx, vy, vw, vh, True);
     XFlush(display);
-}
-
-void CXlibToolkit::CopyRect(int destX, int destY, int width, int height, int origBmp, int origX, int origY)
-{
-    InvalidateRect(destX, destY, width, height);
 }
 
 void CXlibToolkit::StartMouseCapture()

@@ -16,18 +16,30 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-typedef struct
-{
-    int destX;
-    int destY;
-    int width;
-    int height;
-    int origBmp;
-    int origX;
-    int origY;
-} oxeCoords;
+#pragma once
 
 #include <blend2d/blend2d.h>
+
+inline char GetOpLetter(int index)
+{
+    static const char opLetters[8] = {'A', 'B', 'C', 'D', 'E', 'F', 'X', 'Z'};
+    return (index >= 0 && index < 8) ? opLetters[index] : '?';
+}
+
+inline BLRgba32 GetOpAccentColor(int index)
+{
+    static const BLRgba32 accents[8] = {
+        BLRgba32(0x00, 0xf0, 0xff), // A: cyan
+        BLRgba32(0x00, 0xe6, 0x76), // B: emerald green
+        BLRgba32(0xff, 0xd6, 0x00), // C: amber
+        BLRgba32(0xff, 0x91, 0x00), // D: orange
+        BLRgba32(0xb3, 0x88, 0xff), // E: violet
+        BLRgba32(0xff, 0x40, 0x81), // F: magenta
+        BLRgba32(0x40, 0xc4, 0xff), // X: ice blue
+        BLRgba32(0xee, 0xf2, 0xf6)  // Z: white
+    };
+    return (index >= 0 && index < 8) ? accents[index] : accents[0];
+}
 
 class CControl
 {
@@ -59,7 +71,6 @@ public:
     virtual bool  IncreaseValue  (int delta)             {return false;}
     virtual int   GetIndex       (void)                  {return -1   ;}
     virtual int   GetType        (void)                  {return -1   ;}
-    virtual int   GetCoordinates (oxeCoords *coords)     {return  0   ;}
     virtual void  Paint          (BLContext &ctx, const BLFont &fontSmall, const BLFont &fontNormal) {}
     void SetToolkit(CToolkit *toolkit)
     {

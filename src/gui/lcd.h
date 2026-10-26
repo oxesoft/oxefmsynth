@@ -18,20 +18,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #define LCD_COLS    16 // columns
 #define LCD_LINES   2  // lines
-#define LCD_COORDS  (LCD_COLS * LCD_LINES)
 
 class CLcd : public CControl
 {
 private:
-    char     text0[TEXT_SIZE];
-    char     text1[TEXT_SIZE];
-    int      lcdx;
-    int      lcdy;
-    void Repaint() override;
+    char text[LCD_LINES][TEXT_SIZE];
 public:
     CLcd(int bmpchars, int x, int y);
+    void ShowWelcome();
     bool SetText(char lineIndex, const char *text);
-    int  GetCoordinates(oxeCoords *coords) override;
     void GetRepaintBounds(int &rx, int &ry, int &rw, int &rh) const override;
     void Paint(BLContext &ctx, const BLFont &fontSmall, const BLFont &fontNormal) override;
 };

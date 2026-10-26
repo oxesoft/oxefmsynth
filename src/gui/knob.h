@@ -30,7 +30,6 @@ private:
     bool  isOutput;
     bool  isPan;
     bool  isSelfMod;
-    void  Repaint() override;
 public:
     CKnob(int bmp, int knobSize, const char *name, CSynthesizer *synthesizer, char &channel, int type, int par, int x, int y);
     bool  Update         (void) override;
@@ -39,8 +38,6 @@ public:
     bool  IncreaseValue  (int delta) override;
     int   GetIndex       (void) override;
     int   GetType        (void) override;
-    float GetValue       (char channel);
-    int   GetCoordinates (oxeCoords *coords) override;
     void  GetRepaintBounds(int &rx, int &ry, int &rw, int &rh) const override;
     void  Paint          (BLContext &ctx, const BLFont &fontSmall, const BLFont &fontNormal) override;
 };

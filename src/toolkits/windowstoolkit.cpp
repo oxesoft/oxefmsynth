@@ -29,7 +29,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 static int g_useCount = 0;
 extern void* hInstance;
 
-static void GetMouseScaled(HWND hWnd, LPARAM lParam, int &outX, int &outY)
+static void ScaleClientPoint(HWND hWnd, int inX, int inY, int &outX, int &outY)
 {
     RECT rc;
     GetClientRect(hWnd, &rc);
@@ -37,14 +37,19 @@ static void GetMouseScaled(HWND hWnd, LPARAM lParam, int &outX, int &outY)
     int ch = rc.bottom - rc.top;
     if (cw <= 0 || ch <= 0)
     {
-        outX = GET_X_LPARAM(lParam);
-        outY = GET_Y_LPARAM(lParam);
+        outX = inX;
+        outY = inY;
         return;
     }
     float sx = (float)cw / (float)GUI_WIDTH;
     float sy = (float)ch / (float)GUI_HEIGHT;
-    outX = (int)(GET_X_LPARAM(lParam) / sx);
-    outY = (int)(GET_Y_LPARAM(lParam) / sy);
+    outX = (int)(inX / sx);
+    outY = (int)(inY / sy);
+}
+
+static void GetMouseScaled(HWND hWnd, LPARAM lParam, int &outX, int &outY)
+{
+    ScaleClientPoint(hWnd, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), outX, outY);
 }
 
 LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -115,14 +120,8 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
         {
             int zDelta = GET_WHEEL_DELTA_WPARAM(wParam) / WHEEL_DELTA;
             ScreenToClient(hWnd, &point);
-            RECT rc;
-            GetClientRect(hWnd, &rc);
-            int cw = rc.right - rc.left;
-            int ch = rc.bottom - rc.top;
-            float sx = cw > 0 ? (float)cw / (float)GUI_WIDTH : 1.0f;
-            float sy = ch > 0 ? (float)ch / (float)GUI_HEIGHT : 1.0f;
-            int mx = (int)(point.x / sx);
-            int my = (int)(point.y / sy);
+            int mx, my;
+            ScaleClientPoint(hWnd, point.x, point.y, mx, my);
             toolkit->editor->OnMouseWheel(mx, my, zDelta);
             SetFocus(hWnd);
             return 0;
@@ -386,11 +385,6 @@ void CWindowsToolkit::InvalidateRect(int x, int y, int width, int height)
     rc.right  = (int)ceil((x + width + 1) * scale);
     rc.bottom = (int)ceil((y + height + 1) * scale);
     ::InvalidateRect(hWnd, &rc, FALSE);
-}
-
-void CWindowsToolkit::CopyRect(int destX, int destY, int width, int height, int origBmp, int origX, int origY)
-{
-    InvalidateRect(destX, destY, width, height);
 }
 
 void CWindowsToolkit::StartMouseCapture()

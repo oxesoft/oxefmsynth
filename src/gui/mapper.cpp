@@ -32,6 +32,7 @@ char CMapper::FloatValueToIntValue(CSynthesizer *synthesizer, char channel, int 
             value = (char)lrintf(fvalue*MAXPARVALUE);
             break;
         case VL_MINUS1_2_PLUS1:
+        case VL_PAN:
             value = (char)lrintf(((fvalue/2.f)*MAXPARVALUE)+MAXPARVALUE/2.f);
             break;
         case VL_FILTER_CUTOFF:
@@ -65,13 +66,11 @@ char CMapper::FloatValueToIntValue(CSynthesizer *synthesizer, char channel, int 
             value = (char)lrintf(fvalue*(MAXPARVALUE/float(WAVEFORMS-1)));
             break;
         case VL_FILTER:
+        case VL_LFO_DEST:
             value = (char)lrintf(fvalue*(MAXPARVALUE/2.f));
             break;
         case VL_MOD:
             value = (char)lrintf(MAXPARVALUE * powf(fvalue, 0.5f));
-            break;
-        case VL_PAN:
-            value = (char)lrintf(((fvalue/2.f)*MAXPARVALUE)+MAXPARVALUE/2);
             break;
         case VL_PITCH_CURVE:
         {
@@ -87,9 +86,6 @@ char CMapper::FloatValueToIntValue(CSynthesizer *synthesizer, char channel, int 
         }
         case VL_LFO_RATE:
             value = (char)lrintf((MAXPARVALUE / 16.f) * fvalue);
-            break;
-        case VL_LFO_DEST:
-            value = (char)lrintf(fvalue*(MAXPARVALUE/2.f));
             break;
         case VL_MOD_DEST:
             value = (char)lrintf(fvalue*(MAXPARVALUE/6.f));
@@ -148,6 +144,7 @@ float CMapper::IntValueToFloatValue(CSynthesizer *synthesizer, char channel, int
             fvalue = (float)(value/((lrintf(MAXPARVALUE)+4)/WAVEFORMS));
             break;
         case VL_FILTER:
+        case VL_LFO_DEST:
             fvalue = (float)(value/((lrintf(MAXPARVALUE)+4)/(2+1)));
             break;
         case VL_MOD:
@@ -172,9 +169,6 @@ float CMapper::IntValueToFloatValue(CSynthesizer *synthesizer, char channel, int
         case VL_LFO_RATE:
             fvalue = (16.f / MAXPARVALUE) * (float)value;
             break;
-        case VL_LFO_DEST:
-            fvalue = (float)(value/((lrintf(MAXPARVALUE)+4)/(2+1)));
-            break;
         case VL_MOD_DEST:
             fvalue = (float)(value/((lrintf(MAXPARVALUE)+5)/(6+1)));
             break;
@@ -192,8 +186,6 @@ void CMapper::GetDisplayValue(CSynthesizer *synthesizer, char channel, int par, 
     switch (type)
     {
         case VL_ZERO_TO_ONE:
-            snprintf(str, TEXT_SIZE, "%.2f", fvalue);
-            break;
         case VL_MINUS1_2_PLUS1:
             snprintf(str, TEXT_SIZE, "%.2f", fvalue);
             break;
@@ -213,19 +205,12 @@ void CMapper::GetDisplayValue(CSynthesizer *synthesizer, char channel, int par, 
             }
             else
             {
-                if (value>50)
+                if (value != 50)
                 {
-                    char lval = value - 50;
+                    char lval = (value > 50) ? (value - 50) : (50 - value);
                     char octa = lval / 12;
                     char semi = lval - (octa * 12);
-                    snprintf(str, TEXT_SIZE, "+%i oct & %02i semi", octa, semi);
-                }
-                else if (value<50)
-                {
-                    char lval = 50 - value;
-                    char octa = lval / 12;
-                    char semi = lval - (octa * 12);
-                    snprintf(str, TEXT_SIZE, "-%i oct & %02i semi", octa, semi);
+                    snprintf(str, TEXT_SIZE, "%c%i oct & %02i semi", (value > 50) ? '+' : '-', octa, semi);
                 }
                 else
                 {
@@ -242,61 +227,36 @@ void CMapper::GetDisplayValue(CSynthesizer *synthesizer, char channel, int par, 
             {
                 snprintf(str, TEXT_SIZE, "%.2fHz", C0 * fvalue);
             }
+            else if (!kbTrack)
+            {
+                snprintf(str, TEXT_SIZE, "%.2fHz", C0 * fvalue * powf(2.0f, (coarseT/MAXPARVALUE * MAXFREQOSC) / 12.0f));
+            }
             else
             {
-                if (!kbTrack)
-                {
-                    snprintf(str, TEXT_SIZE, "%.2fHz", C0 * fvalue * powf(2.0f, (coarseT/MAXPARVALUE * MAXFREQOSC) / 12.0f));
-                }
-                else
-                {
-                    snprintf(str, TEXT_SIZE, "%.2f semitone", (float)((value-(MAXPARVALUE/2))*2)/MAXPARVALUE);
-                }
+                snprintf(str, TEXT_SIZE, "%.2f semitone", (float)((value-(MAXPARVALUE/2))*2)/MAXPARVALUE);
             }
             break;
         }
         case VL_TIME:
-            snprintf(str, TEXT_SIZE, "%fs", fvalue);
-            break;
         case VL_PORTAMENTO:
             snprintf(str, TEXT_SIZE, "%fs", fvalue);
             break;
         case VL_WAVEFORM:
-            switch (lrintf(fvalue))
-            {
-                case 0:
-                    strncpy(str, "Sine", TEXT_SIZE);
-                    break;
-                case 1:
-                    strncpy(str, "Saw", TEXT_SIZE);
-                    break;
-                case 2:
-                    strncpy(str, "Triangle", TEXT_SIZE);
-                    break;
-                case 3:
-                    strncpy(str, "Square", TEXT_SIZE);
-                    break;
-                case 4:
-                    strncpy(str, "Square bandlimit", TEXT_SIZE);
-                    break;
-                case 5:
-                    strncpy(str, "Saw bandlimited", TEXT_SIZE);
-                    break;
-                default:
-                    strncpy(str, "?", TEXT_SIZE);
-                    break;
-            }
+        {
+            static const char* const names[] = {
+                "Sine", "Saw", "Triangle", "Square", "Square bandlimit", "Saw bandlimited"
+            };
+            long idx = lrintf(fvalue);
+            strncpy(str, (idx >= 0 && idx < 6) ? names[idx] : "?", TEXT_SIZE);
             break;
+        }
         case VL_FILTER:
-            if      (fvalue == 0.f)
-                strncpy(str, "Lowpass", TEXT_SIZE);
-            else if (fvalue == 1.f)
-                strncpy(str, "Hipass", TEXT_SIZE);
-            else if (fvalue == 2.f)
-                strncpy(str, "Bandpass", TEXT_SIZE);
-            else
-                strncpy(str, "?", TEXT_SIZE);
+        {
+            static const char* const names[] = { "Lowpass", "Hipass", "Bandpass" };
+            int idx = (int)fvalue;
+            strncpy(str, (fvalue == (float)idx && idx >= 0 && idx < 3) ? names[idx] : "?", TEXT_SIZE);
             break;
+        }
         case VL_MOD:
             snprintf(str, TEXT_SIZE, "%i", value);
             break;
@@ -323,37 +283,28 @@ void CMapper::GetDisplayValue(CSynthesizer *synthesizer, char channel, int par, 
             snprintf(str, TEXT_SIZE, "%.2fHz", fvalue);
             break;
         case VL_LFO_DEST:
-            if      (fvalue == 0.f)
-                strncpy(str, "Pitch", TEXT_SIZE);
-            else if (fvalue == 1.f)
-                strncpy(str, "OPX", TEXT_SIZE);
-            else if (fvalue == 2.f)
-                strncpy(str, "OPZ", TEXT_SIZE);
-            else
-                strncpy(str, "?", TEXT_SIZE);
+        {
+            static const char* const names[] = { "Pitch", "OPX", "OPZ" };
+            int idx = (int)fvalue;
+            strncpy(str, (fvalue == (float)idx && idx >= 0 && idx < 3) ? names[idx] : "?", TEXT_SIZE);
             break;
+        }
         case VL_MOD_DEST:
-            if      (fvalue == 0.f)
-                strncpy(str, "LFO Depth", TEXT_SIZE);
-            else if (fvalue == 1.f)
-                strncpy(str, "LFO Rate", TEXT_SIZE);
-            else if (fvalue == 2.f)
-                strncpy(str, "Filter Cutoff", TEXT_SIZE);
-            else if (fvalue == 3.f)
-                strncpy(str, "LFO Depth Invert", TEXT_SIZE);
-            else if (fvalue == 4.f)
-                strncpy(str, "LFO Rate Invert", TEXT_SIZE);
-            else if (fvalue == 5.f)
-                strncpy(str, "Filter Cutt Invr", TEXT_SIZE);
-            else if (fvalue == 6.f)
-                strncpy(str, "None", TEXT_SIZE);
-            else
-                strncpy(str, "?", TEXT_SIZE);
+        {
+            static const char* const names[] = {
+                "LFO Depth", "LFO Rate", "Filter Cutoff",
+                "LFO Depth Invert", "LFO Rate Invert", "Filter Cutt Invr", "None"
+            };
+            int idx = (int)fvalue;
+            strncpy(str, (fvalue == (float)idx && idx >= 0 && idx < 7) ? names[idx] : "?", TEXT_SIZE);
             break;
+        }
         case VL_ON_OFF:
             strncpy(str, fvalue?"On":"Off", TEXT_SIZE);
             break;
         case VL_CHANNELS:
+        case BT_NAME:
+        case BT_PROGRAM:
             synthesizer->GetProgName(str, channel);
             break;
         case BT_MINUS_10:
@@ -375,10 +326,6 @@ void CMapper::GetDisplayValue(CSynthesizer *synthesizer, char channel, int par, 
             {
                 synthesizer->GetProgName(str, channel);
             }
-            break;
-        case BT_NAME:
-        case BT_PROGRAM:
-            synthesizer->GetProgName(str, channel);
             break;
         case BT_BANK:
             synthesizer->GetBankName(str);
