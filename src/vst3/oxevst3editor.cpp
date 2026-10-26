@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "oxevst3editor.h"
 #include "oxevst3.h"
+#include "pluginterfaces/base/keycodes.h"
 
 #if defined(_WIN32)
 #define WIN32_LEAN_AND_MEAN
@@ -142,7 +143,31 @@ Steinberg::tresult PLUGIN_API COxeVst3Editor::setFrame(Steinberg::IPlugFrame* fr
 
 Steinberg::tresult PLUGIN_API COxeVst3Editor::canResize()
 {
-    return Steinberg::kResultTrue;
+    return Steinberg::kResultFalse;
+}
+
+void COxeVst3Editor::requestResize(int w, int h)
+{
+    if (w < 475) w = 475;
+    h = (int)((w * (double)GUI_HEIGHT) / (double)GUI_WIDTH);
+    if (plugFrame)
+    {
+        Steinberg::ViewRect rect(0, 0, w, h);
+        if (plugFrame->resizeView(this, &rect) == Steinberg::kResultTrue)
+        {
+            return;
+        }
+    }
+    width = w;
+    height = h;
+    if (plugin)
+    {
+        plugin->setEditorSize(w, h);
+    }
+    if (toolkit)
+    {
+        toolkit->Resize(w, h);
+    }
 }
 
 Steinberg::tresult PLUGIN_API COxeVst3Editor::checkSizeConstraint(Steinberg::ViewRect* rect)
@@ -164,6 +189,15 @@ Steinberg::tresult PLUGIN_API COxeVst3Editor::onWheel(float distance)
 
 Steinberg::tresult PLUGIN_API COxeVst3Editor::onKeyDown(Steinberg::char16 key, Steinberg::int16 keyCode, Steinberg::int16 modifiers)
 {
+    if ((modifiers & Steinberg::kCommandKey) && key >= '1' && key <= '6')
+    {
+        static const int kScalePercent[6] = { 100, 125, 150, 175, 200, 250 };
+        int percent = kScalePercent[key - '1'];
+        int w = (int)round(GUI_WIDTH * (percent / 100.0));
+        int h = (int)round(GUI_HEIGHT * (percent / 100.0));
+        requestResize(w, h);
+        return Steinberg::kResultTrue;
+    }
     return Steinberg::kResultFalse;
 }
 

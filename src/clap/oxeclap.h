@@ -92,6 +92,7 @@ public:
     void setParameterFromGUI(int index, float value);
     void setProgramFromGUI(int program);
     void updateHostDisplay();
+    bool requestResize(uint32_t width, uint32_t height);
 
     // CLAP plugin callbacks
     static bool CLAP_ABI plugin_init(const struct clap_plugin *plugin);

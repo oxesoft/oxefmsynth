@@ -54,6 +54,7 @@ public:
     Steinberg::tresult PLUGIN_API setFrame(Steinberg::IPlugFrame* frame) override;
     Steinberg::tresult PLUGIN_API canResize() override;
     Steinberg::tresult PLUGIN_API checkSizeConstraint(Steinberg::ViewRect* rect) override;
+    void requestResize(int w, int h);
 
     // FUnknown
     Steinberg::tresult PLUGIN_API queryInterface(const Steinberg::TUID iid, void** obj) override;

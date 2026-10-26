@@ -39,6 +39,11 @@ public:
     int          dibHeight;
     void        *parentWindow;
     CEditor     *editor;
+    bool         isResizing;
+    bool         isOverGrip;
+    POINT        dragStartScreenPos;
+    int          dragStartW;
+    int          dragStartH;
     CWindowsToolkit(void *parentWindow, CEditor *editor);
     virtual ~CWindowsToolkit();
     virtual void Invalidate() override;

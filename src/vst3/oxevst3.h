@@ -96,6 +96,7 @@ public:
     void setActiveEditor(COxeVst3Editor* editor);
     void onEditorDestroyed(COxeVst3Editor* editor);
     void setEditorSize(int32 width, int32 height);
+    void requestResize(int32 width, int32 height);
     int32 getEditorWidth() const { return editorWidth; }
     int32 getEditorHeight() const { return editorHeight; }
 

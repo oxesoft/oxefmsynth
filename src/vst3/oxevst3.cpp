@@ -713,5 +713,13 @@ void COxeVst3::setEditorSize(int32 width, int32 height)
     }
 }
 
+void COxeVst3::requestResize(int32 width, int32 height)
+{
+    if (activeEditor)
+    {
+        activeEditor->requestResize((int)width, (int)height);
+    }
+}
+
 } // namespace Vst
 } // namespace Steinberg

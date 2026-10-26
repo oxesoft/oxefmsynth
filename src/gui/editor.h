@@ -28,6 +28,8 @@ class CEditor
 {
 private:
     bool           changingControl;
+    bool           isResizingGUI;
+    bool           isHoveringResizeGrip;
     int            currentX;
     int            currentY;
     int            prevX;
@@ -64,6 +66,12 @@ public:
     void  SetToolkit       (CToolkit *toolkit);
     void  SetHostInterface (CHostInterface *hostinterface);
     void  Paint            (BLContext &ctx, int dirtyX = 0, int dirtyY = 0, int dirtyW = 0, int dirtyH = 0);
+    bool  IsOverResizeGrip (int x, int y) const;
+    void  SetHoveringResizeGrip(bool hovering);
+    bool  IsHoveringResizeGrip () const { return isHoveringResizeGrip; }
+    void  SetResizingGUI   (bool resizing);
+    bool  IsResizingGUI    () const { return isResizingGUI; }
+    void  RequestResize    (int width, int height);
 private:
     void  DrawPanelCards   (BLContext &ctx, const BLFont &fontSmall, const BLFont &fontNormal, const BLFont &fontHeader);
     void  DrawOperatorEnvelope(BLContext &ctx, int opIndex, float x, float y, float w, float h, const BLFont &fontSmall, const BLRgba32 &accentColor = BLRgba32(0x00, 0xf0, 0xff));

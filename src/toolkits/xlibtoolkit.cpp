@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "editor.h"
 #include "xlibtoolkit.h"
+#include <X11/cursorfont.h>
 #include <pthread.h>
 #include <string.h>
 #include <stdlib.h>
@@ -94,6 +95,19 @@ void* eventProc(void* ptr)
                 switch (e->button)
                 {
                 case 1:
+                    if (toolkit->editor && toolkit->editor->IsOverResizeGrip(mx, my))
+                    {
+                        toolkit->isResizing = true;
+                        toolkit->dragStartRootX = e->x_root;
+                        toolkit->dragStartRootY = e->y_root;
+                        XWindowAttributes wa;
+                        XGetWindowAttributes(toolkit->display, toolkit->window, &wa);
+                        toolkit->dragStartW = wa.width;
+                        toolkit->dragStartH = wa.height;
+                        toolkit->editor->SetResizingGUI(true);
+                        XDefineCursor(toolkit->display, toolkit->window, toolkit->resizeCursor);
+                        break;
+                    }
                     if (e->time - time > 400)
                     {
                         toolkit->editor->OnLButtonDown(mx, my);
@@ -115,14 +129,60 @@ void* eventProc(void* ptr)
             }
             case ButtonRelease:
             {
+                XButtonEvent *e = (XButtonEvent*)&event;
+                if (e->button == 1 && toolkit->isResizing)
+                {
+                    toolkit->isResizing = false;
+                    toolkit->editor->SetResizingGUI(false);
+                    int mx, my;
+                    GetMouseScaled(toolkit, e->x, e->y, mx, my);
+                    toolkit->isOverGrip = toolkit->editor->IsOverResizeGrip(mx, my);
+                    toolkit->editor->SetHoveringResizeGrip(toolkit->isOverGrip);
+                    if (!toolkit->isOverGrip)
+                    {
+                        XUndefineCursor(toolkit->display, toolkit->window);
+                    }
+                    break;
+                }
                 toolkit->editor->OnLButtonUp();
                 break;
             }
             case MotionNotify:
             {
                 XMotionEvent *e = (XMotionEvent*)&event;
+                if (toolkit->isResizing)
+                {
+                    int deltaX = e->x_root - toolkit->dragStartRootX;
+                    int deltaY = e->y_root - toolkit->dragStartRootY;
+                    double aspect = (double)GUI_WIDTH / (double)GUI_HEIGHT;
+                    double delta = (deltaX + deltaY * aspect) * 0.5;
+                    int targetW = (int)round(toolkit->dragStartW + delta);
+                    if (targetW < 475) targetW = 475;
+                    if (targetW > 2850) targetW = 2850;
+                    int targetH = (int)round((targetW * (double)GUI_HEIGHT) / (double)GUI_WIDTH);
+                    toolkit->editor->RequestResize(targetW, targetH);
+                    XDefineCursor(toolkit->display, toolkit->window, toolkit->resizeCursor);
+                    break;
+                }
                 int mx, my;
                 GetMouseScaled(toolkit, e->x, e->y, mx, my);
+                if (toolkit->editor)
+                {
+                    bool overGrip = toolkit->editor->IsOverResizeGrip(mx, my);
+                    if (overGrip != toolkit->isOverGrip)
+                    {
+                        toolkit->isOverGrip = overGrip;
+                        toolkit->editor->SetHoveringResizeGrip(overGrip);
+                        if (overGrip)
+                        {
+                            XDefineCursor(toolkit->display, toolkit->window, toolkit->resizeCursor);
+                        }
+                        else
+                        {
+                            XUndefineCursor(toolkit->display, toolkit->window);
+                        }
+                    }
+                }
                 toolkit->editor->OnMouseMove(mx, my);
                 break;
             }
@@ -185,7 +245,14 @@ CXlibToolkit::CXlibToolkit(void *parentWindow, CEditor *editor)
     this->editor          = editor;
     this->thread1Finished = true;
     this->thread2Finished = true;
+    this->isResizing      = false;
+    this->isOverGrip      = false;
+    this->dragStartRootX  = 0;
+    this->dragStartRootY  = 0;
+    this->dragStartW      = GUI_WIDTH;
+    this->dragStartH      = GUI_HEIGHT;
     this->display         = XOpenDisplay(NULL);
+    this->resizeCursor    = this->display ? XCreateFontCursor(this->display, XC_bottom_right_corner) : 0;
 
     if (!display)
     {
@@ -241,6 +308,11 @@ CXlibToolkit::CXlibToolkit(void *parentWindow, CEditor *editor)
 
 CXlibToolkit::~CXlibToolkit()
 {
+    if (display && resizeCursor)
+    {
+        XFreeCursor(display, resizeCursor);
+        resizeCursor = 0;
+    }
     if (display && window)
     {
         SendClientAtom(display, window, WM_DELETE_WINDOW);

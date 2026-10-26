@@ -78,6 +78,15 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
     }
     switch (message)
     {
+    case WM_SETCURSOR:
+    {
+        if (toolkit && (toolkit->isResizing || toolkit->isOverGrip))
+        {
+            SetCursor(LoadCursor(NULL, IDC_SIZENWSE));
+            return TRUE;
+        }
+        break;
+    }
     case WM_LBUTTONDBLCLK:
     {
         int mx, my;
@@ -89,12 +98,36 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
     {
         int mx, my;
         GetMouseScaled(hWnd, lParam, mx, my);
+        if (toolkit->editor && toolkit->editor->IsOverResizeGrip(mx, my))
+        {
+            toolkit->isResizing = true;
+            GetCursorPos(&toolkit->dragStartScreenPos);
+            RECT rc;
+            GetClientRect(hWnd, &rc);
+            toolkit->dragStartW = rc.right - rc.left;
+            toolkit->dragStartH = rc.bottom - rc.top;
+            SetCapture(hWnd);
+            toolkit->editor->SetResizingGUI(true);
+            SetCursor(LoadCursor(NULL, IDC_SIZENWSE));
+            return 0;
+        }
         toolkit->editor->OnLButtonDown(mx, my);
         SetFocus(hWnd);
         return 0;
     }
     case WM_LBUTTONUP:
     {
+        if (toolkit->isResizing)
+        {
+            toolkit->isResizing = false;
+            ReleaseCapture();
+            toolkit->editor->SetResizingGUI(false);
+            int mx, my;
+            GetMouseScaled(hWnd, lParam, mx, my);
+            toolkit->isOverGrip = toolkit->editor->IsOverResizeGrip(mx, my);
+            toolkit->editor->SetHoveringResizeGrip(toolkit->isOverGrip);
+            return 0;
+        }
         toolkit->editor->OnLButtonUp();
         SetFocus(hWnd);
         return 0;
@@ -116,8 +149,37 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
     }
     case WM_MOUSEMOVE:
     {
+        if (toolkit->isResizing)
+        {
+            POINT pt;
+            GetCursorPos(&pt);
+            int deltaX = pt.x - toolkit->dragStartScreenPos.x;
+            int deltaY = pt.y - toolkit->dragStartScreenPos.y;
+            double aspect = (double)GUI_WIDTH / (double)GUI_HEIGHT;
+            double delta = (deltaX + deltaY * aspect) * 0.5;
+            int targetW = (int)round(toolkit->dragStartW + delta);
+            if (targetW < 475) targetW = 475;
+            if (targetW > 2850) targetW = 2850;
+            int targetH = (int)round((targetW * (double)GUI_HEIGHT) / (double)GUI_WIDTH);
+            toolkit->editor->RequestResize(targetW, targetH);
+            SetCursor(LoadCursor(NULL, IDC_SIZENWSE));
+            return 0;
+        }
         int mx, my;
         GetMouseScaled(hWnd, lParam, mx, my);
+        if (toolkit->editor)
+        {
+            bool overGrip = toolkit->editor->IsOverResizeGrip(mx, my);
+            if (overGrip != toolkit->isOverGrip)
+            {
+                toolkit->isOverGrip = overGrip;
+                toolkit->editor->SetHoveringResizeGrip(overGrip);
+            }
+            if (overGrip)
+            {
+                SetCursor(LoadCursor(NULL, IDC_SIZENWSE));
+            }
+        }
         toolkit->editor->OnMouseMove(mx, my);
         return 0;
     }
@@ -296,6 +358,12 @@ CWindowsToolkit::CWindowsToolkit(void *parentWindow, CEditor *editor)
     this->pixelData    = NULL;
     this->dibWidth     = 0;
     this->dibHeight    = 0;
+    this->isResizing   = false;
+    this->isOverGrip   = false;
+    this->dragStartW   = GUI_WIDTH;
+    this->dragStartH   = GUI_HEIGHT;
+    this->dragStartScreenPos.x = 0;
+    this->dragStartScreenPos.y = 0;
 
     g_useCount++;
     if (g_useCount == 1)
@@ -450,7 +518,16 @@ float CWindowsToolkit::GetScale()
 void CWindowsToolkit::Resize(int width, int height)
 {
     if (!hWnd) return;
-    SetWindowPos(hWnd, NULL, 0, 0, width, height, SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE);
+    if (!parentWindow)
+    {
+        RECT rc = { 0, 0, width, height };
+        AdjustWindowRect(&rc, WS_OVERLAPPEDWINDOW, FALSE);
+        SetWindowPos(hWnd, NULL, 0, 0, rc.right - rc.left, rc.bottom - rc.top, SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE);
+    }
+    else
+    {
+        SetWindowPos(hWnd, NULL, 0, 0, width, height, SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE);
+    }
     ::InvalidateRect(hWnd, NULL, FALSE);
 }
 

@@ -27,7 +27,8 @@ public:
 enum {
     UPDATE_DISPLAY,
     SET_PROGRAM   ,
-    SET_PARAMETER
+    SET_PARAMETER ,
+    REQUEST_RESIZE
 };
 
 #endif

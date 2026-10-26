@@ -48,5 +48,10 @@ void CVst3HostInterface::ReceiveMessageFromPlugin(unsigned int messageID, unsign
             plugin->setParameterFromGUI(index, value);
             break;
         }
+        case REQUEST_RESIZE:
+        {
+            plugin->requestResize((Steinberg::int32)par1, (Steinberg::int32)par2);
+            break;
+        }
     }
 }

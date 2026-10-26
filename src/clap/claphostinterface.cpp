@@ -48,5 +48,10 @@ void CClapHostInterface::ReceiveMessageFromPlugin(unsigned int messageID, unsign
             plugin->setParameterFromGUI(index, value);
             break;
         }
+        case REQUEST_RESIZE:
+        {
+            plugin->requestResize((uint32_t)par1, (uint32_t)par2);
+            break;
+        }
     }
 }

@@ -26,6 +26,32 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 static const int kScalePercent[6] = { 100, 125, 150, 175, 200, 250 };
 
+static NSCursor* GetDiagonalResizeCursor()
+{
+    static NSCursor *cursor = nil;
+    if (!cursor)
+    {
+        if (@available(macOS 15.0, *))
+        {
+            cursor = [[NSCursor frameResizeCursorFromPosition:NSCursorFrameResizePositionBottomRight
+                                                 inDirections:NSCursorFrameResizeDirectionsOutward | NSCursorFrameResizeDirectionsInward] retain];
+        }
+        if (!cursor)
+        {
+            SEL sel = sel_registerName("_windowResizeNorthWestSouthEastCursor");
+            if ([NSCursor respondsToSelector:sel])
+            {
+                cursor = [[NSCursor performSelector:sel] retain];
+            }
+        }
+        if (!cursor)
+        {
+            cursor = [[NSCursor crosshairCursor] retain];
+        }
+    }
+    return cursor;
+}
+
 static void PopulateScaleMenu(NSMenu *menu, id target, SEL action)
 {
     static const char* const kScaleTitles[6] = {
@@ -50,15 +76,23 @@ static void PopulateScaleMenu(NSMenu *menu, id target, SEL action)
 {
     CCocoaToolkit* toolkit;
     BLImage        blImage;
+    BOOL           isResizing;
+    NSPoint        dragStartScreenPos;
+    NSSize         dragStartViewSize;
+    BOOL           isOverGrip;
+    id             keyMonitor;
 }
 - (id)   initWithToolkit:(CCocoaToolkit*)toolkitPtr size:(NSSize)size;
 - (void) clearToolkit;
 - (void) viewDidMoveToWindow;
+- (BOOL) acceptsFirstMouse:(NSEvent *)event;
 - (void) getMouseCoords:(NSEvent *)event x:(int *)outX y:(int *)outY;
 - (void) mouseDown:(NSEvent *)event;
 - (void) mouseUp:(NSEvent *)event;
 - (void) mouseMoved:(NSEvent *)event;
 - (void) mouseDragged:(NSEvent *)event;
+- (void) cursorUpdate:(NSEvent *)event;
+- (void) mouseExited:(NSEvent *)event;
 - (void) scrollWheel:(NSEvent *)event;
 - (void) keyDown:(NSEvent *)event;
 - (BOOL) acceptsFirstResponder;
@@ -107,11 +141,14 @@ struct CCocoaToolkitImpl
     if (self)
     {
         toolkit = toolkitPtr;
+        isResizing = NO;
+        isOverGrip = NO;
+        keyMonitor = nil;
         [self setWantsLayer:YES];
         [self setLayerContentsRedrawPolicy:NSViewLayerContentsRedrawOnSetNeedsDisplay];
         NSTrackingArea *trackingArea = [[[NSTrackingArea alloc]
             initWithRect:NSZeroRect
-                 options:(NSTrackingMouseEnteredAndExited | NSTrackingActiveAlways | NSTrackingInVisibleRect)
+                 options:(NSTrackingMouseEnteredAndExited | NSTrackingMouseMoved | NSTrackingCursorUpdate | NSTrackingActiveAlways | NSTrackingInVisibleRect)
                    owner:self
                 userInfo:nil] autorelease];
         [self addTrackingArea:trackingArea];
@@ -121,11 +158,21 @@ struct CCocoaToolkitImpl
 
 - (void) clearToolkit
 {
+    if (keyMonitor)
+    {
+        [NSEvent removeMonitor:keyMonitor];
+        keyMonitor = nil;
+    }
     toolkit = nullptr;
 }
 
 - (void) dealloc
 {
+    if (keyMonitor)
+    {
+        [NSEvent removeMonitor:keyMonitor];
+        keyMonitor = nil;
+    }
     blImage.reset();
     [super dealloc];
 }
@@ -204,8 +251,51 @@ struct CCocoaToolkitImpl
     CGDataProviderRelease(provider);
 }
 
+- (BOOL) acceptsFirstMouse:(NSEvent *)event
+{
+    return YES;
+}
+
 - (void) viewDidMoveToWindow
 {
+    [super viewDidMoveToWindow];
+    if ([self window])
+    {
+        if (!keyMonitor)
+        {
+            keyMonitor = [NSEvent addLocalMonitorForEventsMatchingMask:NSEventMaskKeyDown handler:^NSEvent *(NSEvent *event) {
+                if ([event window] == [self window] || [[self window] isKeyWindow])
+                {
+                    if ([event modifierFlags] & NSEventModifierFlagCommand)
+                    {
+                        NSString *chars = [event charactersIgnoringModifiers];
+                        if ([chars length] == 1)
+                        {
+                            unichar c = [chars characterAtIndex:0];
+                            if (c >= '1' && c <= '6')
+                            {
+                                NSPoint loc = [self convertPoint:[event locationInWindow] fromView:nil];
+                                if (NSPointInRect(loc, [self bounds]) || [[self window] firstResponder] == self)
+                                {
+                                    [self resizeToScalePercent:kScalePercent[c - '1']];
+                                    return nil;
+                                }
+                            }
+                        }
+                    }
+                }
+                return event;
+            }];
+        }
+    }
+    else
+    {
+        if (keyMonitor)
+        {
+            [NSEvent removeMonitor:keyMonitor];
+            keyMonitor = nil;
+        }
+    }
 }
 
 - (BOOL) isOpaque
@@ -235,17 +325,65 @@ struct CCocoaToolkitImpl
     *outY = GUI_HEIGHT - (int)(loc.y / sy);
 }
 
+- (void) cursorUpdate:(NSEvent *)event
+{
+    int x, y;
+    [self getMouseCoords:event x:&x y:&y];
+    if (isResizing || (toolkit && toolkit->editor && toolkit->editor->IsOverResizeGrip(x, y)))
+    {
+        [GetDiagonalResizeCursor() set];
+    }
+    else
+    {
+        [[NSCursor arrowCursor] set];
+    }
+}
+
+- (void) mouseExited:(NSEvent *)theEvent
+{
+    if (toolkit && toolkit->editor)
+    {
+        toolkit->editor->SetHoveringResizeGrip(false);
+        isOverGrip = NO;
+    }
+    [[NSCursor arrowCursor] set];
+}
+
 - (void) mouseDown:(NSEvent *)event
 {
     if (!toolkit || !toolkit->editor) return;
+    [[self window] makeFirstResponder:self];
     int x, y;
     [self getMouseCoords:event x:&x y:&y];
+    if (toolkit->editor->IsOverResizeGrip(x, y))
+    {
+        isResizing = YES;
+        dragStartScreenPos = [NSEvent mouseLocation];
+        dragStartViewSize = [self bounds].size;
+        toolkit->editor->SetResizingGUI(true);
+        [GetDiagonalResizeCursor() set];
+        return;
+    }
     toolkit->editor->OnLButtonDown(x, y);
 }
 
 - (void) mouseUp:(NSEvent *)event
 {
     if (!toolkit || !toolkit->editor) return;
+    if (isResizing)
+    {
+        isResizing = NO;
+        toolkit->editor->SetResizingGUI(false);
+        int x, y;
+        [self getMouseCoords:event x:&x y:&y];
+        isOverGrip = toolkit->editor->IsOverResizeGrip(x, y);
+        toolkit->editor->SetHoveringResizeGrip(isOverGrip);
+        if (!isOverGrip)
+        {
+            [[NSCursor arrowCursor] set];
+        }
+        return;
+    }
     toolkit->editor->OnLButtonUp();
     if ([event clickCount] == 2)
     {
@@ -260,12 +398,41 @@ struct CCocoaToolkitImpl
     if (!toolkit || !toolkit->editor) return;
     int x, y;
     [self getMouseCoords:event x:&x y:&y];
+    BOOL overGrip = toolkit->editor->IsOverResizeGrip(x, y);
+    if (overGrip != isOverGrip)
+    {
+        isOverGrip = overGrip;
+        toolkit->editor->SetHoveringResizeGrip(overGrip);
+    }
+    if (overGrip || isResizing)
+    {
+        [GetDiagonalResizeCursor() set];
+    }
+    else
+    {
+        [[NSCursor arrowCursor] set];
+    }
     toolkit->editor->OnMouseMove(x, y);
 }
 
 - (void) mouseDragged:(NSEvent *)event
 {
     if (!toolkit || !toolkit->editor) return;
+    if (isResizing)
+    {
+        NSPoint currentScreenPos = [NSEvent mouseLocation];
+        CGFloat deltaX = currentScreenPos.x - dragStartScreenPos.x;
+        CGFloat deltaY = dragStartScreenPos.y - currentScreenPos.y; // Cocoa screen Y is bottom-to-top
+        double aspect = (double)GUI_WIDTH / (double)GUI_HEIGHT;
+        double delta = (deltaX + deltaY * aspect) * 0.5;
+        int targetW = (int)round(dragStartViewSize.width + delta);
+        if (targetW < 475) targetW = 475;
+        if (targetW > 2850) targetW = 2850;
+        int targetH = (int)round((targetW * (double)GUI_HEIGHT) / (double)GUI_WIDTH);
+        toolkit->editor->RequestResize(targetW, targetH);
+        [GetDiagonalResizeCursor() set];
+        return;
+    }
     int x, y;
     [self getMouseCoords:event x:&x y:&y];
     toolkit->editor->OnMouseMove(x, y);
@@ -286,6 +453,11 @@ struct CCocoaToolkitImpl
 - (void) keyDown:(NSEvent *)event
 {
     if (!toolkit || !toolkit->editor) return;
+    if ([event modifierFlags] & NSEventModifierFlagCommand)
+    {
+        if ([self performKeyEquivalent:event])
+            return;
+    }
     const char *c = [[event characters] UTF8String];
     if (c && c[0])
     {
@@ -324,7 +496,13 @@ struct CCocoaToolkitImpl
 
 - (void) resizeToScalePercent:(int)percent
 {
-    if (toolkit)
+    if (toolkit && toolkit->editor)
+    {
+        int w = (int)round(GUI_WIDTH * (percent / 100.0));
+        int h = (int)round(GUI_HEIGHT * (percent / 100.0));
+        toolkit->editor->RequestResize(w, h);
+    }
+    else if (toolkit)
     {
         int w = (int)round(GUI_WIDTH * (percent / 100.0));
         int h = (int)round(GUI_HEIGHT * (percent / 100.0));
@@ -362,6 +540,7 @@ struct CCocoaToolkitImpl
                 backing: NSBackingStoreBuffered
                 defer: NO
             ];
+            [window setCollectionBehavior:NSWindowCollectionBehaviorFullScreenPrimary];
             [window setContentAspectRatio:NSMakeSize(GUI_WIDTH, GUI_HEIGHT)];
             [window setMinSize:NSMakeSize(475, 328)];
             [window setBackgroundColor:[NSColor colorWithDeviceRed:(0x0b / 255.0)
@@ -543,7 +722,12 @@ struct CCocoaToolkitImpl
         {
             [window toggleFullScreen:nil];
         }
-        [window setContentSize:NSMakeSize(w, h)];
+        NSRect frame = [window frame];
+        NSRect contentRect = NSMakeRect(0, 0, w, h);
+        NSRect newFrame = [window frameRectForContentRect:contentRect];
+        newFrame.origin.x = frame.origin.x;
+        newFrame.origin.y = frame.origin.y + frame.size.height - newFrame.size.height;
+        [window setFrame:newFrame display:YES];
         [self layoutView];
     }
     else if (view)

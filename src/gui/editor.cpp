@@ -30,6 +30,8 @@ CEditor::CEditor(CSynthesizer *synthesizer)
     this->synthesizer   = synthesizer;
     this->toolkit       = NULL;
     this->hostinterface = NULL;
+    this->isResizingGUI = false;
+    this->isHoveringResizeGrip = false;
     channel             = 0;
 
     // auxiliar vars
@@ -409,6 +411,47 @@ void CEditor::SetHostInterface(CHostInterface *hostinterface)
     }
 }
 
+bool CEditor::IsOverResizeGrip(int x, int y) const
+{
+    return (x >= GUI_WIDTH - 20 && y >= GUI_HEIGHT - 20);
+}
+
+void CEditor::SetHoveringResizeGrip(bool hovering)
+{
+    if (isHoveringResizeGrip != hovering)
+    {
+        isHoveringResizeGrip = hovering;
+        if (toolkit)
+        {
+            toolkit->InvalidateRect(GUI_WIDTH - 20, GUI_HEIGHT - 20, 20, 20);
+        }
+    }
+}
+
+void CEditor::SetResizingGUI(bool resizing)
+{
+    if (isResizingGUI != resizing)
+    {
+        isResizingGUI = resizing;
+        if (toolkit)
+        {
+            toolkit->InvalidateRect(GUI_WIDTH - 20, GUI_HEIGHT - 20, 20, 20);
+        }
+    }
+}
+
+void CEditor::RequestResize(int width, int height)
+{
+    if (hostinterface)
+    {
+        hostinterface->ReceiveMessageFromPlugin(REQUEST_RESIZE, (unsigned int)width, (unsigned int)height);
+    }
+    else if (toolkit)
+    {
+        toolkit->Resize(width, height);
+    }
+}
+
 void CEditor::ProgramChanged()
 {
     char str[TEXT_SIZE];
@@ -565,6 +608,10 @@ void CEditor::OnLButtonDblClick(int x, int y)
 
 void CEditor::OnLButtonDown(int x, int y)
 {
+    if (IsOverResizeGrip(x, y))
+    {
+        return;
+    }
     char prevchannel = channel; // saves the current channel in case of the clicked control be CChannels
     for (int i=0;i<GUI_CONTROLS;i++)
     {
@@ -628,6 +675,11 @@ void CEditor::OnMouseMove(int x, int y)
 {
     this->currentX = x;
     this->currentY = y;
+    bool overGrip = IsOverResizeGrip(x, y);
+    if (overGrip != isHoveringResizeGrip)
+    {
+        SetHoveringResizeGrip(overGrip);
+    }
     if (changingControl)
     {
         int dy = -(y - this->prevY);
@@ -1250,6 +1302,18 @@ void CEditor::Paint(BLContext &ctx, int dirtyX, int dirtyY, int dirtyW, int dirt
                 ctl[i]->Paint(ctx, fontSmall, fontNormal);
             }
         }
+    }
+
+    // Paint diagonal resize grip in bottom-right corner
+    if (isFullRepaint || RectsIntersect(GUI_WIDTH - 20, GUI_HEIGHT - 20, 20, 20, dirtyX, dirtyY, dirtyW, dirtyH))
+    {
+        BLRgba32 gripColor = (isHoveringResizeGrip || isResizingGUI)
+            ? BLRgba32(0xbe, 0xe4, 0x00) // accent lime
+            : BLRgba32(0x3e, 0x4d, 0x62); // border slate
+        ctx.set_stroke_width(1.2);
+        ctx.stroke_line(944.0, 652.0, 948.0, 648.0, gripColor);
+        ctx.stroke_line(939.0, 652.0, 948.0, 643.0, gripColor);
+        ctx.stroke_line(934.0, 652.0, 948.0, 638.0, gripColor);
     }
 
     if (!isFullRepaint)

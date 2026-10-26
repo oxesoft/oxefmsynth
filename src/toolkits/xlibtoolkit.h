@@ -39,6 +39,13 @@ public:
     Atom         WM_TIMER;
     bool         thread1Finished;
     bool         thread2Finished;
+    bool         isResizing;
+    bool         isOverGrip;
+    int          dragStartRootX;
+    int          dragStartRootY;
+    int          dragStartW;
+    int          dragStartH;
+    Cursor       resizeCursor;
     CXlibToolkit(void *parentWindow, CEditor *editor);
     virtual ~CXlibToolkit();
     virtual void Invalidate() override;
