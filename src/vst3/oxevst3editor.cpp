@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "oxevst3editor.h"
 #include "oxevst3.h"
 #include "pluginterfaces/base/keycodes.h"
+#include <cmath>
 
 #if defined(_WIN32)
 #define WIN32_LEAN_AND_MEAN
