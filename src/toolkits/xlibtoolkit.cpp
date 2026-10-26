@@ -25,14 +25,35 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <unistd.h>
 #include <math.h>
 
+static void GetViewport(int cw, int ch, int &vpX, int &vpY, int &vpW, int &vpH, double &scale)
+{
+    if (cw <= 0 || ch <= 0)
+    {
+        vpX = 0;
+        vpY = 0;
+        vpW = GUI_WIDTH;
+        vpH = GUI_HEIGHT;
+        scale = 1.0;
+        return;
+    }
+    scale = fmin((double)cw / (double)GUI_WIDTH, (double)ch / (double)GUI_HEIGHT);
+    vpW = (int)round(GUI_WIDTH * scale);
+    vpH = (int)round(GUI_HEIGHT * scale);
+    if (vpW < 1) vpW = 1;
+    if (vpH < 1) vpH = 1;
+    vpX = (cw - vpW) / 2;
+    vpY = (ch - vpH) / 2;
+}
+
 static void GetMouseScaled(CXlibToolkit *toolkit, int inX, int inY, int &outX, int &outY)
 {
     XWindowAttributes wa;
     XGetWindowAttributes(toolkit->display, toolkit->window, &wa);
-    float sx = wa.width > 0 ? (float)wa.width / (float)GUI_WIDTH : 1.0f;
-    float sy = wa.height > 0 ? (float)wa.height / (float)GUI_HEIGHT : 1.0f;
-    outX = (int)(inX / sx);
-    outY = (int)(inY / sy);
+    int vpX, vpY, vpW, vpH;
+    double scale;
+    GetViewport(wa.width, wa.height, vpX, vpY, vpW, vpH, scale);
+    outX = (int)floor((inX - vpX) / scale);
+    outY = (int)floor((inY - vpY) / scale);
 }
 
 static void SendClientAtom(Display *display, Window window, Atom atom)
@@ -267,32 +288,49 @@ void CXlibToolkit::Draw(int x, int y, int w, int h)
     int winH = wa.height;
     if (winW <= 0 || winH <= 0) return;
 
+    int vpX, vpY, vpW, vpH;
+    double scale;
+    GetViewport(winW, winH, vpX, vpY, vpW, vpH, scale);
+
     bool isFull = (w <= 0 || h <= 0);
 
-    if (blImage.width() != winW || blImage.height() != winH)
+    if (blImage.width() != vpW || blImage.height() != vpH)
     {
-        blImage.create(winW, winH, BL_FORMAT_PRGB32);
+        blImage.create(vpW, vpH, BL_FORMAT_PRGB32);
         isFull = true;
     }
 
-    double sx = (double)winW / (double)GUI_WIDTH;
-    double sy = (double)winH / (double)GUI_HEIGHT;
+    if (vpX > 0 || vpY > 0)
+    {
+        XSetForeground(display, gc, 0x0b0e14);
+        if (vpY > 0)
+        {
+            XFillRectangle(display, window, gc, 0, 0, winW, vpY);
+            XFillRectangle(display, window, gc, 0, vpY + vpH, winW, winH - (vpY + vpH));
+        }
+        if (vpX > 0)
+        {
+            XFillRectangle(display, window, gc, 0, vpY, vpX, vpH);
+            XFillRectangle(display, window, gc, vpX + vpW, vpY, winW - (vpX + vpW), vpH);
+        }
+    }
 
     int dirtyX = 0, dirtyY = 0, dirtyW = GUI_WIDTH, dirtyH = GUI_HEIGHT;
     if (!isFull)
     {
-        dirtyX = (int)floor(x / sx);
-        dirtyY = (int)floor(y / sy);
-        dirtyW = (int)ceil(w / sx) + 1;
-        dirtyH = (int)ceil(h / sy) + 1;
+        dirtyX = (int)floor((x - vpX) / scale);
+        dirtyY = (int)floor((y - vpY) / scale);
+        dirtyW = (int)ceil(w / scale) + 1;
+        dirtyH = (int)ceil(h / scale) + 1;
         if (dirtyX < 0) dirtyX = 0;
         if (dirtyY < 0) dirtyY = 0;
         if (dirtyX + dirtyW > GUI_WIDTH) dirtyW = GUI_WIDTH - dirtyX;
         if (dirtyY + dirtyH > GUI_HEIGHT) dirtyH = GUI_HEIGHT - dirtyY;
+        if (dirtyW <= 0 || dirtyH <= 0) return;
     }
 
     BLContext ctx(blImage);
-    ctx.scale(sx, sy);
+    ctx.scale(scale, scale);
     editor->Paint(ctx, dirtyX, dirtyY, dirtyW, dirtyH);
     ctx.end();
 
@@ -301,24 +339,24 @@ void CXlibToolkit::Draw(int x, int y, int w, int h)
 
     Visual *visual = DefaultVisual(display, DefaultScreen(display));
     int depth = DefaultDepth(display, DefaultScreen(display));
-    XImage *ximage = XCreateImage(display, visual, depth, ZPixmap, 0, (char*)imgData.pixel_data, winW, winH, 32, imgData.stride);
+    XImage *ximage = XCreateImage(display, visual, depth, ZPixmap, 0, (char*)imgData.pixel_data, vpW, vpH, 32, imgData.stride);
     if (ximage)
     {
         if (isFull)
         {
-            XPutImage(display, window, gc, ximage, 0, 0, 0, 0, winW, winH);
+            XPutImage(display, window, gc, ximage, 0, 0, vpX, vpY, vpW, vpH);
         }
         else
         {
-            int bltX = (int)floor(dirtyX * sx);
-            int bltY = (int)floor(dirtyY * sy);
-            int bltW = (int)ceil(dirtyW * sx) + 1;
-            int bltH = (int)ceil(dirtyH * sy) + 1;
-            if (bltX + bltW > winW) bltW = winW - bltX;
-            if (bltY + bltH > winH) bltH = winH - bltY;
+            int bltX = (int)floor(dirtyX * scale);
+            int bltY = (int)floor(dirtyY * scale);
+            int bltW = (int)ceil(dirtyW * scale) + 1;
+            int bltH = (int)ceil(dirtyH * scale) + 1;
+            if (bltX + bltW > vpW) bltW = vpW - bltX;
+            if (bltY + bltH > vpH) bltH = vpH - bltY;
             if (bltW > 0 && bltH > 0)
             {
-                XPutImage(display, window, gc, ximage, bltX, bltY, bltX, bltY, bltW, bltH);
+                XPutImage(display, window, gc, ximage, bltX, bltY, vpX + bltX, vpY + bltY, bltW, bltH);
             }
         }
         ximage->data = NULL; // prevent XDestroyImage from freeing Blend2D memory
@@ -338,12 +376,13 @@ void CXlibToolkit::InvalidateRect(int x, int y, int width, int height)
     if (!display || !window) return;
     XWindowAttributes wa;
     XGetWindowAttributes(display, window, &wa);
-    double sx = wa.width > 0 ? (double)wa.width / (double)GUI_WIDTH : 1.0;
-    double sy = wa.height > 0 ? (double)wa.height / (double)GUI_HEIGHT : 1.0;
-    int vx = (int)floor((x - 1) * sx);
-    int vy = (int)floor((y - 1) * sy);
-    int vw = (int)ceil((width + 2) * sx);
-    int vh = (int)ceil((height + 2) * sy);
+    int vpX, vpY, vpW, vpH;
+    double scale;
+    GetViewport(wa.width, wa.height, vpX, vpY, vpW, vpH, scale);
+    int vx = vpX + (int)floor((x - 1) * scale);
+    int vy = vpY + (int)floor((y - 1) * scale);
+    int vw = (int)ceil((width + 2) * scale);
+    int vh = (int)ceil((height + 2) * scale);
     if (vx < 0) { vw += vx; vx = 0; }
     if (vy < 0) { vh += vy; vy = 0; }
     XClearArea(display, window, vx, vy, vw, vh, True);
@@ -363,7 +402,10 @@ float CXlibToolkit::GetScale()
     if (!display || !window) return 1.0f;
     XWindowAttributes wa;
     XGetWindowAttributes(display, window, &wa);
-    return wa.width > 0 ? (float)wa.width / (float)GUI_WIDTH : 1.0f;
+    int vpX, vpY, vpW, vpH;
+    double scale;
+    GetViewport(wa.width, wa.height, vpX, vpY, vpW, vpH, scale);
+    return (float)scale;
 }
 
 void CXlibToolkit::Resize(int width, int height)

@@ -80,6 +80,7 @@ static void PopulateScaleMenu(NSMenu *menu, id target, SEL action)
     NSTimer*           timer;
 }
 - (id)   initWithToolkit:(CCocoaToolkit*)toolkitPtr view:(PluginView*)viewPtr parent:(id)parent;
+- (void) layoutView;
 - (void) showWindow;
 - (void) closeWindow;
 - (void) waitWindowClosed;
@@ -108,6 +109,12 @@ struct CCocoaToolkitImpl
         toolkit = toolkitPtr;
         [self setWantsLayer:YES];
         [self setLayerContentsRedrawPolicy:NSViewLayerContentsRedrawOnSetNeedsDisplay];
+        NSTrackingArea *trackingArea = [[[NSTrackingArea alloc]
+            initWithRect:NSZeroRect
+                 options:(NSTrackingMouseEnteredAndExited | NSTrackingActiveAlways | NSTrackingInVisibleRect)
+                   owner:self
+                userInfo:nil] autorelease];
+        [self addTrackingArea:trackingArea];
     }
     return self;
 }
@@ -199,7 +206,6 @@ struct CCocoaToolkitImpl
 
 - (void) viewDidMoveToWindow
 {
-    [self addTrackingRect:[self bounds] owner:self userData:NULL assumeInside:NO];
 }
 
 - (BOOL) isOpaque
@@ -358,9 +364,14 @@ struct CCocoaToolkitImpl
             ];
             [window setContentAspectRatio:NSMakeSize(GUI_WIDTH, GUI_HEIGHT)];
             [window setMinSize:NSMakeSize(475, 328)];
+            [window setBackgroundColor:[NSColor colorWithDeviceRed:(0x0b / 255.0)
+                                                             green:(0x0e / 255.0)
+                                                              blue:(0x14 / 255.0)
+                                                             alpha:1.0]];
             [window setTitle:@TITLE_FULL];
             [window center];
-            [window setContentView: view];
+            [[window contentView] addSubview: view];
+            [self layoutView];
             [window setDelegate:self];
             [NSApp setDelegate:self];
 
@@ -388,14 +399,34 @@ struct CCocoaToolkitImpl
     return self;
 }
 
+- (void) layoutView
+{
+    if (!window || !view) return;
+    NSRect contentRect = [[window contentView] bounds];
+    double scale = fmin(contentRect.size.width / (double)GUI_WIDTH,
+                        contentRect.size.height / (double)GUI_HEIGHT);
+    double vw = round(GUI_WIDTH * scale);
+    double vh = round(GUI_HEIGHT * scale);
+    double vx = floor((contentRect.size.width - vw) * 0.5);
+    double vy = floor((contentRect.size.height - vh) * 0.5);
+    [view setFrame:NSMakeRect(vx, vy, vw, vh)];
+    [[window contentView] setNeedsDisplay:YES];
+    [view setNeedsDisplay:YES];
+}
+
 - (void) windowDidResize:(NSNotification *)notification
 {
-    if (window && view)
-    {
-        NSRect contentRect = [[window contentView] bounds];
-        [view setFrame:contentRect];
-        [view setNeedsDisplay:YES];
-    }
+    [self layoutView];
+}
+
+- (void) windowDidEnterFullScreen:(NSNotification *)notification
+{
+    [self layoutView];
+}
+
+- (void) windowDidExitFullScreen:(NSNotification *)notification
+{
+    [self layoutView];
 }
 
 - (void) closeWindow
@@ -508,9 +539,14 @@ struct CCocoaToolkitImpl
 {
     if (window)
     {
+        if ([window styleMask] & NSWindowStyleMaskFullScreen)
+        {
+            [window toggleFullScreen:nil];
+        }
         [window setContentSize:NSMakeSize(w, h)];
+        [self layoutView];
     }
-    if (view)
+    else if (view)
     {
         [view setFrame:NSMakeRect(0, 0, w, h)];
         [view setNeedsDisplay:YES];

@@ -29,22 +29,35 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 static int g_useCount = 0;
 extern void* hInstance;
 
+static void GetViewport(int cw, int ch, int &vpX, int &vpY, int &vpW, int &vpH, double &scale)
+{
+    if (cw <= 0 || ch <= 0)
+    {
+        vpX = 0;
+        vpY = 0;
+        vpW = GUI_WIDTH;
+        vpH = GUI_HEIGHT;
+        scale = 1.0;
+        return;
+    }
+    scale = fmin((double)cw / (double)GUI_WIDTH, (double)ch / (double)GUI_HEIGHT);
+    vpW = (int)round(GUI_WIDTH * scale);
+    vpH = (int)round(GUI_HEIGHT * scale);
+    if (vpW < 1) vpW = 1;
+    if (vpH < 1) vpH = 1;
+    vpX = (cw - vpW) / 2;
+    vpY = (ch - vpH) / 2;
+}
+
 static void ScaleClientPoint(HWND hWnd, int inX, int inY, int &outX, int &outY)
 {
     RECT rc;
     GetClientRect(hWnd, &rc);
-    int cw = rc.right - rc.left;
-    int ch = rc.bottom - rc.top;
-    if (cw <= 0 || ch <= 0)
-    {
-        outX = inX;
-        outY = inY;
-        return;
-    }
-    float sx = (float)cw / (float)GUI_WIDTH;
-    float sy = (float)ch / (float)GUI_HEIGHT;
-    outX = (int)(inX / sx);
-    outY = (int)(inY / sy);
+    int vpX, vpY, vpW, vpH;
+    double scale;
+    GetViewport(rc.right - rc.left, rc.bottom - rc.top, vpX, vpY, vpW, vpH, scale);
+    outX = (int)floor((inX - vpX) / scale);
+    outY = (int)floor((inY - vpY) / scale);
 }
 
 static void GetMouseScaled(HWND hWnd, LPARAM lParam, int &outX, int &outY)
@@ -152,7 +165,11 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
         int ch = clientRect.bottom - clientRect.top;
         if (cw > 0 && ch > 0 && toolkit && toolkit->editor)
         {
-            if (toolkit->dibWidth != cw || toolkit->dibHeight != ch || !toolkit->hBitmap)
+            int vpX, vpY, vpW, vpH;
+            double scale;
+            GetViewport(cw, ch, vpX, vpY, vpW, vpH, scale);
+
+            if (toolkit->dibWidth != vpW || toolkit->dibHeight != vpH || !toolkit->hBitmap)
             {
                 toolkit->blImage.reset();
                 if (toolkit->hBitmap)
@@ -174,8 +191,8 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
                 BITMAPINFO bmi;
                 ZeroMemory(&bmi, sizeof(BITMAPINFO));
                 bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
-                bmi.bmiHeader.biWidth = cw;
-                bmi.bmiHeader.biHeight = -ch; // top-down
+                bmi.bmiHeader.biWidth = vpW;
+                bmi.bmiHeader.biHeight = -vpH; // top-down
                 bmi.bmiHeader.biPlanes = 1;
                 bmi.bmiHeader.biBitCount = 32;
                 bmi.bmiHeader.biCompression = BI_RGB;
@@ -184,48 +201,66 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
                 if (toolkit->hBitmap)
                 {
                     toolkit->hOldBitmap = (HBITMAP)SelectObject(toolkit->memDC, toolkit->hBitmap);
-                    toolkit->dibWidth = cw;
-                    toolkit->dibHeight = ch;
-                    toolkit->blImage.create_from_data(cw, ch, BL_FORMAT_PRGB32, toolkit->pixelData, (intptr_t)cw * 4);
+                    toolkit->dibWidth = vpW;
+                    toolkit->dibHeight = vpH;
+                    toolkit->blImage.create_from_data(vpW, vpH, BL_FORMAT_PRGB32, toolkit->pixelData, (intptr_t)vpW * 4);
                     ps.rcPaint = clientRect;
                 }
             }
 
+            if (vpX > 0 || vpY > 0)
+            {
+                HBRUSH bgBrush = CreateSolidBrush(RGB(0x0b, 0x0e, 0x14));
+                RECT bar;
+                if (vpY > 0)
+                {
+                    SetRect(&bar, 0, 0, cw, vpY);
+                    FillRect(dc, &bar, bgBrush);
+                    SetRect(&bar, 0, vpY + vpH, cw, ch);
+                    FillRect(dc, &bar, bgBrush);
+                }
+                if (vpX > 0)
+                {
+                    SetRect(&bar, 0, vpY, vpX, vpY + vpH);
+                    FillRect(dc, &bar, bgBrush);
+                    SetRect(&bar, vpX + vpW, vpY, cw, vpY + vpH);
+                    FillRect(dc, &bar, bgBrush);
+                }
+                DeleteObject(bgBrush);
+            }
+
             if (toolkit->hBitmap && toolkit->pixelData)
             {
-                double sx = (double)cw / (double)GUI_WIDTH;
-                double sy = (double)ch / (double)GUI_HEIGHT;
-
-                int dirtyX = (int)floor(ps.rcPaint.left / sx);
-                int dirtyY = (int)floor(ps.rcPaint.top / sy);
-                int dirtyW = (int)ceil((ps.rcPaint.right - ps.rcPaint.left) / sx) + 1;
-                int dirtyH = (int)ceil((ps.rcPaint.bottom - ps.rcPaint.top) / sy) + 1;
-
-                if (dirtyX < 0) dirtyX = 0;
-                if (dirtyY < 0) dirtyY = 0;
-                if (dirtyX + dirtyW > GUI_WIDTH) dirtyW = GUI_WIDTH - dirtyX;
-                if (dirtyY + dirtyH > GUI_HEIGHT) dirtyH = GUI_HEIGHT - dirtyY;
-
-                BLContext ctx(toolkit->blImage);
-                ctx.scale(sx, sy);
-                toolkit->editor->Paint(ctx, dirtyX, dirtyY, dirtyW, dirtyH);
-                ctx.end();
-
-                GdiFlush();
-
-                int bltX = ps.rcPaint.left;
-                int bltY = ps.rcPaint.top;
+                int bltX = ps.rcPaint.left - vpX;
+                int bltY = ps.rcPaint.top - vpY;
                 int bltW = ps.rcPaint.right - ps.rcPaint.left;
                 int bltH = ps.rcPaint.bottom - ps.rcPaint.top;
 
                 if (bltX < 0) { bltW += bltX; bltX = 0; }
                 if (bltY < 0) { bltH += bltY; bltY = 0; }
-                if (bltX + bltW > cw) bltW = cw - bltX;
-                if (bltY + bltH > ch) bltH = ch - bltY;
+                if (bltX + bltW > vpW) bltW = vpW - bltX;
+                if (bltY + bltH > vpH) bltH = vpH - bltY;
 
                 if (bltW > 0 && bltH > 0)
                 {
-                    BitBlt(dc, bltX, bltY, bltW, bltH, toolkit->memDC, bltX, bltY, SRCCOPY);
+                    int dirtyX = (int)floor(bltX / scale);
+                    int dirtyY = (int)floor(bltY / scale);
+                    int dirtyW = (int)ceil(bltW / scale) + 1;
+                    int dirtyH = (int)ceil(bltH / scale) + 1;
+
+                    if (dirtyX < 0) dirtyX = 0;
+                    if (dirtyY < 0) dirtyY = 0;
+                    if (dirtyX + dirtyW > GUI_WIDTH) dirtyW = GUI_WIDTH - dirtyX;
+                    if (dirtyY + dirtyH > GUI_HEIGHT) dirtyH = GUI_HEIGHT - dirtyY;
+
+                    BLContext ctx(toolkit->blImage);
+                    ctx.scale(scale, scale);
+                    toolkit->editor->Paint(ctx, dirtyX, dirtyY, dirtyW, dirtyH);
+                    ctx.end();
+
+                    GdiFlush();
+
+                    BitBlt(dc, vpX + bltX, vpY + bltY, bltW, bltH, toolkit->memDC, bltX, bltY, SRCCOPY);
                 }
             }
         }
@@ -378,12 +413,16 @@ void CWindowsToolkit::Invalidate()
 void CWindowsToolkit::InvalidateRect(int x, int y, int width, int height)
 {
     if (!hWnd) return;
-    float scale = GetScale();
+    RECT clientRect;
+    GetClientRect(hWnd, &clientRect);
+    int vpX, vpY, vpW, vpH;
+    double scale;
+    GetViewport(clientRect.right - clientRect.left, clientRect.bottom - clientRect.top, vpX, vpY, vpW, vpH, scale);
     RECT rc;
-    rc.left   = (int)floor((x - 1) * scale);
-    rc.top    = (int)floor((y - 1) * scale);
-    rc.right  = (int)ceil((x + width + 1) * scale);
-    rc.bottom = (int)ceil((y + height + 1) * scale);
+    rc.left   = vpX + (int)floor((x - 1) * scale);
+    rc.top    = vpY + (int)floor((y - 1) * scale);
+    rc.right  = vpX + (int)ceil((x + width + 1) * scale);
+    rc.bottom = vpY + (int)ceil((y + height + 1) * scale);
     ::InvalidateRect(hWnd, &rc, FALSE);
 }
 
@@ -402,8 +441,10 @@ float CWindowsToolkit::GetScale()
     if (!hWnd) return 1.0f;
     RECT rc;
     GetClientRect(hWnd, &rc);
-    int cw = rc.right - rc.left;
-    return cw > 0 ? (float)cw / (float)GUI_WIDTH : 1.0f;
+    int vpX, vpY, vpW, vpH;
+    double scale;
+    GetViewport(rc.right - rc.left, rc.bottom - rc.top, vpX, vpY, vpW, vpH, scale);
+    return (float)scale;
 }
 
 void CWindowsToolkit::Resize(int width, int height)
