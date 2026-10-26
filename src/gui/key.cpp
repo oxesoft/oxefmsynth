@@ -22,6 +22,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "control.h"
 #include "key.h"
 
+static const char* GetKeyShortLabel(const char* name)
+{
+    if (strstr(name, "Bypass")) return "BP";
+    if (strstr(name, "Keyb Track")) return "KB";
+    return "";
+}
+
 CKey::CKey(int bmp, int index, int w, int h, const char *name, CSynthesizer *synthesizer, char &channel, int par, int x, int y)
 {
     strncpy(this->name, name, TEXT_SIZE);
@@ -38,6 +45,25 @@ CKey::CKey(int bmp, int index, int w, int h, const char *name, CSynthesizer *syn
     this->right       = x + w;
     this->bottom      = y + h;
     this->value       = 0;
+    this->shortLabel  = GetKeyShortLabel(this->name);
+}
+
+void CKey::GetRepaintBounds(int &rx, int &ry, int &rw, int &rh) const
+{
+    if (shortLabel[0])
+    {
+        rx = this->left - 6;
+        ry = this->top - 2;
+        rw = this->w + 12;
+        rh = 42;
+    }
+    else
+    {
+        rx = this->left - 2;
+        ry = this->top - 2;
+        rw = this->w + 4;
+        rh = this->h + 4;
+    }
 }
 
 void CKey::OnClick(int x, int y)
@@ -102,6 +128,15 @@ void CKey::Paint(BLContext &ctx, const BLFont &fontSmall, const BLFont &fontNorm
             ctx.set_stroke_width(1.2);
             ctx.stroke_circle(cx, cy, r, BLRgba32(0x32, 0x3e, 0x4e));
             ctx.fill_circle(cx, cy, r * 0.35f, BLRgba32(0x24, 0x2c, 0x38));
+        }
+
+        // Short label below LED
+        if (shortLabel[0] && fontSmall.is_valid())
+        {
+            float tw = strlen(shortLabel) * 5.5f;
+            float tx = cx - tw * 0.5f;
+            float ty = top + 35.0f;
+            ctx.fill_utf8_text(BLPoint(tx, ty), fontSmall, shortLabel, SIZE_MAX, BLRgba32(0x7a, 0x8a, 0x9e));
         }
     }
 }

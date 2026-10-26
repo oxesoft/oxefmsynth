@@ -25,6 +25,7 @@ private:
     int  h;               // height in pixels
     int  par;             // synth parameter assigned
     int  index;           // bitmap index in bitmap table
+    const char* shortLabel;
 public:
     CKey(int bmp, int index, int w, int h, const char *name, CSynthesizer *synthesizer, char &channel, int par, int x, int y);
     void  OnClick        (int x, int y) override;
@@ -32,5 +33,6 @@ public:
     bool  GetName        (char* str) override;
     int   GetIndex       (void) override;
     int   GetType        (void) override;
+    void  GetRepaintBounds(int &rx, int &ry, int &rw, int &rh) const override;
     void  Paint          (BLContext &ctx, const BLFont &fontSmall, const BLFont &fontNormal) override;
 };

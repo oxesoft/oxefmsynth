@@ -35,6 +35,7 @@ static const char* GetShortLabel(const char* fullName)
     if (strstr(fullName, "Cutoff")) return "CUTOFF";
     if (strstr(fullName, "Resonance")) return "RESO";
     if (strstr(fullName, "Amount")) return "AMNT";
+    if (strstr(fullName, "Type")) return "TYPE";
     if (strstr(fullName, "VlSensivity")) return "VEL";
     if (strstr(fullName, "KeybScaling")) return "SCA";
     if (strstr(fullName, "Coarse Tune")) return "COAR";
