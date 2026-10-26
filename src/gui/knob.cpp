@@ -172,7 +172,8 @@ void CKnob::Paint(BLContext &ctx, const BLFont &fontSmall, const BLFont &fontNor
         ctx.stroke_arc(BLArc(cx, cy, r, r, 0.75 * M_PI, 1.5 * M_PI), BLRgba32(0x22, 0x2a, 0x36));
 
         bool isBipolar = (type == VL_PAN || type == VL_MINUS1_2_PLUS1 ||
-                          type == VL_COARSE_TUNE || type == VL_FINE_TUNE);
+                          type == VL_COARSE_TUNE || type == VL_FINE_TUNE ||
+                          type == VL_PITCH_CURVE);
         BLRgba32 activeColor(0x00, 0xf0, 0xff); // cyan
 
         if (type == VL_COARSE_TUNE || type == VL_FINE_TUNE)
@@ -244,15 +245,16 @@ bool CKnob::Update(void)
 
 bool CKnob::IncreaseValue(int delta)
 {
-    this->value += delta;
-    if (this->value > (char)MAXPARVALUE)
+    int newValue = (int)this->value + delta;
+    if (newValue > (int)MAXPARVALUE)
     {
-        this->value = (char)MAXPARVALUE;
+        newValue = (int)MAXPARVALUE;
     }
-    if (this->value < 0)
+    if (newValue < 0)
     {
-        this->value = 0;
+        newValue = 0;
     }
+    this->value = (signed char)newValue;
     this->fvalue = CMapper::IntValueToFloatValue(this->synthesizer, *channel, this->par, this->type, this->value);
     synthesizer->SetPar(*channel, this->par, this->fvalue);
     Repaint();

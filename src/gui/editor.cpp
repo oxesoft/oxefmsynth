@@ -630,7 +630,9 @@ void CEditor::OnMouseMove(int x, int y)
     this->currentY = y;
     if (changingControl)
     {
-        int value = -(y - this->prevY) + (x - this->prevX);
+        int dy = -(y - this->prevY);
+        int dx = (x - this->prevX);
+        int value = (abs(dy) >= abs(dx)) ? dy : dx;
         this->prevX = x;
         this->prevY = y;
         if (ctl[cID]->IncreaseValue(value) == true)
