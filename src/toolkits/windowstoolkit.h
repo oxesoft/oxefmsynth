@@ -45,7 +45,7 @@ public:
     int          dragStartW;
     int          dragStartH;
     CWindowsToolkit(void *parentWindow, CEditor *editor);
-    virtual ~CWindowsToolkit();
+    virtual ~CWindowsToolkit() override;
     virtual void Invalidate() override;
     virtual void InvalidateRect(int x, int y, int width, int height) override;
     virtual void StartMouseCapture() override;
@@ -53,5 +53,6 @@ public:
     virtual void StartWindowProcesses() override;
     virtual int  WaitWindowClosed() override;
     virtual float GetScale() override;
-    void Resize(int width, int height);
+    virtual void Resize(int width, int height) override;
+    virtual bool IsShiftDown() override;
 };

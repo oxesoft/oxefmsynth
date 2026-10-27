@@ -32,6 +32,14 @@ CEditor::CEditor(CSynthesizer *synthesizer)
     this->hostinterface = NULL;
     this->isResizingGUI = false;
     this->isHoveringResizeGrip = false;
+    this->changingControl = false;
+    this->dragAccumulator = 0.0f;
+    this->wheelAccumulator = 0.0f;
+    this->lastWheelControl = NULL;
+    this->currentX      = 0;
+    this->currentY      = 0;
+    this->prevX         = 0;
+    this->prevY         = 0;
     channel             = 0;
 
     // auxiliar vars
@@ -452,6 +460,15 @@ void CEditor::RequestResize(int width, int height)
     }
 }
 
+bool CEditor::IsShiftDown() const
+{
+    if (toolkit)
+    {
+        return toolkit->IsShiftDown();
+    }
+    return false;
+}
+
 void CEditor::ProgramChanged()
 {
     char str[TEXT_SIZE];
@@ -595,6 +612,7 @@ void CEditor::OnLButtonDblClick(int x, int y)
                 DisplayControl(ctl[i]);
                 InvalidateEnvelopeIfParam(toolkit, index);
                 changingControl = false;
+                dragAccumulator = 0.0f;
                 if (toolkit)
                 {
                     toolkit->StopMouseCapture();
@@ -634,6 +652,7 @@ void CEditor::OnLButtonDown(int x, int y)
             if (ctl[i]->IsKnob() == true)
             {
                 changingControl = true;
+                dragAccumulator = 0.0f;
                 if (toolkit)
                 {
                     toolkit->StartMouseCapture();
@@ -665,6 +684,7 @@ void CEditor::OnLButtonUp()
         NotifyHostParameter(ctl[cID]->GetIndex());
     }
     changingControl = false;
+    dragAccumulator = 0.0f;
     if (toolkit)
     {
         toolkit->StopMouseCapture();
@@ -684,13 +704,28 @@ void CEditor::OnMouseMove(int x, int y)
     {
         int dy = -(y - this->prevY);
         int dx = (x - this->prevX);
-        int value = (abs(dy) >= abs(dx)) ? dy : dx;
+        int deltaPixels = (abs(dy) >= abs(dx)) ? dy : dx;
         this->prevX = x;
         this->prevY = y;
-        if (ctl[cID]->IncreaseValue(value) == true)
+
+        if (deltaPixels != 0)
         {
-            DisplayControlValue(ctl[cID]);
-            InvalidateEnvelopeIfParam(toolkit, ctl[cID]->GetIndex());
+            float deltaValue = IsShiftDown() ? ((float)deltaPixels * 0.1f) : (float)deltaPixels;
+            dragAccumulator += deltaValue;
+            int step = (int)dragAccumulator;
+            if (step != 0)
+            {
+                dragAccumulator -= step;
+                if (ctl[cID]->IncreaseValue(step) == true)
+                {
+                    DisplayControlValue(ctl[cID]);
+                    InvalidateEnvelopeIfParam(toolkit, ctl[cID]->GetIndex());
+                }
+                else
+                {
+                    dragAccumulator = 0.0f;
+                }
+            }
         }
     }
 }
@@ -706,11 +741,39 @@ void CEditor::OnMouseWheel(int x, int y, int delta)
             {
                 ctl[i]->GetName(str);
                 lcd->SetText(0, str);
-                if (ctl[i]->IncreaseValue(delta) == true)
+                int step = delta;
+                if (IsShiftDown())
                 {
-                    DisplayControlValue(ctl[i]);
-                    InvalidateEnvelopeIfParam(toolkit, ctl[i]->GetIndex());
-                    NotifyHostParameter(ctl[i]->GetIndex());
+                    if (lastWheelControl != ctl[i])
+                    {
+                        wheelAccumulator = 0.0f;
+                        lastWheelControl = ctl[i];
+                    }
+                    wheelAccumulator += (float)delta * 0.2f;
+                    step = (int)wheelAccumulator;
+                    if (step != 0)
+                    {
+                        wheelAccumulator -= step;
+                    }
+                }
+                else
+                {
+                    wheelAccumulator = 0.0f;
+                    lastWheelControl = ctl[i];
+                }
+
+                if (step != 0)
+                {
+                    if (ctl[i]->IncreaseValue(step) == true)
+                    {
+                        DisplayControlValue(ctl[i]);
+                        InvalidateEnvelopeIfParam(toolkit, ctl[i]->GetIndex());
+                        NotifyHostParameter(ctl[i]->GetIndex());
+                    }
+                    else
+                    {
+                        wheelAccumulator = 0.0f;
+                    }
                 }
             }
             break;

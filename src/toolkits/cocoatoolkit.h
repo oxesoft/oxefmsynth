@@ -31,14 +31,15 @@ public:
     void        *parentWindow;
     CEditor     *editor;
     CCocoaToolkit(void *parentWindow, CEditor *editor);
-    virtual ~CCocoaToolkit();
-    virtual void Invalidate();
-    virtual void InvalidateRect(int x, int y, int width, int height);
-    virtual void StartMouseCapture();
-    virtual void StopMouseCapture();
-    virtual void StartWindowProcesses();
-    virtual int  WaitWindowClosed();
-    virtual float GetScale();
-    void         Resize(int width, int height);
+    virtual ~CCocoaToolkit() override;
+    virtual void Invalidate() override;
+    virtual void InvalidateRect(int x, int y, int width, int height) override;
+    virtual void StartMouseCapture() override;
+    virtual void StopMouseCapture() override;
+    virtual void StartWindowProcesses() override;
+    virtual int  WaitWindowClosed() override;
+    virtual float GetScale() override;
+    virtual void Resize(int width, int height) override;
+    virtual bool IsShiftDown() override;
 };
 

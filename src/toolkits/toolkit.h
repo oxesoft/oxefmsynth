@@ -32,6 +32,7 @@ public:
     virtual int  WaitWindowClosed() {return 0;}   // standalone only
     virtual float GetScale() { return 1.0f; }
     virtual void Resize(int width, int height) {}
+    virtual bool IsShiftDown() { return false; }
 };
 
 #endif

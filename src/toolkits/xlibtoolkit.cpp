@@ -89,6 +89,7 @@ void* eventProc(void* ptr)
             case ButtonPress:
             {
                 XButtonEvent *e = (XButtonEvent*)&event;
+                toolkit->isShiftDown = (e->state & ShiftMask) != 0;
                 int mx, my;
                 GetMouseScaled(toolkit, e->x, e->y, mx, my);
 
@@ -130,6 +131,7 @@ void* eventProc(void* ptr)
             case ButtonRelease:
             {
                 XButtonEvent *e = (XButtonEvent*)&event;
+                toolkit->isShiftDown = (e->state & ShiftMask) != 0;
                 if (e->button == 1 && toolkit->isResizing)
                 {
                     toolkit->isResizing = false;
@@ -150,6 +152,7 @@ void* eventProc(void* ptr)
             case MotionNotify:
             {
                 XMotionEvent *e = (XMotionEvent*)&event;
+                toolkit->isShiftDown = (e->state & ShiftMask) != 0;
                 if (toolkit->isResizing)
                 {
                     int deltaX = e->x_root - toolkit->dragStartRootX;
@@ -188,11 +191,25 @@ void* eventProc(void* ptr)
             }
             case KeyPress:
             {
+                KeySym sym = XLookupKeysym((XKeyEvent*)&event, 0);
+                if (sym == XK_Shift_L || sym == XK_Shift_R || (((XKeyEvent*)&event)->state & ShiftMask))
+                {
+                    toolkit->isShiftDown = true;
+                }
                 char buffer[64];
                 int count = XLookupString((XKeyEvent*)&event, buffer, sizeof(buffer), NULL, NULL);
                 if (count > 0 && buffer[0])
                 {
                     toolkit->editor->OnChar(buffer[0]);
+                }
+                break;
+            }
+            case KeyRelease:
+            {
+                KeySym sym = XLookupKeysym((XKeyEvent*)&event, 0);
+                if (sym == XK_Shift_L || sym == XK_Shift_R)
+                {
+                    toolkit->isShiftDown = false;
                 }
                 break;
             }
@@ -251,6 +268,7 @@ CXlibToolkit::CXlibToolkit(void *parentWindow, CEditor *editor)
     this->dragStartRootY  = 0;
     this->dragStartW      = GUI_WIDTH;
     this->dragStartH      = GUI_HEIGHT;
+    this->isShiftDown     = false;
     this->display         = XOpenDisplay(NULL);
     this->resizeCursor    = this->display ? XCreateFontCursor(this->display, XC_bottom_right_corner) : 0;
 
@@ -262,7 +280,7 @@ CXlibToolkit::CXlibToolkit(void *parentWindow, CEditor *editor)
     int screen = DefaultScreen(display);
     XSetWindowAttributes attr;
     attr.background_pixmap = None;
-    attr.event_mask = ExposureMask | KeyPressMask | ButtonPressMask | ButtonReleaseMask | PointerMotionMask;
+    attr.event_mask = ExposureMask | KeyPressMask | KeyReleaseMask | ButtonPressMask | ButtonReleaseMask | PointerMotionMask;
 
     Window parent = parentWindow ? (Window)parentWindow : RootWindow(display, screen);
     int winX = parentWindow ? 0 : 100;
@@ -494,4 +512,19 @@ int CXlibToolkit::WaitWindowClosed()
         usleep(1000 * 100);
     }
     return 0;
+}
+
+bool CXlibToolkit::IsShiftDown()
+{
+    if (display && window)
+    {
+        Window root, child;
+        int root_x, root_y, win_x, win_y;
+        unsigned int mask = 0;
+        if (XQueryPointer(display, window, &root, &child, &root_x, &root_y, &win_x, &win_y, &mask))
+        {
+            isShiftDown = (mask & ShiftMask) != 0;
+        }
+    }
+    return isShiftDown;
 }

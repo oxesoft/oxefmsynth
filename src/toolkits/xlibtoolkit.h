@@ -46,8 +46,9 @@ public:
     int          dragStartW;
     int          dragStartH;
     Cursor       resizeCursor;
+    bool         isShiftDown;
     CXlibToolkit(void *parentWindow, CEditor *editor);
-    virtual ~CXlibToolkit();
+    virtual ~CXlibToolkit() override;
     virtual void Invalidate() override;
     virtual void InvalidateRect(int x, int y, int width, int height) override;
     virtual void StartMouseCapture() override;
@@ -55,6 +56,7 @@ public:
     virtual void StartWindowProcesses() override;
     virtual int  WaitWindowClosed() override;
     virtual float GetScale() override;
-    void Resize(int width, int height);
+    virtual bool IsShiftDown() override;
+    virtual void Resize(int width, int height) override;
     void Draw(int x = 0, int y = 0, int w = 0, int h = 0);
 };

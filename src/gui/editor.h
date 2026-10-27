@@ -34,6 +34,9 @@ private:
     int            currentY;
     int            prevX;
     int            prevY;
+    float          dragAccumulator;
+    float          wheelAccumulator;
+    CControl       *lastWheelControl;
     CLcd           *lcd;
     CControl       *ctl[GUI_CONTROLS];
     CSynthesizer   *synthesizer;
@@ -72,6 +75,7 @@ public:
     void  SetResizingGUI   (bool resizing);
     bool  IsResizingGUI    () const { return isResizingGUI; }
     void  RequestResize    (int width, int height);
+    bool  IsShiftDown      () const;
 private:
     void  DrawPanelCards   (BLContext &ctx, const BLFont &fontSmall, const BLFont &fontNormal, const BLFont &fontHeader);
     void  DrawOperatorEnvelope(BLContext &ctx, int opIndex, float x, float y, float w, float h, const BLFont &fontSmall, const BLRgba32 &accentColor = BLRgba32(0x00, 0xf0, 0xff));

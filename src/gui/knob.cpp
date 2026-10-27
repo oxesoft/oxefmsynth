@@ -255,6 +255,10 @@ bool CKnob::IncreaseValue(int delta)
     {
         newValue = 0;
     }
+    if (newValue == (int)this->value)
+    {
+        return false;
+    }
     this->value = (signed char)newValue;
     this->fvalue = CMapper::IntValueToFloatValue(this->synthesizer, *channel, this->par, this->type, this->value);
     synthesizer->SetPar(*channel, this->par, this->fvalue);

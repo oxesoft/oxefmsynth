@@ -839,3 +839,8 @@ void CCocoaToolkit::Resize(int width, int height)
         [pImpl->controller resizeToWidth:width height:height];
     }
 }
+
+bool CCocoaToolkit::IsShiftDown()
+{
+    return ([NSEvent modifierFlags] & NSEventModifierFlagShift) != 0;
+}

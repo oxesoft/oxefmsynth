@@ -541,3 +541,8 @@ int CWindowsToolkit::WaitWindowClosed()
     }
     return (int)msg.wParam;
 }
+
+bool CWindowsToolkit::IsShiftDown()
+{
+    return (GetKeyState(VK_SHIFT) & 0x8000) != 0 || (GetAsyncKeyState(VK_SHIFT) & 0x8000) != 0;
+}
