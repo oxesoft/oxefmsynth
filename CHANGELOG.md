@@ -7,9 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [2.0.0-beta.3] - 2026-10-26
+## [2.0.0-beta.3] - 2026-10-27
 
 ### Added
+- **Fine Knob Adjustment:** Holding down the Shift key allows finer value adjustment for knobs across mouse dragging (10x finer sensitivity) and mouse wheel.
+- **Operator Card Header Toggle:** Clicking each operator's colorful name (pill and title) in the card header toggles the operator on/off with synchronized active and dimmed visual states matching the modulation matrix.
+- **On/Off LED Labels:** Added "On" label under the operator on/off LEDs in each operator card.
 - **Diagonal GUI Resizing:** Added an interactive diagonal click-and-drag resize handle in the bottom-right corner across Standalone, VST3, and CLAP plugins, maintaining fixed 950:656 aspect ratio.
 - **DAW Preset Integration:** Exposed soundbanks and programs to the host's preset manager in VST3 and CLAP, and added CLAP preset discovery and preset load extension support.
 - **GUI Dimension Persistence:** Resized plugin GUI dimensions are now persisted in host project states and restored upon reopen.
@@ -27,6 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **LCD & UI Alignment:** Fixed LCD text when switching banks, fixed Bank and Program button LED updates on click, corrected Store button LCD mouseover text, and aligned LCD and MIDI channel elements with button bounds.
 - **Label Spelling:** Corrected spelling of LFO Depth label.
 - **MinGW Build:** Fixed MinGW-w64 undefined reference to `__mingw_fe_dfl_env`.
+- **VST3 Build:** Fixed missing `<cmath>` include in VST3 editor on Linux and Windows.
 
 ---
 
