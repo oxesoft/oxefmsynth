@@ -78,6 +78,7 @@ public:
     bool  IsShiftDown      () const;
 private:
     void  DrawPanelCards   (BLContext &ctx, const BLFont &fontSmall, const BLFont &fontNormal, const BLFont &fontHeader);
+    void  DrawOperatorHeader(BLContext &ctx, int opIndex, const BLFont &fontSmall);
     void  DrawOperatorEnvelope(BLContext &ctx, int opIndex, float x, float y, float w, float h, const BLFont &fontSmall, const BLRgba32 &accentColor = BLRgba32(0x00, 0xf0, 0xff));
     void  DrawMatrixDecorations(BLContext &ctx, const BLFont &fontSmall, const BLFont &fontNormal);
     void  DrawOxeLogo      (BLContext &ctx, float x, float y, float scale = 0.58f);

@@ -554,7 +554,7 @@ static inline void InvalidateEnvelopeIfParam(CToolkit *toolkit, int par)
     int op = GetEnvelopeOpIndexForParam(par);
     if (op >= 0)
     {
-        toolkit->InvalidateRect((int)opCards[op].x + 170, (int)opCards[op].y + 4, 116, 23);
+        toolkit->InvalidateRect((int)opCards[op].x + 6, (int)opCards[op].y + 4, 282, 23);
     }
 }
 
@@ -600,6 +600,28 @@ void CEditor::NotifyHostParameter(int index)
 
 void CEditor::OnLButtonDblClick(int x, int y)
 {
+    for (int op = 0; op < 8; op++)
+    {
+        float cx = opCards[op].x;
+        float cy = opCards[op].y;
+        if (x >= cx + 6 && x <= cx + 115 && y >= cy + 5 && y <= cy + 25)
+        {
+            int par = OPAON + op * 13;
+            synthesizer->SetDefault(channel, par);
+            for (int j = 0; j < GUI_CONTROLS; j++)
+            {
+                ctl[j]->Update();
+            }
+            CControl *c = FindControlByParam(par);
+            if (c)
+            {
+                DisplayControl(c);
+            }
+            InvalidateEnvelopeIfParam(toolkit, par);
+            NotifyHostParameter(par);
+            return;
+        }
+    }
     for (int i=0;i<GUI_CONTROLS;i++)
     {
         if (ctl[i]->IsMouseOver(x, y))
@@ -629,6 +651,35 @@ void CEditor::OnLButtonDown(int x, int y)
     if (IsOverResizeGrip(x, y))
     {
         return;
+    }
+    for (int op = 0; op < 8; op++)
+    {
+        float cx = opCards[op].x;
+        float cy = opCards[op].y;
+        if (x >= cx + 6 && x <= cx + 115 && y >= cy + 5 && y <= cy + 25)
+        {
+            int par = OPAON + op * 13;
+            CControl *c = FindControlByParam(par);
+            if (c)
+            {
+                c->OnClick(x, y);
+                for (int j = 0; j < GUI_CONTROLS; j++)
+                {
+                    ctl[j]->Update();
+                }
+                synthesizer->SetEditingName(false);
+                if (synthesizer->GetStandBy(channel))
+                {
+                    synthesizer->SetStandBy(channel, true);
+                }
+                DisplayControl(c);
+                InvalidateEnvelopeIfParam(toolkit, par);
+                NotifyHostParameter(par);
+            }
+            this->prevX = x;
+            this->prevY = y;
+            return;
+        }
     }
     char prevchannel = channel; // saves the current channel in case of the clicked control be CChannels
     for (int i=0;i<GUI_CONTROLS;i++)
@@ -804,6 +855,20 @@ void CEditor::Update()
     {
         return;
     }
+    for (int op = 0; op < 8; op++)
+    {
+        float cx = opCards[op].x;
+        float cy = opCards[op].y;
+        if (currentX >= cx + 6 && currentX <= cx + 115 && currentY >= cy + 5 && currentY <= cy + 25)
+        {
+            CControl *c = FindControlByParam(OPAON + op * 13);
+            if (c)
+            {
+                DisplayControl(c);
+            }
+            return;
+        }
+    }
     for (int i = 0; i < GUI_CONTROLS; i++)
     {
         if (ctl[i]->IsMouseOver(currentX, currentY) && cID != i)
@@ -899,27 +964,7 @@ void CEditor::DrawPanelCards(BLContext &ctx, const BLFont &fontSmall, const BLFo
     // 2. Operator Cards (A through F, X, Z)
     for (int i = 0; i < 8; i++)
     {
-        float cx = opCards[i].x;
-        float cy = opCards[i].y;
-        float cw = opCards[i].w;
-        float ch = opCards[i].h;
-
-        // Card base
-        drawCard(cx, cy, cw, ch);
-
-        // Tag pill
-        ctx.fill_round_rect(BLRoundRect(cx + 8.0f, cy + 7.0f, 16.0f, 16.0f, 3.0f), BLRgba32(opCards[i].accent.r(), opCards[i].accent.g(), opCards[i].accent.b(), 0x30));
-        ctx.stroke_round_rect(BLRoundRect(cx + 8.0f, cy + 7.0f, 16.0f, 16.0f, 3.0f), opCards[i].accent);
-        if (fontSmall.is_valid())
-        {
-            BLGlyphBuffer gb;
-            gb.set_utf8_text(opCards[i].tag, 1);
-            BLTextMetrics tm;
-            fontSmall.get_text_metrics(gb, tm);
-            float tagX = cx + 8.0f + (16.0f - (float)(tm.bounding_box.x0 + tm.bounding_box.x1)) * 0.5f;
-            ctx.fill_utf8_text(BLPoint(tagX, cy + 19.0f), fontSmall, opCards[i].tag, 1, opCards[i].accent);
-            ctx.fill_utf8_text(BLPoint(cx + 30.0f, cy + 19.0f), fontSmall, opCards[i].title, SIZE_MAX, BLRgba32(0x8a, 0x9b, 0xaf));
-        }
+        drawCard(opCards[i].x, opCards[i].y, opCards[i].w, opCards[i].h);
     }
 
     // 3. Matrix Card
@@ -943,6 +988,37 @@ void CEditor::DrawPanelCards(BLContext &ctx, const BLFont &fontSmall, const BLFo
         ctx.fill_utf8_text(BLPoint(626.0, 587.0), fontSmall, "PITCH", SIZE_MAX, BLRgba32(0x60, 0x72, 0x88));
         ctx.fill_utf8_text(BLPoint(788.0, 587.0), fontSmall, "EFFECTS", SIZE_MAX, BLRgba32(0x60, 0x72, 0x88));
         ctx.fill_utf8_text(BLPoint(898.0, 587.0), fontSmall, "HQ", SIZE_MAX, BLRgba32(0x60, 0x72, 0x88));
+    }
+}
+
+void CEditor::DrawOperatorHeader(BLContext &ctx, int opIndex, const BLFont &fontSmall)
+{
+    float cx = opCards[opIndex].x;
+    float cy = opCards[opIndex].y;
+    int par = OPAON + opIndex * 13;
+    bool isOn = (synthesizer && synthesizer->GetPar(channel, par) > 0.5f);
+
+    BLRgba32 accent = opCards[opIndex].accent;
+    BLRgba32 pillBg = isOn ? BLRgba32(accent.r(), accent.g(), accent.b(), 0x30)
+                           : BLRgba32(0x18, 0x20, 0x2b);
+    BLRgba32 pillBorder = isOn ? accent : BLRgba32(0x30, 0x3c, 0x4c);
+    BLRgba32 tagColor = isOn ? accent : BLRgba32(0x55, 0x64, 0x76);
+    BLRgba32 titleColor = isOn ? BLRgba32(0x8a, 0x9b, 0xaf) : BLRgba32(0x4a, 0x55, 0x64);
+
+    // Tag pill
+    ctx.fill_round_rect(BLRoundRect(cx + 8.0f, cy + 7.0f, 16.0f, 16.0f, 3.0f), pillBg);
+    ctx.set_stroke_width(1.0);
+    ctx.stroke_round_rect(BLRoundRect(cx + 8.0f, cy + 7.0f, 16.0f, 16.0f, 3.0f), pillBorder);
+
+    if (fontSmall.is_valid())
+    {
+        BLGlyphBuffer gb;
+        gb.set_utf8_text(opCards[opIndex].tag, 1);
+        BLTextMetrics tm;
+        fontSmall.get_text_metrics(gb, tm);
+        float tagX = cx + 8.0f + (16.0f - (float)(tm.bounding_box.x0 + tm.bounding_box.x1)) * 0.5f;
+        ctx.fill_utf8_text(BLPoint(tagX, cy + 19.0f), fontSmall, opCards[opIndex].tag, 1, tagColor);
+        ctx.fill_utf8_text(BLPoint(cx + 30.0f, cy + 19.0f), fontSmall, opCards[opIndex].title, SIZE_MAX, titleColor);
     }
 }
 
@@ -1329,15 +1405,16 @@ void CEditor::Paint(BLContext &ctx, int dirtyX, int dirtyY, int dirtyW, int dirt
     BLFont fontSmall  = CFontManager::GetFont(9.0f);
     BLFont fontNormal = CFontManager::GetFont(11.0f);
 
-    // Dynamic envelope curves in card headers
+    // Dynamic operator headers and envelope curves
     for (int i = 0; i < 8; i++)
     {
-        int ex = (int)opCards[i].x + 170;
-        int ey = (int)opCards[i].y + 4;
-        int ew = 116;
-        int eh = 23;
-        if (isFullRepaint || RectsIntersect(ex, ey, ew, eh, dirtyX, dirtyY, dirtyW, dirtyH))
+        int hx = (int)opCards[i].x + 6;
+        int hy = (int)opCards[i].y + 4;
+        int hw = 282;
+        int hh = 23;
+        if (isFullRepaint || RectsIntersect(hx, hy, hw, hh, dirtyX, dirtyY, dirtyW, dirtyH))
         {
+            DrawOperatorHeader(ctx, i, fontSmall);
             DrawOperatorEnvelope(ctx, i, opCards[i].x + 172.0f, opCards[i].y + 6.0f, 112.0f, 19.0f, fontSmall, opCards[i].accent);
         }
     }

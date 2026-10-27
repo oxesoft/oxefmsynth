@@ -22,10 +22,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "control.h"
 #include "key.h"
 
-static const char* GetKeyShortLabel(const char* name)
+static const char* GetKeyShortLabel(int bmp, const char* name)
 {
+    if (bmp == BMP_OPS) return "";
     if (strstr(name, "Bypass")) return "BP";
     if (strstr(name, "Keyb Track")) return "KB";
+    if (strstr(name, "On/Off")) return "On";
     return "";
 }
 
@@ -45,7 +47,7 @@ CKey::CKey(int bmp, int index, int w, int h, const char *name, CSynthesizer *syn
     this->right       = x + w;
     this->bottom      = y + h;
     this->value       = 0;
-    this->shortLabel  = GetKeyShortLabel(this->name);
+    this->shortLabel  = GetKeyShortLabel(this->bmp, this->name);
 }
 
 void CKey::GetRepaintBounds(int &rx, int &ry, int &rw, int &rh) const
