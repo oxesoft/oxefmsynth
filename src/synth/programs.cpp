@@ -340,8 +340,8 @@ void CPrograms::SetName(char *name, const char *str)
 
 // Global (bank-wide) effect parameters.
 #define GLOBAL_PARAMETERS(X)       \
-    X(REVTI, 0.8f)                 \
-    X(REVDA, 0.5f)                 \
+    X(REVTI, 0.f)                  \
+    X(REVDA, 0.f)                  \
     X(DLYTI, 0.f)                  \
     X(DLYFE, 0.f)                  \
     X(DLYLF, 0.f)                  \
