@@ -68,6 +68,7 @@ SOURCES:=src/synth/buffers.cpp \
          $(VST3SDK_PATH)/base/source/fobject.cpp \
          $(VST3SDK_PATH)/base/source/fstreamer.cpp \
          $(VST3SDK_PATH)/base/source/fstring.cpp \
+         $(VST3SDK_PATH)/base/source/timer.cpp \
          $(VST3SDK_PATH)/base/source/updatehandler.cpp \
          $(VST3SDK_PATH)/base/thread/source/flock.cpp \
          $(VST3SDK_PATH)/pluginterfaces/base/coreiids.cpp \
