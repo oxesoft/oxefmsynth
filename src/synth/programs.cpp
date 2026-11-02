@@ -327,7 +327,7 @@ void CPrograms::SetName(char *name, const char *str)
     X(LFOWF, 0.f)                  \
     X(LFORA, 0.f)                  \
     X(LFODE, 0.f)                  \
-    X(LFODL, 0.000075f)            \
+    X(LFODL, 0.f)                  \
     X(LFODS, 0.f)                  \
     /* Pitch */                    \
     X(PORTA, 0.f)                  \
