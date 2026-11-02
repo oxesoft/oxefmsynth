@@ -83,6 +83,18 @@ jobs:
           mkdir -p dist
           cp -R bin/oxefmsynth.clap bin/oxefmsynth.vst3 dist/
 
+      - name: Verify plugin binaries (Linux)
+        if: matrix.platform == 'linux'
+        run: |
+          python3 -c "import ctypes; ctypes.CDLL('./bin/oxefmsynth.clap')"
+          python3 -c "import ctypes, glob; ctypes.CDLL(glob.glob('./bin/oxefmsynth.vst3/Contents/*-linux/oxefmsynth.so')[0])"
+
+      - name: Verify plugin binaries (macOS)
+        if: matrix.platform == 'macos'
+        run: |
+          python3 -c "import ctypes; ctypes.CDLL('./bin/oxefmsynth.clap/Contents/MacOS/oxefmsynth')"
+          python3 -c "import ctypes; ctypes.CDLL('./bin/oxefmsynth.vst3/Contents/MacOS/oxefmsynth')"
+
       - name: Build plugins (Windows)
         if: matrix.platform == 'windows'
         shell: msys2 {0}

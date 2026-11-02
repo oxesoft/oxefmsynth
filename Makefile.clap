@@ -108,7 +108,7 @@ else
         else
             LIBS+=-lX11 -lpthread -ldl
             CXXFLAGS+=-fPIC
-            LDFLAGS+=-s
+            LDFLAGS+=-s -Wl,--no-undefined
             SOURCES+=src/toolkits/xlibtoolkit.cpp
             TARGET_FILE:=$(BIN_DIR)/$(BUNDLE_NAME)
             BUNDLE_BINARY:=$(TARGET_FILE)

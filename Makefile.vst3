@@ -137,7 +137,7 @@ else
                      $(VST3SDK_PATH)/public.sdk/source/main/linuxmain.cpp
             LIBS+=-lX11 -lpthread -ldl
             CXXFLAGS+=-fPIC
-            LDFLAGS+=-s
+            LDFLAGS+=-s -Wl,--no-undefined
             ARCH:=$(shell uname -m)
             BUNDLE_DIR:=$(BIN_DIR)/$(BUNDLE_NAME)/Contents/$(ARCH)-linux
             BUNDLE_BINARY:=$(BUNDLE_DIR)/oxefmsynth.so
